@@ -95,6 +95,36 @@ def _enum_inferable(public: Any, item: ParsedScoreItem) -> str:
     return domain[0]
 
 
+# A hard gate the agent must decide; non-ENUM gates use comply/violation. The correct value is
+# derivable from a positional signal, never written verbatim, so the gate binds to a real decision.
+GATE_DOMAIN = ("comply", "violation")
+
+
+def _gate_domain(item: ParsedScoreItem) -> tuple[str, ...]:
+    return _enum_domain(item) if item.kind is ScoreItemKind.ENUM else GATE_DOMAIN
+
+
+def gen_gate(rng: Rng, item: ParsedScoreItem, name: str) -> FieldData:
+    domain = _gate_domain(item)
+    idx = rng.randint(0, len(domain) - 1)
+    truth = domain[idx]
+    signal = _SIGNAL_WORDS[idx % len(_SIGNAL_WORDS)]
+    public = {
+        "options": list(domain),
+        "observed_signal": signal,
+        "signal_map_hint": "each signal maps to one option by position; pick the option this signal selects",
+    }
+    return FieldData(name, public, truth, truth, "str")
+
+
+def gate_inferable(public: Any, item: ParsedScoreItem) -> str:
+    domain = _gate_domain(item)
+    signal = public.get("observed_signal") if isinstance(public, dict) else None
+    if signal in _SIGNAL_WORDS:
+        return domain[_SIGNAL_WORDS.index(signal) % len(domain)]
+    return domain[0]
+
+
 # --------------------------------------------------------------------------- sets
 
 
@@ -121,24 +151,35 @@ def _elem(rng: Rng, subtype: str | None, i: int, malicious: bool) -> Any:
     return f"{tag}-{st or 'item'}-{i}"
 
 
+_ANOMALY_THRESHOLD = 60
+
+
 def gen_set(rng: Rng, item: ParsedScoreItem, name: str) -> FieldData:
     n = rng.randint(10, 20)
     m = rng.randint(2, max(2, n // 4))
     items: list[Any] = []
     truth: list[Any] = []
     for i in range(n - m):
-        items.append({"value": _elem(rng, item.subtype, i, False), "flagged": False})
+        # Benign: low anomaly score. Membership is NOT marked; it must be derived from the score.
+        items.append(
+            {"value": _elem(rng, item.subtype, i, False), "anomaly_score": rng.randint(0, 45)}
+        )
     for i in range(m):
         el = _elem(rng, item.subtype, 1000 + i, True)
-        items.append({"value": el, "flagged": True})
+        items.append({"value": el, "anomaly_score": rng.randint(70, 100)})
         truth.append(el)
     items = rng.shuffle(items)
-    public = {"candidates": items, "note": "identify the anomalous elements"}
+    public = {
+        "candidates": items,
+        "anomaly_threshold": _ANOMALY_THRESHOLD,
+        "note": f"an element is anomalous when anomaly_score >= {_ANOMALY_THRESHOLD}",
+    }
     return FieldData(name, public, truth, truth, "list")
 
 
 def _set_inferable(public: Any) -> list[Any]:
-    return [c["value"] for c in public.get("candidates", []) if c.get("flagged")]
+    thr = public.get("anomaly_threshold", _ANOMALY_THRESHOLD)
+    return [c["value"] for c in public.get("candidates", []) if c.get("anomaly_score", 0) >= thr]
 
 
 # --------------------------------------------------------------------------- order
@@ -147,16 +188,20 @@ def _set_inferable(public: Any) -> list[Any]:
 def gen_order(rng: Rng, item: ParsedScoreItem, name: str) -> FieldData:
     k = rng.randint(6, 12)
     ids = [f"{clean_field(name)}-{i:02d}" for i in range(k)]
-    keyed = [{"id": e, "rank_key": i} for i, e in enumerate(ids)]
+    # Distinct non-index sort values; the true order is recovered by sorting on occurred_at (the
+    # ordering task itself), not by reading a key equal to the answer position.
+    values = rng.sample(range(1000, 9999), k)
+    truth_order = [e for _, e in sorted(zip(values, ids, strict=True))]
+    events = rng.shuffle([{"id": e, "occurred_at": v} for e, v in zip(ids, values, strict=True)])
     public = {
-        "events": rng.shuffle([dict(e) for e in keyed]),
-        "note": "order by rank_key ascending",
+        "events": events,
+        "note": "order the events by their true time (occurred_at ascending)",
     }
-    return FieldData(name, public, list(ids), list(ids), "list")
+    return FieldData(name, public, truth_order, truth_order, "list")
 
 
 def _order_inferable(public: Any) -> list[str]:
-    return [e["id"] for e in sorted(public.get("events", []), key=lambda e: e["rank_key"])]
+    return [e["id"] for e in sorted(public.get("events", []), key=lambda e: e["occurred_at"])]
 
 
 # --------------------------------------------------------------------------- numeric
@@ -182,11 +227,15 @@ def is_interval_numeric(item: ParsedScoreItem) -> bool:
 
 def gen_numeric(rng: Rng, item: ParsedScoreItem, name: str) -> FieldData:
     if is_interval_numeric(item):
-        start = rng.randint(0, 500)
-        interval: dict[str, int] = {"start": start, "end": start + rng.randint(20, 200)}
+        # Byte offsets, some of which "hit" a signature; the interval is derived as min..max hit,
+        # not written verbatim.
+        offsets = sorted(rng.sample(range(0, 800), rng.randint(8, 16)))
+        hits = sorted(rng.sample(offsets, rng.randint(3, 6)))
+        rows_iv = [{"offset": o, "signature_hit": o in hits} for o in offsets]
+        interval: dict[str, int] = {"start": hits[0], "end": hits[-1]}
         ipub: dict[str, Any] = {
-            "span_hint": interval,
-            "note": "report the byte interval (start,end)",
+            "payload_bytes": rows_iv,
+            "note": "report the byte interval (start=min, end=max) covering the signature_hit offsets",
         }
         return FieldData(name, ipub, interval, interval, "dict")
     if is_dict_numeric(item):
@@ -202,19 +251,22 @@ def gen_numeric(rng: Rng, item: ParsedScoreItem, name: str) -> FieldData:
             "compute": [f"m{j} = sum(v) mod {j + 7}" for j in range(cells)],
         }
         return FieldData(name, dpub, truth_d, truth_d, "dict")
-    base = rng.randint(1, 100)
-    spub: dict[str, Any] = {"rows": [{"v": base}], "compute": "value = v"}
-    return FieldData(name, spub, float(base), float(base), "float")
+    # Scalar: a real aggregate (count of rows over a threshold), not a copied value.
+    rows_s = [{"v": rng.randint(1, 100)} for _ in range(rng.randint(8, 16))]
+    truth_v = float(sum(1 for r in rows_s if r["v"] > 50))
+    spub: dict[str, Any] = {"rows": rows_s, "compute": "value = count of rows with v > 50"}
+    return FieldData(name, spub, truth_v, truth_v, "float")
 
 
 def _numeric_inferable(public: Any, item: ParsedScoreItem) -> Any:
     if is_interval_numeric(item):
-        return public.get("span_hint", {"start": 0, "end": 0})
+        hits = [r["offset"] for r in public.get("payload_bytes", []) if r.get("signature_hit")]
+        return {"start": min(hits), "end": max(hits)} if hits else {"start": 0, "end": 0}
     rows = public.get("rows", [])
     if is_dict_numeric(item):
         cells = numeric_cells(item)
         return {f"m{j}": float(sum(r["v"] for r in rows) % (j + 7)) for j in range(cells)}
-    return float(rows[0]["v"]) if rows else 0.0
+    return float(sum(1 for r in rows if r.get("v", 0) > 50))
 
 
 # --------------------------------------------------------------------------- scoring

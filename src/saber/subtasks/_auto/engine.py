@@ -119,14 +119,11 @@ class AutoSubtask(SubtaskBase):
             if _is_cite(item):
                 continue
             if _is_gate(item):
-                # A hard gate the agent must satisfy: generate the correct value it must match.
-                fd = F.gen_enum(rng, item, name) if item.kind is ScoreItemKind.ENUM else None
-                truth[name] = fd.truth if fd is not None else "satisfied"
-                data[_dk(name) + "_context"] = (
-                    fd.public
-                    if fd is not None
-                    else {"constraint": item.field, "satisfy_with": "satisfied"}
-                )
+                # A hard gate the agent must get right (comply vs violation, or the correct enum);
+                # the correct value is derivable from a signal, never the literal answer.
+                gfd = F.gen_gate(rng, item, name)
+                truth[name] = gfd.truth
+                data[_dk(name) + "_context"] = gfd.public
                 continue
             gen = F.GENERATORS.get(item.kind, F.gen_set)
             fd = gen(rng, item, name)
@@ -182,11 +179,7 @@ class AutoSubtask(SubtaskBase):
                 ans["citations"] = list(_all_evidence(public_inputs))
             elif _is_gate(item):
                 gctx = data.get(_dk(name) + "_context", {})
-                ans[name] = (
-                    F._enum_inferable(gctx, item)
-                    if item.kind is ScoreItemKind.ENUM
-                    else "satisfied"
-                )
+                ans[name] = F.gate_inferable(gctx, item)
             elif _dk(name) in data:
                 ans[name] = F.infer_field(item, name, data[_dk(name)])
         return ans, list(_all_evidence(public_inputs))
@@ -204,10 +197,7 @@ class AutoSubtask(SubtaskBase):
             if _is_cite(item):
                 gates.append(F.cite_gate(data.get("citations"), ctx.evidence_ids, name=name))
             elif _is_gate(item):
-                ok = (
-                    str(data.get(name, "")).strip().lower()
-                    == str(truth.get(name, "satisfied")).lower()
-                )
+                ok = str(data.get(name, "")).strip().lower() == str(truth.get(name, "")).lower()
                 mode, factor = _gate_mode(item)
                 gates.append(
                     GateOutcome(name=name, passed=ok, mode=mode, factor=factor, reason=item.field)
@@ -217,24 +207,42 @@ class AutoSubtask(SubtaskBase):
         return self._compose(comps, gates, truth)
 
     def _score_one(self, item: ParsedScoreItem, name: str, pred: Any, truth_val: Any) -> ItemScore:
-        if self._agg.kind is AggregateKind.SET_DELTA and item.kind is ScoreItemKind.SET:
+        set_delta_agg = self._agg.kind is AggregateKind.SET_DELTA
+        per_item_delta = "each component uses set_delta" in self._agg.notes
+        if (set_delta_agg or per_item_delta) and item.kind is ScoreItemKind.SET:
             return F.set_delta_field(item, name, pred, truth_val)
         if self._agg.kind is AggregateKind.TECHNIQUE_TACTIC and item.kind is ScoreItemKind.ENUM:
             s, d = technique_tactic_score(pred, truth_val, _ATT_CK)
             return ItemScore(field=name, score=s, weight=item.weight, detail=d)
         return F.score_field(item, name, pred, truth_val, weight=item.weight)
 
+    _FOLDED = {
+        AggregateKind.FIXED_ITEM,
+        AggregateKind.SET_DELTA,
+        AggregateKind.FBETA,
+        AggregateKind.KENDALL_TAU,
+        AggregateKind.FRACTION_CORRECT,
+        AggregateKind.TECHNIQUE_TACTIC,
+        AggregateKind.ACCURACY,
+        AggregateKind.MACRO_AVERAGE,
+        AggregateKind.MIXTURE,
+        AggregateKind.PRODUCT_GATES,
+    }
+
     def _compose(
         self, comps: list[ItemScore], gates: list[GateOutcome], truth: Mapping[str, Any]
     ) -> ScoreParts:
         agg = self._agg
-        penalties: list[tuple[str, int, float]] = []
         if agg.kind is AggregateKind.ACCURACY:
-            raw: float | None = sum(c.score for c in comps) / len(comps) if comps else 0.0
+            raw: float = sum(c.score for c in comps) / len(comps) if comps else 0.0
         elif agg.kind is AggregateKind.MACRO_AVERAGE:
             raw, _ = macro_average({c.field: c.score for c in comps})
+        elif agg.kind is AggregateKind.FIXED_ITEM:
+            # [A] (× [B] × ...): product of every scored factor, not just the first.
+            raw = _product(c.score for c in comps) if comps else 0.0
+        elif agg.kind is AggregateKind.PRODUCT_GATES:
+            raw = _product(c.score for c in comps) if comps else 1.0
         elif agg.kind in (
-            AggregateKind.FIXED_ITEM,
             AggregateKind.SET_DELTA,
             AggregateKind.FBETA,
             AggregateKind.KENDALL_TAU,
@@ -249,27 +257,60 @@ class AutoSubtask(SubtaskBase):
             raw = sum((c.weight or 0.0) * c.score for c in comps) / (
                 total_w if abs(total_w - 1.0) > 1e-6 else 1.0
             )
-        for c in comps:
-            if agg.kind in (
-                AggregateKind.FIXED_ITEM,
-                AggregateKind.SET_DELTA,
-                AggregateKind.FBETA,
-                AggregateKind.KENDALL_TAU,
-                AggregateKind.FRACTION_CORRECT,
-                AggregateKind.TECHNIQUE_TACTIC,
-                AggregateKind.ACCURACY,
-                AggregateKind.MACRO_AVERAGE,
-                AggregateKind.MIXTURE,
-            ):
-                c.weight = None  # score already folded into raw; don't double-count via ScoreParts.weighted
+        # Source caps ("cap X nếu <dim> sai") -> a cap-gate that fails when the guarded dimension
+        # is not fully correct; apply_gates then does min(score, cap).
+        cap_gates = self._cap_gates(comps)
+        # Source penalties ("- k x (count ...)") -> deduct k per extraneous element of the primary set.
+        penalties = self._penalties(comps)
+        if agg.kind in self._FOLDED:
+            for c in comps:
+                c.weight = None  # score already folded into raw; don't double-count via weighted()
         return ScoreParts(
             components=comps,
-            gates=gates,
+            gates=gates + cap_gates,
             penalties=penalties,
             raw_score=raw,
             trace=[f"{c.field}={c.score:.3f}" for c in comps]
-            + [f"gate {g.name}={g.passed}" for g in gates],
+            + [f"gate {g.name}={g.passed}" for g in gates + cap_gates],
         )
+
+    def _cap_gates(self, comps: list[ItemScore]) -> list[GateOutcome]:
+        out: list[GateOutcome] = []
+        for cap in self._agg.caps:
+            guarded = self._match_component(cap.condition, comps)
+            passed = guarded.score >= 1.0 - 1e-9 if guarded is not None else False
+            out.append(
+                GateOutcome(
+                    name=f"cap:{cap.condition[:40]}",
+                    passed=passed,
+                    mode="cap",
+                    factor=cap.cap,
+                    reason=f"cap {cap.cap} if '{cap.condition}'",
+                )
+            )
+        return out
+
+    def _penalties(self, comps: list[ItemScore]) -> list[tuple[str, int, float]]:
+        out: list[tuple[str, int, float]] = []
+        primary = next(
+            (c for c in comps if "false_positives" in c.detail or "fp" in c.detail), None
+        )
+        for pen in self._agg.penalties:
+            count = 0
+            if primary is not None:
+                count = int(
+                    primary.detail.get("fp", len(primary.detail.get("false_positives", [])))
+                )
+            out.append((pen.count_of[:40], count, pen.per_item))
+        return out
+
+    def _match_component(self, condition: str, comps: list[ItemScore]) -> ItemScore | None:
+        cond = condition.lower()
+        for c in comps:
+            tokens = [t for t in c.field.lower().replace("_", " ").split() if len(t) >= 3]
+            if any(t in cond for t in tokens):
+                return c
+        return comps[0] if comps else None
 
     # ---- golden -------------------------------------------------------------------
     def golden_cases(self, bundle: FixtureBundle) -> list[GoldenCase]:
@@ -285,12 +326,60 @@ class AutoSubtask(SubtaskBase):
             empty["citations"] = []
         # Empty answer: every scored component is empty/absent -> low score.
         cases.append(GoldenCase("empty_submission", empty, expected_max=0.6))
+
+        # Nonempty-but-wrong: corrupt every scored field and every gate; must score strictly below
+        # the oracle (this is what catches dropped factors / unbound gates / missing caps).
+        oracle = self.answer_from_truth(bundle.sealed_truth)
+        wrong = {k: _corrupt(k, v, self._items, self._field_names) for k, v in oracle.items()}
+        cases.append(GoldenCase("all_fields_wrong", wrong, expected_max=0.5))
+
+        # If any zero-mode hard gate exists, violating it alone must zero the whole score.
+        gate_fields = [
+            n
+            for i, n in zip(self._items, self._field_names, strict=True)
+            if _is_gate(i) and not _is_cite(i) and _gate_mode(i)[0] == "zero"
+        ]
+        if gate_fields:
+            violated = dict(oracle)
+            for n in gate_fields:
+                violated[n] = "___violation___"
+            cases.append(GoldenCase("hard_gate_violated", violated, expected_score=0.0))
         return cases
 
 
 def _dk(name: str) -> str:
     """Namespace an input-fragment key so a field name never collides with a forbidden truth key."""
     return f"field__{name}"
+
+
+def _corrupt(field: str, value: Any, items: list[ParsedScoreItem], names: list[str]) -> Any:
+    """Return a deliberately wrong value of the same shape as `value` for a golden negative case."""
+    if field == "citations":
+        return ["___hallucinated___"]
+    if isinstance(value, list):
+        return []  # empty set/order -> wrong
+    if isinstance(value, dict):
+        # Shift far enough to fall outside every tolerance (±%, IoU interval, ±0 cells).
+        return {
+            k: (v * 3 + 1000 if isinstance(v, int | float) else "___x___") for k, v in value.items()
+        }
+    if isinstance(value, bool):
+        return not value
+    if isinstance(value, int | float):
+        return value * 3 + 1000  # outside ±0 / ±% tolerance
+    return "___wrong___"
+
+
+def _product(values: Any) -> float:
+    out = 1.0
+    for v in values:
+        out *= v
+    return out
+
+
+# Two-option domain for a non-ENUM hard gate: the agent must decide comply vs violation. Modelled
+# like an enum (signal -> option by position) so it binds to a derivable decision, not a constant.
+GATE_DOMAIN = ("comply", "violation")
 
 
 def _is_cite(item: ParsedScoreItem) -> bool:

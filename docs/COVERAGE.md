@@ -1,6 +1,6 @@
 # SABER subtask coverage matrix (machine-generated)
 
-Updated: 2026-10-19T04:38:01+00:00
+Updated: 2026-10-19T05:03:53+00:00
 
 Readiness tiers are strict: SPECIFIED (contract only), IMPLEMENTED_OFFLINE (code+tests),
 VERIFIED_OFFLINE (tests ran green on synthetic DEV data), BLOCKED_INTEGRATION (needs a real

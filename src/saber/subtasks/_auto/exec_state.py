@@ -110,6 +110,7 @@ def exec_score(
         )
     matched = set(res.matched)
     pos = set(truth["positives"])
+    gates: list[GateOutcome] = []
     if st._agg.kind is AggregateKind.DELTA_FP_TP:
         fps = set(truth["false_positives"])
         fp_removed = len(matched & fps)
@@ -120,9 +121,23 @@ def exec_score(
             tp_before=len(pos),
             tp_after=len(pos) - tp_lost,
         )
+        # Source filter formulas gate on "no critical TP lost": any suppressed true positive zeroes.
+        if st._agg.gates:
+            gates.append(
+                GateOutcome(
+                    name="no_critical_tp_lost",
+                    passed=tp_lost == 0,
+                    mode="zero",
+                    reason=f"tp_lost={tp_lost}",
+                )
+            )
     elif st._agg.kind is AggregateKind.TPR_MINUS_FPR:
         m = corpus_metrics(matched, pos, len(lines))
         score, detail = tpr_minus_fpr(tp=m["tp"], fn=m["fn"], fp=m["fp"], tn=m["tn"])
+        if any("parse_ok" in g.lower() for g in st._agg.gates):
+            gates.append(
+                GateOutcome(name="parse_ok", passed=True, mode="zero", reason="rule compiled")
+            )
     else:  # exec item under a set-delta-style aggregate
         mhit = len(matched & pos)
         nfp = len(matched - pos)
@@ -131,8 +146,9 @@ def exec_score(
         detail = corpus_metrics(matched, pos, len(lines))
     return ScoreParts(
         components=[ItemScore(field="rule", score=score, weight=1.0, detail=detail)],
+        gates=gates,
         raw_score=score,
-        trace=[f"rule exec -> {score:.4f}"],
+        trace=[f"rule exec -> {score:.4f}"] + [f"gate {g.name}={g.passed}" for g in gates],
     )
 
 

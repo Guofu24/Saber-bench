@@ -115,3 +115,30 @@ owed yet. Once `score_v1` is frozen for a hidden split, any further change bumps
 - **B0 abstention vs failure.** Where a subtask has no rules oracle, B0 abstains; those subtasks
   are excluded from B0's aggregate rather than scored `0`, and listed under `abstentions` in the
   experiment report. Bootstrap CIs over fewer than three subtasks are flagged `reliable_ci=false`.
+
+## Archetype-engine fidelity conventions (pre-freeze, still `score_v1`)
+
+The `AutoSubtask` engine composes each subtask's scorer from its parsed source contract. To stay
+faithful to the formula (not just the aggregate kind), it applies:
+
+- **Product aggregates** (`[A] × [B]`, FIXED_ITEM with more than one scored factor): the score is
+  the product of every scored component, not the first alone.
+- **Caps** (`cap k nếu <dim> sai`): applied as a cap-gate that fails when the guarded dimension is
+  not fully correct, so the total is capped at `k`. The guarded dimension is matched by field-name
+  tokens in the (verbatim source) condition, falling back to the primary component.
+- **Penalties** (`− k × (count …)`): deducted as `k ×` the number of extraneous elements reported
+  in the primary set component.
+- **Per-component set-delta** (`Σ wᵢ·sᵢ, mỗi mục theo max(0, M′/M − N′/(N′+M′))`): set components
+  are scored with the source set-delta formula, not Fβ.
+- **Hard gates** (`× [gate]`, `Π[…]`): every gate binds to a decision the agent must get right
+  (the correct enum, or comply/violation derivable from a signal), never a constant; a wrong gate
+  value zeroes (or caps) the score per the source.
+- **Answer non-leakage**: generators encode the answer as a *derivable* signal (set membership via
+  an anomaly-score threshold, order via a sortable time field, numerics via a stated computation),
+  never as the literal answer, so the rules baseline must actually infer it.
+
+Open fidelity gaps, tracked and acceptable at `VERIFIED_OFFLINE` (not `READY_BENCHMARK`): MIXTURE
+uses per-item weights where they coincide with the formula's term weights; ORDER inside a mixture
+is scored `tau*recall` where a few source formulas write `max(0,ρ)`; a `× CITE` that the source
+applies to only a sub-term is enforced as a stricter global citation gate. These are documented
+rather than silently divergent, and the engine fixtures remain structural synthetic data.
