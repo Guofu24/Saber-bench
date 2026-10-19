@@ -29,3 +29,6 @@ runs/
 *.sqlite3
 *.sqlite3-journal
 raw_telemetry/
+
+# untrusted downloaded datasets (reproducible via provenance manifests in gold/evaldata/)
+data/external/

@@ -1,0 +1,77 @@
+{
+  "generated_at": "2026-10-19T09:03:16+00:00",
+  "source": {
+    "name": "SigmaHQ/sigma",
+    "kind": "detection_test",
+    "url": "https://github.com/SigmaHQ/sigma",
+    "license": "Detection Rule License (DRL) 1.1",
+    "usage_permitted": true,
+    "commit": "4d47b8ff8a8b4f85ea099a79313158badea1feed",
+    "homepage": "https://github.com/SigmaHQ/Detection-Rule-License",
+    "notes": "rules/windows/process_creation, pinned commit"
+  },
+  "label_tier": "source_provided",
+  "note": "GENUINE external detection rules (DRL-1.1). SOURCE_PROVIDED labels = the rules' own detection semantics; NOT independently validated gold for SABER subtasks; NOT READY_BENCHMARK.",
+  "reproduce": "re-fetch rules/windows/process_creation/*.yml at commit 4d47b8ff8a8b4f85ea099a79313158badea1feed; SHA256 must match.",
+  "files": [
+    {
+      "file": "proc_creation_win_7zip_exfil_dmp_files.yml",
+      "sha256": "bc099a1a8b01dfd98ed647c388ca43ce7913f5e837db41611379e705d9359cc6",
+      "size_bytes": 1241,
+      "records": 1,
+      "validated": true,
+      "techniques": [
+        "T1560.001"
+      ],
+      "lineage_keys": [
+        "74c16cc9224dfc4e"
+      ],
+      "detail": "1 records validated"
+    },
+    {
+      "file": "proc_creation_win_7zip_password_compression.yml",
+      "sha256": "877998e61870667b675653f3b74cbaabc7b0120c71fb80e26f7b27b198ff64c0",
+      "size_bytes": 1146,
+      "records": 1,
+      "validated": true,
+      "techniques": [
+        "T1560.001"
+      ],
+      "lineage_keys": [
+        "967acf9ebeabf114"
+      ],
+      "detail": "1 records validated"
+    },
+    {
+      "file": "proc_creation_win_acccheckconsole_execution.yml",
+      "sha256": "d14e6d24ebefe314324f8b5612177ca42940382493b080b75578d9b9c2bc267b",
+      "size_bytes": 1419,
+      "records": 1,
+      "validated": true,
+      "techniques": [],
+      "lineage_keys": [
+        "929ab8b01fa83566"
+      ],
+      "detail": "1 records validated"
+    },
+    {
+      "file": "proc_creation_win_addinutil_suspicious_cmdline.yml",
+      "sha256": "12c76ba452ae792a111abde24c25ca83e4e25bc030e918e74e0fdb9c934be91d",
+      "size_bytes": 1659,
+      "records": 1,
+      "validated": true,
+      "techniques": [
+        "T1218"
+      ],
+      "lineage_keys": [
+        "193d821cd7ed15cb"
+      ],
+      "detail": "1 records validated"
+    }
+  ],
+  "all_validated": true,
+  "distinct_techniques": [
+    "T1218",
+    "T1560.001"
+  ]
+}
