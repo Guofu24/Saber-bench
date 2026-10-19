@@ -22,8 +22,14 @@ def test_public_payload_has_no_truth_keys() -> None:
         for variant in st.VARIANTS:
             ep = build_episode(sid, variant=variant)
             public = ep.public_payload()
-            assert_no_leak(public)
-            text = json.dumps(public, default=str)
+            # The output schema is the JSON schema of the agent's ANSWER (a field may legitimately
+            # be named e.g. "labels"); exclude it from the truth-key scan, like the builder does.
+            scan = {
+                **public,
+                "manifest": {k: v for k, v in public["manifest"].items() if k != "output_schema"},
+            }
+            assert_no_leak(scan)
+            text = json.dumps(scan, default=str)
             # The sealed answer must never be byte-present in the public blob.
             for key in ("sealed_truth", "attack_verification", "scenario_id", "is_malicious"):
                 assert f'"{key}"' not in text, (sid, variant, key)

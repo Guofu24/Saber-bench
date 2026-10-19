@@ -1,6 +1,6 @@
 # SABER implementation progress (machine-generated from status/ledger.json)
 
-Updated: 2026-10-19T04:17:09+00:00
+Updated: 2026-10-19T04:38:00+00:00
 
 Status meanings: `DONE_DEV`/`IMPLEMENTED_DEV` = implementation + independent offline tests ran green;
 `PARTIAL` = safe parts done, remainder listed in blockers; `BLOCKED_INTEGRATION` = needs external
@@ -13,7 +13,7 @@ independently validated private data, lab verification and human adjudication.
 |---|---|---|---|---|---|---|---|---|---|---|
 | engineering | 0 | 4 | 11 | 0 | 0 | 0 | 23 | 0 | 0 | 0 |
 | bridge | 0 | 0 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| domain | 0 | 0 | 0 | 0 | 0 | 0 | 163 | 0 | 0 | 12 |
+| domain | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 175 |
 
 ## Items
 
@@ -61,176 +61,176 @@ independently validated private data, lab verification and human adjudication.
 | T030 | engineering | agents | DONE_DEV | `uv run pytest tests/security/test_response_actions.py` | Real lab side-effect execution requires approved isolated lab + executor token (H4) — Dry-run default; track-A no side effects; approval binds exact action; BlockedLabResponseDriver fails closed. |
 | T031 | engineering | agents | PENDING |  |  |
 | T032 | engineering | agents | DONE_DEV | `uv run pytest tests/unit/test_agents_experiments.py` | LLM baselines B1-B4 need operator-approved provider + budget — B0 rules-only + ORACLE run offline; specialist router by service; identical output contract. |
-| T0167.001 | domain | subtasks_file | PENDING |  |  |
-| T0167.002 | domain | subtasks_file | PENDING |  |  |
-| T0167.003 | domain | subtasks_file | PENDING |  |  |
-| T0173.002 | domain | subtasks_file | PENDING |  |  |
-| T0182.001 | domain | subtasks_file | PENDING |  |  |
-| T0182.002 | domain | subtasks_file | PENDING |  |  |
-| T0182.003 | domain | subtasks_file | PENDING |  |  |
-| T0292.001 | domain | subtasks_file | PENDING |  |  |
-| T0292.002 | domain | subtasks_file | PENDING |  |  |
-| T0397.001 | domain | subtasks_file | PENDING |  |  |
+| T0167.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T0167.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T0167.003 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T0173.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T0182.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T0182.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T0182.003 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T0292.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T0292.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T0397.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
 | T0397.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t0397_002.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
-| T0510.001 | domain | subtasks_file | PENDING |  |  |
-| T0510.002 | domain | subtasks_file | PENDING |  |  |
+| T0510.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T0510.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
 | T0845.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t0845_001.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
-| T0845.002 | domain | subtasks_file | PENDING |  |  |
-| T1053.001 | domain | subtasks_file | PENDING |  |  |
-| T1053.002 | domain | subtasks_file | PENDING |  |  |
-| T1085.001 | domain | subtasks_file | PENDING |  |  |
-| T1085.002 | domain | subtasks_file | PENDING |  |  |
-| T1090.001 | domain | subtasks_file | PENDING |  |  |
-| T1090.002 | domain | subtasks_file | PENDING |  |  |
-| T1090.003 | domain | subtasks_file | PENDING |  |  |
-| T1102.001 | domain | subtasks_file | PENDING |  |  |
-| T1102.002 | domain | subtasks_file | PENDING |  |  |
-| T1103.001 | domain | subtasks_file | PENDING |  |  |
-| T1103.002 | domain | subtasks_file | PENDING |  |  |
-| T1104.001 | domain | subtasks_file | PENDING |  |  |
-| T1104.002 | domain | subtasks_file | PENDING |  |  |
-| T1104.003 | domain | subtasks_file | PENDING |  |  |
-| T1111.001 | domain | subtasks_file | PENDING |  |  |
-| T1111.002 | domain | subtasks_file | PENDING |  |  |
+| T0845.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1053.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1053.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1085.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1085.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1090.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1090.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1090.003 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1102.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1102.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1103.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1103.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1104.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1104.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1104.003 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1111.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1111.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
 | T1112.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t1112_002.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
-| T1241.001 | domain | subtasks_file | PENDING |  |  |
-| T1241.002 | domain | subtasks_file | PENDING |  |  |
-| T1242.001 | domain | subtasks_file | PENDING |  |  |
-| T1242.002 | domain | subtasks_file | PENDING |  |  |
-| T1250.001 | domain | subtasks_file | PENDING |  |  |
-| T1250.002 | domain | subtasks_file | PENDING |  |  |
-| T1251.001 | domain | subtasks_file | PENDING |  |  |
-| T1251.002 | domain | subtasks_file | PENDING |  |  |
-| T1251.003 | domain | subtasks_file | PENDING |  |  |
-| T1252.001 | domain | subtasks_file | PENDING |  |  |
-| T1252.002 | domain | subtasks_file | PENDING |  |  |
-| T1253.001 | domain | subtasks_file | PENDING |  |  |
-| T1253.002 | domain | subtasks_file | PENDING |  |  |
-| T1253.003 | domain | subtasks_file | PENDING |  |  |
-| T1257.001 | domain | subtasks_file | PENDING |  |  |
-| T1257.002 | domain | subtasks_file | PENDING |  |  |
-| T1257.003 | domain | subtasks_file | PENDING |  |  |
+| T1241.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1241.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1242.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1242.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1250.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1250.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1251.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1251.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1251.003 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1252.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1252.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1253.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1253.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1253.003 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1257.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1257.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1257.003 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
 | T1290.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t1290_001.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
-| T1290.002 | domain | subtasks_file | PENDING |  |  |
-| T1299.001 | domain | subtasks_file | PENDING |  |  |
-| T1299.002 | domain | subtasks_file | PENDING |  |  |
-| T1315.001 | domain | subtasks_file | PENDING |  |  |
-| T1315.002 | domain | subtasks_file | PENDING |  |  |
-| T1316.001 | domain | subtasks_file | PENDING |  |  |
-| T1316.002 | domain | subtasks_file | PENDING |  |  |
-| T1323.001 | domain | subtasks_file | PENDING |  |  |
-| T1323.002 | domain | subtasks_file | PENDING |  |  |
-| T1324.001 | domain | subtasks_file | PENDING |  |  |
-| T1324.002 | domain | subtasks_file | PENDING |  |  |
-| T1324.003 | domain | subtasks_file | PENDING |  |  |
-| T1332.001 | domain | subtasks_file | PENDING |  |  |
-| T1332.002 | domain | subtasks_file | PENDING |  |  |
-| T1332.003 | domain | subtasks_file | PENDING |  |  |
-| T1341.001 | domain | subtasks_file | PENDING |  |  |
-| T1341.002 | domain | subtasks_file | PENDING |  |  |
-| T1347.001 | domain | subtasks_file | PENDING |  |  |
-| T1347.002 | domain | subtasks_file | PENDING |  |  |
-| T1348.002 | domain | subtasks_file | PENDING |  |  |
-| T1349.001 | domain | subtasks_file | PENDING |  |  |
-| T1349.002 | domain | subtasks_file | PENDING |  |  |
-| T1350.001 | domain | subtasks_file | PENDING |  |  |
-| T1350.002 | domain | subtasks_file | PENDING |  |  |
-| T1351.001 | domain | subtasks_file | PENDING |  |  |
-| T1351.002 | domain | subtasks_file | PENDING |  |  |
-| T1371.001 | domain | subtasks_file | PENDING |  |  |
-| T1371.002 | domain | subtasks_file | PENDING |  |  |
-| T1381.001 | domain | subtasks_file | PENDING |  |  |
-| T1384.001 | domain | subtasks_file | PENDING |  |  |
-| T1384.002 | domain | subtasks_file | PENDING |  |  |
-| T1386.001 | domain | subtasks_file | PENDING |  |  |
-| T1386.002 | domain | subtasks_file | PENDING |  |  |
-| T1387.001 | domain | subtasks_file | PENDING |  |  |
-| T1387.002 | domain | subtasks_file | PENDING |  |  |
-| T1388.001 | domain | subtasks_file | PENDING |  |  |
-| T1388.002 | domain | subtasks_file | PENDING |  |  |
-| T1391.001 | domain | subtasks_file | PENDING |  |  |
-| T1391.002 | domain | subtasks_file | PENDING |  |  |
-| T1406.001 | domain | subtasks_file | PENDING |  |  |
-| T1406.002 | domain | subtasks_file | PENDING |  |  |
-| T1428.001 | domain | subtasks_file | PENDING |  |  |
-| T1428.002 | domain | subtasks_file | PENDING |  |  |
-| T1607.001 | domain | subtasks_file | PENDING |  |  |
-| T1607.002 | domain | subtasks_file | PENDING |  |  |
-| T1617.001 | domain | subtasks_file | PENDING |  |  |
-| T1617.002 | domain | subtasks_file | PENDING |  |  |
-| T1617.003 | domain | subtasks_file | PENDING |  |  |
-| T1644.001 | domain | subtasks_file | PENDING |  |  |
-| T1644.002 | domain | subtasks_file | PENDING |  |  |
-| T2012.002 | domain | subtasks_file | PENDING |  |  |
-| T2013.001 | domain | subtasks_file | PENDING |  |  |
-| T2013.002 | domain | subtasks_file | PENDING |  |  |
-| T2016.001 | domain | subtasks_file | PENDING |  |  |
-| T2016.002 | domain | subtasks_file | PENDING |  |  |
-| T0020.002 | domain | subtasks_soc | PENDING |  |  |
-| T0020.003 | domain | subtasks_soc | PENDING |  |  |
-| T0173.003 | domain | subtasks_soc | PENDING |  |  |
-| T0292.003 | domain | subtasks_soc | PENDING |  |  |
-| T0510.003 | domain | subtasks_soc | PENDING |  |  |
-| T0845.003 | domain | subtasks_soc | PENDING |  |  |
-| T1053.003 | domain | subtasks_soc | PENDING |  |  |
-| T1085.003 | domain | subtasks_soc | PENDING |  |  |
-| T1103.003 | domain | subtasks_soc | PENDING |  |  |
-| T1111.003 | domain | subtasks_soc | PENDING |  |  |
+| T1290.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1299.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1299.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1315.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1315.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1316.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1316.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1323.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1323.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1324.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1324.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1324.003 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1332.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1332.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1332.003 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1341.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1341.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1347.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1347.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1348.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1349.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1349.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1350.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1350.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1351.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1351.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1371.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1371.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1381.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1384.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1384.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1386.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1386.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1387.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1387.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1388.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1388.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1391.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1391.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1406.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1406.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1428.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1428.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1607.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1607.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1617.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1617.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1617.003 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1644.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1644.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T2012.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T2013.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T2013.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T2016.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T2016.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T0020.002 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T0020.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T0173.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T0292.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T0510.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T0845.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1053.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1085.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1103.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1111.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
 | T1112.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t1112_003.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
-| T1241.003 | domain | subtasks_soc | PENDING |  |  |
-| T1242.003 | domain | subtasks_soc | PENDING |  |  |
-| T1250.003 | domain | subtasks_soc | PENDING |  |  |
-| T1252.003 | domain | subtasks_soc | PENDING |  |  |
-| T1290.003 | domain | subtasks_soc | PENDING |  |  |
-| T1299.003 | domain | subtasks_soc | PENDING |  |  |
-| T1315.003 | domain | subtasks_soc | PENDING |  |  |
-| T1316.003 | domain | subtasks_soc | PENDING |  |  |
-| T1323.003 | domain | subtasks_soc | PENDING |  |  |
-| T1347.003 | domain | subtasks_soc | PENDING |  |  |
-| T1348.003 | domain | subtasks_soc | PENDING |  |  |
-| T1348.004 | domain | subtasks_soc | PENDING |  |  |
-| T1348.005 | domain | subtasks_soc | PENDING |  |  |
-| T1348.006 | domain | subtasks_soc | PENDING |  |  |
-| T1348.007 | domain | subtasks_soc | PENDING |  |  |
-| T1348.008 | domain | subtasks_soc | PENDING |  |  |
-| T1348.009 | domain | subtasks_soc | PENDING |  |  |
-| T1348.010 | domain | subtasks_soc | PENDING |  |  |
-| T1348.011 | domain | subtasks_soc | PENDING |  |  |
-| T1348.012 | domain | subtasks_soc | PENDING |  |  |
-| T1348.013 | domain | subtasks_soc | PENDING |  |  |
-| T1349.003 | domain | subtasks_soc | PENDING |  |  |
-| T1350.003 | domain | subtasks_soc | PENDING |  |  |
-| T1351.003 | domain | subtasks_soc | PENDING |  |  |
-| T1371.003 | domain | subtasks_soc | PENDING |  |  |
-| T1384.003 | domain | subtasks_soc | PENDING |  |  |
-| T1386.003 | domain | subtasks_soc | PENDING |  |  |
-| T1387.003 | domain | subtasks_soc | PENDING |  |  |
-| T1388.003 | domain | subtasks_soc | PENDING |  |  |
-| T1391.003 | domain | subtasks_soc | PENDING |  |  |
-| T1406.003 | domain | subtasks_soc | PENDING |  |  |
-| T1428.003 | domain | subtasks_soc | PENDING |  |  |
-| T1607.003 | domain | subtasks_soc | PENDING |  |  |
-| T1644.003 | domain | subtasks_soc | PENDING |  |  |
-| T2013.003 | domain | subtasks_soc | PENDING |  |  |
-| T2016.003 | domain | subtasks_soc | PENDING |  |  |
-| T0397.003 | domain | subtasks_vm | PENDING |  |  |
-| T1102.003 | domain | subtasks_vm | PENDING |  |  |
-| T1109.001 | domain | subtasks_vm | PENDING |  |  |
-| T1109.002 | domain | subtasks_vm | PENDING |  |  |
+| T1241.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1242.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1250.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1252.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1290.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1299.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1315.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1316.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1323.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1347.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1348.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1348.004 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1348.005 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1348.006 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1348.007 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1348.008 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1348.009 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1348.010 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1348.011 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1348.012 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1348.013 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1349.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1350.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1351.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1371.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1384.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1386.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1387.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1388.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1391.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1406.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1428.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1607.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1644.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T2013.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T2016.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T0397.003 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1102.003 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1109.001 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1109.002 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
 | T1109.003 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t1109_003.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
-| T1341.003 | domain | subtasks_vm | PENDING |  |  |
-| T1370.001 | domain | subtasks_vm | PENDING |  |  |
-| T1370.002 | domain | subtasks_vm | PENDING |  |  |
-| T1370.003 | domain | subtasks_vm | PENDING |  |  |
-| T1381.002 | domain | subtasks_vm | PENDING |  |  |
-| T1381.003 | domain | subtasks_vm | PENDING |  |  |
-| T1389.001 | domain | subtasks_vm | PENDING |  |  |
-| T1389.002 | domain | subtasks_vm | PENDING |  |  |
-| T1389.003 | domain | subtasks_vm | PENDING |  |  |
-| T1487.001 | domain | subtasks_vm | PENDING |  |  |
-| T1487.002 | domain | subtasks_vm | PENDING |  |  |
+| T1341.003 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1370.001 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1370.002 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1370.003 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1381.002 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1381.003 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1389.001 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1389.002 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1389.003 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1487.001 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
+| T1487.002 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
 | T1487.003 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t1487_003.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
-| T2012.003 | domain | subtasks_vm | PENDING |  |  |
+| T2012.003 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_all_subtasks.py` | STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK — Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY |
 | T033 | engineering | evaluation_release | DONE_DEV | `uv run pytest tests/security/test_split_leakage.py` | Family-based train/dev/test split + leakage/contamination checks; frozen to status/split.json. |
 | T034 | engineering | evaluation_release | DONE_DEV | `uv run pytest tests/unit/test_agents_experiments.py` | Comparative B0-vs-B3 claims need LLM baselines + hidden family split — Experiment matrix: per-baseline/service/env means with bootstrap CIs over subtasks; DEV_SIMULATION_ONLY. |
 | T035 | engineering | evaluation_release | PENDING |  |  |

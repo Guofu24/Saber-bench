@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T04:17:09+00:00",
+  "updated_at": "2026-10-19T04:38:00+00:00",
   "items": {
     "T001": {
       "kind": "engineering",
@@ -527,52 +527,212 @@
     "T0167.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0167.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0167.003": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0173.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0182.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0182.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0182.003": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0292.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0292.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0397.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0397.002": {
       "kind": "domain",
@@ -596,12 +756,44 @@
     "T0510.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0510.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0845.001": {
       "kind": "domain",
@@ -625,87 +817,359 @@
     "T0845.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1053.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1053.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1085.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1085.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1090.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1090.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1090.003": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1102.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1102.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1103.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1103.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1104.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1104.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1104.003": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1111.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1111.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1112.002": {
       "kind": "domain",
@@ -729,87 +1193,359 @@
     "T1241.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1241.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1242.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1242.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1250.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1250.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1251.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1251.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1251.003": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1252.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1252.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1253.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1253.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1253.003": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1257.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1257.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1257.003": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1290.001": {
       "kind": "domain",
@@ -833,327 +1569,1367 @@
     "T1290.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1299.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1299.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1315.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1315.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1316.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1316.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1323.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1323.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1324.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1324.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1324.003": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1332.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1332.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1332.003": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1341.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1341.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1347.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1347.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1348.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1349.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1349.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1350.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1350.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1351.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1351.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1371.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1371.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1381.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1384.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1384.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1386.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1386.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1387.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1387.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1388.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1388.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1391.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1391.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1406.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1406.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1428.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1428.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1607.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1607.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1617.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1617.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1617.003": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1644.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1644.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T2012.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T2013.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T2013.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T2016.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T2016.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0020.002": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0020.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0173.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0292.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0510.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0845.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1053.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1085.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1103.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1111.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1112.003": {
       "kind": "domain",
@@ -1177,202 +2953,842 @@
     "T1241.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1242.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1250.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1252.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1290.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1299.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1315.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1316.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1323.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1347.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1348.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1348.004": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1348.005": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1348.006": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1348.007": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1348.008": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1348.009": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1348.010": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1348.011": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1348.012": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1348.013": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1349.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1350.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1351.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1371.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1384.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1386.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1387.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1388.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1391.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1406.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1428.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1607.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1644.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T2013.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T2016.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T0397.003": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1102.003": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1109.001": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1109.002": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1109.003": {
       "kind": "domain",
@@ -1396,57 +3812,233 @@
     "T1341.003": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1370.001": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1370.002": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1370.003": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1381.002": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1381.003": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1389.001": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1389.002": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1389.003": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1487.001": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1487.002": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T1487.003": {
       "kind": "domain",
@@ -1470,7 +4062,23 @@
     "T2012.003": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "PENDING"
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:38:00+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_all_subtasks.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/_auto/engine.py",
+        "src/saber/subtasks/_auto/fields.py",
+        "src/saber/subtasks/_auto/exec_state.py"
+      ],
+      "blockers": [
+        "STRUCTURAL synthetic fixture; needs domain-crafted data + independent gold for READY_BENCHMARK"
+      ],
+      "notes": "Archetype engine: scorer bound to parsed source formula; oracle full credit; DEV_SIMULATION_ONLY"
     },
     "T033": {
       "kind": "engineering",

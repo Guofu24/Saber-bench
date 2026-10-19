@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-19T04:05:47.314669Z",
+  "generated_at": "2026-10-19T04:38:18.768703Z",
   "scorer_version": "score_v1",
   "catalog_digest": "47329b0dd5b8182dbef38e1e50b2513877b3aabe6c193762442b303ceae16243",
-  "code_commit": "b252a01",
+  "code_commit": "9946d37",
   "labels": [
     "DEV_SIMULATION_ONLY"
   ],
@@ -19,17 +19,180 @@
   ],
   "subtasks": [
     "T0020.001",
+    "T0020.002",
+    "T0020.003",
+    "T0167.001",
+    "T0167.002",
+    "T0167.003",
     "T0173.001",
+    "T0173.002",
+    "T0173.003",
+    "T0182.001",
+    "T0182.002",
+    "T0182.003",
+    "T0292.001",
+    "T0292.002",
+    "T0292.003",
+    "T0397.001",
     "T0397.002",
+    "T0397.003",
+    "T0510.001",
+    "T0510.002",
+    "T0510.003",
     "T0845.001",
+    "T0845.002",
+    "T0845.003",
+    "T1053.001",
+    "T1053.002",
+    "T1053.003",
+    "T1085.001",
+    "T1085.002",
+    "T1085.003",
+    "T1090.001",
+    "T1090.002",
+    "T1090.003",
+    "T1102.001",
+    "T1102.002",
+    "T1102.003",
+    "T1103.001",
+    "T1103.002",
+    "T1103.003",
+    "T1104.001",
+    "T1104.002",
+    "T1104.003",
+    "T1109.001",
+    "T1109.002",
     "T1109.003",
+    "T1111.001",
+    "T1111.002",
+    "T1111.003",
     "T1112.001",
     "T1112.002",
     "T1112.003",
+    "T1241.001",
+    "T1241.002",
+    "T1241.003",
+    "T1242.001",
+    "T1242.002",
+    "T1242.003",
+    "T1250.001",
+    "T1250.002",
+    "T1250.003",
+    "T1251.001",
+    "T1251.002",
+    "T1251.003",
+    "T1252.001",
+    "T1252.002",
+    "T1252.003",
+    "T1253.001",
+    "T1253.002",
+    "T1253.003",
+    "T1257.001",
+    "T1257.002",
+    "T1257.003",
     "T1290.001",
+    "T1290.002",
+    "T1290.003",
+    "T1299.001",
+    "T1299.002",
+    "T1299.003",
+    "T1315.001",
+    "T1315.002",
+    "T1315.003",
+    "T1316.001",
+    "T1316.002",
+    "T1316.003",
+    "T1323.001",
+    "T1323.002",
+    "T1323.003",
+    "T1324.001",
+    "T1324.002",
+    "T1324.003",
+    "T1332.001",
+    "T1332.002",
+    "T1332.003",
+    "T1341.001",
+    "T1341.002",
+    "T1341.003",
+    "T1347.001",
+    "T1347.002",
+    "T1347.003",
     "T1348.001",
+    "T1348.002",
+    "T1348.003",
+    "T1348.004",
+    "T1348.005",
+    "T1348.006",
+    "T1348.007",
+    "T1348.008",
+    "T1348.009",
+    "T1348.010",
+    "T1348.011",
+    "T1348.012",
+    "T1348.013",
+    "T1349.001",
+    "T1349.002",
+    "T1349.003",
+    "T1350.001",
+    "T1350.002",
+    "T1350.003",
+    "T1351.001",
+    "T1351.002",
+    "T1351.003",
+    "T1370.001",
+    "T1370.002",
+    "T1370.003",
+    "T1371.001",
+    "T1371.002",
+    "T1371.003",
+    "T1381.001",
+    "T1381.002",
+    "T1381.003",
+    "T1384.001",
+    "T1384.002",
+    "T1384.003",
+    "T1386.001",
+    "T1386.002",
+    "T1386.003",
+    "T1387.001",
+    "T1387.002",
+    "T1387.003",
+    "T1388.001",
+    "T1388.002",
+    "T1388.003",
+    "T1389.001",
+    "T1389.002",
+    "T1389.003",
+    "T1391.001",
+    "T1391.002",
+    "T1391.003",
+    "T1406.001",
+    "T1406.002",
+    "T1406.003",
+    "T1428.001",
+    "T1428.002",
+    "T1428.003",
+    "T1487.001",
+    "T1487.002",
     "T1487.003",
-    "T2012.001"
+    "T1607.001",
+    "T1607.002",
+    "T1607.003",
+    "T1617.001",
+    "T1617.002",
+    "T1617.003",
+    "T1644.001",
+    "T1644.002",
+    "T1644.003",
+    "T2012.001",
+    "T2012.002",
+    "T2012.003",
+    "T2013.001",
+    "T2013.002",
+    "T2013.003",
+    "T2016.001",
+    "T2016.002",
+    "T2016.003"
   ],
   "cells": [
     {
@@ -53,6 +216,106 @@
       "abstained": false
     },
     {
+      "subtask_id": "T0020.002",
+      "service": "CNT",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0020.002",
+      "service": "CNT",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0020.003",
+      "service": "CNT",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0020.003",
+      "service": "CNT",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0167.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0167.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0167.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0167.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0167.003",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0167.003",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
       "subtask_id": "T0173.001",
       "service": "IR",
       "environment": "file",
@@ -64,6 +327,186 @@
     },
     {
       "subtask_id": "T0173.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0173.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0173.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0173.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0173.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0182.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0182.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0182.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0182.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0182.003",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0182.003",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0292.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0292.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0292.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0292.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0292.003",
+      "service": "HUNT",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0292.003",
+      "service": "HUNT",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0397.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0397.001",
       "service": "IR",
       "environment": "file",
       "baseline": "ORACLE",
@@ -93,6 +536,86 @@
       "abstained": false
     },
     {
+      "subtask_id": "T0397.003",
+      "service": "IR",
+      "environment": "vm",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0397.003",
+      "service": "IR",
+      "environment": "vm",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0510.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0510.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0510.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0510.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0510.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0510.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
       "subtask_id": "T0845.001",
       "service": "HUNT",
       "environment": "file",
@@ -113,6 +636,446 @@
       "abstained": false
     },
     {
+      "subtask_id": "T0845.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0845.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0845.003",
+      "service": "HUNT",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T0845.003",
+      "service": "HUNT",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1053.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1053.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1053.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1053.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1053.003",
+      "service": "HUNT",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1053.003",
+      "service": "HUNT",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1085.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1085.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1085.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1085.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1085.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1085.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1090.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1090.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1090.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1090.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1090.003",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1090.003",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1102.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1102.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1102.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1102.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1102.003",
+      "service": "HUNT",
+      "environment": "vm",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1102.003",
+      "service": "HUNT",
+      "environment": "vm",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1103.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1103.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1103.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1103.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1103.003",
+      "service": "HUNT",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1103.003",
+      "service": "HUNT",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1104.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1104.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1104.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1104.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1104.003",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1104.003",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1109.001",
+      "service": "IR",
+      "environment": "vm",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1109.001",
+      "service": "IR",
+      "environment": "vm",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1109.002",
+      "service": "IR",
+      "environment": "vm",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1109.002",
+      "service": "IR",
+      "environment": "vm",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
       "subtask_id": "T1109.003",
       "service": "IR",
       "environment": "vm",
@@ -126,6 +1089,66 @@
       "subtask_id": "T1109.003",
       "service": "IR",
       "environment": "vm",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1111.001",
+      "service": "CNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1111.001",
+      "service": "CNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1111.002",
+      "service": "CNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1111.002",
+      "service": "CNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1111.003",
+      "service": "CNT",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1111.003",
+      "service": "CNT",
+      "environment": "soc",
       "baseline": "ORACLE",
       "mean_score": 1.0,
       "validity_rate": 1.0,
@@ -193,6 +1216,426 @@
       "abstained": false
     },
     {
+      "subtask_id": "T1241.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1241.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1241.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1241.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1241.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1241.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1242.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1242.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1242.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1242.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1242.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1242.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1250.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1250.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1250.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1250.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1250.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1250.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1251.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1251.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1251.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1251.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1251.003",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1251.003",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1252.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1252.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1252.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1252.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1252.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1252.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1253.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1253.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1253.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1253.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1253.003",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1253.003",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1257.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1257.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1257.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1257.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1257.003",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1257.003",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
       "subtask_id": "T1290.001",
       "service": "MON",
       "environment": "file",
@@ -206,6 +1649,526 @@
       "subtask_id": "T1290.001",
       "service": "MON",
       "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1290.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1290.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1290.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1290.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1299.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1299.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1299.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1299.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1299.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1299.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1315.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1315.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1315.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1315.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1315.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1315.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1316.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1316.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1316.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1316.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1316.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1316.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1323.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1323.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1323.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1323.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1323.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1323.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1324.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1324.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1324.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1324.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1324.003",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1324.003",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1332.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1332.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1332.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1332.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1332.003",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1332.003",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1341.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1341.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1341.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1341.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1341.003",
+      "service": "HUNT",
+      "environment": "vm",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1341.003",
+      "service": "HUNT",
+      "environment": "vm",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1347.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1347.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1347.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1347.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1347.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1347.003",
+      "service": "MON",
+      "environment": "soc",
       "baseline": "ORACLE",
       "mean_score": 1.0,
       "validity_rate": 1.0,
@@ -233,6 +2196,1126 @@
       "abstained": false
     },
     {
+      "subtask_id": "T1348.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.004",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.004",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.005",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.005",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.006",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.006",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.007",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.007",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.008",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.008",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.009",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.009",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.010",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.010",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.011",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.011",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.012",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.012",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.013",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1348.013",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1349.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1349.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1349.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1349.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1349.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1349.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1350.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1350.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1350.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1350.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1350.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1350.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1351.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1351.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1351.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1351.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1351.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1351.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1370.001",
+      "service": "IR",
+      "environment": "vm",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1370.001",
+      "service": "IR",
+      "environment": "vm",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1370.002",
+      "service": "IR",
+      "environment": "vm",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1370.002",
+      "service": "IR",
+      "environment": "vm",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1370.003",
+      "service": "IR",
+      "environment": "vm",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1370.003",
+      "service": "IR",
+      "environment": "vm",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1371.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1371.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1371.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1371.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1371.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1371.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1381.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1381.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1381.002",
+      "service": "HUNT",
+      "environment": "vm",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1381.002",
+      "service": "HUNT",
+      "environment": "vm",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1381.003",
+      "service": "HUNT",
+      "environment": "vm",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1381.003",
+      "service": "HUNT",
+      "environment": "vm",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1384.001",
+      "service": "CNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1384.001",
+      "service": "CNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1384.002",
+      "service": "CNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1384.002",
+      "service": "CNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1384.003",
+      "service": "CNT",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1384.003",
+      "service": "CNT",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1386.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1386.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1386.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1386.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1386.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1386.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1387.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1387.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1387.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1387.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1387.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1387.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1388.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1388.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1388.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1388.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1388.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1388.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1389.001",
+      "service": "MON",
+      "environment": "vm",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1389.001",
+      "service": "MON",
+      "environment": "vm",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1389.002",
+      "service": "MON",
+      "environment": "vm",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1389.002",
+      "service": "MON",
+      "environment": "vm",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1389.003",
+      "service": "MON",
+      "environment": "vm",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1389.003",
+      "service": "MON",
+      "environment": "vm",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1391.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1391.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1391.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1391.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1391.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1391.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1406.001",
+      "service": "CNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1406.001",
+      "service": "CNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1406.002",
+      "service": "CNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1406.002",
+      "service": "CNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1406.003",
+      "service": "CNT",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1406.003",
+      "service": "CNT",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1428.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1428.001",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1428.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1428.002",
+      "service": "MON",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1428.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1428.003",
+      "service": "MON",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1487.001",
+      "service": "HUNT",
+      "environment": "vm",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1487.001",
+      "service": "HUNT",
+      "environment": "vm",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1487.002",
+      "service": "HUNT",
+      "environment": "vm",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1487.002",
+      "service": "HUNT",
+      "environment": "vm",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
       "subtask_id": "T1487.003",
       "service": "HUNT",
       "environment": "vm",
@@ -253,6 +3336,186 @@
       "abstained": false
     },
     {
+      "subtask_id": "T1607.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1607.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1607.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1607.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1607.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1607.003",
+      "service": "IR",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1617.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1617.001",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1617.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1617.002",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1617.003",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 0.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1617.003",
+      "service": "IR",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1644.001",
+      "service": "CNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1644.001",
+      "service": "CNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1644.002",
+      "service": "CNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1644.002",
+      "service": "CNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1644.003",
+      "service": "CNT",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T1644.003",
+      "service": "CNT",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
       "subtask_id": "T2012.001",
       "service": "HUNT",
       "environment": "file",
@@ -270,6 +3533,166 @@
       "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 6,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T2012.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T2012.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T2012.003",
+      "service": "HUNT",
+      "environment": "vm",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T2012.003",
+      "service": "HUNT",
+      "environment": "vm",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T2013.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T2013.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T2013.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T2013.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T2013.003",
+      "service": "HUNT",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T2013.003",
+      "service": "HUNT",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T2016.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T2016.001",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T2016.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T2016.002",
+      "service": "HUNT",
+      "environment": "file",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T2016.003",
+      "service": "HUNT",
+      "environment": "soc",
+      "baseline": "B0",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
+      "abstained": false
+    },
+    {
+      "subtask_id": "T2016.003",
+      "service": "HUNT",
+      "environment": "soc",
+      "baseline": "ORACLE",
+      "mean_score": 1.0,
+      "validity_rate": 1.0,
+      "episodes": 2,
       "abstained": false
     }
   ],
@@ -277,10 +3700,10 @@
     {
       "group": "all",
       "baseline": "B0",
-      "mean": 1.0,
-      "ci_low": 1.0,
-      "ci_high": 1.0,
-      "n_subtasks": 9,
+      "mean": 0.8895348837209303,
+      "ci_low": 0.8430232558139535,
+      "ci_high": 0.936046511627907,
+      "n_subtasks": 172,
       "reliable_ci": true
     },
     {
@@ -289,7 +3712,7 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 12,
+      "n_subtasks": 175,
       "reliable_ci": true
     }
   ],
@@ -300,8 +3723,8 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 1,
-      "reliable_ci": false
+      "n_subtasks": 15,
+      "reliable_ci": true
     },
     {
       "group": "CNT",
@@ -309,17 +3732,17 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 1,
-      "reliable_ci": false
+      "n_subtasks": 15,
+      "reliable_ci": true
     },
     {
       "group": "HUNT",
       "baseline": "B0",
-      "mean": 1.0,
-      "ci_low": 1.0,
-      "ci_high": 1.0,
-      "n_subtasks": 2,
-      "reliable_ci": false
+      "mean": 0.868421052631579,
+      "ci_low": 0.7631578947368421,
+      "ci_high": 0.9736842105263158,
+      "n_subtasks": 38,
+      "reliable_ci": true
     },
     {
       "group": "HUNT",
@@ -327,17 +3750,17 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 3,
+      "n_subtasks": 39,
       "reliable_ci": true
     },
     {
       "group": "IR",
       "baseline": "B0",
-      "mean": 1.0,
-      "ci_low": 1.0,
+      "mean": 0.9672131147540983,
+      "ci_low": 0.9180327868852459,
       "ci_high": 1.0,
-      "n_subtasks": 1,
-      "reliable_ci": false
+      "n_subtasks": 61,
+      "reliable_ci": true
     },
     {
       "group": "IR",
@@ -345,16 +3768,16 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 3,
+      "n_subtasks": 63,
       "reliable_ci": true
     },
     {
       "group": "MON",
       "baseline": "B0",
-      "mean": 1.0,
-      "ci_low": 1.0,
-      "ci_high": 1.0,
-      "n_subtasks": 5,
+      "mean": 0.7931034482758621,
+      "ci_low": 0.6896551724137931,
+      "ci_high": 0.896551724137931,
+      "n_subtasks": 58,
       "reliable_ci": true
     },
     {
@@ -363,7 +3786,7 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 5,
+      "n_subtasks": 58,
       "reliable_ci": true
     }
   ],
@@ -371,10 +3794,10 @@
     {
       "group": "file",
       "baseline": "B0",
-      "mean": 1.0,
-      "ci_low": 1.0,
-      "ci_high": 1.0,
-      "n_subtasks": 7,
+      "mean": 0.9629629629629629,
+      "ci_low": 0.9259259259259259,
+      "ci_high": 0.9907407407407407,
+      "n_subtasks": 108,
       "reliable_ci": true
     },
     {
@@ -383,17 +3806,17 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 9,
+      "n_subtasks": 110,
       "reliable_ci": true
     },
     {
       "group": "soc",
       "baseline": "B0",
-      "mean": 1.0,
-      "ci_low": 1.0,
-      "ci_high": 1.0,
-      "n_subtasks": 1,
-      "reliable_ci": false
+      "mean": 0.7021276595744681,
+      "ci_low": 0.574468085106383,
+      "ci_high": 0.8297872340425532,
+      "n_subtasks": 47,
+      "reliable_ci": true
     },
     {
       "group": "soc",
@@ -401,17 +3824,17 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 1,
-      "reliable_ci": false
+      "n_subtasks": 47,
+      "reliable_ci": true
     },
     {
       "group": "vm",
       "baseline": "B0",
-      "mean": 1.0,
-      "ci_low": 1.0,
+      "mean": 0.9411764705882353,
+      "ci_low": 0.8235294117647058,
       "ci_high": 1.0,
-      "n_subtasks": 1,
-      "reliable_ci": false
+      "n_subtasks": 17,
+      "reliable_ci": true
     },
     {
       "group": "vm",
@@ -419,15 +3842,15 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 2,
-      "reliable_ci": false
+      "n_subtasks": 18,
+      "reliable_ci": true
     }
   ],
   "specialist_coverage": {
-    "content": 1,
-    "incident_response": 3,
-    "hunt": 3,
-    "monitor": 5
+    "content": 15,
+    "hunt": 39,
+    "incident_response": 63,
+    "monitor": 58
   },
   "abstentions": {
     "B0": [

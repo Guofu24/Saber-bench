@@ -99,8 +99,12 @@ def build_episode(
         deadline_at=deadline,
         provenance_tags=[DEV_FIXTURE_LABEL],
     )
-    # Leak guards: neither the manifest nor the public inputs may carry evaluator-only keys.
-    assert_no_leak(manifest.model_dump(mode="json"))
+    # Leak guards: neither the manifest nor the public inputs may carry evaluator-only keys. The
+    # output_schema is the JSON schema of the agent's *answer* (a field may legitimately be named
+    # e.g. "labels"), so it is excluded from the truth-key scan by construction.
+    manifest_view = manifest.model_dump(mode="json")
+    manifest_view.pop("output_schema", None)
+    assert_no_leak(manifest_view)
     assert_no_leak(bundle.public_inputs)
     truth_sha = sha256_of(bundle.sealed_truth)
     return BuiltEpisode(
