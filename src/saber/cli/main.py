@@ -221,6 +221,19 @@ def smoke(subtask_id: str, seed: int) -> None:
     )
 
 
+@cli.command(
+    "serve", help="Run the read-mostly API (offline). Only event path is the bounded gateway."
+)
+@click.option("--host", default="127.0.0.1")
+@click.option("--port", type=int, default=8000)
+def serve(host: str, port: int) -> None:  # pragma: no cover - thin uvicorn wrapper
+    import uvicorn
+
+    from saber.api import create_app
+
+    uvicorn.run(create_app(), host=host, port=port)
+
+
 def _score_summary(score: Any) -> dict[str, Any]:
     return {
         "subtask_id": score.subtask_id,

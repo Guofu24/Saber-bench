@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T03:41:04+00:00",
+  "updated_at": "2026-10-19T03:42:38+00:00",
   "items": {
     "T001": {
       "kind": "engineering",
@@ -66,7 +66,19 @@
     "T004": {
       "kind": "engineering",
       "phase": "foundation",
-      "status": "PENDING"
+      "status": "DONE_DEV",
+      "updated_at": "2026-10-19T03:42:38+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/integration/test_api.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/api/app.py",
+        "tests/integration/test_api.py"
+      ],
+      "notes": "Read-mostly FastAPI: /health, subtasks, public manifest, gateway-backed events, report. Typed error envelope; no truth served."
     },
     "T005": {
       "kind": "engineering",

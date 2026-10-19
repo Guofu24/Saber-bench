@@ -1,6 +1,6 @@
 # SABER implementation progress (machine-generated from status/ledger.json)
 
-Updated: 2026-10-19T03:41:04+00:00
+Updated: 2026-10-19T03:42:38+00:00
 
 Status meanings: `DONE_DEV`/`IMPLEMENTED_DEV` = implementation + independent offline tests ran green;
 `PARTIAL` = safe parts done, remainder listed in blockers; `BLOCKED_INTEGRATION` = needs external
@@ -11,7 +11,7 @@ independently validated private data, lab verification and human adjudication.
 
 | Kind | BLOCKED | BLOCKED_INTEGRATION | DONE_DEV | IMPLEMENTED_DEV | PARTIAL | PENDING |
 |---|---|---|---|---|---|---|
-| engineering | 0 | 4 | 9 | 0 | 0 | 25 |
+| engineering | 0 | 4 | 10 | 0 | 0 | 24 |
 | bridge | 0 | 0 | 5 | 0 | 0 | 0 |
 | domain | 0 | 0 | 0 | 12 | 0 | 163 |
 
@@ -22,7 +22,7 @@ independently validated private data, lab verification and human adjudication.
 | T001 | engineering | foundation | DONE_DEV | `uv run ruff check src tests scripts`<br>`uv run ruff format --check src tests`<br>`uv run mypy`<br>`uv run pytest` | CI not run remotely yet (no push at time of record). Windows host; uv project venv. |
 | T002 | engineering | foundation | DONE_DEV | `uv run pytest tests/unit/domain/test_contracts.py`<br>`uv run mypy` | Pydantic v2 strict DTOs; no DB/API. |
 | T003 | engineering | foundation | PENDING |  |  |
-| T004 | engineering | foundation | PENDING |  |  |
+| T004 | engineering | foundation | DONE_DEV | `uv run pytest tests/integration/test_api.py` | Read-mostly FastAPI: /health, subtasks, public manifest, gateway-backed events, report. Typed error envelope; no truth served. |
 | T005 | engineering | foundation | PENDING |  |  |
 | B001 | bridge | bridge | DONE_DEV | `uv run pytest tests/unit/catalog/test_loader.py` | 175 items parsed, 0 CUSTOM aggregates, weights verified; source hash verified. |
 | B002 | bridge | bridge | DONE_DEV | `uv run pytest tests/unit/domain/test_subtask_spec.py` | SubtaskSpecV1 builds for all 175 records; env-specific invariants enforced. |
