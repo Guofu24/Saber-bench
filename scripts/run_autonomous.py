@@ -415,12 +415,13 @@ def invoke(item: dict[str, str], attempt: int, budget: float, turns: int,
 
 
 def test_python() -> str:
-    venv = ROOT / ".venv/bin/python"
-    if venv.is_file():
-        test = subprocess.run([str(venv), "-m", "pytest", "--version"], cwd=ROOT,
-                              capture_output=True, timeout=15, check=False)
-        if test.returncode == 0:
-            return str(venv)
+    """Prefer the project-local venv interpreter (POSIX or Windows layout)."""
+    for candidate in (ROOT / ".venv/bin/python", ROOT / ".venv/Scripts/python.exe"):
+        if candidate.is_file():
+            test = subprocess.run([str(candidate), "-m", "pytest", "--version"], cwd=ROOT,
+                                  capture_output=True, timeout=15, check=False)
+            if test.returncode == 0:
+                return str(candidate)
     return sys.executable
 
 

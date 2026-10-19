@@ -1,12 +1,13 @@
 """No Claude/auth/network calls: structural tests for the one-command supervisor."""
+
 from __future__ import annotations
 
 import importlib.util
-from pathlib import Path
-import unittest
-from unittest.mock import patch
 import json
 import subprocess
+import unittest
+from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location("run_autonomous", ROOT / "scripts/run_autonomous.py")
@@ -46,25 +47,45 @@ class SupervisorTests(unittest.TestCase):
         self.assertIn("--settings", cmd)
 
     def test_subscription_rejects_api_env_even_with_claude_login(self) -> None:
-        auth = subprocess.CompletedProcess(["claude", "auth", "status"], 0,
-                                           stdout=json.dumps({"authMethod": "claude.ai"}), stderr="")
-        with patch.object(module.shutil, "which", return_value="/usr/bin/claude"), \
-             patch.object(module.subprocess, "run", return_value=auth), \
-             patch.dict(module.os.environ, {"ANTHROPIC_API_KEY": "dummy"}):
+        auth = subprocess.CompletedProcess(
+            ["claude", "auth", "status"],
+            0,
+            stdout=json.dumps({"authMethod": "claude.ai"}),
+            stderr="",
+        )
+        with (
+            patch.object(module.shutil, "which", return_value="/usr/bin/claude"),
+            patch.object(module.subprocess, "run", return_value=auth),
+            patch.dict(module.os.environ, {"ANTHROPIC_API_KEY": "dummy"}),
+        ):
             with self.assertRaisesRegex(RuntimeError, "ANTHROPIC_API_KEY"):
                 module.preflight(False, "subscription")
 
     def test_subscription_rejects_api_key_auth_method(self) -> None:
-        auth = subprocess.CompletedProcess(["claude", "auth", "status"], 0,
-                                           stdout=json.dumps({"authMethod": "api_key"}), stderr="")
-        env = {k: v for k, v in module.os.environ.items() if k not in (
-            "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL",
-            "CLAUDE_CODE_USE_BEDROCK", "CLAUDE_CODE_USE_VERTEX", "CLAUDE_CODE_USE_FOUNDRY",
-            "ANTHROPIC_FOUNDRY_API_KEY", "ANTHROPIC_VERTEX_PROJECT_ID",
-            "AWS_BEARER_TOKEN_BEDROCK")}
-        with patch.object(module.shutil, "which", return_value="/usr/bin/claude"), \
-             patch.object(module.subprocess, "run", return_value=auth), \
-             patch.dict(module.os.environ, env, clear=True):
+        auth = subprocess.CompletedProcess(
+            ["claude", "auth", "status"], 0, stdout=json.dumps({"authMethod": "api_key"}), stderr=""
+        )
+        env = {
+            k: v
+            for k, v in module.os.environ.items()
+            if k
+            not in (
+                "ANTHROPIC_API_KEY",
+                "ANTHROPIC_AUTH_TOKEN",
+                "ANTHROPIC_BASE_URL",
+                "CLAUDE_CODE_USE_BEDROCK",
+                "CLAUDE_CODE_USE_VERTEX",
+                "CLAUDE_CODE_USE_FOUNDRY",
+                "ANTHROPIC_FOUNDRY_API_KEY",
+                "ANTHROPIC_VERTEX_PROJECT_ID",
+                "AWS_BEARER_TOKEN_BEDROCK",
+            )
+        }
+        with (
+            patch.object(module.shutil, "which", return_value="/usr/bin/claude"),
+            patch.object(module.subprocess, "run", return_value=auth),
+            patch.dict(module.os.environ, env, clear=True),
+        ):
             with self.assertRaisesRegex(RuntimeError, "authMethod=api_key"):
                 module.preflight(False, "subscription")
 

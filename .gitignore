@@ -2,3 +2,30 @@
 # Autonomous local supervisor state, logs, receipts, secrets
 .saber-autonomous/
 config/existing-environment.json
+
+# Python / tooling
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+
+# Secrets and private benchmark material
+.env
+.env.*
+!.env.example
+scenarios/private/
+scenarios/**/truth/*.sealed.json
+infra/**/secrets*
+infra/**/*.tfvars
+lab_private_inventory*
+
+# Local run artefacts (episodes, reports, sqlite)
+runs/
+*.sqlite3
+*.sqlite3-journal
+raw_telemetry/
