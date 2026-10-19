@@ -25,7 +25,18 @@ ROOT = Path(__file__).resolve().parents[1]
 LEDGER = ROOT / "status" / "ledger.json"
 PROGRESS = ROOT / "docs" / "PROGRESS.md"
 RECEIPTS = ROOT / ".saber-autonomous" / "receipts"
-VALID = {"PENDING", "DONE_DEV", "IMPLEMENTED_DEV", "PARTIAL", "BLOCKED_INTEGRATION", "BLOCKED"}
+VALID = {
+    # Engineering/bridge lifecycle:
+    "PENDING", "DONE_DEV", "PARTIAL", "BLOCKED",
+    # Mandated benchmark-subtask readiness tiers (never equate DEV with validated):
+    "SPECIFIED",            # contract exists in the frozen catalog; no runnable implementation yet
+    "IMPLEMENTED_OFFLINE",  # scorer + fixture + tests written; not independently re-run here
+    "VERIFIED_OFFLINE",     # implementation + tests ran green (deterministic, synthetic DEV data)
+    "BLOCKED_INTEGRATION",  # needs a real SIEM/hypervisor/forensic dataset/provider to proceed
+    "READY_BENCHMARK",      # independently validated gold + execution evidence (never auto-set)
+    # Back-compat alias kept so old receipts still load:
+    "IMPLEMENTED_DEV",
+}
 
 
 def now() -> str:
@@ -134,6 +145,60 @@ def render(data: dict | None = None) -> None:
     PROGRESS.write_text("\n".join(lines) + "\n", encoding="utf8")
 
 
+def coverage() -> dict:
+    """Full 175-subtask readiness matrix cross-referenced against the frozen catalog + split."""
+    import sys as _sys
+
+    _sys.path.insert(0, str(ROOT / "src"))
+    from saber.benchmark.splits import build_split  # type: ignore[import-not-found]
+    from saber.catalog import load_catalog  # type: ignore[import-not-found]
+
+    cat = load_catalog()
+    split = build_split()
+    data = load()
+    rows = []
+    tally: dict[str, int] = {}
+    for s in cat.subtasks:
+        item = data["items"].get(s.id, {})
+        status = item.get("status", "PENDING")
+        if status in ("PENDING", "IMPLEMENTED_DEV"):
+            # A domain subtask with no real implementation is SPECIFIED; legacy DEV = VERIFIED_OFFLINE.
+            status = "SPECIFIED" if status == "PENDING" else "VERIFIED_OFFLINE"
+        tally[status] = tally.get(status, 0) + 1
+        rows.append({
+            "id": s.id, "service": s.service, "environment": s.environment,
+            "aggregate": s.aggregate.kind.value if s.aggregate else "?",
+            "split": split.split_of(s.id).value, "status": status,
+        })
+    return {"tally": tally, "rows": rows}
+
+
+def render_coverage() -> None:
+    cov = coverage()
+    out = ROOT / "docs" / "COVERAGE.md"
+    lines = [
+        "# SABER subtask coverage matrix (machine-generated)",
+        "",
+        f"Updated: {now()}",
+        "",
+        "Readiness tiers are strict: SPECIFIED (contract only), IMPLEMENTED_OFFLINE (code+tests),",
+        "VERIFIED_OFFLINE (tests ran green on synthetic DEV data), BLOCKED_INTEGRATION (needs a real",
+        "lab/dataset), READY_BENCHMARK (independently validated gold — never auto-set). Synthetic DEV",
+        "fixtures are never equated with validated benchmark data.",
+        "",
+        "## Tally",
+        "",
+        "| Status | Count |",
+        "|---|---|",
+    ]
+    for status in ("SPECIFIED", "IMPLEMENTED_OFFLINE", "VERIFIED_OFFLINE", "BLOCKED_INTEGRATION", "READY_BENCHMARK"):
+        lines.append(f"| {status} | {cov['tally'].get(status, 0)} |")
+    lines += ["", "## Subtasks", "", "| ID | Service | Env | Aggregate | Split | Status |", "|---|---|---|---|---|---|"]
+    for r in cov["rows"]:
+        lines.append(f"| {r['id']} | {r['service']} | {r['environment']} | {r['aggregate']} | {r['split']} | {r['status']} |")
+    out.write_text("\n".join(lines) + "\n", encoding="utf8")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -149,6 +214,8 @@ def main() -> int:
     r.set_defaults(func=lambda a: (render(), 0)[1])
     m = sub.add_parser("summary")
     m.set_defaults(func=lambda a: (print(json.dumps(summarize(load()), indent=2)), 0)[1])
+    c = sub.add_parser("coverage")
+    c.set_defaults(func=lambda a: (render_coverage(), print(json.dumps(coverage()["tally"], indent=2)), 0)[2])
     args = parser.parse_args()
     return int(args.func(args))
 

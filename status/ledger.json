@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T03:42:38+00:00",
+  "updated_at": "2026-10-19T04:17:09+00:00",
   "items": {
     "T001": {
       "kind": "engineering",
@@ -252,8 +252,8 @@
     "T1112.001": {
       "kind": "domain",
       "phase": "pilot_file",
-      "status": "IMPLEMENTED_DEV",
-      "updated_at": "2026-10-19T03:18:59+00:00",
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:17:08+00:00",
       "tests": [
         {
           "command": "uv run pytest tests/subtasks/test_t1112_001.py",
@@ -261,19 +261,18 @@
         }
       ],
       "changed_files": [
-        "src/saber/subtasks/t1112_001/__init__.py",
-        "tests/subtasks/test_t1112_001.py"
+        "src/saber/subtasks/t1112_001/__init__.py"
       ],
       "blockers": [
         "No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only"
       ],
-      "notes": "Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY."
+      "notes": "Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY."
     },
     "T1348.001": {
       "kind": "domain",
       "phase": "pilot_file",
-      "status": "IMPLEMENTED_DEV",
-      "updated_at": "2026-10-19T03:18:59+00:00",
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:17:08+00:00",
       "tests": [
         {
           "command": "uv run pytest tests/subtasks/test_t1348_001.py",
@@ -281,19 +280,18 @@
         }
       ],
       "changed_files": [
-        "src/saber/subtasks/t1348_001/__init__.py",
-        "tests/subtasks/test_t1348_001.py"
+        "src/saber/subtasks/t1348_001/__init__.py"
       ],
       "blockers": [
         "No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only"
       ],
-      "notes": "Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY."
+      "notes": "Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY."
     },
     "T2012.001": {
       "kind": "domain",
       "phase": "pilot_file",
-      "status": "IMPLEMENTED_DEV",
-      "updated_at": "2026-10-19T03:18:59+00:00",
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:17:08+00:00",
       "tests": [
         {
           "command": "uv run pytest tests/subtasks/test_t2012_001.py",
@@ -301,19 +299,18 @@
         }
       ],
       "changed_files": [
-        "src/saber/subtasks/t2012_001/__init__.py",
-        "tests/subtasks/test_t2012_001.py"
+        "src/saber/subtasks/t2012_001/__init__.py"
       ],
       "blockers": [
         "No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only"
       ],
-      "notes": "Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY."
+      "notes": "Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY."
     },
     "T0020.001": {
       "kind": "domain",
       "phase": "pilot_file",
-      "status": "IMPLEMENTED_DEV",
-      "updated_at": "2026-10-19T03:18:59+00:00",
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:17:08+00:00",
       "tests": [
         {
           "command": "uv run pytest tests/subtasks/test_t0020_001.py",
@@ -321,19 +318,18 @@
         }
       ],
       "changed_files": [
-        "src/saber/subtasks/t0020_001/__init__.py",
-        "tests/subtasks/test_t0020_001.py"
+        "src/saber/subtasks/t0020_001/__init__.py"
       ],
       "blockers": [
         "No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only"
       ],
-      "notes": "Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY."
+      "notes": "Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY."
     },
     "T0173.001": {
       "kind": "domain",
       "phase": "pilot_file",
-      "status": "IMPLEMENTED_DEV",
-      "updated_at": "2026-10-19T03:18:59+00:00",
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:17:08+00:00",
       "tests": [
         {
           "command": "uv run pytest tests/subtasks/test_t0173_001.py",
@@ -341,13 +337,12 @@
         }
       ],
       "changed_files": [
-        "src/saber/subtasks/t0173_001/__init__.py",
-        "tests/subtasks/test_t0173_001.py"
+        "src/saber/subtasks/t0173_001/__init__.py"
       ],
       "blockers": [
         "No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only"
       ],
-      "notes": "Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY."
+      "notes": "Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY."
     },
     "T015": {
       "kind": "engineering",
@@ -582,8 +577,8 @@
     "T0397.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "IMPLEMENTED_DEV",
-      "updated_at": "2026-10-19T03:27:05+00:00",
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:17:08+00:00",
       "tests": [
         {
           "command": "uv run pytest tests/subtasks/test_t0397_002.py",
@@ -591,13 +586,12 @@
         }
       ],
       "changed_files": [
-        "src/saber/subtasks/t0397_002/__init__.py",
-        "tests/subtasks/test_t0397_002.py"
+        "src/saber/subtasks/t0397_002/__init__.py"
       ],
       "blockers": [
         "Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication"
       ],
-      "notes": "Oracle reaches full credit; DEV_SIMULATION_ONLY"
+      "notes": "Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY."
     },
     "T0510.001": {
       "kind": "domain",
@@ -612,8 +606,8 @@
     "T0845.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "IMPLEMENTED_DEV",
-      "updated_at": "2026-10-19T03:27:05+00:00",
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:17:09+00:00",
       "tests": [
         {
           "command": "uv run pytest tests/subtasks/test_t0845_001.py",
@@ -621,13 +615,12 @@
         }
       ],
       "changed_files": [
-        "src/saber/subtasks/t0845_001/__init__.py",
-        "tests/subtasks/test_t0845_001.py"
+        "src/saber/subtasks/t0845_001/__init__.py"
       ],
       "blockers": [
         "Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication"
       ],
-      "notes": "Oracle reaches full credit; DEV_SIMULATION_ONLY"
+      "notes": "Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY."
     },
     "T0845.002": {
       "kind": "domain",
@@ -717,8 +710,8 @@
     "T1112.002": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "IMPLEMENTED_DEV",
-      "updated_at": "2026-10-19T03:27:05+00:00",
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:17:08+00:00",
       "tests": [
         {
           "command": "uv run pytest tests/subtasks/test_t1112_002.py",
@@ -726,13 +719,12 @@
         }
       ],
       "changed_files": [
-        "src/saber/subtasks/t1112_002/__init__.py",
-        "tests/subtasks/test_t1112_002.py"
+        "src/saber/subtasks/t1112_002/__init__.py"
       ],
       "blockers": [
         "Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication"
       ],
-      "notes": "Oracle reaches full credit; DEV_SIMULATION_ONLY"
+      "notes": "Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY."
     },
     "T1241.001": {
       "kind": "domain",
@@ -822,8 +814,8 @@
     "T1290.001": {
       "kind": "domain",
       "phase": "subtasks_file",
-      "status": "IMPLEMENTED_DEV",
-      "updated_at": "2026-10-19T03:27:05+00:00",
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:17:09+00:00",
       "tests": [
         {
           "command": "uv run pytest tests/subtasks/test_t1290_001.py",
@@ -831,13 +823,12 @@
         }
       ],
       "changed_files": [
-        "src/saber/subtasks/t1290_001/__init__.py",
-        "tests/subtasks/test_t1290_001.py"
+        "src/saber/subtasks/t1290_001/__init__.py"
       ],
       "blockers": [
         "Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication"
       ],
-      "notes": "Oracle reaches full credit; DEV_SIMULATION_ONLY"
+      "notes": "Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY."
     },
     "T1290.002": {
       "kind": "domain",
@@ -1167,8 +1158,8 @@
     "T1112.003": {
       "kind": "domain",
       "phase": "subtasks_soc",
-      "status": "IMPLEMENTED_DEV",
-      "updated_at": "2026-10-19T03:27:05+00:00",
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:17:08+00:00",
       "tests": [
         {
           "command": "uv run pytest tests/subtasks/test_t1112_003.py",
@@ -1176,13 +1167,12 @@
         }
       ],
       "changed_files": [
-        "src/saber/subtasks/t1112_003/__init__.py",
-        "tests/subtasks/test_t1112_003.py"
+        "src/saber/subtasks/t1112_003/__init__.py"
       ],
       "blockers": [
         "Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication"
       ],
-      "notes": "Oracle reaches full credit; DEV_SIMULATION_ONLY"
+      "notes": "Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY."
     },
     "T1241.003": {
       "kind": "domain",
@@ -1387,8 +1377,8 @@
     "T1109.003": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "IMPLEMENTED_DEV",
-      "updated_at": "2026-10-19T03:27:05+00:00",
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:17:09+00:00",
       "tests": [
         {
           "command": "uv run pytest tests/subtasks/test_t1109_003.py",
@@ -1396,13 +1386,12 @@
         }
       ],
       "changed_files": [
-        "src/saber/subtasks/t1109_003/__init__.py",
-        "tests/subtasks/test_t1109_003.py"
+        "src/saber/subtasks/t1109_003/__init__.py"
       ],
       "blockers": [
         "Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication"
       ],
-      "notes": "Oracle reaches full credit; DEV_SIMULATION_ONLY"
+      "notes": "Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY."
     },
     "T1341.003": {
       "kind": "domain",
@@ -1462,8 +1451,8 @@
     "T1487.003": {
       "kind": "domain",
       "phase": "subtasks_vm",
-      "status": "IMPLEMENTED_DEV",
-      "updated_at": "2026-10-19T03:27:05+00:00",
+      "status": "VERIFIED_OFFLINE",
+      "updated_at": "2026-10-19T04:17:09+00:00",
       "tests": [
         {
           "command": "uv run pytest tests/subtasks/test_t1487_003.py",
@@ -1471,13 +1460,12 @@
         }
       ],
       "changed_files": [
-        "src/saber/subtasks/t1487_003/__init__.py",
-        "tests/subtasks/test_t1487_003.py"
+        "src/saber/subtasks/t1487_003/__init__.py"
       ],
       "blockers": [
         "Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication"
       ],
-      "notes": "Oracle reaches full credit; DEV_SIMULATION_ONLY"
+      "notes": "Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY."
     },
     "T2012.003": {
       "kind": "domain",
@@ -1487,7 +1475,19 @@
     "T033": {
       "kind": "engineering",
       "phase": "evaluation_release",
-      "status": "PENDING"
+      "status": "DONE_DEV",
+      "updated_at": "2026-10-19T04:17:09+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/security/test_split_leakage.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/benchmark/splits.py",
+        "tests/security/test_split_leakage.py"
+      ],
+      "notes": "Family-based train/dev/test split + leakage/contamination checks; frozen to status/split.json."
     },
     "T034": {
       "kind": "engineering",

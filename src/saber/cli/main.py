@@ -234,6 +234,27 @@ def serve(host: str, port: int) -> None:  # pragma: no cover - thin uvicorn wrap
     uvicorn.run(create_app(), host=host, port=port)
 
 
+@cli.command(
+    "split", help="Show the frozen family-based train/dev/test split and run leakage checks."
+)
+def split() -> None:
+    from saber.benchmark.splits import (
+        assert_all_services_represented,
+        assert_no_family_crosses_split,
+        assert_partition_complete,
+        build_split,
+    )
+
+    assignment = build_split()
+    assert_partition_complete(assignment)
+    assert_no_family_crosses_split(assignment)
+    assert_all_services_represented(assignment)
+    click.echo(f"seed={assignment.seed}  counts={assignment.counts()}")
+    click.echo(
+        "leakage checks OK: partition complete, no family crosses a split, services represented"
+    )
+
+
 def _score_summary(score: Any) -> dict[str, Any]:
     return {
         "subtask_id": score.subtask_id,

@@ -1,6 +1,6 @@
 # SABER implementation progress (machine-generated from status/ledger.json)
 
-Updated: 2026-10-19T03:42:38+00:00
+Updated: 2026-10-19T04:17:09+00:00
 
 Status meanings: `DONE_DEV`/`IMPLEMENTED_DEV` = implementation + independent offline tests ran green;
 `PARTIAL` = safe parts done, remainder listed in blockers; `BLOCKED_INTEGRATION` = needs external
@@ -9,11 +9,11 @@ independently validated private data, lab verification and human adjudication.
 
 ## Summary
 
-| Kind | BLOCKED | BLOCKED_INTEGRATION | DONE_DEV | IMPLEMENTED_DEV | PARTIAL | PENDING |
-|---|---|---|---|---|---|---|
-| engineering | 0 | 4 | 10 | 0 | 0 | 24 |
-| bridge | 0 | 0 | 5 | 0 | 0 | 0 |
-| domain | 0 | 0 | 0 | 12 | 0 | 163 |
+| Kind | BLOCKED | BLOCKED_INTEGRATION | DONE_DEV | IMPLEMENTED_DEV | IMPLEMENTED_OFFLINE | PARTIAL | PENDING | READY_BENCHMARK | SPECIFIED | VERIFIED_OFFLINE |
+|---|---|---|---|---|---|---|---|---|---|---|
+| engineering | 0 | 4 | 11 | 0 | 0 | 0 | 23 | 0 | 0 | 0 |
+| bridge | 0 | 0 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| domain | 0 | 0 | 0 | 0 | 0 | 0 | 163 | 0 | 0 | 12 |
 
 ## Items
 
@@ -38,11 +38,11 @@ independently validated private data, lab verification and human adjudication.
 | T012 | engineering | offline_engine | PENDING |  |  |
 | T013 | engineering | offline_engine | PENDING |  |  |
 | T014 | engineering | offline_engine | PENDING |  |  |
-| T1112.001 | domain | pilot_file | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t1112_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY. |
-| T1348.001 | domain | pilot_file | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t1348_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY. |
-| T2012.001 | domain | pilot_file | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t2012_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY. |
-| T0020.001 | domain | pilot_file | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t0020_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY. |
-| T0173.001 | domain | pilot_file | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t0173_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY. |
+| T1112.001 | domain | pilot_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t1112_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
+| T1348.001 | domain | pilot_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t1348_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
+| T2012.001 | domain | pilot_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t2012_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
+| T0020.001 | domain | pilot_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t0020_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
+| T0173.001 | domain | pilot_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t0173_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
 | T015 | engineering | range_adapters | DONE_DEV | `uv run pytest tests/unit/test_lab_plan_and_config.py` | Real Proxmox apply requires operator credentials + H1/H2 gates — Plan-only isolation validator; rejects prod routes/NAT/egress. No apply path exists. |
 | T016 | engineering | range_adapters | PENDING |  |  |
 | T017 | engineering | range_adapters | BLOCKED_INTEGRATION |  | No approved MinIO/S3 object store — RawEvidenceStore port defined; compose service scaffolded. |
@@ -71,10 +71,10 @@ independently validated private data, lab verification and human adjudication.
 | T0292.001 | domain | subtasks_file | PENDING |  |  |
 | T0292.002 | domain | subtasks_file | PENDING |  |  |
 | T0397.001 | domain | subtasks_file | PENDING |  |  |
-| T0397.002 | domain | subtasks_file | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t0397_002.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Oracle reaches full credit; DEV_SIMULATION_ONLY |
+| T0397.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t0397_002.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
 | T0510.001 | domain | subtasks_file | PENDING |  |  |
 | T0510.002 | domain | subtasks_file | PENDING |  |  |
-| T0845.001 | domain | subtasks_file | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t0845_001.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Oracle reaches full credit; DEV_SIMULATION_ONLY |
+| T0845.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t0845_001.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
 | T0845.002 | domain | subtasks_file | PENDING |  |  |
 | T1053.001 | domain | subtasks_file | PENDING |  |  |
 | T1053.002 | domain | subtasks_file | PENDING |  |  |
@@ -92,7 +92,7 @@ independently validated private data, lab verification and human adjudication.
 | T1104.003 | domain | subtasks_file | PENDING |  |  |
 | T1111.001 | domain | subtasks_file | PENDING |  |  |
 | T1111.002 | domain | subtasks_file | PENDING |  |  |
-| T1112.002 | domain | subtasks_file | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t1112_002.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Oracle reaches full credit; DEV_SIMULATION_ONLY |
+| T1112.002 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t1112_002.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
 | T1241.001 | domain | subtasks_file | PENDING |  |  |
 | T1241.002 | domain | subtasks_file | PENDING |  |  |
 | T1242.001 | domain | subtasks_file | PENDING |  |  |
@@ -110,7 +110,7 @@ independently validated private data, lab verification and human adjudication.
 | T1257.001 | domain | subtasks_file | PENDING |  |  |
 | T1257.002 | domain | subtasks_file | PENDING |  |  |
 | T1257.003 | domain | subtasks_file | PENDING |  |  |
-| T1290.001 | domain | subtasks_file | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t1290_001.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Oracle reaches full credit; DEV_SIMULATION_ONLY |
+| T1290.001 | domain | subtasks_file | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t1290_001.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
 | T1290.002 | domain | subtasks_file | PENDING |  |  |
 | T1299.001 | domain | subtasks_file | PENDING |  |  |
 | T1299.002 | domain | subtasks_file | PENDING |  |  |
@@ -176,7 +176,7 @@ independently validated private data, lab verification and human adjudication.
 | T1085.003 | domain | subtasks_soc | PENDING |  |  |
 | T1103.003 | domain | subtasks_soc | PENDING |  |  |
 | T1111.003 | domain | subtasks_soc | PENDING |  |  |
-| T1112.003 | domain | subtasks_soc | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t1112_003.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Oracle reaches full credit; DEV_SIMULATION_ONLY |
+| T1112.003 | domain | subtasks_soc | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t1112_003.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
 | T1241.003 | domain | subtasks_soc | PENDING |  |  |
 | T1242.003 | domain | subtasks_soc | PENDING |  |  |
 | T1250.003 | domain | subtasks_soc | PENDING |  |  |
@@ -217,7 +217,7 @@ independently validated private data, lab verification and human adjudication.
 | T1102.003 | domain | subtasks_vm | PENDING |  |  |
 | T1109.001 | domain | subtasks_vm | PENDING |  |  |
 | T1109.002 | domain | subtasks_vm | PENDING |  |  |
-| T1109.003 | domain | subtasks_vm | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t1109_003.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Oracle reaches full credit; DEV_SIMULATION_ONLY |
+| T1109.003 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t1109_003.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
 | T1341.003 | domain | subtasks_vm | PENDING |  |  |
 | T1370.001 | domain | subtasks_vm | PENDING |  |  |
 | T1370.002 | domain | subtasks_vm | PENDING |  |  |
@@ -229,9 +229,9 @@ independently validated private data, lab verification and human adjudication.
 | T1389.003 | domain | subtasks_vm | PENDING |  |  |
 | T1487.001 | domain | subtasks_vm | PENDING |  |  |
 | T1487.002 | domain | subtasks_vm | PENDING |  |  |
-| T1487.003 | domain | subtasks_vm | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t1487_003.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Oracle reaches full credit; DEV_SIMULATION_ONLY |
+| T1487.003 | domain | subtasks_vm | VERIFIED_OFFLINE | `uv run pytest tests/subtasks/test_t1487_003.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Independent scorer + synthetic DEV fixture; tests green. DEV_SIMULATION_ONLY. |
 | T2012.003 | domain | subtasks_vm | PENDING |  |  |
-| T033 | engineering | evaluation_release | PENDING |  |  |
+| T033 | engineering | evaluation_release | DONE_DEV | `uv run pytest tests/security/test_split_leakage.py` | Family-based train/dev/test split + leakage/contamination checks; frozen to status/split.json. |
 | T034 | engineering | evaluation_release | DONE_DEV | `uv run pytest tests/unit/test_agents_experiments.py` | Comparative B0-vs-B3 claims need LLM baselines + hidden family split — Experiment matrix: per-baseline/service/env means with bootstrap CIs over subtasks; DEV_SIMULATION_ONLY. |
 | T035 | engineering | evaluation_release | PENDING |  |  |
 | T036 | engineering | evaluation_release | PENDING |  |  |
