@@ -142,3 +142,21 @@ uses per-item weights where they coincide with the formula's term weights; ORDER
 is scored `tau*recall` where a few source formulas write `max(0,ρ)`; a `× CITE` that the source
 applies to only a sub-term is enforced as a stricter global citation gate. These are documented
 rather than silently divergent, and the engine fixtures remain structural synthetic data.
+
+## Cap/penalty binding and baseline citations (re-review refinements, still `score_v1`)
+
+- **Cap binding.** A source cap (`cap k nếu <dim> sai`) is matched to the score item it guards by
+  bidirectional token overlap between the (verbatim) condition and item field names. If the matched
+  item is itself a gate item that already carries the cap (e.g. `sla_marks · rule/SLA · cap 0.5`),
+  the aggregate-level cap is skipped to avoid double-binding; otherwise it caps the matched scored
+  component (fallback: the primary component). Set-guarded caps currently also trip on false
+  positives, not only omissions — stricter than the source wording, never more lenient.
+- **Penalty items.** A per-element penalty item (`level{} · enum · −0.5/phần tử sai`) is scored as a
+  per-element classification; the deduction is `per_item ×` the number of elements placed at the
+  wrong level. When such an item is present it supersedes the aggregate-level penalty it encodes
+  (no double deduction). Other aggregate penalties (`− k × (số mục đòi thừa)`) deduct from the
+  primary set's extraneous-element count.
+- **Baseline citations.** Episodes expose `citeable_evidence` (opaque input-artefact handles, not
+  truth); the rules baseline cites them so a `× CITE` gate is passable with real references, while
+  hallucinated references still fail. A `× CITE` applied to only a sub-term in the source is
+  enforced as a stricter global citation gate (documented, not silent).

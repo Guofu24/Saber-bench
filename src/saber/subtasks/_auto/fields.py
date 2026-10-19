@@ -125,6 +125,49 @@ def gate_inferable(public: Any, item: ParsedScoreItem) -> str:
     return domain[0]
 
 
+# --------------------------------------------------------------------------- penalty items
+
+# A penalty item (e.g. `level{} · enum · -0.5/phần tử sai`) classifies each of several elements;
+# each element placed at the wrong level costs `penalty_per_item`. Modelled as a per-element dict.
+_PENALTY_DOMAIN = ("tier1", "tier2", "tier3")
+
+
+def gen_penalty(rng: Rng, item: ParsedScoreItem, name: str) -> FieldData:
+    k = rng.randint(4, 8)
+    elements = [f"elem-{i:02d}" for i in range(k)]
+    truth: dict[str, str] = {}
+    rows = []
+    for e in elements:
+        idx = rng.randint(0, len(_PENALTY_DOMAIN) - 1)
+        truth[e] = _PENALTY_DOMAIN[idx]
+        rows.append({"element": e, "observed_signal": _SIGNAL_WORDS[idx % len(_SIGNAL_WORDS)]})
+    public = {
+        "elements": rng.shuffle(rows),
+        "levels": list(_PENALTY_DOMAIN),
+        "note": "classify each element's level; each signal maps to one level by position",
+    }
+    return FieldData(name, public, truth, truth, "dict")
+
+
+def penalty_inferable(public: Any) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for row in public.get("elements", []):
+        sig = row.get("observed_signal")
+        if sig in _SIGNAL_WORDS:
+            out[row["element"]] = _PENALTY_DOMAIN[_SIGNAL_WORDS.index(sig) % len(_PENALTY_DOMAIN)]
+    return out
+
+
+def penalty_mismatch_count(pred: Any, truth: Any) -> int:
+    """Number of elements classified at the wrong level (missing counts as wrong)."""
+    if not isinstance(truth, dict):
+        return 0
+    pred = pred if isinstance(pred, dict) else {}
+    return sum(
+        1 for k, v in truth.items() if str(pred.get(k, "")).strip().lower() != str(v).lower()
+    )
+
+
 # --------------------------------------------------------------------------- sets
 
 

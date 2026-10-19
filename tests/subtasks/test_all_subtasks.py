@@ -98,6 +98,31 @@ def test_every_catalog_subtask_is_implemented() -> None:
     assert len(_ALL_IDS) == 175
 
 
+def test_gate_multipliers_have_backing_gate_items() -> None:
+    # Invariant: a source formula that multiplies by a hard gate (× [X] / × CITE / Π[...]) must have
+    # a gate-marked score item backing it, so the engine (which binds gates from per-item is_gate)
+    # never leaves a hard gate always-pass. FIXED_ITEM products ([A] × [B]) are excluded: there the
+    # bracketed terms are scored factors, handled by the product, not gates.
+    import re
+
+    from saber.catalog.models import AggregateKind, ScoreItemKind
+
+    bad = []
+    for s in load_catalog().subtasks:
+        if s.aggregate and s.aggregate.kind is AggregateKind.FIXED_ITEM:
+            continue
+        f = s.score_aggregate_source
+        has_gate_mult = bool(
+            re.search(r"×\s*\[", f) or "× CITE" in f or "Π[" in f or "nhân CITE" in f
+        )
+        has_gate_item = any(
+            i.is_gate or i.kind in (ScoreItemKind.GATE, ScoreItemKind.CITE) for i in s.score_items
+        )
+        if has_gate_mult and not has_gate_item:
+            bad.append((s.id, f))
+    assert not bad, bad
+
+
 def test_reference_baseline_runs_where_present() -> None:
     # Spot-check that the rules reference is wired for a sample across families (not all have one).
     present = 0

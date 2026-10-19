@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-19T05:03:52.765898Z",
+  "generated_at": "2026-10-19T05:23:57.774500Z",
   "scorer_version": "score_v1",
   "catalog_digest": "47329b0dd5b8182dbef38e1e50b2513877b3aabe6c193762442b303ceae16243",
-  "code_commit": "8c9c3b0",
+  "code_commit": "bca3a54",
   "labels": [
     "DEV_SIMULATION_ONLY"
   ],
@@ -480,7 +480,7 @@
       "service": "HUNT",
       "environment": "soc",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -660,7 +660,7 @@
       "service": "HUNT",
       "environment": "soc",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -780,7 +780,7 @@
       "service": "MON",
       "environment": "soc",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -900,7 +900,7 @@
       "service": "HUNT",
       "environment": "vm",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -1000,7 +1000,7 @@
       "service": "HUNT",
       "environment": "file",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -1020,7 +1020,7 @@
       "service": "HUNT",
       "environment": "file",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -2040,7 +2040,7 @@
       "service": "IR",
       "environment": "file",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -2160,7 +2160,7 @@
       "service": "MON",
       "environment": "soc",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -2240,7 +2240,7 @@
       "service": "MON",
       "environment": "soc",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -2260,7 +2260,7 @@
       "service": "MON",
       "environment": "soc",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -2280,7 +2280,7 @@
       "service": "MON",
       "environment": "soc",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -2300,7 +2300,7 @@
       "service": "MON",
       "environment": "soc",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -2320,7 +2320,7 @@
       "service": "MON",
       "environment": "soc",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -2340,7 +2340,7 @@
       "service": "MON",
       "environment": "soc",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -2360,7 +2360,7 @@
       "service": "MON",
       "environment": "soc",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -2380,7 +2380,7 @@
       "service": "MON",
       "environment": "soc",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -2400,7 +2400,7 @@
       "service": "MON",
       "environment": "soc",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -2420,7 +2420,7 @@
       "service": "MON",
       "environment": "soc",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -3440,7 +3440,7 @@
       "service": "IR",
       "environment": "file",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
       "episodes": 2,
       "abstained": false
@@ -3700,9 +3700,9 @@
     {
       "group": "all",
       "baseline": "B0",
-      "mean": 0.8895348837209303,
-      "ci_low": 0.8430232558139535,
-      "ci_high": 0.936046511627907,
+      "mean": 1.0,
+      "ci_low": 1.0,
+      "ci_high": 1.0,
       "n_subtasks": 172,
       "reliable_ci": true
     },
@@ -3738,9 +3738,9 @@
     {
       "group": "HUNT",
       "baseline": "B0",
-      "mean": 0.868421052631579,
-      "ci_low": 0.7631578947368421,
-      "ci_high": 0.9736842105263158,
+      "mean": 1.0,
+      "ci_low": 1.0,
+      "ci_high": 1.0,
       "n_subtasks": 38,
       "reliable_ci": true
     },
@@ -3756,8 +3756,8 @@
     {
       "group": "IR",
       "baseline": "B0",
-      "mean": 0.9672131147540983,
-      "ci_low": 0.9180327868852459,
+      "mean": 1.0,
+      "ci_low": 1.0,
       "ci_high": 1.0,
       "n_subtasks": 61,
       "reliable_ci": true
@@ -3774,9 +3774,9 @@
     {
       "group": "MON",
       "baseline": "B0",
-      "mean": 0.7931034482758621,
-      "ci_low": 0.6896551724137931,
-      "ci_high": 0.896551724137931,
+      "mean": 1.0,
+      "ci_low": 1.0,
+      "ci_high": 1.0,
       "n_subtasks": 58,
       "reliable_ci": true
     },
@@ -3794,9 +3794,9 @@
     {
       "group": "file",
       "baseline": "B0",
-      "mean": 0.9629629629629629,
-      "ci_low": 0.9259259259259259,
-      "ci_high": 0.9907407407407407,
+      "mean": 1.0,
+      "ci_low": 1.0,
+      "ci_high": 1.0,
       "n_subtasks": 108,
       "reliable_ci": true
     },
@@ -3812,9 +3812,9 @@
     {
       "group": "soc",
       "baseline": "B0",
-      "mean": 0.7021276595744681,
-      "ci_low": 0.574468085106383,
-      "ci_high": 0.8297872340425532,
+      "mean": 1.0,
+      "ci_low": 1.0,
+      "ci_high": 1.0,
       "n_subtasks": 47,
       "reliable_ci": true
     },
@@ -3830,8 +3830,8 @@
     {
       "group": "vm",
       "baseline": "B0",
-      "mean": 0.9411764705882353,
-      "ci_low": 0.8235294117647058,
+      "mean": 1.0,
+      "ci_low": 1.0,
       "ci_high": 1.0,
       "n_subtasks": 17,
       "reliable_ci": true

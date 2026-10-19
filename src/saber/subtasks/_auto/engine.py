@@ -125,6 +125,13 @@ class AutoSubtask(SubtaskBase):
                 truth[name] = gfd.truth
                 data[_dk(name) + "_context"] = gfd.public
                 continue
+            if item.is_penalty:
+                # A penalty item: per-element classification; each wrong element deducts.
+                pfd = F.gen_penalty(rng, item, name)
+                data[_dk(name)] = pfd.public
+                truth[name] = pfd.truth
+                scored_names.append(name)
+                continue
             gen = F.GENERATORS.get(item.kind, F.gen_set)
             fd = gen(rng, item, name)
             data[_dk(name)] = fd.public
@@ -143,6 +150,9 @@ class AutoSubtask(SubtaskBase):
                 "scored_fields": scored_names or self._field_names,
                 "data": data,
                 "objective": self._rec.scenario_source,
+                # Evidence ids the agent may cite (opaque handles to the input artefacts, not truth);
+                # the rules baseline cites these so a citation gate is passable with real evidence.
+                "citeable_evidence": list(evidence),
             },
             sealed_truth=truth,
             evidence_ids=evidence,
@@ -180,6 +190,8 @@ class AutoSubtask(SubtaskBase):
             elif _is_gate(item):
                 gctx = data.get(_dk(name) + "_context", {})
                 ans[name] = F.gate_inferable(gctx, item)
+            elif item.is_penalty and _dk(name) in data:
+                ans[name] = F.penalty_inferable(data[_dk(name)])
             elif _dk(name) in data:
                 ans[name] = F.infer_field(item, name, data[_dk(name)])
         return ans, list(_all_evidence(public_inputs))
@@ -201,6 +213,17 @@ class AutoSubtask(SubtaskBase):
                 mode, factor = _gate_mode(item)
                 gates.append(
                     GateOutcome(name=name, passed=ok, mode=mode, factor=factor, reason=item.field)
+                )
+            elif item.is_penalty:
+                count = F.penalty_mismatch_count(data.get(name), truth.get(name))
+                per = item.penalty_per_item or 0.0
+                comps.append(
+                    ItemScore(
+                        field=name,
+                        score=1.0 if count == 0 else 0.0,
+                        weight=None,
+                        detail={"penalty_count": count, "penalty_per_item": per},
+                    )
                 )
             else:
                 comps.append(self._score_one(item, name, data.get(name), truth.get(name)))
@@ -276,8 +299,16 @@ class AutoSubtask(SubtaskBase):
 
     def _cap_gates(self, comps: list[ItemScore]) -> list[GateOutcome]:
         out: list[GateOutcome] = []
+        by_field = {c.field: c for c in comps}
         for cap in self._agg.caps:
-            guarded = self._match_component(cap.condition, comps)
+            item = self._match_item(cap.condition)
+            # If the cap's dimension is a gate item (e.g. `sla_marks · rule/SLA · cap 0.5`), that
+            # item's own cap-gate already enforces it; adding an aggregate cap would double-bind.
+            if item is not None and (item.is_gate or item.kind is ScoreItemKind.GATE):
+                continue
+            guarded = by_field.get(F.clean_field(item.field)) if item is not None else None
+            if guarded is None:
+                guarded = comps[0] if comps else None
             passed = guarded.score >= 1.0 - 1e-9 if guarded is not None else False
             out.append(
                 GateOutcome(
@@ -292,6 +323,15 @@ class AutoSubtask(SubtaskBase):
 
     def _penalties(self, comps: list[ItemScore]) -> list[tuple[str, int, float]]:
         out: list[tuple[str, int, float]] = []
+        # Penalty ITEMS (e.g. `level{} · enum · -0.5/phần tử sai`) carry their own per-element
+        # mismatch count in their detail; prefer those and skip the aggregate penalty they encode.
+        item_penalties = [c for c in comps if "penalty_count" in c.detail]
+        for c in item_penalties:
+            out.append(
+                (c.field, int(c.detail["penalty_count"]), float(c.detail["penalty_per_item"]))
+            )
+        if item_penalties:
+            return out
         primary = next(
             (c for c in comps if "false_positives" in c.detail or "fp" in c.detail), None
         )
@@ -304,13 +344,24 @@ class AutoSubtask(SubtaskBase):
             out.append((pen.count_of[:40], count, pen.per_item))
         return out
 
-    def _match_component(self, condition: str, comps: list[ItemScore]) -> ItemScore | None:
+    def _match_item(self, condition: str) -> ParsedScoreItem | None:
+        """Match a (verbatim source) cap condition to the score item it guards, bidirectionally."""
         cond = condition.lower()
-        for c in comps:
-            tokens = [t for t in c.field.lower().replace("_", " ").split() if len(t) >= 3]
-            if any(t in cond for t in tokens):
-                return c
-        return comps[0] if comps else None
+        cond_tokens = [t for t in cond.replace("_", " ").split() if len(t) >= 3]
+        for it in self._items:
+            field_tokens = [
+                t
+                for t in it.field.lower()
+                .replace("_", " ")
+                .replace("[]", "")
+                .replace("{}", "")
+                .split()
+                if len(t) >= 3
+            ]
+            for ft in field_tokens:
+                if ft in cond or any(ft in ct or ct in ft for ct in cond_tokens):
+                    return it
+        return None
 
     # ---- golden -------------------------------------------------------------------
     def golden_cases(self, bundle: FixtureBundle) -> list[GoldenCase]:
@@ -344,6 +395,17 @@ class AutoSubtask(SubtaskBase):
             for n in gate_fields:
                 violated[n] = "___violation___"
             cases.append(GoldenCase("hard_gate_violated", violated, expected_score=0.0))
+
+        # Partial-correct: corrupt exactly one scored dimension; must fall strictly below the oracle.
+        # Catches a dropped product factor, an unbound gate, or a mis-bound cap that only shows on
+        # partially-correct answers.
+        scored = [n for i, n in zip(self._items, self._field_names, strict=True) if not _is_gate(i)]
+        if scored and scored[0] in oracle:
+            one_wrong = dict(oracle)
+            one_wrong[scored[0]] = _corrupt(
+                scored[0], oracle[scored[0]], self._items, self._field_names
+            )
+            cases.append(GoldenCase("one_dimension_wrong", one_wrong, expected_max=0.99))
         return cases
 
 
@@ -409,8 +471,10 @@ def _is_dict(item: ParsedScoreItem) -> bool:
 
 
 def _all_evidence(public_inputs: Mapping[str, Any]) -> list[str]:
-    # The runner passes evidence ids separately; the reference cites whatever the episode exposes.
-    return []
+    # Evidence ids the agent may cite are exposed in the public inputs; the rules baseline cites
+    # them so a CITE gate is passable with real (non-hallucinated) references.
+    ev = public_inputs.get("citeable_evidence", [])
+    return [str(e) for e in ev] if isinstance(ev, list) else []
 
 
 def _build_output_model(
@@ -433,6 +497,8 @@ def _build_output_model(
                 continue
             if _is_gate(item):
                 spec[name] = (str | None, None)
+            elif item.is_penalty:
+                spec[name] = (dict, {})
             elif item.kind in (ScoreItemKind.SET, ScoreItemKind.ORDER):
                 spec[name] = (list, [])
             elif item.kind is ScoreItemKind.NUMERIC and (
