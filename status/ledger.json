@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T02:50:53+00:00",
+  "updated_at": "2026-10-19T02:57:53+00:00",
   "items": {
     "T001": {
       "kind": "engineering",
@@ -111,7 +111,27 @@
     "B003": {
       "kind": "bridge",
       "phase": "bridge",
-      "status": "PENDING"
+      "status": "DONE_DEV",
+      "updated_at": "2026-10-19T02:57:53+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/unit/grading",
+          "exit_code": 0
+        },
+        {
+          "command": "uv run mypy",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/grading/primitives.py",
+        "src/saber/grading/canonical.py",
+        "src/saber/grading/state.py",
+        "src/saber/grading/execsandbox.py",
+        "tests/unit/grading/test_primitives.py",
+        "tests/unit/grading/test_state_and_exec.py"
+      ],
+      "notes": "Conventions in docs/adr/0001; real YARA/Suricata/hypervisor adapters remain BLOCKED_INTEGRATION."
     },
     "B004": {
       "kind": "bridge",

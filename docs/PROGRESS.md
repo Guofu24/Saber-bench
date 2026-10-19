@@ -1,6 +1,6 @@
 # SABER implementation progress (machine-generated from status/ledger.json)
 
-Updated: 2026-10-19T02:50:53+00:00
+Updated: 2026-10-19T02:57:53+00:00
 
 Status meanings: `DONE_DEV`/`IMPLEMENTED_DEV` = implementation + independent offline tests ran green;
 `PARTIAL` = safe parts done, remainder listed in blockers; `BLOCKED_INTEGRATION` = needs external
@@ -12,7 +12,7 @@ independently validated private data, lab verification and human adjudication.
 | Kind | BLOCKED | BLOCKED_INTEGRATION | DONE_DEV | IMPLEMENTED_DEV | PARTIAL | PENDING |
 |---|---|---|---|---|---|---|
 | engineering | 0 | 0 | 2 | 0 | 0 | 36 |
-| bridge | 0 | 0 | 2 | 0 | 0 | 3 |
+| bridge | 0 | 0 | 3 | 0 | 0 | 2 |
 | domain | 0 | 0 | 0 | 0 | 0 | 175 |
 
 ## Items
@@ -26,7 +26,7 @@ independently validated private data, lab verification and human adjudication.
 | T005 | engineering | foundation | PENDING |  |  |
 | B001 | bridge | bridge | DONE_DEV | `uv run pytest tests/unit/catalog/test_loader.py` | 175 items parsed, 0 CUSTOM aggregates, weights verified; source hash verified. |
 | B002 | bridge | bridge | DONE_DEV | `uv run pytest tests/unit/domain/test_subtask_spec.py` | SubtaskSpecV1 builds for all 175 records; env-specific invariants enforced. |
-| B003 | bridge | bridge | PENDING |  |  |
+| B003 | bridge | bridge | DONE_DEV | `uv run pytest tests/unit/grading`<br>`uv run mypy` | Conventions in docs/adr/0001; real YARA/Suricata/hypervisor adapters remain BLOCKED_INTEGRATION. |
 | B004 | bridge | bridge | PENDING |  |  |
 | B005 | bridge | bridge | PENDING |  |  |
 | T006 | engineering | offline_engine | PENDING |  |  |
