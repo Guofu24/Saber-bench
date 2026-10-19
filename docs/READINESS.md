@@ -68,14 +68,19 @@ as relocation-not-removal and service-killed).
 
 Offline baseline snapshot (12 subtasks, seeds 1 and 42, `reports/experiment-dev.json`):
 
-| Baseline | Mean | 95% CI (bootstrap over subtasks) |
-|---|---|---|
-| B0 rules-only | 0.667 | [0.417, 0.917] |
-| ORACLE (upper bound) | 1.000 | [1.000, 1.000] |
+| Baseline | Subtasks scored | Mean | 95% CI (bootstrap over subtasks) |
+|---|---|---|---|
+| B0 rules-only | 9 (abstained on 3) | 1.000 | [1.000, 1.000] |
+| ORACLE (upper bound) | 12 | 1.000 | [1.000, 1.000] |
 
-These numbers describe the **scorer and the rules baseline on synthetic fixtures**. They are not a
-measurement of any model, and they are not evidence that the 12 subtasks are validated benchmark
-cases. The remaining 163 subtasks are `SPECIFIED` in the frozen catalog but not yet implemented.
+B0 abstains on the three subtasks that have no rules oracle (T0397.002, T0845.001, T1109.003);
+those are excluded from its aggregate rather than scored zero. On the synthetic DEV fixtures the
+rules reference solves every subtask it attempts, so B0 equals the oracle here — expected for
+designed fixtures, and not a measurement of any model. Per-environment CIs over fewer than three
+subtasks are flagged `reliable_ci=false`. These numbers describe the **scorer and the rules
+baseline on synthetic fixtures**; they are not evidence that the 12 subtasks are validated
+benchmark cases. The remaining 163 subtasks are `SPECIFIED` in the frozen catalog but not yet
+implemented.
 
 ### Tier 3 — Awaiting real lab / data (BLOCKED_INTEGRATION)
 

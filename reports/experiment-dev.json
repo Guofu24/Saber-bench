@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-19T03:43:04.741533Z",
+  "generated_at": "2026-10-19T04:05:47.314669Z",
   "scorer_version": "score_v1",
   "catalog_digest": "47329b0dd5b8182dbef38e1e50b2513877b3aabe6c193762442b303ceae16243",
-  "code_commit": "9b33d2e",
+  "code_commit": "b252a01",
   "labels": [
     "DEV_SIMULATION_ONLY"
   ],
@@ -39,7 +39,8 @@
       "baseline": "B0",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 6
+      "episodes": 6,
+      "abstained": false
     },
     {
       "subtask_id": "T0020.001",
@@ -48,7 +49,8 @@
       "baseline": "ORACLE",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 6
+      "episodes": 6,
+      "abstained": false
     },
     {
       "subtask_id": "T0173.001",
@@ -57,7 +59,8 @@
       "baseline": "B0",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 2
+      "episodes": 2,
+      "abstained": false
     },
     {
       "subtask_id": "T0173.001",
@@ -66,7 +69,8 @@
       "baseline": "ORACLE",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 2
+      "episodes": 2,
+      "abstained": false
     },
     {
       "subtask_id": "T0397.002",
@@ -75,7 +79,8 @@
       "baseline": "B0",
       "mean_score": 0.0,
       "validity_rate": 1.0,
-      "episodes": 4
+      "episodes": 4,
+      "abstained": true
     },
     {
       "subtask_id": "T0397.002",
@@ -84,7 +89,8 @@
       "baseline": "ORACLE",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 4
+      "episodes": 4,
+      "abstained": false
     },
     {
       "subtask_id": "T0845.001",
@@ -93,7 +99,8 @@
       "baseline": "B0",
       "mean_score": 0.0,
       "validity_rate": 1.0,
-      "episodes": 2
+      "episodes": 2,
+      "abstained": true
     },
     {
       "subtask_id": "T0845.001",
@@ -102,7 +109,8 @@
       "baseline": "ORACLE",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 2
+      "episodes": 2,
+      "abstained": false
     },
     {
       "subtask_id": "T1109.003",
@@ -111,7 +119,8 @@
       "baseline": "B0",
       "mean_score": 0.0,
       "validity_rate": 1.0,
-      "episodes": 2
+      "episodes": 2,
+      "abstained": true
     },
     {
       "subtask_id": "T1109.003",
@@ -120,7 +129,8 @@
       "baseline": "ORACLE",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 2
+      "episodes": 2,
+      "abstained": false
     },
     {
       "subtask_id": "T1112.001",
@@ -129,7 +139,8 @@
       "baseline": "B0",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 4
+      "episodes": 4,
+      "abstained": false
     },
     {
       "subtask_id": "T1112.001",
@@ -138,7 +149,8 @@
       "baseline": "ORACLE",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 4
+      "episodes": 4,
+      "abstained": false
     },
     {
       "subtask_id": "T1112.002",
@@ -147,7 +159,8 @@
       "baseline": "B0",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 4
+      "episodes": 4,
+      "abstained": false
     },
     {
       "subtask_id": "T1112.002",
@@ -156,16 +169,18 @@
       "baseline": "ORACLE",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 4
+      "episodes": 4,
+      "abstained": false
     },
     {
       "subtask_id": "T1112.003",
       "service": "MON",
       "environment": "soc",
       "baseline": "B0",
-      "mean_score": 0.0,
+      "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 4
+      "episodes": 4,
+      "abstained": false
     },
     {
       "subtask_id": "T1112.003",
@@ -174,7 +189,8 @@
       "baseline": "ORACLE",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 4
+      "episodes": 4,
+      "abstained": false
     },
     {
       "subtask_id": "T1290.001",
@@ -183,7 +199,8 @@
       "baseline": "B0",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 2
+      "episodes": 2,
+      "abstained": false
     },
     {
       "subtask_id": "T1290.001",
@@ -192,7 +209,8 @@
       "baseline": "ORACLE",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 2
+      "episodes": 2,
+      "abstained": false
     },
     {
       "subtask_id": "T1348.001",
@@ -201,7 +219,8 @@
       "baseline": "B0",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 6
+      "episodes": 6,
+      "abstained": false
     },
     {
       "subtask_id": "T1348.001",
@@ -210,7 +229,8 @@
       "baseline": "ORACLE",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 6
+      "episodes": 6,
+      "abstained": false
     },
     {
       "subtask_id": "T1487.003",
@@ -219,7 +239,8 @@
       "baseline": "B0",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 4
+      "episodes": 4,
+      "abstained": false
     },
     {
       "subtask_id": "T1487.003",
@@ -228,7 +249,8 @@
       "baseline": "ORACLE",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 4
+      "episodes": 4,
+      "abstained": false
     },
     {
       "subtask_id": "T2012.001",
@@ -237,7 +259,8 @@
       "baseline": "B0",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 6
+      "episodes": 6,
+      "abstained": false
     },
     {
       "subtask_id": "T2012.001",
@@ -246,17 +269,19 @@
       "baseline": "ORACLE",
       "mean_score": 1.0,
       "validity_rate": 1.0,
-      "episodes": 6
+      "episodes": 6,
+      "abstained": false
     }
   ],
   "by_baseline": [
     {
       "group": "all",
       "baseline": "B0",
-      "mean": 0.6666666666666666,
-      "ci_low": 0.4166666666666667,
-      "ci_high": 0.9166666666666666,
-      "n_subtasks": 12
+      "mean": 1.0,
+      "ci_low": 1.0,
+      "ci_high": 1.0,
+      "n_subtasks": 9,
+      "reliable_ci": true
     },
     {
       "group": "all",
@@ -264,7 +289,8 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 12
+      "n_subtasks": 12,
+      "reliable_ci": true
     }
   ],
   "by_service": [
@@ -274,7 +300,8 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 1
+      "n_subtasks": 1,
+      "reliable_ci": false
     },
     {
       "group": "CNT",
@@ -282,15 +309,17 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 1
+      "n_subtasks": 1,
+      "reliable_ci": false
     },
     {
       "group": "HUNT",
       "baseline": "B0",
-      "mean": 0.6666666666666666,
-      "ci_low": 0.0,
+      "mean": 1.0,
+      "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 3
+      "n_subtasks": 2,
+      "reliable_ci": false
     },
     {
       "group": "HUNT",
@@ -298,15 +327,17 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 3
+      "n_subtasks": 3,
+      "reliable_ci": true
     },
     {
       "group": "IR",
       "baseline": "B0",
-      "mean": 0.3333333333333333,
-      "ci_low": 0.0,
+      "mean": 1.0,
+      "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 3
+      "n_subtasks": 1,
+      "reliable_ci": false
     },
     {
       "group": "IR",
@@ -314,15 +345,17 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 3
+      "n_subtasks": 3,
+      "reliable_ci": true
     },
     {
       "group": "MON",
       "baseline": "B0",
-      "mean": 0.8,
-      "ci_low": 0.4,
+      "mean": 1.0,
+      "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 5
+      "n_subtasks": 5,
+      "reliable_ci": true
     },
     {
       "group": "MON",
@@ -330,17 +363,19 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 5
+      "n_subtasks": 5,
+      "reliable_ci": true
     }
   ],
   "by_environment": [
     {
       "group": "file",
       "baseline": "B0",
-      "mean": 0.7777777777777778,
-      "ci_low": 0.4444444444444444,
+      "mean": 1.0,
+      "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 9
+      "n_subtasks": 7,
+      "reliable_ci": true
     },
     {
       "group": "file",
@@ -348,15 +383,17 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 9
+      "n_subtasks": 9,
+      "reliable_ci": true
     },
     {
       "group": "soc",
       "baseline": "B0",
-      "mean": 0.0,
-      "ci_low": 0.0,
-      "ci_high": 0.0,
-      "n_subtasks": 1
+      "mean": 1.0,
+      "ci_low": 1.0,
+      "ci_high": 1.0,
+      "n_subtasks": 1,
+      "reliable_ci": false
     },
     {
       "group": "soc",
@@ -364,15 +401,17 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 1
+      "n_subtasks": 1,
+      "reliable_ci": false
     },
     {
       "group": "vm",
       "baseline": "B0",
-      "mean": 0.5,
-      "ci_low": 0.0,
+      "mean": 1.0,
+      "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 2
+      "n_subtasks": 1,
+      "reliable_ci": false
     },
     {
       "group": "vm",
@@ -380,7 +419,8 @@
       "mean": 1.0,
       "ci_low": 1.0,
       "ci_high": 1.0,
-      "n_subtasks": 2
+      "n_subtasks": 2,
+      "reliable_ci": false
     }
   ],
   "specialist_coverage": {
@@ -389,5 +429,12 @@
     "hunt": 3,
     "monitor": 5
   },
-  "notes": "B0 is the rules-only reference; ORACLE is the evaluator upper bound (not a competitor). LLM baselines are BLOCKED_INTEGRATION (subscription-only, no API budget)."
+  "abstentions": {
+    "B0": [
+      "T0397.002",
+      "T0845.001",
+      "T1109.003"
+    ]
+  },
+  "notes": "B0 is the rules-only reference (abstains where no rules oracle exists; those are excluded from its aggregate, not scored 0). ORACLE is the evaluator upper bound, not a competitor. LLM baselines are BLOCKED_INTEGRATION (subscription-only, no API budget)."
 }
