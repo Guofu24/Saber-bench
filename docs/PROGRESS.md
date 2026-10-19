@@ -1,6 +1,6 @@
 # SABER implementation progress (machine-generated from status/ledger.json)
 
-Updated: 2026-10-19T03:30:35+00:00
+Updated: 2026-10-19T03:36:47+00:00
 
 Status meanings: `DONE_DEV`/`IMPLEMENTED_DEV` = implementation + independent offline tests ran green;
 `PARTIAL` = safe parts done, remainder listed in blockers; `BLOCKED_INTEGRATION` = needs external
@@ -11,7 +11,7 @@ independently validated private data, lab verification and human adjudication.
 
 | Kind | BLOCKED | BLOCKED_INTEGRATION | DONE_DEV | IMPLEMENTED_DEV | PARTIAL | PENDING |
 |---|---|---|---|---|---|---|
-| engineering | 0 | 0 | 4 | 0 | 0 | 34 |
+| engineering | 0 | 4 | 6 | 0 | 0 | 28 |
 | bridge | 0 | 0 | 5 | 0 | 0 | 0 |
 | domain | 0 | 0 | 0 | 12 | 0 | 163 |
 
@@ -43,22 +43,22 @@ independently validated private data, lab verification and human adjudication.
 | T2012.001 | domain | pilot_file | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t2012_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY. |
 | T0020.001 | domain | pilot_file | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t0020_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY. |
 | T0173.001 | domain | pilot_file | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t0173_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY. |
-| T015 | engineering | range_adapters | PENDING |  |  |
+| T015 | engineering | range_adapters | DONE_DEV | `uv run pytest tests/unit/test_lab_plan_and_config.py` | Real Proxmox apply requires operator credentials + H1/H2 gates — Plan-only isolation validator; rejects prod routes/NAT/egress. No apply path exists. |
 | T016 | engineering | range_adapters | PENDING |  |  |
-| T017 | engineering | range_adapters | PENDING |  |  |
-| T018 | engineering | range_adapters | PENDING |  |  |
+| T017 | engineering | range_adapters | BLOCKED_INTEGRATION |  | No approved MinIO/S3 object store — RawEvidenceStore port defined; compose service scaffolded. |
+| T018 | engineering | range_adapters | BLOCKED_INTEGRATION |  | No approved/reachable/authenticated OpenSearch or Wazuh Indexer — EventQuery->backend DSL translation implemented+tested; live search fails closed. |
 | T019 | engineering | range_adapters | PENDING |  |  |
 | T020 | engineering | range_adapters | PENDING |  |  |
 | T021 | engineering | range_adapters | PENDING |  |  |
 | T022 | engineering | range_adapters | PENDING |  |  |
-| T023 | engineering | range_adapters | PENDING |  |  |
-| T024 | engineering | range_adapters | PENDING |  |  |
+| T023 | engineering | range_adapters | BLOCKED_INTEGRATION |  | No isolated lab + operator approval for emulation — Allowlisted-emulation driver lists profiles, refuses execution (fail closed). |
+| T024 | engineering | range_adapters | BLOCKED_INTEGRATION |  | No hypervisor lab; real snapshot/verify needs H2 — RangeController port + DEV LocalDirMachine capture; hypervisor adapter fails closed. |
 | T025 | engineering | agents | PENDING |  |  |
 | T026 | engineering | agents | PENDING |  |  |
 | T027 | engineering | agents | PENDING |  |  |
 | T028 | engineering | agents | PENDING |  |  |
 | T029 | engineering | agents | PENDING |  |  |
-| T030 | engineering | agents | PENDING |  |  |
+| T030 | engineering | agents | DONE_DEV | `uv run pytest tests/security/test_response_actions.py` | Real lab side-effect execution requires approved isolated lab + executor token (H4) — Dry-run default; track-A no side effects; approval binds exact action; BlockedLabResponseDriver fails closed. |
 | T031 | engineering | agents | PENDING |  |  |
 | T032 | engineering | agents | PENDING |  |  |
 | T0167.001 | domain | subtasks_file | PENDING |  |  |

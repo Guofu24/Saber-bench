@@ -1,0 +1,15 @@
+# Example isolated-lab topology. Validate with saber.infra.validate_lab_plan before any apply.
+# This is a SPECIFICATION, not an apply manifest. There is deliberately no `terraform apply` here.
+lab_environment_id: saber-lab-1
+network:
+  bridge: vmbr-lab
+  cidr: 10.66.1.0/24        # must sit inside the dedicated 10.66.0.0/16 lab range
+  default_deny: true
+  nat_to: []                # NAT to production is rejected by the validator
+  routes_to: []             # any route reaching production/Internet is rejected
+internet_egress: false      # default test execution has no Internet egress
+vms:
+  - {name: win-ws-01, bridge: vmbr-lab, ip: 10.66.1.10, role: workstation}
+  - {name: lin-web-01, bridge: vmbr-lab, ip: 10.66.1.20, role: web}
+  - {name: lin-db-01,  bridge: vmbr-lab, ip: 10.66.1.30, role: database}
+  - {name: collector,  bridge: vmbr-lab, ip: 10.66.1.40, role: log_collector}

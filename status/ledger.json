@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T03:30:35+00:00",
+  "updated_at": "2026-10-19T03:36:47+00:00",
   "items": {
     "T001": {
       "kind": "engineering",
@@ -340,7 +340,23 @@
     "T015": {
       "kind": "engineering",
       "phase": "range_adapters",
-      "status": "PENDING"
+      "status": "DONE_DEV",
+      "updated_at": "2026-10-19T03:36:47+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/unit/test_lab_plan_and_config.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/infra/lab_plan.py",
+        "infra/proxmox/lab-topology.example.yaml",
+        "tests/unit/test_lab_plan_and_config.py"
+      ],
+      "blockers": [
+        "Real Proxmox apply requires operator credentials + H1/H2 gates"
+      ],
+      "notes": "Plan-only isolation validator; rejects prod routes/NAT/egress. No apply path exists."
     },
     "T016": {
       "kind": "engineering",
@@ -350,12 +366,26 @@
     "T017": {
       "kind": "engineering",
       "phase": "range_adapters",
-      "status": "PENDING"
+      "status": "BLOCKED_INTEGRATION",
+      "updated_at": "2026-10-19T03:36:47+00:00",
+      "blockers": [
+        "No approved MinIO/S3 object store"
+      ],
+      "notes": "RawEvidenceStore port defined; compose service scaffolded."
     },
     "T018": {
       "kind": "engineering",
       "phase": "range_adapters",
-      "status": "PENDING"
+      "status": "BLOCKED_INTEGRATION",
+      "updated_at": "2026-10-19T03:36:47+00:00",
+      "changed_files": [
+        "src/saber/telemetry/opensearch_store.py",
+        "tests/unit/test_integration_adapters.py"
+      ],
+      "blockers": [
+        "No approved/reachable/authenticated OpenSearch or Wazuh Indexer"
+      ],
+      "notes": "EventQuery->backend DSL translation implemented+tested; live search fails closed."
     },
     "T019": {
       "kind": "engineering",
@@ -380,12 +410,29 @@
     "T023": {
       "kind": "engineering",
       "phase": "range_adapters",
-      "status": "PENDING"
+      "status": "BLOCKED_INTEGRATION",
+      "updated_at": "2026-10-19T03:36:47+00:00",
+      "changed_files": [
+        "src/saber/range/blocked.py"
+      ],
+      "blockers": [
+        "No isolated lab + operator approval for emulation"
+      ],
+      "notes": "Allowlisted-emulation driver lists profiles, refuses execution (fail closed)."
     },
     "T024": {
       "kind": "engineering",
       "phase": "range_adapters",
-      "status": "PENDING"
+      "status": "BLOCKED_INTEGRATION",
+      "updated_at": "2026-10-19T03:36:47+00:00",
+      "changed_files": [
+        "src/saber/range/ports.py",
+        "src/saber/range/localdir.py"
+      ],
+      "blockers": [
+        "No hypervisor lab; real snapshot/verify needs H2"
+      ],
+      "notes": "RangeController port + DEV LocalDirMachine capture; hypervisor adapter fails closed."
     },
     "T025": {
       "kind": "engineering",
@@ -415,7 +462,24 @@
     "T030": {
       "kind": "engineering",
       "phase": "agents",
-      "status": "PENDING"
+      "status": "DONE_DEV",
+      "updated_at": "2026-10-19T03:36:47+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/security/test_response_actions.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/response/policy.py",
+        "src/saber/response/driver.py",
+        "src/saber/response/service.py",
+        "tests/security/test_response_actions.py"
+      ],
+      "blockers": [
+        "Real lab side-effect execution requires approved isolated lab + executor token (H4)"
+      ],
+      "notes": "Dry-run default; track-A no side effects; approval binds exact action; BlockedLabResponseDriver fails closed."
     },
     "T031": {
       "kind": "engineering",
