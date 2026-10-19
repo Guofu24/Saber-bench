@@ -1,0 +1,1167 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-19T02:50:53+00:00",
+  "items": {
+    "T001": {
+      "kind": "engineering",
+      "phase": "foundation",
+      "status": "DONE_DEV",
+      "updated_at": "2026-10-19T02:34:06+00:00",
+      "tests": [
+        {
+          "command": "uv run ruff check src tests scripts",
+          "exit_code": 0
+        },
+        {
+          "command": "uv run ruff format --check src tests",
+          "exit_code": 0
+        },
+        {
+          "command": "uv run mypy",
+          "exit_code": 0
+        },
+        {
+          "command": "uv run pytest",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "pyproject.toml",
+        "src/saber/__init__.py",
+        "tests/unit/test_smoke.py",
+        ".github/workflows/ci.yml"
+      ],
+      "notes": "CI not run remotely yet (no push at time of record). Windows host; uv project venv."
+    },
+    "T002": {
+      "kind": "engineering",
+      "phase": "foundation",
+      "status": "DONE_DEV",
+      "updated_at": "2026-10-19T02:50:53+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/unit/domain/test_contracts.py",
+          "exit_code": 0
+        },
+        {
+          "command": "uv run mypy",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/domain/events.py",
+        "src/saber/domain/query.py",
+        "src/saber/domain/cases.py",
+        "src/saber/domain/responses.py",
+        "src/saber/domain/runs.py",
+        "tests/unit/domain/test_contracts.py"
+      ],
+      "notes": "Pydantic v2 strict DTOs; no DB/API."
+    },
+    "T003": {
+      "kind": "engineering",
+      "phase": "foundation",
+      "status": "PENDING"
+    },
+    "T004": {
+      "kind": "engineering",
+      "phase": "foundation",
+      "status": "PENDING"
+    },
+    "T005": {
+      "kind": "engineering",
+      "phase": "foundation",
+      "status": "PENDING"
+    },
+    "B001": {
+      "kind": "bridge",
+      "phase": "bridge",
+      "status": "DONE_DEV",
+      "updated_at": "2026-10-19T02:50:53+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/unit/catalog/test_loader.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/catalog/loader.py",
+        "src/saber/catalog/parsing.py",
+        "tests/unit/catalog/test_loader.py"
+      ],
+      "notes": "175 items parsed, 0 CUSTOM aggregates, weights verified; source hash verified."
+    },
+    "B002": {
+      "kind": "bridge",
+      "phase": "bridge",
+      "status": "DONE_DEV",
+      "updated_at": "2026-10-19T02:50:53+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/unit/domain/test_subtask_spec.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/domain/subtask.py",
+        "tests/unit/domain/test_subtask_spec.py"
+      ],
+      "notes": "SubtaskSpecV1 builds for all 175 records; env-specific invariants enforced."
+    },
+    "B003": {
+      "kind": "bridge",
+      "phase": "bridge",
+      "status": "PENDING"
+    },
+    "B004": {
+      "kind": "bridge",
+      "phase": "bridge",
+      "status": "PENDING"
+    },
+    "B005": {
+      "kind": "bridge",
+      "phase": "bridge",
+      "status": "PENDING"
+    },
+    "T006": {
+      "kind": "engineering",
+      "phase": "offline_engine",
+      "status": "PENDING"
+    },
+    "T007": {
+      "kind": "engineering",
+      "phase": "offline_engine",
+      "status": "PENDING"
+    },
+    "T008": {
+      "kind": "engineering",
+      "phase": "offline_engine",
+      "status": "PENDING"
+    },
+    "T009": {
+      "kind": "engineering",
+      "phase": "offline_engine",
+      "status": "PENDING"
+    },
+    "T010": {
+      "kind": "engineering",
+      "phase": "offline_engine",
+      "status": "PENDING"
+    },
+    "T011": {
+      "kind": "engineering",
+      "phase": "offline_engine",
+      "status": "PENDING"
+    },
+    "T012": {
+      "kind": "engineering",
+      "phase": "offline_engine",
+      "status": "PENDING"
+    },
+    "T013": {
+      "kind": "engineering",
+      "phase": "offline_engine",
+      "status": "PENDING"
+    },
+    "T014": {
+      "kind": "engineering",
+      "phase": "offline_engine",
+      "status": "PENDING"
+    },
+    "T1112.001": {
+      "kind": "domain",
+      "phase": "pilot_file",
+      "status": "PENDING"
+    },
+    "T1348.001": {
+      "kind": "domain",
+      "phase": "pilot_file",
+      "status": "PENDING"
+    },
+    "T2012.001": {
+      "kind": "domain",
+      "phase": "pilot_file",
+      "status": "PENDING"
+    },
+    "T0020.001": {
+      "kind": "domain",
+      "phase": "pilot_file",
+      "status": "PENDING"
+    },
+    "T0173.001": {
+      "kind": "domain",
+      "phase": "pilot_file",
+      "status": "PENDING"
+    },
+    "T015": {
+      "kind": "engineering",
+      "phase": "range_adapters",
+      "status": "PENDING"
+    },
+    "T016": {
+      "kind": "engineering",
+      "phase": "range_adapters",
+      "status": "PENDING"
+    },
+    "T017": {
+      "kind": "engineering",
+      "phase": "range_adapters",
+      "status": "PENDING"
+    },
+    "T018": {
+      "kind": "engineering",
+      "phase": "range_adapters",
+      "status": "PENDING"
+    },
+    "T019": {
+      "kind": "engineering",
+      "phase": "range_adapters",
+      "status": "PENDING"
+    },
+    "T020": {
+      "kind": "engineering",
+      "phase": "range_adapters",
+      "status": "PENDING"
+    },
+    "T021": {
+      "kind": "engineering",
+      "phase": "range_adapters",
+      "status": "PENDING"
+    },
+    "T022": {
+      "kind": "engineering",
+      "phase": "range_adapters",
+      "status": "PENDING"
+    },
+    "T023": {
+      "kind": "engineering",
+      "phase": "range_adapters",
+      "status": "PENDING"
+    },
+    "T024": {
+      "kind": "engineering",
+      "phase": "range_adapters",
+      "status": "PENDING"
+    },
+    "T025": {
+      "kind": "engineering",
+      "phase": "agents",
+      "status": "PENDING"
+    },
+    "T026": {
+      "kind": "engineering",
+      "phase": "agents",
+      "status": "PENDING"
+    },
+    "T027": {
+      "kind": "engineering",
+      "phase": "agents",
+      "status": "PENDING"
+    },
+    "T028": {
+      "kind": "engineering",
+      "phase": "agents",
+      "status": "PENDING"
+    },
+    "T029": {
+      "kind": "engineering",
+      "phase": "agents",
+      "status": "PENDING"
+    },
+    "T030": {
+      "kind": "engineering",
+      "phase": "agents",
+      "status": "PENDING"
+    },
+    "T031": {
+      "kind": "engineering",
+      "phase": "agents",
+      "status": "PENDING"
+    },
+    "T032": {
+      "kind": "engineering",
+      "phase": "agents",
+      "status": "PENDING"
+    },
+    "T0167.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T0167.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T0167.003": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T0173.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T0182.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T0182.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T0182.003": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T0292.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T0292.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T0397.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T0397.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T0510.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T0510.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T0845.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T0845.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1053.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1053.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1085.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1085.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1090.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1090.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1090.003": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1102.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1102.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1103.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1103.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1104.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1104.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1104.003": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1111.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1111.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1112.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1241.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1241.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1242.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1242.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1250.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1250.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1251.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1251.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1251.003": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1252.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1252.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1253.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1253.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1253.003": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1257.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1257.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1257.003": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1290.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1290.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1299.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1299.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1315.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1315.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1316.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1316.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1323.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1323.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1324.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1324.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1324.003": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1332.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1332.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1332.003": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1341.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1341.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1347.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1347.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1348.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1349.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1349.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1350.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1350.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1351.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1351.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1371.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1371.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1381.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1384.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1384.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1386.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1386.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1387.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1387.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1388.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1388.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1391.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1391.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1406.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1406.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1428.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1428.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1607.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1607.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1617.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1617.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1617.003": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1644.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T1644.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T2012.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T2013.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T2013.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T2016.001": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T2016.002": {
+      "kind": "domain",
+      "phase": "subtasks_file",
+      "status": "PENDING"
+    },
+    "T0020.002": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T0020.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T0173.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T0292.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T0510.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T0845.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1053.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1085.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1103.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1111.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1112.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1241.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1242.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1250.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1252.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1290.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1299.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1315.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1316.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1323.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1347.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1348.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1348.004": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1348.005": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1348.006": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1348.007": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1348.008": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1348.009": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1348.010": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1348.011": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1348.012": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1348.013": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1349.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1350.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1351.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1371.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1384.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1386.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1387.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1388.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1391.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1406.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1428.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1607.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T1644.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T2013.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T2016.003": {
+      "kind": "domain",
+      "phase": "subtasks_soc",
+      "status": "PENDING"
+    },
+    "T0397.003": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T1102.003": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T1109.001": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T1109.002": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T1109.003": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T1341.003": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T1370.001": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T1370.002": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T1370.003": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T1381.002": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T1381.003": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T1389.001": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T1389.002": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T1389.003": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T1487.001": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T1487.002": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T1487.003": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T2012.003": {
+      "kind": "domain",
+      "phase": "subtasks_vm",
+      "status": "PENDING"
+    },
+    "T033": {
+      "kind": "engineering",
+      "phase": "evaluation_release",
+      "status": "PENDING"
+    },
+    "T034": {
+      "kind": "engineering",
+      "phase": "evaluation_release",
+      "status": "PENDING"
+    },
+    "T035": {
+      "kind": "engineering",
+      "phase": "evaluation_release",
+      "status": "PENDING"
+    },
+    "T036": {
+      "kind": "engineering",
+      "phase": "evaluation_release",
+      "status": "PENDING"
+    },
+    "T037": {
+      "kind": "engineering",
+      "phase": "evaluation_release",
+      "status": "PENDING"
+    },
+    "T038": {
+      "kind": "engineering",
+      "phase": "evaluation_release",
+      "status": "PENDING"
+    }
+  }
+}
