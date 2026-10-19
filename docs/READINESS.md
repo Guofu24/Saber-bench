@@ -63,6 +63,31 @@ timeout), one tool failure, and known weak-separation pilots (T1406, T1112). It 
 tier table: zero human-signed labels, a non-blind holdout, and synthetic (not real) telemetry keep
 it short of `READY_BENCHMARK`. Full account in `docs/PHASE_D_REPORT.md`.
 
+## Phase E — Realistic Evaluation Foundation (capabilities, not a tier change)
+
+Phase E adds the foundations for a credible, independently testable SOC benchmark without touching
+the 175 offline-verified subtasks, contracts, splits, or grading invariants.
+
+- **E1 — independent evaluation data** (`saber.evaldata`): importers/validators for genuine event
+  logs, network captures, host artifacts, and detection-test corpora; four-tier label provenance
+  (`SOURCE_PROVIDED` / `INDEPENDENTLY_VERIFIED` / `SYNTHETIC` / `EXPERT_ADJUDICATION_REQUIRED`);
+  and a scenario-lineage contamination guard. Proven on genuine SigmaHQ rules (DRL-1.1, pinned
+  commit, checksummed). **Independently validated gold labels: 0.** See
+  `docs/EVAL_DATA_PROVENANCE.md`.
+- **E2 — strong baselines** (`saber.baselines`): a naive floor, a conventional **ceiling**
+  (`strong.py`, honestly caveated — co-designed with the generators for ~8/12 pilots), and LLM
+  modes (single, specialist, coordinated multi-agent) over the subscription CLI, compared on
+  identical episodes with FP/FN, latency, completion, resource use, and cluster-bootstrap CIs
+  (`saber gold compare`). A timeout bug (process tree not killed) was found and fixed. See
+  `docs/PHASE_E_REPORT.md`.
+- **E3 — cyber range**: a read-only environment inventory, an isolated reproducible benign-telemetry
+  Docker lab (`lab/`), and a `DockerLabController` adapter that fails closed (`BLOCKED_INTEGRATION`)
+  until an authorized lab exists. See `docs/CYBER_RANGE.md`.
+
+Phase E does **not** change the tier table below. `soc`/`vm` modes still need an authorized lab
+(CR-1..CR-4), and no external gold has been independently validated, so nothing is promoted to
+`READY_BENCHMARK`. `DEV_SIMULATION_ONLY` is preserved throughout.
+
 ## Three readiness tiers
 
 ### Tier 1 — Implemented software, tested offline

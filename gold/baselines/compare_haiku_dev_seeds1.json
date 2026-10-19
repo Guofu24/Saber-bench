@@ -1,0 +1,3495 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-19T10:02:30+00:00",
+  "labels": [
+    "GOLD_PILOT_V1",
+    "STRONG_BASELINE_COMPARISON",
+    "DEV_SIMULATION_ONLY"
+  ],
+  "auth": "claude.ai subscription CLI (API-key env scrubbed); cost is LIST price, informational",
+  "model_requested": "haiku",
+  "split": "dev",
+  "seeds": [
+    1
+  ],
+  "baselines": [
+    "oracle",
+    "naive",
+    "strong",
+    "single",
+    "specialist",
+    "multi_agent"
+  ],
+  "episodes": [
+    {
+      "subtask_id": "T1112.002",
+      "service": "MON",
+      "seed": 1,
+      "episode_id": "2e547ffc-b68d-5ca9-b600-7a0b6535a3c3",
+      "results": {
+        "oracle": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdict",
+              "score": 1.0,
+              "weight": 0.5,
+              "detail": {}
+            },
+            {
+              "field": "triggering_rule",
+              "score": 1.0,
+              "weight": 0.25,
+              "detail": {}
+            },
+            {
+              "field": "affected_asset",
+              "score": 1.0,
+              "weight": 0.25,
+              "detail": {}
+            }
+          ],
+          "grounding": {
+            "checked": 1,
+            "grounded": 1,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "naive": {
+          "score": 0.5,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdict",
+              "score": 0.0,
+              "weight": 0.5,
+              "detail": {}
+            },
+            {
+              "field": "triggering_rule",
+              "score": 1.0,
+              "weight": 0.25,
+              "detail": {}
+            },
+            {
+              "field": "affected_asset",
+              "score": 1.0,
+              "weight": 0.25,
+              "detail": {}
+            }
+          ],
+          "grounding": {
+            "checked": 1,
+            "grounded": 1,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "strong": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdict",
+              "score": 1.0,
+              "weight": 0.5,
+              "detail": {}
+            },
+            {
+              "field": "triggering_rule",
+              "score": 1.0,
+              "weight": 0.25,
+              "detail": {}
+            },
+            {
+              "field": "affected_asset",
+              "score": 1.0,
+              "weight": 0.25,
+              "detail": {}
+            }
+          ],
+          "grounding": {
+            "checked": 1,
+            "grounded": 1,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "single": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdict",
+              "score": 1.0,
+              "weight": 0.5,
+              "detail": {}
+            },
+            {
+              "field": "triggering_rule",
+              "score": 1.0,
+              "weight": 0.25,
+              "detail": {}
+            },
+            {
+              "field": "affected_asset",
+              "score": 1.0,
+              "weight": 0.25,
+              "detail": {}
+            }
+          ],
+          "grounding": {
+            "checked": 1,
+            "grounded": 1,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 7750,
+          "duration_ms": 5394,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.021383,
+          "parse_note": "ok"
+        },
+        "specialist": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdict",
+              "score": 1.0,
+              "weight": 0.5,
+              "detail": {}
+            },
+            {
+              "field": "triggering_rule",
+              "score": 1.0,
+              "weight": 0.25,
+              "detail": {}
+            },
+            {
+              "field": "affected_asset",
+              "score": 1.0,
+              "weight": 0.25,
+              "detail": {}
+            }
+          ],
+          "grounding": {
+            "checked": 1,
+            "grounded": 1,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 5860,
+          "duration_ms": 4458,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.021042,
+          "parse_note": "ok"
+        },
+        "multi_agent": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdict",
+              "score": 1.0,
+              "weight": 0.5,
+              "detail": {}
+            },
+            {
+              "field": "triggering_rule",
+              "score": 1.0,
+              "weight": 0.25,
+              "detail": {}
+            },
+            {
+              "field": "affected_asset",
+              "score": 1.0,
+              "weight": 0.25,
+              "detail": {}
+            }
+          ],
+          "grounding": {
+            "checked": 1,
+            "grounded": 1,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 2,
+          "wall_ms": 14702,
+          "duration_ms": 11647,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.043017,
+          "parse_note": "ok"
+        }
+      }
+    },
+    {
+      "subtask_id": "T1348.002",
+      "service": "MON",
+      "seed": 1,
+      "episode_id": "c8db77e7-0d49-5387-9723-1390f59bb0cc",
+      "results": {
+        "oracle": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "labels",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "n": 11,
+                "correct": 11
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 11,
+            "grounded": 11,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "naive": {
+          "score": 0.2727,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "labels",
+              "score": 0.2727272727272727,
+              "weight": 1.0,
+              "detail": {
+                "n": 11,
+                "correct": 3
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 11,
+            "grounded": 11,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "strong": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "labels",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "n": 11,
+                "correct": 11
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 11,
+            "grounded": 11,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "single": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "labels",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "n": 11,
+                "correct": 11
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 11,
+            "grounded": 11,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 9483,
+          "duration_ms": 8155,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.026435,
+          "parse_note": "ok"
+        },
+        "specialist": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "labels",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "n": 11,
+                "correct": 11
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 11,
+            "grounded": 11,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 8188,
+          "duration_ms": 6824,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.025328,
+          "parse_note": "ok"
+        },
+        "multi_agent": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "labels",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "n": 11,
+                "correct": 11
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 11,
+            "grounded": 11,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 2,
+          "wall_ms": 19546,
+          "duration_ms": 16807,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.054991,
+          "parse_note": "ok"
+        }
+      }
+    },
+    {
+      "subtask_id": "T1387.002",
+      "service": "MON",
+      "seed": 1,
+      "episode_id": "1a3bc9ec-7160-5b32-90ba-dfff272486cd",
+      "results": {
+        "oracle": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdict",
+              "score": 1.0,
+              "weight": 0.6,
+              "detail": {}
+            },
+            {
+              "field": "payload_offset",
+              "score": 1.0,
+              "weight": 0.4,
+              "detail": {
+                "iou": 1.0,
+                "threshold": 0.8
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "naive": {
+          "score": 0.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdict",
+              "score": 0.0,
+              "weight": 0.6,
+              "detail": {}
+            },
+            {
+              "field": "payload_offset",
+              "score": 0.0,
+              "weight": 0.4,
+              "detail": {
+                "iou": 0.0,
+                "threshold": 0.8
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "strong": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdict",
+              "score": 1.0,
+              "weight": 0.6,
+              "detail": {}
+            },
+            {
+              "field": "payload_offset",
+              "score": 1.0,
+              "weight": 0.4,
+              "detail": {
+                "iou": 1.0,
+                "threshold": 0.8
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "single": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdict",
+              "score": 1.0,
+              "weight": 0.6,
+              "detail": {}
+            },
+            {
+              "field": "payload_offset",
+              "score": 1.0,
+              "weight": 0.4,
+              "detail": {
+                "iou": 1.0,
+                "threshold": 0.8
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 10047,
+          "duration_ms": 8696,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.025087,
+          "parse_note": "ok"
+        },
+        "specialist": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdict",
+              "score": 1.0,
+              "weight": 0.6,
+              "detail": {}
+            },
+            {
+              "field": "payload_offset",
+              "score": 1.0,
+              "weight": 0.4,
+              "detail": {
+                "iou": 1.0,
+                "threshold": 0.8
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 21921,
+          "duration_ms": 20672,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.033177,
+          "parse_note": "ok"
+        },
+        "multi_agent": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdict",
+              "score": 1.0,
+              "weight": 0.6,
+              "detail": {}
+            },
+            {
+              "field": "payload_offset",
+              "score": 1.0,
+              "weight": 0.4,
+              "detail": {
+                "iou": 1.0,
+                "threshold": 0.8
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 2,
+          "wall_ms": 27546,
+          "duration_ms": 25014,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.053903,
+          "parse_note": "ok"
+        }
+      }
+    },
+    {
+      "subtask_id": "T0020.001",
+      "service": "CNT",
+      "seed": 1,
+      "episode_id": "0cc0846a-0b98-5195-9cad-c5c12ea14cc7",
+      "results": {
+        "oracle": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "rule",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "tp": 8,
+                "fp": 0,
+                "fn": 0,
+                "tn": 25,
+                "total": 33,
+                "parse_ok": true,
+                "score_formula": "max(0, M'/M - N'/(N'+M'))"
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 1,
+            "grounded": 0,
+            "fraction": 0.0,
+            "hallucinated": [
+              "union(?:\\s|%20|\\+)+select|drop(?:\\s|%20|\\+)+table|sleep(?:\\(|%28)|admin(?:'|%27)(?:--|%2[dD]%2[dD])|(?:'|%27)(?:\\s|%20|\\+)*or(?:\\s|%20|\\+)|(?:\\bor|%20or)(?:\\s|%20|\\+)+1(?:\\s|%20|\\+)*(?:=|%3[dD])(?:\\s|%20|\\+)*1|(?:'|%27)1(?:'|%27)(?:=|%3[dD])(?:'|%27)1"
+            ],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "naive": {
+          "score": 0.3417,
+          "error": null,
+          "false_positives": 8,
+          "false_negatives": 1,
+          "components": [
+            {
+              "field": "rule",
+              "score": 0.3416666666666667,
+              "weight": 1.0,
+              "detail": {
+                "tp": 7,
+                "fp": 8,
+                "fn": 1,
+                "tn": 17,
+                "total": 33,
+                "parse_ok": true,
+                "score_formula": "max(0, M'/M - N'/(N'+M'))"
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "strong": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "rule",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "tp": 8,
+                "fp": 0,
+                "fn": 0,
+                "tn": 25,
+                "total": 33,
+                "parse_ok": true,
+                "score_formula": "max(0, M'/M - N'/(N'+M'))"
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 1,
+            "grounded": 0,
+            "fraction": 0.0,
+            "hallucinated": [
+              "union(?:\\s|%20|\\+)+select|(?:or|and)(?:\\s|%20|\\+)+\\d+(?:\\s|%20|\\+)*(?:=|%3[dd])|sleep(?:\\(|%28)|benchmark(?:\\(|%28)|(?:--|%2[dd]%2[dd])|(?:'|%27)(?:\\s|%20|\\+)*or|information_schema|(?:;|%3[bb])(?:\\s|%20|\\+)*drop"
+            ],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "single": {
+          "score": 0.6667,
+          "error": null,
+          "false_positives": 4,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "rule",
+              "score": 0.6666666666666667,
+              "weight": 1.0,
+              "detail": {
+                "tp": 8,
+                "fp": 4,
+                "fn": 0,
+                "tn": 21,
+                "total": 33,
+                "parse_ok": true,
+                "score_formula": "max(0, M'/M - N'/(N'+M'))"
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 1,
+            "grounded": 0,
+            "fraction": 0.0,
+            "hallucinated": [
+              "(?:sqlmap|%27|--|SLEEP)"
+            ],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 89782,
+          "duration_ms": 88468,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.086365,
+          "parse_note": "ok"
+        },
+        "specialist": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "rule",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "tp": 8,
+                "fp": 0,
+                "fn": 0,
+                "tn": 25,
+                "total": 33,
+                "parse_ok": true,
+                "score_formula": "max(0, M'/M - N'/(N'+M'))"
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 1,
+            "grounded": 0,
+            "fraction": 0.0,
+            "hallucinated": [
+              "(%27|').*?(--|UNION|SELECT|DROP|SLEEP|OR|AND)|UNION\\s+SELECT|DROP\\s+TABLE|\\bSLEEP\\b"
+            ],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 77108,
+          "duration_ms": 75932,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.075376,
+          "parse_note": "ok"
+        },
+        "multi_agent": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "rule",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "tp": 8,
+                "fp": 0,
+                "fn": 0,
+                "tn": 25,
+                "total": 33,
+                "parse_ok": true,
+                "score_formula": "max(0, M'/M - N'/(N'+M'))"
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 1,
+            "grounded": 0,
+            "fraction": 0.0,
+            "hallucinated": [
+              "(%27.*?(--|%3B|UNION|SELECT|OR|AND|DROP|SLEEP)|SLEEP%28)"
+            ],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 2,
+          "wall_ms": 124844,
+          "duration_ms": 122509,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.130793,
+          "parse_note": "ok"
+        }
+      }
+    },
+    {
+      "subtask_id": "T1406.001",
+      "service": "CNT",
+      "seed": 1,
+      "episode_id": "1cb83875-9e0c-5090-bba5-eec4b89300c3",
+      "results": {
+        "oracle": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "yara",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "tp": 5.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 5,
+                "truth_size": 5,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 1,
+            "grounded": 0,
+            "fraction": 0.0,
+            "hallucinated": [
+              "cfg=SynthBeacon;v=3;"
+            ],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "naive": {
+          "score": 0.9091,
+          "error": null,
+          "false_positives": 1,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "yara",
+              "score": 0.9090909090909091,
+              "weight": 1.0,
+              "detail": {
+                "tp": 5.0,
+                "fp": 1,
+                "fn": 0,
+                "precision": 0.833333,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 6,
+                "truth_size": 5,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "strong": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "yara",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "tp": 5.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 5,
+                "truth_size": 5,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "single": {
+          "score": 0.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 5,
+          "components": [
+            {
+              "field": "yara",
+              "score": 0.0,
+              "weight": 1.0,
+              "detail": {
+                "tp": 0.0,
+                "fp": 0,
+                "fn": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 0,
+                "truth_size": 5,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 1,
+            "grounded": 1,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 29250,
+          "duration_ms": 28052,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.039903,
+          "parse_note": "ok"
+        },
+        "specialist": {
+          "score": 0.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 5,
+          "components": [
+            {
+              "field": "yara",
+              "score": 0.0,
+              "weight": 1.0,
+              "detail": {
+                "tp": 0.0,
+                "fp": 0,
+                "fn": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 0,
+                "truth_size": 5,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 3,
+            "grounded": 2,
+            "fraction": 0.6666666666666666,
+            "hallucinated": [
+              "T1406_001"
+            ],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 75342,
+          "duration_ms": 74204,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.073897,
+          "parse_note": "ok"
+        },
+        "multi_agent": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "yara",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "tp": 5.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 5,
+                "truth_size": 5,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 1,
+            "grounded": 0,
+            "fraction": 0.0,
+            "hallucinated": [
+              "T1406_001"
+            ],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 2,
+          "wall_ms": 46124,
+          "duration_ms": 43602,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.070385,
+          "parse_note": "ok"
+        }
+      }
+    },
+    {
+      "subtask_id": "T1111.002",
+      "service": "CNT",
+      "seed": 1,
+      "episode_id": "aa4e3808-8949-514e-b8ae-6b436e630a63",
+      "results": {
+        "oracle": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "filter",
+              "score": 1.0,
+              "weight": 0.7,
+              "detail": {
+                "delta_fp_pct": 1.0,
+                "delta_tp_lost_pct": 0.0
+              }
+            },
+            {
+              "field": "fp_cause",
+              "score": 1.0,
+              "weight": 0.3,
+              "detail": {}
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "naive": {
+          "score": 0.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "filter",
+              "score": 0.0,
+              "weight": 0.7,
+              "detail": {
+                "parse_ok": false
+              }
+            },
+            {
+              "field": "fp_cause",
+              "score": 0.0,
+              "weight": 0.3,
+              "detail": {}
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "strong": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "filter",
+              "score": 1.0,
+              "weight": 0.7,
+              "detail": {
+                "delta_fp_pct": 1.0,
+                "delta_tp_lost_pct": 0.0
+              }
+            },
+            {
+              "field": "fp_cause",
+              "score": 1.0,
+              "weight": 0.3,
+              "detail": {}
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "single": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "filter",
+              "score": 1.0,
+              "weight": 0.7,
+              "detail": {
+                "delta_fp_pct": 1.0,
+                "delta_tp_lost_pct": 0.0
+              }
+            },
+            {
+              "field": "fp_cause",
+              "score": 1.0,
+              "weight": 0.3,
+              "detail": {}
+            }
+          ],
+          "grounding": {
+            "checked": 2,
+            "grounded": 1,
+            "fraction": 0.5,
+            "hallucinated": [
+              "process.name"
+            ],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 15717,
+          "duration_ms": 14410,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.028234,
+          "parse_note": "ok"
+        },
+        "specialist": {
+          "score": 0.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "filter",
+              "score": 0.0,
+              "weight": 0.7,
+              "detail": {
+                "delta_fp_pct": 0.0,
+                "delta_tp_lost_pct": 1.0
+              }
+            },
+            {
+              "field": "fp_cause",
+              "score": 0.0,
+              "weight": 0.3,
+              "detail": {}
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 19282,
+          "duration_ms": 18072,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.029777,
+          "parse_note": "ok"
+        },
+        "multi_agent": {
+          "score": 0.7,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "filter",
+              "score": 1.0,
+              "weight": 0.7,
+              "detail": {
+                "delta_fp_pct": 1.0,
+                "delta_tp_lost_pct": 0.0
+              }
+            },
+            {
+              "field": "fp_cause",
+              "score": 0.0,
+              "weight": 0.3,
+              "detail": {}
+            }
+          ],
+          "grounding": {
+            "checked": 2,
+            "grounded": 1,
+            "fraction": 0.5,
+            "hallucinated": [
+              "process.name"
+            ],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 2,
+          "wall_ms": 31030,
+          "duration_ms": 28412,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.055792,
+          "parse_note": "ok"
+        }
+      }
+    },
+    {
+      "subtask_id": "T2013.001",
+      "service": "HUNT",
+      "seed": 1,
+      "episode_id": "88024973-cd80-502d-93a0-42d92dd00168",
+      "results": {
+        "oracle": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "ioc.ipv4",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.domain",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.url",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 1.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 1,
+                "truth_size": 1,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.sha256",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.email",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.cve",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 1.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 1,
+                "truth_size": 1,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 11,
+            "grounded": 11,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "naive": {
+          "score": 0.0,
+          "error": null,
+          "false_positives": 2,
+          "false_negatives": 10,
+          "components": [
+            {
+              "field": "ioc.ipv4",
+              "score": 0.0,
+              "weight": null,
+              "detail": {
+                "tp": 0.0,
+                "fp": 2,
+                "fn": 2,
+                "precision": 0.0,
+                "recall": 0.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.domain",
+              "score": 0.0,
+              "weight": null,
+              "detail": {
+                "tp": 0.0,
+                "fp": 0,
+                "fn": 2,
+                "precision": 0.0,
+                "recall": 0.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 0,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.url",
+              "score": 0.0,
+              "weight": null,
+              "detail": {
+                "tp": 0.0,
+                "fp": 0,
+                "fn": 1,
+                "precision": 0.0,
+                "recall": 0.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 0,
+                "truth_size": 1,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.sha256",
+              "score": 0.0,
+              "weight": null,
+              "detail": {
+                "tp": 0.0,
+                "fp": 0,
+                "fn": 2,
+                "precision": 0.0,
+                "recall": 0.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 0,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.email",
+              "score": 0.0,
+              "weight": null,
+              "detail": {
+                "tp": 0.0,
+                "fp": 0,
+                "fn": 2,
+                "precision": 0.0,
+                "recall": 0.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 0,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.cve",
+              "score": 0.0,
+              "weight": null,
+              "detail": {
+                "tp": 0.0,
+                "fp": 0,
+                "fn": 1,
+                "precision": 0.0,
+                "recall": 0.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 0,
+                "truth_size": 1,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 3,
+            "grounded": 3,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "strong": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "ioc.ipv4",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.domain",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.url",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 1.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 1,
+                "truth_size": 1,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.sha256",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.email",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.cve",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 1.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 1,
+                "truth_size": 1,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 11,
+            "grounded": 11,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "single": {
+          "score": 0.9286,
+          "error": null,
+          "false_positives": 3,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "ioc.ipv4",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.domain",
+              "score": 0.5714285714285715,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 3,
+                "fn": 0,
+                "precision": 0.4,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 5,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.url",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 1.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 1,
+                "truth_size": 1,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.sha256",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.email",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.cve",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 1.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 1,
+                "truth_size": 1,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 14,
+            "grounded": 14,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 14672,
+          "duration_ms": 13371,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.030772,
+          "parse_note": "ok"
+        },
+        "specialist": {
+          "score": 0.9286,
+          "error": null,
+          "false_positives": 3,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "ioc.ipv4",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.domain",
+              "score": 0.5714285714285715,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 3,
+                "fn": 0,
+                "precision": 0.4,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 5,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.url",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 1.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 1,
+                "truth_size": 1,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.sha256",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.email",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.cve",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 1.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 1,
+                "truth_size": 1,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 14,
+            "grounded": 14,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 20407,
+          "duration_ms": 19177,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.034684,
+          "parse_note": "ok"
+        },
+        "multi_agent": {
+          "score": 0.9286,
+          "error": null,
+          "false_positives": 3,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "ioc.ipv4",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.domain",
+              "score": 0.5714285714285715,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 3,
+                "fn": 0,
+                "precision": 0.4,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 5,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.url",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 1.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 1,
+                "truth_size": 1,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.sha256",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.email",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 2.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 2,
+                "truth_size": 2,
+                "abstained": false
+              }
+            },
+            {
+              "field": "ioc.cve",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 1.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1",
+                "pred_size": 1,
+                "truth_size": 1,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 14,
+            "grounded": 14,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 2,
+          "wall_ms": 38030,
+          "duration_ms": 35559,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.068365,
+          "parse_note": "ok"
+        }
+      }
+    },
+    {
+      "subtask_id": "T1102.002",
+      "service": "HUNT",
+      "seed": 1,
+      "episode_id": "8fda4e95-6363-533a-9225-8664c149c586",
+      "results": {
+        "oracle": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "compromised",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 4.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 2.0,
+                "formula": "F2",
+                "pred_size": 4,
+                "truth_size": 4,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 4,
+            "grounded": 4,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "naive": {
+          "score": 0.7895,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 1,
+          "components": [
+            {
+              "field": "compromised",
+              "score": 0.7894736842105263,
+              "weight": null,
+              "detail": {
+                "tp": 3.0,
+                "fp": 0,
+                "fn": 1,
+                "precision": 1.0,
+                "recall": 0.75,
+                "beta": 2.0,
+                "formula": "F2",
+                "pred_size": 3,
+                "truth_size": 4,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 3,
+            "grounded": 3,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "strong": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "compromised",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 4.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 2.0,
+                "formula": "F2",
+                "pred_size": 4,
+                "truth_size": 4,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 4,
+            "grounded": 4,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "single": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "compromised",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 4.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 2.0,
+                "formula": "F2",
+                "pred_size": 4,
+                "truth_size": 4,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 4,
+            "grounded": 4,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 7358,
+          "duration_ms": 5985,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.025582,
+          "parse_note": "ok"
+        },
+        "specialist": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "compromised",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 4.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 2.0,
+                "formula": "F2",
+                "pred_size": 4,
+                "truth_size": 4,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 4,
+            "grounded": 4,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 10579,
+          "duration_ms": 9267,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.02899,
+          "parse_note": "ok"
+        },
+        "multi_agent": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "compromised",
+              "score": 1.0,
+              "weight": null,
+              "detail": {
+                "tp": 4.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 2.0,
+                "formula": "F2",
+                "pred_size": 4,
+                "truth_size": 4,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 4,
+            "grounded": 4,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 2,
+          "wall_ms": 19280,
+          "duration_ms": 16625,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.055268,
+          "parse_note": "ok"
+        }
+      }
+    },
+    {
+      "subtask_id": "T0167.002",
+      "service": "HUNT",
+      "seed": 1,
+      "episode_id": "302eeba8-65e1-5a98-9a11-e72b09156501",
+      "results": {
+        "oracle": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdicts",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "n": 8,
+                "correct": 8
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 8,
+            "grounded": 8,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "naive": {
+          "score": 0.625,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdicts",
+              "score": 0.625,
+              "weight": 1.0,
+              "detail": {
+                "n": 8,
+                "correct": 5
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 8,
+            "grounded": 8,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "strong": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdicts",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "n": 8,
+                "correct": 8
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 8,
+            "grounded": 8,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "single": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdicts",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "n": 8,
+                "correct": 8
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 8,
+            "grounded": 8,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 9577,
+          "duration_ms": 8267,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.025883,
+          "parse_note": "ok"
+        },
+        "specialist": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdicts",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "n": 8,
+                "correct": 8
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 8,
+            "grounded": 8,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 10250,
+          "duration_ms": 8922,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.026115,
+          "parse_note": "ok"
+        },
+        "multi_agent": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": null,
+          "false_negatives": null,
+          "components": [
+            {
+              "field": "verdicts",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "n": 8,
+                "correct": 8
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 8,
+            "grounded": 8,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 2,
+          "wall_ms": 24780,
+          "duration_ms": 22058,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.054425,
+          "parse_note": "ok"
+        }
+      }
+    },
+    {
+      "subtask_id": "T0173.002",
+      "service": "IR",
+      "seed": 1,
+      "episode_id": "255f243c-b32a-5d72-9a15-1e28f1ddfaf8",
+      "results": {
+        "oracle": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "event_order",
+              "score": 1.0,
+              "weight": 0.6,
+              "detail": {
+                "tau": 1.0,
+                "rho": 1.0,
+                "recall": 1.0,
+                "common": 9,
+                "formula": "max(0,tau) * recall"
+              }
+            },
+            {
+              "field": "utc_times",
+              "score": 1.0,
+              "weight": 0.4,
+              "detail": {
+                "within_5min": 9
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 18,
+            "grounded": 9,
+            "fraction": 0.5,
+            "hallucinated": [
+              "2026-10-17T01:10:03Z",
+              "2026-10-17T05:58:48Z",
+              "2026-10-17T07:23:18Z",
+              "2026-10-17T13:17:29Z",
+              "2026-10-17T13:32:46Z",
+              "2026-10-17T16:44:34Z",
+              "2026-10-17T20:10:18Z",
+              "2026-10-17T23:25:19Z",
+              "2026-10-18T00:35:14Z"
+            ],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "naive": {
+          "score": 0.4667,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "event_order",
+              "score": 0.1111111111111111,
+              "weight": 0.6,
+              "detail": {
+                "tau": 0.111111,
+                "rho": 0.3,
+                "recall": 1.0,
+                "common": 9,
+                "formula": "max(0,tau) * recall"
+              }
+            },
+            {
+              "field": "utc_times",
+              "score": 1.0,
+              "weight": 0.4,
+              "detail": {
+                "within_5min": 9
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 18,
+            "grounded": 18,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "strong": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "event_order",
+              "score": 1.0,
+              "weight": 0.6,
+              "detail": {
+                "tau": 1.0,
+                "rho": 1.0,
+                "recall": 1.0,
+                "common": 9,
+                "formula": "max(0,tau) * recall"
+              }
+            },
+            {
+              "field": "utc_times",
+              "score": 1.0,
+              "weight": 0.4,
+              "detail": {
+                "within_5min": 9
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 18,
+            "grounded": 9,
+            "fraction": 0.5,
+            "hallucinated": [
+              "2026-10-17T01:10:03Z",
+              "2026-10-17T05:58:48Z",
+              "2026-10-17T07:23:18Z",
+              "2026-10-17T13:17:29Z",
+              "2026-10-17T13:32:46Z",
+              "2026-10-17T16:44:34Z",
+              "2026-10-17T20:10:18Z",
+              "2026-10-17T23:25:19Z",
+              "2026-10-18T00:35:14Z"
+            ],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "single": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "event_order",
+              "score": 1.0,
+              "weight": 0.6,
+              "detail": {
+                "tau": 1.0,
+                "rho": 1.0,
+                "recall": 1.0,
+                "common": 9,
+                "formula": "max(0,tau) * recall"
+              }
+            },
+            {
+              "field": "utc_times",
+              "score": 1.0,
+              "weight": 0.4,
+              "detail": {
+                "within_5min": 9
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 18,
+            "grounded": 9,
+            "fraction": 0.5,
+            "hallucinated": [
+              "2026-10-17T01:10:03Z",
+              "2026-10-17T05:58:48Z",
+              "2026-10-17T07:23:18Z",
+              "2026-10-17T13:17:29Z",
+              "2026-10-17T13:32:46Z",
+              "2026-10-17T16:44:34Z",
+              "2026-10-17T20:10:18Z",
+              "2026-10-17T23:25:19Z",
+              "2026-10-18T00:35:14Z"
+            ],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 13405,
+          "duration_ms": 12085,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.028038,
+          "parse_note": "ok"
+        },
+        "specialist": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "event_order",
+              "score": 1.0,
+              "weight": 0.6,
+              "detail": {
+                "tau": 1.0,
+                "rho": 1.0,
+                "recall": 1.0,
+                "common": 9,
+                "formula": "max(0,tau) * recall"
+              }
+            },
+            {
+              "field": "utc_times",
+              "score": 1.0,
+              "weight": 0.4,
+              "detail": {
+                "within_5min": 9
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 18,
+            "grounded": 9,
+            "fraction": 0.5,
+            "hallucinated": [
+              "2026-10-17T01:10:03Z",
+              "2026-10-17T05:58:48Z",
+              "2026-10-17T07:23:18Z",
+              "2026-10-17T13:17:29Z",
+              "2026-10-17T13:32:46Z",
+              "2026-10-17T16:44:34Z",
+              "2026-10-17T20:10:18Z",
+              "2026-10-17T23:25:19Z",
+              "2026-10-18T00:35:14Z"
+            ],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 13954,
+          "duration_ms": 12637,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.030512,
+          "parse_note": "ok"
+        },
+        "multi_agent": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "event_order",
+              "score": 1.0,
+              "weight": 0.6,
+              "detail": {
+                "tau": 1.0,
+                "rho": 1.0,
+                "recall": 1.0,
+                "common": 9,
+                "formula": "max(0,tau) * recall"
+              }
+            },
+            {
+              "field": "utc_times",
+              "score": 1.0,
+              "weight": 0.4,
+              "detail": {
+                "within_5min": 9
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 18,
+            "grounded": 9,
+            "fraction": 0.5,
+            "hallucinated": [
+              "2026-10-17T01:10:03Z",
+              "2026-10-17T05:58:48Z",
+              "2026-10-17T07:23:18Z",
+              "2026-10-17T13:17:29Z",
+              "2026-10-17T13:32:46Z",
+              "2026-10-17T16:44:34Z",
+              "2026-10-17T20:10:18Z",
+              "2026-10-17T23:25:19Z",
+              "2026-10-18T00:35:14Z"
+            ],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 2,
+          "wall_ms": 23341,
+          "duration_ms": 20677,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.057074,
+          "parse_note": "ok"
+        }
+      }
+    },
+    {
+      "subtask_id": "T0397.002",
+      "service": "IR",
+      "seed": 1,
+      "episode_id": "5fdbb74d-ad33-5bdc-8e2e-b09c51ef354c",
+      "results": {
+        "oracle": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "entries",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "tp": 4.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1 partial=0.5",
+                "pred_size": 4,
+                "truth_size": 4,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 4,
+            "grounded": 4,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "naive": {
+          "score": 0.25,
+          "error": null,
+          "false_positives": 3,
+          "false_negatives": 3,
+          "components": [
+            {
+              "field": "entries",
+              "score": 0.25,
+              "weight": 1.0,
+              "detail": {
+                "tp": 1.0,
+                "fp": 3,
+                "fn": 3,
+                "precision": 0.25,
+                "recall": 0.25,
+                "beta": 1.0,
+                "formula": "F1 partial=0.5",
+                "pred_size": 4,
+                "truth_size": 4,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 4,
+            "grounded": 4,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "strong": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "entries",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "tp": 4.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1 partial=0.5",
+                "pred_size": 4,
+                "truth_size": 4,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 4,
+            "grounded": 4,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "single": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "entries",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "tp": 4.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1 partial=0.5",
+                "pred_size": 4,
+                "truth_size": 4,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 4,
+            "grounded": 4,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 10625,
+          "duration_ms": 9273,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.026222,
+          "parse_note": "ok"
+        },
+        "specialist": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "entries",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "tp": 4.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1 partial=0.5",
+                "pred_size": 4,
+                "truth_size": 4,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 4,
+            "grounded": 4,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 8827,
+          "duration_ms": 7239,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.024752,
+          "parse_note": "ok"
+        },
+        "multi_agent": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "entries",
+              "score": 1.0,
+              "weight": 1.0,
+              "detail": {
+                "tp": 4.0,
+                "fp": 0,
+                "fn": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "beta": 1.0,
+                "formula": "F1 partial=0.5",
+                "pred_size": 4,
+                "truth_size": 4,
+                "abstained": false
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 4,
+            "grounded": 4,
+            "fraction": 1.0,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 2,
+          "wall_ms": 22749,
+          "duration_ms": 20121,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.0547,
+          "parse_note": "ok"
+        }
+      }
+    },
+    {
+      "subtask_id": "T1324.002",
+      "service": "IR",
+      "seed": 1,
+      "episode_id": "149a4526-971e-5d08-aaa7-26644acb4675",
+      "results": {
+        "oracle": {
+          "score": 1.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "collection_order",
+              "score": 1.0,
+              "weight": 0.6,
+              "detail": {
+                "tau": 1.0,
+                "rho": 1.0,
+                "recall": 1.0,
+                "common": 5,
+                "formula": "max(0,tau) * recall"
+              }
+            },
+            {
+              "field": "preservation",
+              "score": 1.0,
+              "weight": 0.4,
+              "detail": {
+                "n": 5,
+                "correct": 5
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "naive": {
+          "score": 0.0,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "collection_order",
+              "score": 0.0,
+              "weight": 0.6,
+              "detail": {
+                "tau": 0.0,
+                "rho": 0.1,
+                "recall": 1.0,
+                "common": 5,
+                "formula": "max(0,tau) * recall"
+              }
+            },
+            {
+              "field": "preservation",
+              "score": 0.0,
+              "weight": 0.4,
+              "detail": {
+                "n": 5,
+                "correct": 0
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "strong": {
+          "score": 0.6,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "collection_order",
+              "score": 1.0,
+              "weight": 0.6,
+              "detail": {
+                "tau": 1.0,
+                "rho": 1.0,
+                "recall": 1.0,
+                "common": 5,
+                "formula": "max(0,tau) * recall"
+              }
+            },
+            {
+              "field": "preservation",
+              "score": 0.0,
+              "weight": 0.4,
+              "detail": {
+                "n": 5,
+                "correct": 0
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          }
+        },
+        "single": {
+          "score": 0.76,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "collection_order",
+              "score": 0.6,
+              "weight": 0.6,
+              "detail": {
+                "tau": 0.6,
+                "rho": 0.7,
+                "recall": 1.0,
+                "common": 5,
+                "formula": "max(0,tau) * recall"
+              }
+            },
+            {
+              "field": "preservation",
+              "score": 1.0,
+              "weight": 0.4,
+              "detail": {
+                "n": 5,
+                "correct": 5
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 9110,
+          "duration_ms": 6820,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.022183,
+          "parse_note": "ok"
+        },
+        "specialist": {
+          "score": 0.64,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "collection_order",
+              "score": 0.4,
+              "weight": 0.6,
+              "detail": {
+                "tau": 0.4,
+                "rho": 0.6,
+                "recall": 1.0,
+                "common": 5,
+                "formula": "max(0,tau) * recall"
+              }
+            },
+            {
+              "field": "preservation",
+              "score": 1.0,
+              "weight": 0.4,
+              "detail": {
+                "n": 5,
+                "correct": 5
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 7108,
+          "duration_ms": 4799,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.020657,
+          "parse_note": "ok"
+        },
+        "multi_agent": {
+          "score": 0.76,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "components": [
+            {
+              "field": "collection_order",
+              "score": 0.6,
+              "weight": 0.6,
+              "detail": {
+                "tau": 0.6,
+                "rho": 0.7,
+                "recall": 1.0,
+                "common": 5,
+                "formula": "max(0,tau) * recall"
+              }
+            },
+            {
+              "field": "preservation",
+              "score": 1.0,
+              "weight": 0.4,
+              "detail": {
+                "n": 5,
+                "correct": 5
+              }
+            }
+          ],
+          "grounding": {
+            "checked": 0,
+            "grounded": 0,
+            "fraction": null,
+            "hallucinated": [],
+            "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+          },
+          "completed": true,
+          "n_calls": 2,
+          "wall_ms": 17249,
+          "duration_ms": 14555,
+          "tool_failures": 0,
+          "model_used": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "cost_usd_listprice": 0.044356,
+          "parse_note": "ok"
+        }
+      }
+    }
+  ],
+  "summary": {
+    "oracle": {
+      "score": {
+        "mean": 1.0,
+        "n_episodes": 12,
+        "n_clusters": 12,
+        "ci95_cluster": [
+          1.0,
+          1.0
+        ]
+      },
+      "fp_total": 0,
+      "fn_total": 0
+    },
+    "naive": {
+      "score": {
+        "mean": 0.3462,
+        "n_episodes": 12,
+        "n_clusters": 12,
+        "ci95_cluster": [
+          0.1762,
+          0.5195
+        ]
+      },
+      "fp_total": 14,
+      "fn_total": 15
+    },
+    "strong": {
+      "score": {
+        "mean": 0.9667,
+        "n_episodes": 12,
+        "n_clusters": 12,
+        "ci95_cluster": [
+          0.9,
+          1.0
+        ]
+      },
+      "fp_total": 0,
+      "fn_total": 0
+    },
+    "single": {
+      "score": {
+        "mean": 0.8629,
+        "n_episodes": 12,
+        "n_clusters": 12,
+        "ci95_cluster": [
+          0.6885,
+          0.9881
+        ]
+      },
+      "fp_total": 7,
+      "fn_total": 5,
+      "score_completed": {
+        "mean": 0.8629,
+        "n_episodes": 12,
+        "n_clusters": 12,
+        "ci95_cluster": [
+          0.6885,
+          0.9881
+        ]
+      },
+      "completion_rate": 1.0,
+      "n_calls_total": 12,
+      "tool_failures_total": 0,
+      "latency_mean_ms": 17414,
+      "latency_p95_ms": 88468,
+      "cost_listprice": 0.3861,
+      "models": [
+        "claude-haiku-4-5"
+      ]
+    },
+    "specialist": {
+      "score": {
+        "mean": 0.7974,
+        "n_episodes": 12,
+        "n_clusters": 12,
+        "ci95_cluster": [
+          0.5707,
+          0.9881
+        ]
+      },
+      "fp_total": 3,
+      "fn_total": 5,
+      "score_completed": {
+        "mean": 0.7974,
+        "n_episodes": 12,
+        "n_clusters": 12,
+        "ci95_cluster": [
+          0.5707,
+          0.9881
+        ]
+      },
+      "completion_rate": 1.0,
+      "n_calls_total": 12,
+      "tool_failures_total": 0,
+      "latency_mean_ms": 21850,
+      "latency_p95_ms": 75932,
+      "cost_listprice": 0.4243,
+      "models": [
+        "claude-haiku-4-5"
+      ]
+    },
+    "multi_agent": {
+      "score": {
+        "mean": 0.9491,
+        "n_episodes": 12,
+        "n_clusters": 12,
+        "ci95_cluster": [
+          0.884,
+          1.0
+        ]
+      },
+      "fp_total": 3,
+      "fn_total": 0,
+      "score_completed": {
+        "mean": 0.9491,
+        "n_episodes": 12,
+        "n_clusters": 12,
+        "ci95_cluster": [
+          0.884,
+          1.0
+        ]
+      },
+      "completion_rate": 1.0,
+      "n_calls_total": 24,
+      "tool_failures_total": 0,
+      "latency_mean_ms": 31465,
+      "latency_p95_ms": 122509,
+      "cost_listprice": 0.7431,
+      "models": [
+        "claude-haiku-4-5"
+      ]
+    }
+  },
+  "per_pilot": [
+    {
+      "subtask_id": "T1112.002",
+      "service": "MON",
+      "oracle": 1.0,
+      "naive": 0.5,
+      "strong": 1.0,
+      "single": 1.0,
+      "specialist": 1.0,
+      "multi_agent": 1.0
+    },
+    {
+      "subtask_id": "T1348.002",
+      "service": "MON",
+      "oracle": 1.0,
+      "naive": 0.2727,
+      "strong": 1.0,
+      "single": 1.0,
+      "specialist": 1.0,
+      "multi_agent": 1.0
+    },
+    {
+      "subtask_id": "T1387.002",
+      "service": "MON",
+      "oracle": 1.0,
+      "naive": 0.0,
+      "strong": 1.0,
+      "single": 1.0,
+      "specialist": 1.0,
+      "multi_agent": 1.0
+    },
+    {
+      "subtask_id": "T0020.001",
+      "service": "CNT",
+      "oracle": 1.0,
+      "naive": 0.3417,
+      "strong": 1.0,
+      "single": 0.6667,
+      "specialist": 1.0,
+      "multi_agent": 1.0
+    },
+    {
+      "subtask_id": "T1406.001",
+      "service": "CNT",
+      "oracle": 1.0,
+      "naive": 0.9091,
+      "strong": 1.0,
+      "single": 0.0,
+      "specialist": 0.0,
+      "multi_agent": 1.0
+    },
+    {
+      "subtask_id": "T1111.002",
+      "service": "CNT",
+      "oracle": 1.0,
+      "naive": 0.0,
+      "strong": 1.0,
+      "single": 1.0,
+      "specialist": 0.0,
+      "multi_agent": 0.7
+    },
+    {
+      "subtask_id": "T2013.001",
+      "service": "HUNT",
+      "oracle": 1.0,
+      "naive": 0.0,
+      "strong": 1.0,
+      "single": 0.9286,
+      "specialist": 0.9286,
+      "multi_agent": 0.9286
+    },
+    {
+      "subtask_id": "T1102.002",
+      "service": "HUNT",
+      "oracle": 1.0,
+      "naive": 0.7895,
+      "strong": 1.0,
+      "single": 1.0,
+      "specialist": 1.0,
+      "multi_agent": 1.0
+    },
+    {
+      "subtask_id": "T0167.002",
+      "service": "HUNT",
+      "oracle": 1.0,
+      "naive": 0.625,
+      "strong": 1.0,
+      "single": 1.0,
+      "specialist": 1.0,
+      "multi_agent": 1.0
+    },
+    {
+      "subtask_id": "T0173.002",
+      "service": "IR",
+      "oracle": 1.0,
+      "naive": 0.4667,
+      "strong": 1.0,
+      "single": 1.0,
+      "specialist": 1.0,
+      "multi_agent": 1.0
+    },
+    {
+      "subtask_id": "T0397.002",
+      "service": "IR",
+      "oracle": 1.0,
+      "naive": 0.25,
+      "strong": 1.0,
+      "single": 1.0,
+      "specialist": 1.0,
+      "multi_agent": 1.0
+    },
+    {
+      "subtask_id": "T1324.002",
+      "service": "IR",
+      "oracle": 1.0,
+      "naive": 0.0,
+      "strong": 0.6,
+      "single": 0.76,
+      "specialist": 0.64,
+      "multi_agent": 0.76
+    }
+  ],
+  "caveat": "Controlled discrimination comparison on SYNTHETIC gold episodes; NOT an externally validated benchmark and NOT READY_BENCHMARK."
+}
