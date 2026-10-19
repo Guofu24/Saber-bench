@@ -53,6 +53,21 @@ def test_rules_baseline_discriminates_on_every_pilot() -> None:
         assert 0.0 <= rules < 1.0, f"{sid} naive rules must score below oracle, got {rules}"
 
 
+def test_fp_fn_counting_no_double_count() -> None:
+    from saber.baselines.pilot_runner import (
+        _count_one,
+        _false_negative_count,
+        _false_positive_count,
+    )
+
+    # A set scorer exposes BOTH an int (fn) and the element list (missed); count once, not twice.
+    comp = {"detail": {"fn": 2, "missed": ["a", "b"], "fp": 1, "false_positives": ["x"]}}
+    assert _false_negative_count([comp]) == 2  # not 2 + len([a,b]) = 4
+    assert _false_positive_count([comp]) == 1  # not 1 + len([x]) = 2
+    assert _count_one({"extra": ["a", "b", "c"]}, ("fp", "extra")) == 3  # list len when no int
+    assert _false_negative_count([{"detail": {}}]) is None  # not exposed -> None, not 0
+
+
 def test_strong_baseline_dominates_naive_and_reaches_oracle() -> None:
     # The conventional (non-LLM) baseline must use public inputs only, beat (or match) the naive
     # floor on every pilot, and never exceed the oracle.

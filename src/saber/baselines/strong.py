@@ -1,10 +1,22 @@
-"""Strong deterministic (non-LLM) "conventional SOC" baseline per gold pilot.
+"""Strong deterministic (non-LLM) conventional baseline per gold pilot — a CONVENTIONAL CEILING.
 
-Where the naive ``rules`` baseline is a deliberately weak first pass, this one is a COMPETENT
-conventional analyst/tool: proper parsers and standard detection logic applied to the public
-artifact (never the sealed truth). For well-specified detection tasks a competent conventional
-method should approach the oracle; where it falls short, that is an honest signal that the task
-needs semantic judgement. This is the non-LLM arm of the E2 controlled comparison.
+Honest scope (per the Phase E methodology review): this is a conventional-method **ceiling /
+consistency check**, not a fully independent competitor. It uses only the public artifact (never
+``episode.gold_truth``), but for several pilots the gold truth is *constructed to agree with* the
+same standard detection rule a competent tool would apply, so reaching the oracle there is a
+consistency result, not evidence that conventional methods solve open-world SOC. Per-pilot:
+
+* Genuinely independent of the generator: T1348 (whitelist policy), T1387 (IDS content match),
+  T0173 (timezone math), T1406 (shared-string family hunt), T0020 (a standard WAF regex that is
+  NOT the reference answer), T1111 (filter derived from public attributes), T0167 / T2013 (standard
+  malware-API / IOC regexes).
+* Conventional ceiling that coincides with the detection rule the truth is built around: T1112
+  (telemetry signal words), T1102 (any compromise indicator), T0397 (unsigned + suspect path),
+  and the ORDER half of T1324 (RFC 3227); the T1324 preservation mapping is withheld, so the
+  conventional baseline does not know it and scores order only.
+
+Never claims to be independently validated; it is one arm of the E2 comparison, read WITH this
+caveat, not as a headline "conventional beats LLM" result.
 """
 
 from __future__ import annotations
@@ -27,7 +39,6 @@ _SUSPECT_PATH = (
     "-enc",
     ".scr",
     ".vbs",
-    "svch0st",
 )
 _SUSPICIOUS_API = (
     "virtualalloc",
@@ -48,14 +59,8 @@ _VOLATILITY = [
     "local_logs",
     "archived_logs",
 ]
-_METHOD = {
-    "ram": "live_memory_acquisition",
-    "network_connections": "snapshot_connections",
-    "processes": "capture_process_state",
-    "disk_images": "forensic_disk_image",
-    "local_logs": "copy_preserve_timestamps",
-    "archived_logs": "export_from_central_store",
-}
+# NOTE: the T1324 type->preservation-method mapping is deliberately NOT encoded here — it is
+# withheld from public_inputs, so the conventional baseline must not "know" it (see _t1324).
 _BENIGN_DOMAINS = ("example.com", "shop.example", "corp-lab.example")
 
 
@@ -93,11 +98,13 @@ def _t1387(ep: GoldEpisode) -> dict[str, Any]:
 
 
 def _t0020(_ep: GoldEpisode) -> dict[str, Any]:
-    # Competent WAF-style SQLi detection: token combinations, separator-agnostic, on url-encoded lines.
-    sep = r"(?:\s|%20|\+)"
+    # A STANDARD WAF-style SQLi regex written independently of the pilot's reference pattern: it
+    # keys on common SQLi tokens/comments on the url-encoded lines. It is intentionally not the
+    # reference answer, so it may score below the oracle (an honest conventional result).
     pattern = (
-        rf"union{sep}+select|drop{sep}+table|sleep(?:\(|%28)|admin(?:'|%27)(?:--|%2[dD]%2[dD])"
-        rf"|(?:'|%27){sep}*or{sep}|(?:\bor|%20or){sep}+1{sep}*(?:=|%3[dD]){sep}*1|(?:'|%27)1(?:'|%27)(?:=|%3[dD])(?:'|%27)1"
+        r"union(?:\s|%20|\+)+select|(?:or|and)(?:\s|%20|\+)+\d+(?:\s|%20|\+)*(?:=|%3[dd])"
+        r"|sleep(?:\(|%28)|benchmark(?:\(|%28)|(?:--|%2[dd]%2[dd])|(?:'|%27)(?:\s|%20|\+)*or"
+        r"|information_schema|(?:;|%3[bb])(?:\s|%20|\+)*drop"
     )
     return {"rule": {"engine": "regex", "pattern": pattern, "ignore_case": True}}
 
@@ -132,16 +139,16 @@ def _t1406(ep: GoldEpisode) -> dict[str, Any]:
     }
 
 
-def _t1111(_ep: GoldEpisode) -> dict[str, Any]:
-    # Suppress the benign signed backup agent specifically; keep ransomware TPs. Cause = rule logic.
+def _t1111(ep: GoldEpisode) -> dict[str, Any]:
+    # Derive the filter from PUBLIC attributes, not a hard-coded answer: the alerts carry a `signed`
+    # flag, so a conventional analyst suppresses signed processes (the benign agent) while unsigned
+    # ransomware TPs survive. The cause is read from the public rule: no known_exclusions => the
+    # rule logic itself is at fault.
+    rule = ep.public_inputs.get("rule") or {}
+    no_exclusions = not (rule.get("known_exclusions") or [])
     return {
-        "filter": {
-            "all_of": [
-                {"field": "account", "op": "contains", "value": "backup"},
-                {"field": "signed", "op": "eq", "value": True},
-            ]
-        },
-        "fp_cause": "rule_logic",
+        "filter": {"all_of": [{"field": "signed", "op": "eq", "value": True}]},
+        "fp_cause": "rule_logic" if no_exclusions else "data_quality",
     }
 
 
@@ -200,8 +207,9 @@ def _t1102(ep: GoldEpisode) -> dict[str, Any]:
             or bool(h.get("autoruns"))
             or any("unsigned" in f for f in h.get("files", []))
         )
-        hist = any("quarantine" in x.lower() for x in h.get("av_log", [])) or any(
-            "drop.exe" in x.lower() for x in h.get("prefetch", [])
+        # Historical traces, generically: any AV log entry, or a prefetch of a deleted/old binary.
+        hist = bool(h.get("av_log")) or any(
+            w in x.lower() for x in h.get("prefetch", []) for w in ("deleted", "last run")
         )
         if live or hist:
             out.append(h["host"])
@@ -246,10 +254,14 @@ def _t0397(ep: GoldEpisode) -> dict[str, Any]:
 
 
 def _t1324(ep: GoldEpisode) -> dict[str, Any]:
+    # The volatility ORDER is standard (RFC 3227) and legitimately known. The type->method-token
+    # mapping is withheld from public_inputs, so a conventional analyst does NOT know it: return
+    # order only and leave preservation empty (this scores the 0.6 order component, not the 0.4
+    # preservation component — an honest conventional result, not the withheld answer).
     present = set(ep.public_inputs["evidence_types"])
     return {
         "collection_order": [t for t in _VOLATILITY if t in present],
-        "preservation": {t: _METHOD[t] for t in present if t in _METHOD},
+        "preservation": {},
     }
 
 

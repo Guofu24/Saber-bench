@@ -177,3 +177,16 @@ def test_lineage_scalar_id_dropped_but_nested_techniques_kept() -> None:
     plain = {"iocs": ["evil.example"]}
     assert lineage_key(scalar) == lineage_key(plain)  # scalar id ignored
     assert lineage_key(nested) != lineage_key(plain)  # nested technique counted
+
+
+def test_lineage_defang_and_alternate_ioc_keys() -> None:
+    # Same indicator, different defang + a non-standard key name, must still collide.
+    a = {"artifacts": ["1.2.3.4"]}
+    b = {"iocs": ["1[.]2[.]3[.]4"]}
+    assert lineage_key(a) == lineage_key(b)
+
+
+def test_lineage_empty_records_do_not_all_collide() -> None:
+    # Records with no attack signature must NOT share one lineage (would force them onto one split).
+    assert lineage_key({"note": "x"}) != lineage_key({"note": "y"})
+    assert lineage_key({"note": "x"}) == lineage_key({"note": "x"})  # identical still collide

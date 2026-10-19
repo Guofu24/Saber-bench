@@ -13,11 +13,14 @@ scenarios that share that fingerprint get the same lineage key and must stay on 
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from collections.abc import Iterable, Mapping
 from typing import Any
 
 _TECH_RE = re.compile(r"\bT\d{4}(?:\.\d{3})?\b", re.IGNORECASE)
+_IOC_KEYS = ("iocs", "indicators", "ioc", "indicator", "artifacts", "indicator_list")
+_DEFANG = (("[.]", "."), ("(.)", "."), ("[dot]", "."), ("[@]", "@"), ("[:]", ":"), ("hxxp", "http"))
 # Keys whose values are identifiers, not attack signatures — excluded so a technique-shaped
 # task ID (e.g. "T1112.002") does not leak into the lineage and defeat task-ID independence.
 _ID_KEYS = {"task_id", "subtask_id", "nice_id", "id", "episode_id", "rule_id"}
@@ -50,18 +53,31 @@ def _techniques(obj: Any) -> set[str]:
     return found
 
 
+def _canon_ioc(value: Any) -> str:
+    """Lowercase + de-fang an indicator so the same IOC in different formats collides."""
+    s = str(value).lower().strip()
+    for a, b in _DEFANG:
+        s = s.replace(a, b)
+    return s
+
+
 def _iocs(record: Mapping[str, Any]) -> set[str]:
-    raw = record.get("iocs") or record.get("indicators") or []
     out: set[str] = set()
-    if isinstance(raw, Mapping):
-        for v in raw.values():
-            if isinstance(v, (list, tuple, set)):
-                out.update(str(i).lower() for i in v)
-            else:
-                out.add(str(v).lower())
-    elif isinstance(raw, (list, tuple, set)):
-        out.update(str(i).lower() for i in raw)
-    return out
+    for key in _IOC_KEYS:
+        raw = record.get(key)
+        if raw is None:
+            continue
+        if isinstance(raw, Mapping):
+            for v in raw.values():
+                if isinstance(v, (list, tuple, set)):
+                    out.update(_canon_ioc(i) for i in v)
+                else:
+                    out.add(_canon_ioc(v))
+        elif isinstance(raw, (list, tuple, set)):
+            out.update(_canon_ioc(i) for i in raw)
+        else:
+            out.add(_canon_ioc(raw))
+    return {s for s in out if s}
 
 
 def lineage_key(record: Mapping[str, Any]) -> str:
@@ -73,10 +89,14 @@ def lineage_key(record: Mapping[str, Any]) -> str:
     techniques = sorted(_techniques(record))
     iocs = sorted(_iocs(record))
     logic = record.get("detection") or record.get("logic") or ""
-    logic_s = str(logic)
-    material = "|".join(
-        ["T:" + ",".join(techniques), "I:" + ",".join(iocs), "L:" + logic_s.strip().lower()]
-    )
+    # Whitespace-normalise the detection logic so a reformat of an identical rule still collides.
+    logic_s = re.sub(r"\s+", " ", str(logic)).strip().lower()
+    if not techniques and not iocs and not logic_s:
+        # No extractable attack signature: do NOT let unrelated empty records all collide onto one
+        # split. Key on the whole record so distinct records differ and identical ones still match.
+        body = json.dumps(record, sort_keys=True, default=str)
+        return "empty:" + hashlib.sha256(body.encode("utf-8")).hexdigest()[:10]
+    material = "|".join(["T:" + ",".join(techniques), "I:" + ",".join(iocs), "L:" + logic_s])
     return hashlib.sha256(material.encode("utf-8")).hexdigest()[:16]
 
 

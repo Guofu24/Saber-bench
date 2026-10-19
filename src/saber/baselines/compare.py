@@ -123,8 +123,15 @@ def _agg_baseline(episodes: list[dict[str, Any]], baseline: str, is_llm: bool) -
         entries = [e["results"][baseline] for e in episodes]
         completed = [x for x in entries if x.get("completed")]
         lat = [x["duration_ms"] for x in completed if isinstance(x.get("duration_ms"), int)]
+        # Separate capability (completed-only) from reliability (all, incompletes scored 0) so the
+        # blended `score` is not read as pure capability.
+        by_completed = _by_cluster(
+            [e for e in episodes if e["results"][baseline].get("completed")],
+            lambda e: e["results"][baseline]["score"],
+        )
         out.update(
             {
+                "score_completed": _agg_clustered(by_completed),
                 "completion_rate": round(len(completed) / len(entries), 4) if entries else None,
                 "n_calls_total": sum(x.get("n_calls", 0) for x in entries),
                 "tool_failures_total": sum(x.get("tool_failures", 0) for x in entries),
@@ -206,6 +213,14 @@ def _ci(agg: dict[str, Any]) -> str:
     return f"{agg['score']['mean']}{f' CI95{c}' if c else ''}"
 
 
+def _completed_str(agg: dict[str, Any]) -> str:
+    sc = agg.get("score_completed")
+    if not sc:
+        return "—"
+    c = sc.get("ci95_cluster")
+    return f"{sc.get('mean')}{f' CI95{c}' if c else ''}"
+
+
 def _markdown(report: dict[str, Any]) -> str:
     s = report["summary"]
     lines = [
@@ -218,13 +233,18 @@ def _markdown(report: dict[str, Any]) -> str:
         "",
         "## Score by baseline (cluster-bootstrap 95% CI over pilots)",
         "",
-        "| Baseline | Score | FP total | FN total | Completion | LLM calls | Tool fails | Latency mean/p95 ms | Cost$ |",
-        "|---|---|---|---|---|---|---|---|---|",
+        "Score = all episodes (LLM incompletes scored 0, mixes capability + reliability); "
+        "Score(completed) = capability on completed episodes only. FP/FN totals are only where the "
+        "scorer exposes them (accuracy/enum/order-less pilots show blank), so are not comparable "
+        "across all pilots. The `strong` arm is a conventional CEILING — see strong.py docstring.",
+        "",
+        "| Baseline | Score | Score(completed) | FP total | FN total | Completion | LLM calls | Tool fails | Latency mean/p95 ms | Cost$ |",
+        "|---|---|---|---|---|---|---|---|---|---|",
     ]
     for b in report["baselines"]:
         a = s[b]
         lines.append(
-            f"| {b} | {_ci(a)} | {a.get('fp_total')} | {a.get('fn_total')} | "
+            f"| {b} | {_ci(a)} | {_completed_str(a)} | {a.get('fp_total')} | {a.get('fn_total')} | "
             f"{a.get('completion_rate', '—')} | {a.get('n_calls_total', '—')} | "
             f"{a.get('tool_failures_total', '—')} | "
             f"{a.get('latency_mean_ms', '—')}/{a.get('latency_p95_ms', '—')} | {a.get('cost_listprice', '—')} |"

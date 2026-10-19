@@ -94,16 +94,19 @@ def run_mode(
     calls.append(inv)
     wall += w
 
+    analyst_timed_out = inv.timed_out
     if mode == "multi_agent" and answer is not None:
         final, rinv, w2 = _call(
             _reviewer_prompt(pilot, episode, answer), model=model, timeout_s=timeout_s
         )
         calls.append(rinv)
         wall += w2
-        if final is not None:  # reviewer's corrected answer wins; else keep the draft
+        if final is not None:  # reviewer's corrected answer wins; else keep the valid draft
             answer = final
 
-    completed = answer is not None and all(not c.timed_out for c in calls)
+    # Completion depends on having a usable answer and the ANALYST call succeeding. A reviewer-call
+    # timeout does not discard a valid draft (that confound would deflate multi_agent unfairly).
+    completed = answer is not None and not analyst_timed_out
     return {
         "mode": mode,
         "answer": answer,

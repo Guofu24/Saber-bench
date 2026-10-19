@@ -74,6 +74,24 @@ def test_run_mode_multi_agent_falls_back_on_bad_reviewer(monkeypatch: pytest.Mon
     assert out["answer"]["verdict"] == "TP"
 
 
+def test_multi_agent_reviewer_timeout_keeps_draft(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = {"n": 0}
+
+    def flaky(*_a: Any, **_k: Any) -> CliInvocation:
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return _fake_inv()  # analyst draft OK
+        return CliInvocation(ok=False, requested_model="haiku", timed_out=True)  # reviewer timeout
+
+    monkeypatch.setattr(agents, "run_claude_cli", flaky)
+    pilot = load_pilot("T1112.002")
+    ep = pilot.build("dev", 1)
+    out = run_mode("multi_agent", pilot, ep, model="haiku", timeout_s=5)
+    # A reviewer-call timeout must NOT discard a valid analyst draft (Finding 3 fix).
+    assert out["completed"] is True and out["n_calls"] == 2
+    assert out["answer"]["verdict"] == "TP"
+
+
 def test_run_mode_timeout_not_completed(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         agents,

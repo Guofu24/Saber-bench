@@ -146,33 +146,45 @@ def evidence_grounding(episode: GoldEpisode, answer: dict[str, Any]) -> dict[str
     }
 
 
-def _false_positive_count(components: list[dict[str, Any]]) -> int | None:
-    """Pull a false-positive count out of RAW component detail where the scorer exposes one."""
+# A scorer may expose a count as an int OR the elements as a list (never both should be summed).
+# Keys are ordered so the canonical int is preferred; each component contributes AT MOST ONE value.
+_FP_KEYS = ("fp", "false_positives", "extra", "spurious")
+_FN_KEYS = ("fn", "false_negatives", "missed", "missing")
+
+
+def _count_one(detail: dict[str, Any], keys: tuple[str, ...]) -> int | None:
+    """First present key's value as a count (int as-is, list as len); None if no key present."""
+    for key in keys:
+        v = detail.get(key)
+        if isinstance(v, bool):  # guard: bool is an int subclass
+            continue
+        if isinstance(v, int):
+            return v
+        if isinstance(v, (list, tuple)):
+            return len(v)
+    return None
+
+
+def _tally(components: list[dict[str, Any]], keys: tuple[str, ...]) -> int | None:
     total: int | None = None
     for comp in components:
         detail = comp.get("detail") or {}
         if not isinstance(detail, dict):
             continue
-        for key in ("fp", "false_positives", "extra", "spurious", "fp_after"):
-            if isinstance(detail.get(key), int):
-                total = (total or 0) + int(detail[key])
+        c = _count_one(detail, keys)
+        if c is not None:
+            total = (total or 0) + c
     return total
+
+
+def _false_positive_count(components: list[dict[str, Any]]) -> int | None:
+    """False positives from RAW component detail (one value per component; None if not exposed)."""
+    return _tally(components, _FP_KEYS)
 
 
 def _false_negative_count(components: list[dict[str, Any]]) -> int | None:
-    """Pull a false-negative (missed) count out of RAW component detail where exposed."""
-    total: int | None = None
-    for comp in components:
-        detail = comp.get("detail") or {}
-        if not isinstance(detail, dict):
-            continue
-        for key in ("fn", "false_negatives", "missed"):
-            v = detail.get(key)
-            if isinstance(v, int):
-                total = (total or 0) + v
-            elif isinstance(v, (list, tuple)):
-                total = (total or 0) + len(v)
-    return total
+    """False negatives from RAW component detail (one value per component; None if not exposed)."""
+    return _tally(components, _FN_KEYS)
 
 
 def _sanitize_components(components: list[dict[str, Any]]) -> list[dict[str, Any]]:
