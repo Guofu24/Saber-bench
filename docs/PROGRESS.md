@@ -1,6 +1,6 @@
 # SABER implementation progress (machine-generated from status/ledger.json)
 
-Updated: 2026-10-19T03:36:47+00:00
+Updated: 2026-10-19T03:41:04+00:00
 
 Status meanings: `DONE_DEV`/`IMPLEMENTED_DEV` = implementation + independent offline tests ran green;
 `PARTIAL` = safe parts done, remainder listed in blockers; `BLOCKED_INTEGRATION` = needs external
@@ -11,7 +11,7 @@ independently validated private data, lab verification and human adjudication.
 
 | Kind | BLOCKED | BLOCKED_INTEGRATION | DONE_DEV | IMPLEMENTED_DEV | PARTIAL | PENDING |
 |---|---|---|---|---|---|---|
-| engineering | 0 | 4 | 6 | 0 | 0 | 28 |
+| engineering | 0 | 4 | 9 | 0 | 0 | 25 |
 | bridge | 0 | 0 | 5 | 0 | 0 | 0 |
 | domain | 0 | 0 | 0 | 12 | 0 | 163 |
 
@@ -54,13 +54,13 @@ independently validated private data, lab verification and human adjudication.
 | T023 | engineering | range_adapters | BLOCKED_INTEGRATION |  | No isolated lab + operator approval for emulation — Allowlisted-emulation driver lists profiles, refuses execution (fail closed). |
 | T024 | engineering | range_adapters | BLOCKED_INTEGRATION |  | No hypervisor lab; real snapshot/verify needs H2 — RangeController port + DEV LocalDirMachine capture; hypervisor adapter fails closed. |
 | T025 | engineering | agents | PENDING |  |  |
-| T026 | engineering | agents | PENDING |  |  |
+| T026 | engineering | agents | DONE_DEV | `uv run pytest tests/unit/test_agents_experiments.py` | Deterministic StubProvider for CI; BlockedAnthropicProvider fails closed (subscription-only, no API budget). |
 | T027 | engineering | agents | PENDING |  |  |
 | T028 | engineering | agents | PENDING |  |  |
 | T029 | engineering | agents | PENDING |  |  |
 | T030 | engineering | agents | DONE_DEV | `uv run pytest tests/security/test_response_actions.py` | Real lab side-effect execution requires approved isolated lab + executor token (H4) — Dry-run default; track-A no side effects; approval binds exact action; BlockedLabResponseDriver fails closed. |
 | T031 | engineering | agents | PENDING |  |  |
-| T032 | engineering | agents | PENDING |  |  |
+| T032 | engineering | agents | DONE_DEV | `uv run pytest tests/unit/test_agents_experiments.py` | LLM baselines B1-B4 need operator-approved provider + budget — B0 rules-only + ORACLE run offline; specialist router by service; identical output contract. |
 | T0167.001 | domain | subtasks_file | PENDING |  |  |
 | T0167.002 | domain | subtasks_file | PENDING |  |  |
 | T0167.003 | domain | subtasks_file | PENDING |  |  |
@@ -232,7 +232,7 @@ independently validated private data, lab verification and human adjudication.
 | T1487.003 | domain | subtasks_vm | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t1487_003.py` | Synthetic DEV fixtures; no independently-sourced private gold labels / expert adjudication — Oracle reaches full credit; DEV_SIMULATION_ONLY |
 | T2012.003 | domain | subtasks_vm | PENDING |  |  |
 | T033 | engineering | evaluation_release | PENDING |  |  |
-| T034 | engineering | evaluation_release | PENDING |  |  |
+| T034 | engineering | evaluation_release | DONE_DEV | `uv run pytest tests/unit/test_agents_experiments.py` | Comparative B0-vs-B3 claims need LLM baselines + hidden family split — Experiment matrix: per-baseline/service/env means with bootstrap CIs over subtasks; DEV_SIMULATION_ONLY. |
 | T035 | engineering | evaluation_release | PENDING |  |  |
 | T036 | engineering | evaluation_release | PENDING |  |  |
 | T037 | engineering | evaluation_release | PENDING |  |  |

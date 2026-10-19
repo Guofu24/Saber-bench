@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T03:36:47+00:00",
+  "updated_at": "2026-10-19T03:41:04+00:00",
   "items": {
     "T001": {
       "kind": "engineering",
@@ -442,7 +442,18 @@
     "T026": {
       "kind": "engineering",
       "phase": "agents",
-      "status": "PENDING"
+      "status": "DONE_DEV",
+      "updated_at": "2026-10-19T03:41:04+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/unit/test_agents_experiments.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/agents/provider.py"
+      ],
+      "notes": "Deterministic StubProvider for CI; BlockedAnthropicProvider fails closed (subscription-only, no API budget)."
     },
     "T027": {
       "kind": "engineering",
@@ -489,7 +500,22 @@
     "T032": {
       "kind": "engineering",
       "phase": "agents",
-      "status": "PENDING"
+      "status": "DONE_DEV",
+      "updated_at": "2026-10-19T03:41:04+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/unit/test_agents_experiments.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/agents/baselines.py",
+        "src/saber/agents/router.py"
+      ],
+      "blockers": [
+        "LLM baselines B1-B4 need operator-approved provider + budget"
+      ],
+      "notes": "B0 rules-only + ORACLE run offline; specialist router by service; identical output contract."
     },
     "T0167.001": {
       "kind": "domain",
@@ -1454,7 +1480,23 @@
     "T034": {
       "kind": "engineering",
       "phase": "evaluation_release",
-      "status": "PENDING"
+      "status": "DONE_DEV",
+      "updated_at": "2026-10-19T03:41:04+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/unit/test_agents_experiments.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/experiments/matrix.py",
+        "src/saber/experiments/stats.py",
+        "tests/unit/test_agents_experiments.py"
+      ],
+      "blockers": [
+        "Comparative B0-vs-B3 claims need LLM baselines + hidden family split"
+      ],
+      "notes": "Experiment matrix: per-baseline/service/env means with bootstrap CIs over subtasks; DEV_SIMULATION_ONLY."
     },
     "T035": {
       "kind": "engineering",

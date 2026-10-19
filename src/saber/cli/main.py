@@ -164,6 +164,37 @@ def task_report(subtask_id: str, seeds: str) -> None:
 
 
 @cli.command(
+    "experiment", help="Run offline baselines (B0, ORACLE) over implemented subtasks and aggregate."
+)
+@click.option("--seeds", default="1,42", help="Comma-separated seeds.")
+@click.option(
+    "--out",
+    "out_path",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Write the report JSON here.",
+)
+def experiment(seeds: str, out_path: Path | None) -> None:
+    from saber.experiments import run_matrix
+
+    seed_list = [int(x) for x in seeds.split(",") if x.strip()]
+    report = run_matrix(seeds=seed_list)
+    if out_path is not None:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(
+            json.dumps(report, indent=2, ensure_ascii=False, default=str), encoding="utf-8"
+        )
+        click.echo(f"wrote {out_path}")
+    for row in report["by_baseline"]:
+        click.echo(
+            f"  {row['baseline']:7s} mean={row['mean']:.3f} CI[{row['ci_low']:.3f},{row['ci_high']:.3f}] n={row['n_subtasks']}"
+        )
+    click.echo(
+        f"blocked (no provider budget): {report['baselines_blocked']}  labels={report['labels']}"
+    )
+
+
+@cli.command(
     "smoke", help="End-to-end DEV smoke: build -> oracle -> reference -> grade for one subtask."
 )
 @click.option("--subtask", "subtask_id", default="T1112.001")
