@@ -292,20 +292,143 @@ def _mean(xs: list[float]) -> float | None:
     return round(sum(xs) / len(xs), 4) if xs else None
 
 
-def _bootstrap_ci(xs: list[float], iters: int = 2000, alpha: float = 0.05) -> list[float] | None:
-    """Percentile bootstrap CI for the mean (seeded for reproducibility)."""
-    if len(xs) < 2:
+def _cluster_bootstrap_ci(
+    by_cluster: dict[str, list[float]], iters: int = 2000, alpha: float = 0.05
+) -> list[float] | None:
+    """Percentile CI resampling CLUSTERS (pilots) with replacement, not individual episodes.
+
+    The seeds within a pilot are correlated (same templates), so an i.i.d. episode bootstrap would
+    understate uncertainty. This resamples whole pilots, pooling their episodes, then takes the
+    mean — the appropriate block bootstrap for a few pilots × a few seeds.
+    """
+    clusters = [c for c in by_cluster.values() if c]
+    if len(clusters) < 2:
         return None
     rng = random.Random(20261019)
-    n = len(xs)
-    means = sorted(sum(rng.choice(xs) for _ in range(n)) / n for _ in range(iters))
-    lo = means[int((alpha / 2) * iters)]
-    hi = means[int((1 - alpha / 2) * iters) - 1]
-    return [round(lo, 4), round(hi, 4)]
+    k = len(clusters)
+    means: list[float] = []
+    for _ in range(iters):
+        pooled: list[float] = []
+        for _ in range(k):
+            pooled.extend(rng.choice(clusters))
+        if pooled:
+            means.append(sum(pooled) / len(pooled))
+    means.sort()
+    return [
+        round(means[int((alpha / 2) * iters)], 4),
+        round(means[int((1 - alpha / 2) * iters) - 1], 4),
+    ]
 
 
-def _agg(xs: list[float]) -> dict[str, Any]:
-    return {"mean": _mean(xs), "n": len(xs), "ci95": _bootstrap_ci(xs)}
+def _agg_clustered(by_cluster: dict[str, list[float]]) -> dict[str, Any]:
+    flat = [v for c in by_cluster.values() for v in c]
+    return {
+        "mean": _mean(flat),
+        "n_episodes": len(flat),
+        "n_clusters": len([c for c in by_cluster.values() if c]),
+        "ci95_cluster": _cluster_bootstrap_ci(by_cluster),
+    }
+
+
+def _pctl(xs: list[int], q: float) -> int | None:
+    if not xs:
+        return None
+    s = sorted(xs)
+    return s[min(len(s) - 1, int(q * len(s)))]
+
+
+def _by_cluster(episodes: list[dict[str, Any]], val: Any) -> dict[str, list[float]]:
+    out: dict[str, list[float]] = {}
+    for e in episodes:
+        v = val(e)
+        if v is not None:
+            out.setdefault(e["subtask_id"], []).append(v)
+    return out
+
+
+def _by_seed(
+    episodes: list[dict[str, Any]], seeds: list[int], use_llm: bool
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for s in seeds:
+        es = [e for e in episodes if e["seed"] == s]
+        row: dict[str, Any] = {
+            "seed": s,
+            "oracle_mean": _mean([e["oracle_score"] for e in es]),
+            "rules_mean": _mean([e["rules"]["score"] for e in es]),
+        }
+        if use_llm:
+            comp = [e["llm"] for e in es if "llm" in e and e["llm"].get("completed")]
+            row["llm_mean_completed"] = _mean([x["score"] for x in comp])
+            row["llm_completion"] = (
+                round(sum(1 for e in es if "llm" in e and e["llm"].get("completed")) / len(es), 4)
+                if es
+                else None
+            )
+        rows.append(row)
+    return rows
+
+
+def summarize_episodes(
+    episodes: list[dict[str, Any]], subtask_ids: list[str], seeds: list[int], use_llm: bool
+) -> dict[str, Any]:
+    """Pure aggregation of collected episodes (so a saved run can be re-aggregated identically)."""
+    summary: dict[str, Any] = {
+        "n_episodes": len(episodes),
+        "n_pilots": len(subtask_ids),
+        "seeds": list(seeds),
+        "ci_method": "cluster bootstrap resampling the pilots (seeds within a pilot are correlated)",
+        "oracle": _agg_clustered(_by_cluster(episodes, lambda e: e["oracle_score"])),
+        "rules": _agg_clustered(_by_cluster(episodes, lambda e: e["rules"]["score"])),
+        "oracle_minus_rules": _agg_clustered(
+            _by_cluster(episodes, lambda e: e["oracle_score"] - e["rules"]["score"])
+        ),
+        "by_seed": _by_seed(episodes, seeds, use_llm),
+    }
+    if not use_llm:
+        return summary
+    llm = [e["llm"] for e in episodes if "llm" in e]
+    completed = [x for x in llm if x.get("completed")]
+    llm_all_by: dict[str, list[float]] = {}
+    llm_comp_by: dict[str, list[float]] = {}
+    lr_by: dict[str, list[float]] = {}
+    incomplete: list[dict[str, Any]] = []
+    for e in episodes:
+        if "llm" not in e:
+            continue
+        x = e["llm"]
+        sid = e["subtask_id"]
+        llm_all_by.setdefault(sid, []).append(float(x.get("score", 0.0)))
+        if x.get("completed"):
+            llm_comp_by.setdefault(sid, []).append(float(x["score"]))
+            lr_by.setdefault(sid, []).append(float(x["score"]) - float(e["rules"]["score"]))
+        else:
+            incomplete.append(
+                {
+                    "subtask_id": sid,
+                    "seed": e["seed"],
+                    "reason": "timeout"
+                    if x.get("timed_out")
+                    else ("is_error" if x.get("is_error") else x.get("parse_note")),
+                }
+            )
+    latencies = [x["duration_ms"] for x in completed if isinstance(x.get("duration_ms"), int)]
+    summary.update(
+        {
+            "llm_completion_rate": round(len(completed) / len(llm), 4) if llm else None,
+            "llm_incomplete": incomplete,
+            "llm_score_completed": _agg_clustered(llm_comp_by),
+            "llm_score_all": _agg_clustered(llm_all_by),
+            "llm_minus_rules": _agg_clustered(lr_by),
+            "llm_mean_latency_ms": int(sum(latencies) / len(latencies)) if latencies else None,
+            "llm_latency_p95_ms": _pctl(latencies, 0.95),
+            "llm_total_tool_failures": sum(x.get("tool_failures", 0) for x in llm),
+            "llm_total_cost_usd_listprice": round(
+                sum(x.get("cost_usd_listprice") or 0.0 for x in llm), 4
+            ),
+        }
+    )
+    return summary
 
 
 def run_baselines(
@@ -326,46 +449,10 @@ def run_baselines(
         for s in seed_list
     ]
 
-    oracle_scores = [e["oracle_score"] for e in episodes]
-    rules_scores = [e["rules"]["score"] for e in episodes]
-    paired_or = [o - r for o, r in zip(oracle_scores, rules_scores, strict=True)]
-    summary: dict[str, Any] = {
-        "n_episodes": len(episodes),
-        "n_pilots": len(ids),
-        "seeds": seed_list,
-        "oracle": _agg(oracle_scores),
-        "rules": _agg(rules_scores),
-        "oracle_minus_rules": _agg(paired_or),
-    }
-    model_used_observed = None
-    providers_observed = None
-    if use_llm:
-        llm = [e["llm"] for e in episodes if "llm" in e]
-        completed = [x for x in llm if x.get("completed")]
-        llm_scores_completed = [x["score"] for x in completed]
-        llm_scores_all = [x.get("score", 0.0) for x in llm]
-        latencies = [x["duration_ms"] for x in completed if isinstance(x.get("duration_ms"), int)]
-        model_used_observed = sorted({x["model_used"] for x in llm if x.get("model_used")})
-        providers_observed = sorted({x["provider"] for x in llm if x.get("provider")})
-        # Paired LLM − rules only over episodes where the LLM completed.
-        paired_lr = [
-            x["score"] - e["rules"]["score"]
-            for e, x in zip((e for e in episodes if "llm" in e), llm, strict=True)
-            if x.get("completed")
-        ]
-        summary.update(
-            {
-                "llm_completion_rate": round(len(completed) / len(llm), 4) if llm else None,
-                "llm_score_completed": _agg(llm_scores_completed),
-                "llm_score_all": _agg(llm_scores_all),
-                "llm_minus_rules": _agg(paired_lr),
-                "llm_mean_latency_ms": int(sum(latencies) / len(latencies)) if latencies else None,
-                "llm_total_tool_failures": sum(x.get("tool_failures", 0) for x in llm),
-                "llm_total_cost_usd_listprice": round(
-                    sum(x.get("cost_usd_listprice") or 0.0 for x in llm), 4
-                ),
-            }
-        )
+    summary = summarize_episodes(episodes, ids, seed_list, use_llm)
+    llm = [e["llm"] for e in episodes if "llm" in e]
+    model_used_observed = sorted({x["model_used"] for x in llm if x.get("model_used")}) or None
+    providers_observed = sorted({x["provider"] for x in llm if x.get("provider")}) or None
 
     return {
         "schema_version": 2,
@@ -431,8 +518,8 @@ def write_report(report: dict[str, Any], out_dir: Path | None = None) -> tuple[P
 def _ci_str(agg: dict[str, Any] | None) -> str:
     if not agg:
         return "—"
-    ci = agg.get("ci95")
-    cis = f" CI95[{ci[0]},{ci[1]}]" if ci else ""
+    ci = agg.get("ci95_cluster")
+    cis = f" clusterCI95[{ci[0]},{ci[1]}]" if ci else ""
     return f"{agg.get('mean')}{cis}"
 
 
@@ -447,9 +534,10 @@ def _markdown(report: dict[str, Any]) -> str:
         f"- Labels: {', '.join(report['labels'])}",
         f"- {report['caveat']}",
         "",
-        "## Summary (mean over all episodes, bootstrap 95% CI)",
+        "## Summary (mean over episodes; 95% CI = cluster bootstrap over pilots)",
         "",
         f"- episodes: {s.get('n_episodes')} ({s.get('n_pilots')} pilots x {len(report['seeds'])} seeds)",
+        f"- CI method: {s.get('ci_method')}",
         f"- oracle: {_ci_str(s.get('oracle'))}",
         f"- rules (naive): {_ci_str(s.get('rules'))}",
         f"- oracle − rules (paired): {_ci_str(s.get('oracle_minus_rules'))}",
@@ -460,9 +548,21 @@ def _markdown(report: dict[str, Any]) -> str:
             f"- LLM score (completed): {_ci_str(s.get('llm_score_completed'))}",
             f"- LLM score (all episodes): {_ci_str(s.get('llm_score_all'))}",
             f"- LLM − rules (paired, completed): {_ci_str(s.get('llm_minus_rules'))}",
-            f"- LLM mean latency: {s.get('llm_mean_latency_ms')} ms  tool failures: {s.get('llm_total_tool_failures')}",
+            f"- LLM latency: mean {s.get('llm_mean_latency_ms')} ms, p95 {s.get('llm_latency_p95_ms')} ms  tool failures: {s.get('llm_total_tool_failures')}",
+            f"- LLM incomplete episodes: {s.get('llm_incomplete')}",
             f"- LLM list-price cost (informational): ${s.get('llm_total_cost_usd_listprice')}",
         ]
+    lines += [
+        "",
+        "## Per-seed (run-to-run variability; 3 seeds = limited evidence of stability)",
+        "",
+    ]
+    lines += ["| Seed | Oracle | Rules | LLM completed | Completion |", "|---|---|---|---|---|"]
+    for r in s.get("by_seed", []):
+        lines.append(
+            f"| {r['seed']} | {r['oracle_mean']} | {r['rules_mean']} | "
+            f"{r.get('llm_mean_completed', '—')} | {r.get('llm_completion', '—')} |"
+        )
     lines += [
         "",
         "## Per-pilot (mean over seeds)",

@@ -1,0 +1,3877 @@
+{
+  "schema_version": 2,
+  "generated_at": "2026-10-19T08:36:35+00:00",
+  "labels": [
+    "GOLD_PILOT_V1",
+    "LLM_BASELINE_CLI_SUBSCRIPTION",
+    "DEV_SIMULATION_ONLY"
+  ],
+  "auth": "claude.ai subscription CLI; the runner scrubs API-key/provider env vars and does not itself introduce API billing, but cannot override operator apiKeyHelper/settings/stored credentials (operator responsibility). provider/cost_basis recorded for audit; cost is LIST price, informational only.",
+  "model_requested": "haiku",
+  "model_used_observed": [
+    "claude-haiku-4-5"
+  ],
+  "providers_observed": [
+    "firstParty"
+  ],
+  "split": "dev",
+  "seeds": [
+    1,
+    2,
+    3
+  ],
+  "per_pilot": [
+    {
+      "subtask_id": "T1112.002",
+      "service": "MON",
+      "oracle_mean": 1.0,
+      "rules_mean": 0.8333,
+      "llm_mean_completed": 1.0,
+      "llm_completion": 0.6667
+    },
+    {
+      "subtask_id": "T1348.002",
+      "service": "MON",
+      "oracle_mean": 1.0,
+      "rules_mean": 0.5354,
+      "llm_mean_completed": 1.0,
+      "llm_completion": 1.0
+    },
+    {
+      "subtask_id": "T1387.002",
+      "service": "MON",
+      "oracle_mean": 1.0,
+      "rules_mean": 0.4,
+      "llm_mean_completed": 0.6667,
+      "llm_completion": 1.0
+    },
+    {
+      "subtask_id": "T0020.001",
+      "service": "CNT",
+      "oracle_mean": 1.0,
+      "rules_mean": 0.3083,
+      "llm_mean_completed": 1.0,
+      "llm_completion": 1.0
+    },
+    {
+      "subtask_id": "T1406.001",
+      "service": "CNT",
+      "oracle_mean": 1.0,
+      "rules_mean": 0.9024,
+      "llm_mean_completed": 1.0,
+      "llm_completion": 1.0
+    },
+    {
+      "subtask_id": "T1111.002",
+      "service": "CNT",
+      "oracle_mean": 1.0,
+      "rules_mean": 0.0,
+      "llm_mean_completed": 0.9,
+      "llm_completion": 1.0
+    },
+    {
+      "subtask_id": "T2013.001",
+      "service": "HUNT",
+      "oracle_mean": 1.0,
+      "rules_mean": 0.0,
+      "llm_mean_completed": 0.9354,
+      "llm_completion": 1.0
+    },
+    {
+      "subtask_id": "T1102.002",
+      "service": "HUNT",
+      "oracle_mean": 1.0,
+      "rules_mean": 0.7895,
+      "llm_mean_completed": 1.0,
+      "llm_completion": 1.0
+    },
+    {
+      "subtask_id": "T0167.002",
+      "service": "HUNT",
+      "oracle_mean": 1.0,
+      "rules_mean": 0.6316,
+      "llm_mean_completed": 1.0,
+      "llm_completion": 1.0
+    },
+    {
+      "subtask_id": "T0173.002",
+      "service": "IR",
+      "oracle_mean": 1.0,
+      "rules_mean": 0.4939,
+      "llm_mean_completed": 1.0,
+      "llm_completion": 1.0
+    },
+    {
+      "subtask_id": "T0397.002",
+      "service": "IR",
+      "oracle_mean": 1.0,
+      "rules_mean": 0.3833,
+      "llm_mean_completed": 1.0,
+      "llm_completion": 1.0
+    },
+    {
+      "subtask_id": "T1324.002",
+      "service": "IR",
+      "oracle_mean": 1.0,
+      "rules_mean": 0.0,
+      "llm_mean_completed": 0.84,
+      "llm_completion": 1.0
+    }
+  ],
+  "episodes": [
+    {
+      "subtask_id": "T1112.002",
+      "service": "MON",
+      "split": "dev",
+      "seed": 1,
+      "episode_id": "2e547ffc-b68d-5ca9-b600-7a0b6535a3c3",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.5,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "verdict",
+            "score": 0.0,
+            "weight": 0.5,
+            "detail": {}
+          },
+          {
+            "field": "triggering_rule",
+            "score": 1.0,
+            "weight": 0.25,
+            "detail": {}
+          },
+          {
+            "field": "affected_asset",
+            "score": 1.0,
+            "weight": 0.25,
+            "detail": {}
+          }
+        ],
+        "grounding": {
+          "checked": 1,
+          "grounded": 1,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": null,
+        "provider": null,
+        "cost_basis": null,
+        "completed": false,
+        "parse_note": "claude CLI timed out after 150s",
+        "is_error": false,
+        "timed_out": true,
+        "tool_failures": 1,
+        "permission_denials": [],
+        "duration_ms": null,
+        "wall_ms": 343516,
+        "num_turns": null,
+        "cost_usd_listprice": null,
+        "returncode": null,
+        "error_detail": "claude CLI timed out after 150s",
+        "score": 0.0,
+        "components": [],
+        "grounding": null
+      }
+    },
+    {
+      "subtask_id": "T1112.002",
+      "service": "MON",
+      "split": "dev",
+      "seed": 2,
+      "episode_id": "585873cb-e7c9-5510-853e-080abb58c4f0",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 1.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "verdict",
+            "score": 1.0,
+            "weight": 0.5,
+            "detail": {}
+          },
+          {
+            "field": "triggering_rule",
+            "score": 1.0,
+            "weight": 0.25,
+            "detail": {}
+          },
+          {
+            "field": "affected_asset",
+            "score": 1.0,
+            "weight": 0.25,
+            "detail": {}
+          }
+        ],
+        "grounding": {
+          "checked": 1,
+          "grounded": 1,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 5715,
+        "wall_ms": 7797,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.021427,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "verdict",
+            "score": 1.0,
+            "weight": 0.5,
+            "detail": {}
+          },
+          {
+            "field": "triggering_rule",
+            "score": 1.0,
+            "weight": 0.25,
+            "detail": {}
+          },
+          {
+            "field": "affected_asset",
+            "score": 1.0,
+            "weight": 0.25,
+            "detail": {}
+          }
+        ],
+        "grounding": {
+          "checked": 1,
+          "grounded": 1,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "affected_asset",
+          "triggering_rule",
+          "verdict"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1112.002",
+      "service": "MON",
+      "split": "dev",
+      "seed": 3,
+      "episode_id": "b5976f53-2de1-5f01-b22f-a08ab1dfe425",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 1.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "verdict",
+            "score": 1.0,
+            "weight": 0.5,
+            "detail": {}
+          },
+          {
+            "field": "triggering_rule",
+            "score": 1.0,
+            "weight": 0.25,
+            "detail": {}
+          },
+          {
+            "field": "affected_asset",
+            "score": 1.0,
+            "weight": 0.25,
+            "detail": {}
+          }
+        ],
+        "grounding": {
+          "checked": 1,
+          "grounded": 1,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 4886,
+        "wall_ms": 6217,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.049819999999999996,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "verdict",
+            "score": 1.0,
+            "weight": 0.5,
+            "detail": {}
+          },
+          {
+            "field": "triggering_rule",
+            "score": 1.0,
+            "weight": 0.25,
+            "detail": {}
+          },
+          {
+            "field": "affected_asset",
+            "score": 1.0,
+            "weight": 0.25,
+            "detail": {}
+          }
+        ],
+        "grounding": {
+          "checked": 1,
+          "grounded": 1,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "affected_asset",
+          "triggering_rule",
+          "verdict"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1348.002",
+      "service": "MON",
+      "split": "dev",
+      "seed": 1,
+      "episode_id": "c8db77e7-0d49-5387-9723-1390f59bb0cc",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.2727,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "labels",
+            "score": 0.2727272727272727,
+            "weight": 1.0,
+            "detail": {
+              "n": 11,
+              "correct": 3
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 11,
+          "grounded": 11,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 7328,
+        "wall_ms": 8782,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.026144,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "labels",
+            "score": 1.0,
+            "weight": 1.0,
+            "detail": {
+              "n": 11,
+              "correct": 11
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 11,
+          "grounded": 11,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "labels"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1348.002",
+      "service": "MON",
+      "split": "dev",
+      "seed": 2,
+      "episode_id": "b6a2408f-48a7-565f-a6e9-c4c21196546f",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.7778,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "labels",
+            "score": 0.7777777777777778,
+            "weight": 1.0,
+            "detail": {
+              "n": 9,
+              "correct": 7
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 9,
+          "grounded": 9,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 7572,
+        "wall_ms": 8936,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.026101,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "labels",
+            "score": 1.0,
+            "weight": 1.0,
+            "detail": {
+              "n": 9,
+              "correct": 9
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 9,
+          "grounded": 9,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "labels"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1348.002",
+      "service": "MON",
+      "split": "dev",
+      "seed": 3,
+      "episode_id": "0f7bcaa6-0d8a-5bd7-b202-7dcb3c86f474",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.5556,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "labels",
+            "score": 0.5555555555555556,
+            "weight": 1.0,
+            "detail": {
+              "n": 9,
+              "correct": 5
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 9,
+          "grounded": 9,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 6720,
+        "wall_ms": 8047,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.025008000000000002,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "labels",
+            "score": 1.0,
+            "weight": 1.0,
+            "detail": {
+              "n": 9,
+              "correct": 9
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 9,
+          "grounded": 9,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "labels"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1387.002",
+      "service": "MON",
+      "split": "dev",
+      "seed": 1,
+      "episode_id": "1a3bc9ec-7160-5b32-90ba-dfff272486cd",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "verdict",
+            "score": 0.0,
+            "weight": 0.6,
+            "detail": {}
+          },
+          {
+            "field": "payload_offset",
+            "score": 0.0,
+            "weight": 0.4,
+            "detail": {
+              "iou": 0.0,
+              "threshold": 0.8
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 3953,
+        "wall_ms": 5968,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.020515000000000002,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "verdict",
+            "score": 1.0,
+            "weight": 0.6,
+            "detail": {}
+          },
+          {
+            "field": "payload_offset",
+            "score": 1.0,
+            "weight": 0.4,
+            "detail": {
+              "iou": 1.0,
+              "threshold": 0.8
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "payload_offset",
+          "verdict"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1387.002",
+      "service": "MON",
+      "split": "dev",
+      "seed": 2,
+      "episode_id": "eabf1c08-7f95-5cb4-9428-16fc4dd5502e",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.6,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "verdict",
+            "score": 1.0,
+            "weight": 0.6,
+            "detail": {}
+          },
+          {
+            "field": "payload_offset",
+            "score": 0.0,
+            "weight": 0.4,
+            "detail": {
+              "iou": 0.062112,
+              "threshold": 0.8
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 41765,
+        "wall_ms": 42953,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.049059000000000005,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "verdict",
+            "score": 1.0,
+            "weight": 0.6,
+            "detail": {}
+          },
+          {
+            "field": "payload_offset",
+            "score": 1.0,
+            "weight": 0.4,
+            "detail": {
+              "iou": 1.0,
+              "threshold": 0.8
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "payload_offset",
+          "verdict"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1387.002",
+      "service": "MON",
+      "split": "dev",
+      "seed": 3,
+      "episode_id": "9f3edd12-3df5-5210-811e-ab823fb4e05e",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.6,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "verdict",
+            "score": 1.0,
+            "weight": 0.6,
+            "detail": {}
+          },
+          {
+            "field": "payload_offset",
+            "score": 0.0,
+            "weight": 0.4,
+            "detail": {
+              "iou": 0.05303,
+              "threshold": 0.8
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 22367,
+        "wall_ms": 23530,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.033665,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 0.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "verdict",
+            "score": 0.0,
+            "weight": 0.6,
+            "detail": {}
+          },
+          {
+            "field": "payload_offset",
+            "score": 0.0,
+            "weight": 0.4,
+            "detail": {
+              "iou": 0.555556,
+              "threshold": 0.8
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "payload_offset",
+          "verdict"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T0020.001",
+      "service": "CNT",
+      "split": "dev",
+      "seed": 1,
+      "episode_id": "0cc0846a-0b98-5195-9cad-c5c12ea14cc7",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.3417,
+        "error": null,
+        "false_positives": 8,
+        "components": [
+          {
+            "field": "rule",
+            "score": 0.3416666666666667,
+            "weight": 1.0,
+            "detail": {
+              "tp": 7,
+              "fp": 8,
+              "fn": 1,
+              "tn": 17,
+              "total": 33,
+              "parse_ok": true,
+              "score_formula": "max(0, M'/M - N'/(N'+M'))"
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 69101,
+        "wall_ms": 70311,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.072317,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": 0,
+        "components": [
+          {
+            "field": "rule",
+            "score": 1.0,
+            "weight": 1.0,
+            "detail": {
+              "tp": 8,
+              "fp": 0,
+              "fn": 0,
+              "tn": 25,
+              "total": 33,
+              "parse_ok": true,
+              "score_formula": "max(0, M'/M - N'/(N'+M'))"
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 1,
+          "grounded": 0,
+          "fraction": 0.0,
+          "hallucinated": [
+            "%27.*?(UNION|SELECT|DROP|OR|AND|SLEEP|--)|%3B.*?(UNION|SELECT|DROP|OR|AND|--)|UNION.*?SELECT|DROP.*?TABLE|AND.*?SLEEP"
+          ],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "rule"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T0020.001",
+      "service": "CNT",
+      "split": "dev",
+      "seed": 2,
+      "episode_id": "ed6f9a21-026e-5dd4-8633-2ea172f2af35",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.3333,
+        "error": null,
+        "false_positives": 10,
+        "components": [
+          {
+            "field": "rule",
+            "score": 0.33333333333333326,
+            "weight": 1.0,
+            "detail": {
+              "tp": 8,
+              "fp": 10,
+              "fn": 1,
+              "tn": 13,
+              "total": 32,
+              "parse_ok": true,
+              "score_formula": "max(0, M'/M - N'/(N'+M'))"
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 88125,
+        "wall_ms": 89469,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.084107,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": 0,
+        "components": [
+          {
+            "field": "rule",
+            "score": 1.0,
+            "weight": 1.0,
+            "detail": {
+              "tp": 9,
+              "fp": 0,
+              "fn": 0,
+              "tn": 23,
+              "total": 32,
+              "parse_ok": true,
+              "score_formula": "max(0, M'/M - N'/(N'+M'))"
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 1,
+          "grounded": 0,
+          "fraction": 0.0,
+          "hallucinated": [
+            "(%27|')[^?]*(UNION|SELECT|DROP|INSERT|UPDATE|DELETE|EXEC|OR|AND|;|%3B|--)|(AND|OR)[^?]*SLEEP"
+          ],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "rule"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T0020.001",
+      "service": "CNT",
+      "split": "dev",
+      "seed": 3,
+      "episode_id": "e8f1a85d-6a73-5b78-a6d0-6dea06029fd0",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.25,
+        "error": null,
+        "false_positives": 6,
+        "components": [
+          {
+            "field": "rule",
+            "score": 0.25,
+            "weight": 1.0,
+            "detail": {
+              "tp": 6,
+              "fp": 6,
+              "fn": 2,
+              "tn": 18,
+              "total": 32,
+              "parse_ok": true,
+              "score_formula": "max(0, M'/M - N'/(N'+M'))"
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 63241,
+        "wall_ms": 64406,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.068234,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": 0,
+        "components": [
+          {
+            "field": "rule",
+            "score": 1.0,
+            "weight": 1.0,
+            "detail": {
+              "tp": 8,
+              "fp": 0,
+              "fn": 0,
+              "tn": 24,
+              "total": 32,
+              "parse_ok": true,
+              "score_formula": "max(0, M'/M - N'/(N'+M'))"
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 1,
+          "grounded": 0,
+          "fraction": 0.0,
+          "hallucinated": [
+            "(%27|%3B|SLEEP%28|--)"
+          ],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "rule"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1406.001",
+      "service": "CNT",
+      "split": "dev",
+      "seed": 1,
+      "episode_id": "1cb83875-9e0c-5090-bba5-eec4b89300c3",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.9091,
+        "error": null,
+        "false_positives": 1,
+        "components": [
+          {
+            "field": "yara",
+            "score": 0.9090909090909091,
+            "weight": 1.0,
+            "detail": {
+              "tp": 5.0,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.833333,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 6,
+              "truth_size": 5,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 27326,
+        "wall_ms": 28515,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.037494,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": 0,
+        "components": [
+          {
+            "field": "yara",
+            "score": 1.0,
+            "weight": 1.0,
+            "detail": {
+              "tp": 5.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 5,
+              "truth_size": 5,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "rule"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1406.001",
+      "service": "CNT",
+      "split": "dev",
+      "seed": 2,
+      "episode_id": "39eb3be0-862e-57b9-8655-d53a10675d51",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.8889,
+        "error": null,
+        "false_positives": 1,
+        "components": [
+          {
+            "field": "yara",
+            "score": 0.888888888888889,
+            "weight": 1.0,
+            "detail": {
+              "tp": 4.0,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.8,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 5,
+              "truth_size": 4,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 13688,
+        "wall_ms": 15093,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.027284,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": 0,
+        "components": [
+          {
+            "field": "yara",
+            "score": 1.0,
+            "weight": 1.0,
+            "detail": {
+              "tp": 4.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 4,
+              "truth_size": 4,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 1,
+          "grounded": 0,
+          "fraction": 0.0,
+          "hallucinated": [
+            "T1406_001"
+          ],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "rule"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1406.001",
+      "service": "CNT",
+      "split": "dev",
+      "seed": 3,
+      "episode_id": "9776b112-4565-5c65-9825-e0f457319b58",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.9091,
+        "error": null,
+        "false_positives": 1,
+        "components": [
+          {
+            "field": "yara",
+            "score": 0.9090909090909091,
+            "weight": 1.0,
+            "detail": {
+              "tp": 5.0,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.833333,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 6,
+              "truth_size": 5,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 41889,
+        "wall_ms": 43047,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.049205,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": 0,
+        "components": [
+          {
+            "field": "yara",
+            "score": 1.0,
+            "weight": 1.0,
+            "detail": {
+              "tp": 5.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 5,
+              "truth_size": 5,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 1,
+          "grounded": 0,
+          "fraction": 0.0,
+          "hallucinated": [
+            "T1406_001"
+          ],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "rule"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1111.002",
+      "service": "CNT",
+      "split": "dev",
+      "seed": 1,
+      "episode_id": "aa4e3808-8949-514e-b8ae-6b436e630a63",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "filter",
+            "score": 0.0,
+            "weight": 0.7,
+            "detail": {
+              "parse_ok": false
+            }
+          },
+          {
+            "field": "fp_cause",
+            "score": 0.0,
+            "weight": 0.3,
+            "detail": {}
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 13643,
+        "wall_ms": 15030,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.027544,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 0.7,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "filter",
+            "score": 1.0,
+            "weight": 0.7,
+            "detail": {
+              "delta_fp_pct": 1.0,
+              "delta_tp_lost_pct": 0.0
+            }
+          },
+          {
+            "field": "fp_cause",
+            "score": 0.0,
+            "weight": 0.3,
+            "detail": {}
+          }
+        ],
+        "grounding": {
+          "checked": 2,
+          "grounded": 1,
+          "fraction": 0.5,
+          "hallucinated": [
+            "process.name"
+          ],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "filter",
+          "fp_cause"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1111.002",
+      "service": "CNT",
+      "split": "dev",
+      "seed": 2,
+      "episode_id": "3235ccc0-3953-569a-a46d-aa5d94cc9be9",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "filter",
+            "score": 0.0,
+            "weight": 0.7,
+            "detail": {
+              "parse_ok": false
+            }
+          },
+          {
+            "field": "fp_cause",
+            "score": 0.0,
+            "weight": 0.3,
+            "detail": {}
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 15147,
+        "wall_ms": 16375,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.02937,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "filter",
+            "score": 1.0,
+            "weight": 0.7,
+            "detail": {
+              "delta_fp_pct": 1.0,
+              "delta_tp_lost_pct": 0.0
+            }
+          },
+          {
+            "field": "fp_cause",
+            "score": 1.0,
+            "weight": 0.3,
+            "detail": {}
+          }
+        ],
+        "grounding": {
+          "checked": 2,
+          "grounded": 1,
+          "fraction": 0.5,
+          "hallucinated": [
+            "process.name"
+          ],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "filter",
+          "fp_cause"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1111.002",
+      "service": "CNT",
+      "split": "dev",
+      "seed": 3,
+      "episode_id": "f484bd1f-1ae3-5c0c-be58-1a311084ff75",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "filter",
+            "score": 0.0,
+            "weight": 0.7,
+            "detail": {
+              "parse_ok": false
+            }
+          },
+          {
+            "field": "fp_cause",
+            "score": 0.0,
+            "weight": 0.3,
+            "detail": {}
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 38094,
+        "wall_ms": 39235,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.042585000000000005,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "filter",
+            "score": 1.0,
+            "weight": 0.7,
+            "detail": {
+              "delta_fp_pct": 1.0,
+              "delta_tp_lost_pct": 0.0
+            }
+          },
+          {
+            "field": "fp_cause",
+            "score": 1.0,
+            "weight": 0.3,
+            "detail": {}
+          }
+        ],
+        "grounding": {
+          "checked": 2,
+          "grounded": 1,
+          "fraction": 0.5,
+          "hallucinated": [
+            "process.name"
+          ],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "filter",
+          "fp_cause"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T2013.001",
+      "service": "HUNT",
+      "split": "dev",
+      "seed": 1,
+      "episode_id": "88024973-cd80-502d-93a0-42d92dd00168",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.0,
+        "error": null,
+        "false_positives": 2,
+        "components": [
+          {
+            "field": "ioc.ipv4",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 2,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 2,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.domain",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 0,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 0,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.url",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 0,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 0,
+              "truth_size": 1,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.sha256",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 0,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 0,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.email",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 0,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 0,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.cve",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 0,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 0,
+              "truth_size": 1,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 3,
+          "grounded": 3,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 11254,
+        "wall_ms": 12625,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.028030000000000003,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 0.9444,
+        "error": null,
+        "false_positives": 2,
+        "components": [
+          {
+            "field": "ioc.ipv4",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 2.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 2,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.domain",
+            "score": 0.6666666666666666,
+            "weight": null,
+            "detail": {
+              "tp": 2.0,
+              "fp": 2,
+              "fn": 0,
+              "precision": 0.5,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 4,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.url",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 1.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 1,
+              "truth_size": 1,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.sha256",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 2.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 2,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.email",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 2.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 2,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.cve",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 1.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 1,
+              "truth_size": 1,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 13,
+          "grounded": 13,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "ioc"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T2013.001",
+      "service": "HUNT",
+      "split": "dev",
+      "seed": 2,
+      "episode_id": "1d31e868-c975-5873-93a1-c9fcd2ddbcae",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.0,
+        "error": null,
+        "false_positives": 2,
+        "components": [
+          {
+            "field": "ioc.ipv4",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 2,
+              "fn": 3,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 2,
+              "truth_size": 3,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.domain",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 0,
+              "fn": 3,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 0,
+              "truth_size": 3,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.url",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 0,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 0,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.sha256",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 0,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 0,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.email",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 0,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 0,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.cve",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 0,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 0,
+              "truth_size": 1,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 3,
+          "grounded": 3,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 51890,
+        "wall_ms": 53233,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.059387,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 0.9333,
+        "error": null,
+        "false_positives": 4,
+        "components": [
+          {
+            "field": "ioc.ipv4",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 3.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 3,
+              "truth_size": 3,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.domain",
+            "score": 0.6,
+            "weight": null,
+            "detail": {
+              "tp": 3.0,
+              "fp": 4,
+              "fn": 0,
+              "precision": 0.428571,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 7,
+              "truth_size": 3,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.url",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 2.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 2,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.sha256",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 2.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 2,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.email",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 2.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 2,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.cve",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 1.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 1,
+              "truth_size": 1,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 18,
+          "grounded": 18,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "ioc"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T2013.001",
+      "service": "HUNT",
+      "split": "dev",
+      "seed": 3,
+      "episode_id": "d088135e-f07f-58ef-8382-cccc84474606",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.0,
+        "error": null,
+        "false_positives": 2,
+        "components": [
+          {
+            "field": "ioc.ipv4",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 2,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 2,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.domain",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 0,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 0,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.url",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 0,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 0,
+              "truth_size": 1,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.sha256",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 0,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 0,
+              "truth_size": 1,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.email",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 0,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 0,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.cve",
+            "score": 0.0,
+            "weight": null,
+            "detail": {
+              "tp": 0.0,
+              "fp": 0,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 0,
+              "truth_size": 2,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 3,
+          "grounded": 3,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 30234,
+        "wall_ms": 31359,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.041248,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 0.9286,
+        "error": null,
+        "false_positives": 3,
+        "components": [
+          {
+            "field": "ioc.ipv4",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 2.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 2,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.domain",
+            "score": 0.5714285714285715,
+            "weight": null,
+            "detail": {
+              "tp": 2.0,
+              "fp": 3,
+              "fn": 0,
+              "precision": 0.4,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 5,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.url",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 1.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 1,
+              "truth_size": 1,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.sha256",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 1.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 1,
+              "truth_size": 1,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.email",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 2.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 2,
+              "truth_size": 2,
+              "abstained": false
+            }
+          },
+          {
+            "field": "ioc.cve",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 2.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1",
+              "pred_size": 2,
+              "truth_size": 2,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 14,
+          "grounded": 14,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "ioc"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1102.002",
+      "service": "HUNT",
+      "split": "dev",
+      "seed": 1,
+      "episode_id": "8fda4e95-6363-533a-9225-8664c149c586",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.7895,
+        "error": null,
+        "false_positives": 0,
+        "components": [
+          {
+            "field": "compromised",
+            "score": 0.7894736842105263,
+            "weight": null,
+            "detail": {
+              "tp": 3.0,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.75,
+              "beta": 2.0,
+              "formula": "F2",
+              "pred_size": 3,
+              "truth_size": 4,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 3,
+          "grounded": 3,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 9507,
+        "wall_ms": 10843,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.028844,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": 0,
+        "components": [
+          {
+            "field": "compromised",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 4.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 2.0,
+              "formula": "F2",
+              "pred_size": 4,
+              "truth_size": 4,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 4,
+          "grounded": 4,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "compromised"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1102.002",
+      "service": "HUNT",
+      "split": "dev",
+      "seed": 2,
+      "episode_id": "425ea4d1-a95b-5624-b1d0-c0074fb45b5f",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.7895,
+        "error": null,
+        "false_positives": 0,
+        "components": [
+          {
+            "field": "compromised",
+            "score": 0.7894736842105263,
+            "weight": null,
+            "detail": {
+              "tp": 3.0,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.75,
+              "beta": 2.0,
+              "formula": "F2",
+              "pred_size": 3,
+              "truth_size": 4,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 3,
+          "grounded": 3,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 6792,
+        "wall_ms": 8108,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.025755,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": 0,
+        "components": [
+          {
+            "field": "compromised",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 4.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 2.0,
+              "formula": "F2",
+              "pred_size": 4,
+              "truth_size": 4,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 4,
+          "grounded": 4,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "compromised"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1102.002",
+      "service": "HUNT",
+      "split": "dev",
+      "seed": 3,
+      "episode_id": "bc4f9704-0fa5-518e-af74-a72207ccee2a",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.7895,
+        "error": null,
+        "false_positives": 0,
+        "components": [
+          {
+            "field": "compromised",
+            "score": 0.7894736842105263,
+            "weight": null,
+            "detail": {
+              "tp": 3.0,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.75,
+              "beta": 2.0,
+              "formula": "F2",
+              "pred_size": 3,
+              "truth_size": 4,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 3,
+          "grounded": 3,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 7555,
+        "wall_ms": 8875,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.025512,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": 0,
+        "components": [
+          {
+            "field": "compromised",
+            "score": 1.0,
+            "weight": null,
+            "detail": {
+              "tp": 4.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 2.0,
+              "formula": "F2",
+              "pred_size": 4,
+              "truth_size": 4,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 4,
+          "grounded": 4,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "compromised"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T0167.002",
+      "service": "HUNT",
+      "split": "dev",
+      "seed": 1,
+      "episode_id": "302eeba8-65e1-5a98-9a11-e72b09156501",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.625,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "verdicts",
+            "score": 0.625,
+            "weight": 1.0,
+            "detail": {
+              "n": 8,
+              "correct": 5
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 8,
+          "grounded": 8,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 9976,
+        "wall_ms": 11593,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.026359,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "verdicts",
+            "score": 1.0,
+            "weight": 1.0,
+            "detail": {
+              "n": 8,
+              "correct": 8
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 8,
+          "grounded": 8,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "verdicts"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T0167.002",
+      "service": "HUNT",
+      "split": "dev",
+      "seed": 2,
+      "episode_id": "843ec6ac-ea2c-5b26-96de-b4364bd6851f",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.7143,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "verdicts",
+            "score": 0.7142857142857143,
+            "weight": 1.0,
+            "detail": {
+              "n": 7,
+              "correct": 5
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 7,
+          "grounded": 7,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 18677,
+        "wall_ms": 19922,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.030062000000000002,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "verdicts",
+            "score": 1.0,
+            "weight": 1.0,
+            "detail": {
+              "n": 7,
+              "correct": 7
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 7,
+          "grounded": 7,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "verdicts"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T0167.002",
+      "service": "HUNT",
+      "split": "dev",
+      "seed": 3,
+      "episode_id": "bd94483b-1d27-5507-bad7-48da9d30ad98",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.5556,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "verdicts",
+            "score": 0.5555555555555556,
+            "weight": 1.0,
+            "detail": {
+              "n": 9,
+              "correct": 5
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 9,
+          "grounded": 9,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 8605,
+        "wall_ms": 9952,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.026456999999999998,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "verdicts",
+            "score": 1.0,
+            "weight": 1.0,
+            "detail": {
+              "n": 9,
+              "correct": 9
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 9,
+          "grounded": 9,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "verdicts"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T0173.002",
+      "service": "IR",
+      "split": "dev",
+      "seed": 1,
+      "episode_id": "255f243c-b32a-5d72-9a15-1e28f1ddfaf8",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.4667,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "event_order",
+            "score": 0.1111111111111111,
+            "weight": 0.6,
+            "detail": {
+              "tau": 0.111111,
+              "rho": 0.3,
+              "recall": 1.0,
+              "common": 9,
+              "formula": "max(0,tau) * recall"
+            }
+          },
+          {
+            "field": "utc_times",
+            "score": 1.0,
+            "weight": 0.4,
+            "detail": {
+              "within_5min": 9
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 18,
+          "grounded": 18,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 9623,
+        "wall_ms": 12047,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.027329,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "event_order",
+            "score": 1.0,
+            "weight": 0.6,
+            "detail": {
+              "tau": 1.0,
+              "rho": 1.0,
+              "recall": 1.0,
+              "common": 9,
+              "formula": "max(0,tau) * recall"
+            }
+          },
+          {
+            "field": "utc_times",
+            "score": 1.0,
+            "weight": 0.4,
+            "detail": {
+              "within_5min": 9
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 18,
+          "grounded": 9,
+          "fraction": 0.5,
+          "hallucinated": [
+            "2026-10-17T01:10:03Z",
+            "2026-10-17T05:58:48Z",
+            "2026-10-17T07:23:18Z",
+            "2026-10-17T13:17:29Z",
+            "2026-10-17T13:32:46Z",
+            "2026-10-17T16:44:34Z",
+            "2026-10-17T20:10:18Z",
+            "2026-10-17T23:25:19Z",
+            "2026-10-18T00:35:14Z"
+          ],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "event_order",
+          "utc_times"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T0173.002",
+      "service": "IR",
+      "split": "dev",
+      "seed": 2,
+      "episode_id": "3835cc24-7fa8-5832-8b21-417ea1f900bc",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.4333,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "event_order",
+            "score": 0.05555555555555555,
+            "weight": 0.6,
+            "detail": {
+              "tau": 0.055556,
+              "rho": 0.133333,
+              "recall": 1.0,
+              "common": 9,
+              "formula": "max(0,tau) * recall"
+            }
+          },
+          {
+            "field": "utc_times",
+            "score": 1.0,
+            "weight": 0.4,
+            "detail": {
+              "within_5min": 9
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 18,
+          "grounded": 18,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 10652,
+        "wall_ms": 12000,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.029494000000000003,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "event_order",
+            "score": 1.0,
+            "weight": 0.6,
+            "detail": {
+              "tau": 1.0,
+              "rho": 1.0,
+              "recall": 1.0,
+              "common": 9,
+              "formula": "max(0,tau) * recall"
+            }
+          },
+          {
+            "field": "utc_times",
+            "score": 1.0,
+            "weight": 0.4,
+            "detail": {
+              "within_5min": 9
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 18,
+          "grounded": 9,
+          "fraction": 0.5,
+          "hallucinated": [
+            "2026-10-17T03:41:05Z",
+            "2026-10-17T06:00:46Z",
+            "2026-10-17T06:11:49Z",
+            "2026-10-17T08:38:28Z",
+            "2026-10-17T13:08:37Z",
+            "2026-10-17T13:30:24Z",
+            "2026-10-17T14:38:02Z",
+            "2026-10-17T14:55:46Z",
+            "2026-10-17T17:49:49Z"
+          ],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "event_order",
+          "utc_times"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T0173.002",
+      "service": "IR",
+      "split": "dev",
+      "seed": 3,
+      "episode_id": "49e9c920-0e5e-59f7-8f32-5d7e397f9384",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.5818,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "event_order",
+            "score": 0.30303030303030304,
+            "weight": 0.6,
+            "detail": {
+              "tau": 0.30303,
+              "rho": 0.363636,
+              "recall": 1.0,
+              "common": 12,
+              "formula": "max(0,tau) * recall"
+            }
+          },
+          {
+            "field": "utc_times",
+            "score": 1.0,
+            "weight": 0.4,
+            "detail": {
+              "within_5min": 12
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 24,
+          "grounded": 24,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 9841,
+        "wall_ms": 11172,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.029335,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "event_order",
+            "score": 1.0,
+            "weight": 0.6,
+            "detail": {
+              "tau": 1.0,
+              "rho": 1.0,
+              "recall": 1.0,
+              "common": 12,
+              "formula": "max(0,tau) * recall"
+            }
+          },
+          {
+            "field": "utc_times",
+            "score": 1.0,
+            "weight": 0.4,
+            "detail": {
+              "within_5min": 12
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 24,
+          "grounded": 12,
+          "fraction": 0.5,
+          "hallucinated": [
+            "2026-10-17T04:00:51Z",
+            "2026-10-17T08:02:00Z",
+            "2026-10-17T08:10:30Z",
+            "2026-10-17T14:39:25Z",
+            "2026-10-17T15:08:12Z",
+            "2026-10-17T15:18:26Z",
+            "2026-10-17T15:50:22Z",
+            "2026-10-17T17:18:47Z",
+            "2026-10-17T19:54:37Z",
+            "2026-10-17T20:37:42Z"
+          ],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "event_order",
+          "utc_times"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T0397.002",
+      "service": "IR",
+      "split": "dev",
+      "seed": 1,
+      "episode_id": "5fdbb74d-ad33-5bdc-8e2e-b09c51ef354c",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.25,
+        "error": null,
+        "false_positives": 3,
+        "components": [
+          {
+            "field": "entries",
+            "score": 0.25,
+            "weight": 1.0,
+            "detail": {
+              "tp": 1.0,
+              "fp": 3,
+              "fn": 3,
+              "precision": 0.25,
+              "recall": 0.25,
+              "beta": 1.0,
+              "formula": "F1 partial=0.5",
+              "pred_size": 4,
+              "truth_size": 4,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 4,
+          "grounded": 4,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 7119,
+        "wall_ms": 8452,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.025763,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": 0,
+        "components": [
+          {
+            "field": "entries",
+            "score": 1.0,
+            "weight": 1.0,
+            "detail": {
+              "tp": 4.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1 partial=0.5",
+              "pred_size": 4,
+              "truth_size": 4,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 4,
+          "grounded": 4,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "entries"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T0397.002",
+      "service": "IR",
+      "split": "dev",
+      "seed": 2,
+      "episode_id": "5006f9cb-6086-56bb-acdb-9d9b8aa749fd",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.4,
+        "error": null,
+        "false_positives": 3,
+        "components": [
+          {
+            "field": "entries",
+            "score": 0.4000000000000001,
+            "weight": 1.0,
+            "detail": {
+              "tp": 2.0,
+              "fp": 3,
+              "fn": 3,
+              "precision": 0.4,
+              "recall": 0.4,
+              "beta": 1.0,
+              "formula": "F1 partial=0.5",
+              "pred_size": 5,
+              "truth_size": 5,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 5,
+          "grounded": 5,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 7449,
+        "wall_ms": 8766,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.025508999999999997,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": 0,
+        "components": [
+          {
+            "field": "entries",
+            "score": 1.0,
+            "weight": 1.0,
+            "detail": {
+              "tp": 5.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1 partial=0.5",
+              "pred_size": 5,
+              "truth_size": 5,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 5,
+          "grounded": 5,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "entries"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T0397.002",
+      "service": "IR",
+      "split": "dev",
+      "seed": 3,
+      "episode_id": "49142c4e-60ea-51bd-b965-15b830dc4832",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.5,
+        "error": null,
+        "false_positives": 4,
+        "components": [
+          {
+            "field": "entries",
+            "score": 0.5,
+            "weight": 1.0,
+            "detail": {
+              "tp": 3.0,
+              "fp": 4,
+              "fn": 2,
+              "precision": 0.428571,
+              "recall": 0.6,
+              "beta": 1.0,
+              "formula": "F1 partial=0.5",
+              "pred_size": 7,
+              "truth_size": 5,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 7,
+          "grounded": 7,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 7343,
+        "wall_ms": 8655,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.025979,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 1.0,
+        "error": null,
+        "false_positives": 0,
+        "components": [
+          {
+            "field": "entries",
+            "score": 1.0,
+            "weight": 1.0,
+            "detail": {
+              "tp": 5.0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "beta": 1.0,
+              "formula": "F1 partial=0.5",
+              "pred_size": 5,
+              "truth_size": 5,
+              "abstained": false
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 5,
+          "grounded": 5,
+          "fraction": 1.0,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "entries"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1324.002",
+      "service": "IR",
+      "split": "dev",
+      "seed": 1,
+      "episode_id": "149a4526-971e-5d08-aaa7-26644acb4675",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "collection_order",
+            "score": 0.0,
+            "weight": 0.6,
+            "detail": {
+              "tau": 0.0,
+              "rho": 0.1,
+              "recall": 1.0,
+              "common": 5,
+              "formula": "max(0,tau) * recall"
+            }
+          },
+          {
+            "field": "preservation",
+            "score": 0.0,
+            "weight": 0.4,
+            "detail": {
+              "n": 5,
+              "correct": 0
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 6296,
+        "wall_ms": 7608,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.021403,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 0.88,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "collection_order",
+            "score": 0.8,
+            "weight": 0.6,
+            "detail": {
+              "tau": 0.8,
+              "rho": 0.9,
+              "recall": 1.0,
+              "common": 5,
+              "formula": "max(0,tau) * recall"
+            }
+          },
+          {
+            "field": "preservation",
+            "score": 1.0,
+            "weight": 0.4,
+            "detail": {
+              "n": 5,
+              "correct": 5
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "collection_order",
+          "preservation"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1324.002",
+      "service": "IR",
+      "split": "dev",
+      "seed": 2,
+      "episode_id": "2f0b477b-9764-56e8-931c-be593e0a0ac1",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "collection_order",
+            "score": 0.0,
+            "weight": 0.6,
+            "detail": {
+              "tau": -0.333333,
+              "rho": -0.428571,
+              "recall": 1.0,
+              "common": 6,
+              "formula": "max(0,tau) * recall"
+            }
+          },
+          {
+            "field": "preservation",
+            "score": 0.0,
+            "weight": 0.4,
+            "detail": {
+              "n": 6,
+              "correct": 0
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 5526,
+        "wall_ms": 6875,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.021571,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 0.76,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "collection_order",
+            "score": 0.6,
+            "weight": 0.6,
+            "detail": {
+              "tau": 0.6,
+              "rho": 0.771429,
+              "recall": 1.0,
+              "common": 6,
+              "formula": "max(0,tau) * recall"
+            }
+          },
+          {
+            "field": "preservation",
+            "score": 1.0,
+            "weight": 0.4,
+            "detail": {
+              "n": 6,
+              "correct": 6
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "collection_order",
+          "preservation"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1324.002",
+      "service": "IR",
+      "split": "dev",
+      "seed": 3,
+      "episode_id": "81a3ae71-a1d4-526b-84e3-95105e48d6b3",
+      "oracle_score": 1.0,
+      "rules": {
+        "score": 0.0,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "collection_order",
+            "score": 0.0,
+            "weight": 0.6,
+            "detail": {
+              "tau": -0.2,
+              "rho": 0.0,
+              "recall": 1.0,
+              "common": 5,
+              "formula": "max(0,tau) * recall"
+            }
+          },
+          {
+            "field": "preservation",
+            "score": 0.0,
+            "weight": 0.4,
+            "detail": {
+              "n": 5,
+              "correct": 0
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        }
+      },
+      "llm": {
+        "requested_model": "haiku",
+        "model_used": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "cost_basis": "list",
+        "completed": true,
+        "parse_note": "parsed whole output",
+        "is_error": false,
+        "timed_out": false,
+        "tool_failures": 0,
+        "permission_denials": [],
+        "duration_ms": 9281,
+        "wall_ms": 10672,
+        "num_turns": 1,
+        "cost_usd_listprice": 0.023365000000000004,
+        "returncode": 0,
+        "error_detail": null,
+        "score": 0.88,
+        "error": null,
+        "false_positives": null,
+        "components": [
+          {
+            "field": "collection_order",
+            "score": 0.8,
+            "weight": 0.6,
+            "detail": {
+              "tau": 0.8,
+              "rho": 0.9,
+              "recall": 1.0,
+              "common": 5,
+              "formula": "max(0,tau) * recall"
+            }
+          },
+          {
+            "field": "preservation",
+            "score": 1.0,
+            "weight": 0.4,
+            "detail": {
+              "n": 5,
+              "correct": 5
+            }
+          }
+        ],
+        "grounding": {
+          "checked": 0,
+          "grounded": 0,
+          "fraction": null,
+          "hallucinated": [],
+          "proxy": "coarse: substring grounding of entity-like tokens; inert when none present"
+        },
+        "answer_keys": [
+          "collection_order",
+          "preservation"
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "n_episodes": 36,
+    "n_pilots": 12,
+    "seeds": [
+      1,
+      2,
+      3
+    ],
+    "ci_method": "cluster bootstrap resampling the pilots (seeds within a pilot are correlated)",
+    "oracle": {
+      "mean": 1.0,
+      "n_episodes": 36,
+      "n_clusters": 12,
+      "ci95_cluster": [
+        1.0,
+        1.0
+      ]
+    },
+    "rules": {
+      "mean": 0.4398,
+      "n_episodes": 36,
+      "n_clusters": 12,
+      "ci95_cluster": [
+        0.2598,
+        0.6106
+      ]
+    },
+    "oracle_minus_rules": {
+      "mean": 0.5602,
+      "n_episodes": 36,
+      "n_clusters": 12,
+      "ci95_cluster": [
+        0.3894,
+        0.7402
+      ]
+    },
+    "by_seed": [
+      {
+        "seed": 1,
+        "oracle_mean": 1.0,
+        "rules_mean": 0.3462,
+        "llm_mean_completed": 0.9568,
+        "llm_completion": 0.9167
+      },
+      {
+        "seed": 2,
+        "oracle_mean": 1.0,
+        "rules_mean": 0.4948,
+        "llm_mean_completed": 0.9744,
+        "llm_completion": 1.0
+      },
+      {
+        "seed": 3,
+        "oracle_mean": 1.0,
+        "rules_mean": 0.4785,
+        "llm_mean_completed": 0.9007,
+        "llm_completion": 1.0
+      }
+    ],
+    "llm_completion_rate": 0.9722,
+    "llm_incomplete": [
+      {
+        "subtask_id": "T1112.002",
+        "seed": 1,
+        "reason": "timeout"
+      }
+    ],
+    "llm_score_completed": {
+      "mean": 0.9436,
+      "n_episodes": 35,
+      "n_clusters": 12,
+      "ci95_cluster": [
+        0.8792,
+        0.9914
+      ]
+    },
+    "llm_score_all": {
+      "mean": 0.9174,
+      "n_episodes": 36,
+      "n_clusters": 12,
+      "ci95_cluster": [
+        0.8391,
+        0.9809
+      ]
+    },
+    "llm_minus_rules": {
+      "mean": 0.5055,
+      "n_episodes": 35,
+      "n_clusters": 12,
+      "ci95_cluster": [
+        0.342,
+        0.6691
+      ]
+    },
+    "llm_mean_latency_ms": 19948,
+    "llm_latency_p95_ms": 69101,
+    "llm_total_tool_failures": 1,
+    "llm_total_cost_usd_listprice": 1.2113
+  },
+  "caveat": "Measurement of discrimination only; NOT an externally validated benchmark and NOT READY_BENCHMARK."
+}

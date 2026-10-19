@@ -58,7 +58,8 @@ def test_rules_mean_leaves_headroom() -> None:
     assert s["oracle"]["mean"] == 1.0
     assert s["rules"]["mean"] < 0.6
     assert s["oracle_minus_rules"]["mean"] > 0.3
-    assert s["oracle_minus_rules"]["ci95"] is not None  # multi-seed bootstrap CI present
+    assert s["oracle_minus_rules"]["ci95_cluster"] is not None  # cluster bootstrap CI present
+    assert len(s["by_seed"]) == 2  # per-seed variability recorded
     assert "llm" not in report["episodes"][0]
     assert s["n_pilots"] == 12 and s["n_episodes"] == 24
 

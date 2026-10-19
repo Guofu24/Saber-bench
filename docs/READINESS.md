@@ -18,7 +18,10 @@ contamination) are enforced and tested. Everything that needs real infrastructur
 a hypervisor lab, attack emulation, forensic artifacts, and any LLM-backed baseline — is wired
 behind ports that **fail closed** and marked `BLOCKED_INTEGRATION`. Every subtask is
 `VERIFIED_OFFLINE`; **none is `READY_BENCHMARK`**, because the engine's fixtures are structural
-synthetic DEV data, not domain-crafted or independently validated gold.
+synthetic DEV data, not domain-crafted or independently validated gold. A separate **Gold
+Evaluation Pilot v1** (twelve file-mode subtasks) adds domain-faithful artifacts with
+independently cross-checked labels and a measured rules-vs-LLM-vs-oracle baseline; it is the step
+before, not into, `READY_BENCHMARK`. See `docs/PHASE_D_REPORT.md`.
 
 ## Coverage at a glance
 
@@ -36,6 +39,29 @@ source scoring formula but use structural fixtures. Subtasks whose real mode nee
 below; their *offline* implementation is nonetheless verified. (An earlier revision of this report
 wrote 64/46 — an off-by-one undercount of the 47 `soc` subtasks; the catalog breakdown is 110
 `file` / 47 `soc` / 18 `vm`.)
+
+## Gold Evaluation Pilot v1 (research-validity milestone, not a tier change)
+
+Twelve file-mode subtasks (three per service) built as an independently testable evaluation pilot,
+separate from the archetype engine. Each pilot derives its ground truth from the authored
+construction intent and re-derives it by a genuinely different code path (`independent_verify`),
+carries hard negatives, keeps a sealed dev/hidden split, records provenance, and queues subjective
+conventions for human adjudication (`gold/MANIFEST.json`, `gold/ADJUDICATION_QUEUE.md`). Two
+baselines run on the same episodes through `saber gold baseline`.
+
+Measured over 36 episodes (dev, seeds 1–3; cluster-bootstrap 95% CIs over pilots):
+
+| Baseline | Mean | 95% CI |
+|---|---|---|
+| Oracle | 1.00 | [1.00, 1.00] |
+| Naive rules (floor) | 0.44 | [0.26, 0.61] |
+| Claude Haiku 4.5 (subscription CLI), completed | 0.944 | [0.88, 0.99] |
+
+The pilot **discriminates** naive from capable from oracle, with completion 0.972 (one T1112
+timeout), one tool failure, and known weak-separation pilots (T1406, T1112). It is labeled
+`GOLD_PILOT_V1` / `SYNTHETIC_DOMAIN_FAITHFUL` / `DEV_SIMULATION_ONLY`. It does **not** change the
+tier table: zero human-signed labels, a non-blind holdout, and synthetic (not real) telemetry keep
+it short of `READY_BENCHMARK`. Full account in `docs/PHASE_D_REPORT.md`.
 
 ## Three readiness tiers
 
