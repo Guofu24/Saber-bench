@@ -25,12 +25,20 @@ def test_isolated_plan_passes() -> None:
     assert result.ok, [v.detail for v in result.violations]
 
 
-def test_route_to_production_rejected() -> None:
+def test_route_outside_lab_rejected() -> None:
+    # Allowlist semantics: production, and also special-use ranges, are rejected.
+    for route in ("10.0.0.0/8", "169.254.0.0/16", "100.64.0.0/10", "0.0.0.0/0", "8.8.8.8/32"):
+        plan = _good_plan()
+        plan.network.routes_to = [route]
+        result = validate_lab_plan(plan)
+        assert not result.ok, route
+        assert any(v.code == "route_outside_lab" for v in result.violations), route
+
+
+def test_route_inside_lab_allowed() -> None:
     plan = _good_plan()
-    plan.network.routes_to = ["10.0.0.0/8"]
-    result = validate_lab_plan(plan)
-    assert not result.ok
-    assert any(v.code == "route_to_production" for v in result.violations)
+    plan.network.routes_to = ["10.66.2.0/24"]  # another subnet within the lab range
+    assert validate_lab_plan(plan).ok
 
 
 def test_nat_and_egress_and_bridge_rejected() -> None:

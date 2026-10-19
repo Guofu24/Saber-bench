@@ -29,6 +29,44 @@ def test_public_payload_has_no_truth_keys() -> None:
                 assert f'"{key}"' not in text, (sid, variant, key)
 
 
+# Subtasks where the agent must DECIDE a label (not merely report an observable fact). The decided
+# label values must never be byte-present in the agent-visible payload.
+_DECISION_FIELDS = {
+    "T1112.001": ("verdict",),
+    "T1112.002": ("verdict",),
+    "T1112.003": ("classification", "claim_confirmed", "alert_claim"),
+}
+
+
+@pytest.mark.security
+def test_decision_labels_not_byte_present_in_public() -> None:
+    # Scan the agent-visible INPUTS only. The manifest's output schema legitimately lists the full
+    # enum domain (e.g. both TP and FP) so the agent knows the valid answers; that is not a leak.
+    for sid, fields in _DECISION_FIELDS.items():
+        st = load_subtask(sid)
+        for variant in st.VARIANTS:
+            ep = build_episode(sid, variant=variant)
+            inputs_text = json.dumps(ep.bundle.public_inputs, default=str)
+            for field in fields:
+                value = ep.bundle.sealed_truth[field]
+                assert f'"{value}"' not in inputs_text, (sid, variant, field, value)
+
+
+@pytest.mark.security
+def test_decision_subtasks_are_discriminable_from_evidence() -> None:
+    # The label must be INFERABLE from agent-visible evidence (B0 gets it right), proving it is
+    # neither leaked verbatim nor unsolvable. Run the rules-only solver per class.
+    for sid, fields in _DECISION_FIELDS.items():
+        st = load_subtask(sid)
+        for variant in st.VARIANTS:
+            ep = build_episode(sid, variant=variant)
+            solved = st.reference_solve(ep.bundle.public_inputs)
+            assert solved is not None, sid
+            answer, _ = solved
+            for field in fields:
+                assert answer[field] == ep.bundle.sealed_truth[field], (sid, variant, field)
+
+
 @pytest.mark.security
 def test_leak_guard_rejects_forbidden_key() -> None:
     assert "scenario_id" in BLUE_FORBIDDEN_FIELDS

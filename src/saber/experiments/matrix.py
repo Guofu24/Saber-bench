@@ -33,6 +33,7 @@ class CellResult(StrictModel):
     mean_score: float
     validity_rate: float
     episodes: int
+    abstained: bool = False
 
 
 class GroupStat(StrictModel):
@@ -42,6 +43,9 @@ class GroupStat(StrictModel):
     ci_low: float
     ci_high: float
     n_subtasks: int
+    # A bootstrap CI over fewer than 3 subtasks is not trustworthy; callers should not read it
+    # as precision. The CI is still emitted for completeness but flagged.
+    reliable_ci: bool = True
 
 
 class ExperimentReport(StrictModel):
@@ -59,6 +63,9 @@ class ExperimentReport(StrictModel):
     by_service: list[GroupStat] = Field(default_factory=list)
     by_environment: list[GroupStat] = Field(default_factory=list)
     specialist_coverage: dict[str, int] = Field(default_factory=dict)
+    # Subtasks a baseline abstained on (e.g. B0 has no rules oracle); excluded from its aggregate
+    # so structural zeros do not masquerade as detection failures.
+    abstentions: dict[str, list[str]] = Field(default_factory=dict)
     notes: str = ""
 
 
@@ -107,14 +114,20 @@ def run_matrix(
 
     cells: list[CellResult] = []
     coverage: dict[str, int] = defaultdict(int)
-    # scores[baseline][subtask] = mean score across that subtask's variants/seeds
+    # scores[baseline][subtask] = mean score; abstained subtasks are excluded from this aggregate.
     scores: dict[str, dict[str, list[float]]] = {bid: defaultdict(list) for bid in run_ids}
+    abstentions: dict[str, list[str]] = defaultdict(list)
 
     for sid in ids:
         st = load_subtask(sid)
         rec = cat.subtask(sid)
         coverage[SERVICE_TO_SPECIALIST.get(rec.service, "monitor")] += 1
+        # A baseline "abstains" on a subtask it has no solver for (B0 with no reference_solve);
+        # that is structurally different from attempting and failing.
+        first_episode = build_episode(sid, seed_list[0], st.VARIANTS[0])
+        b0_abstains = st.reference_solve(first_episode.bundle.public_inputs) is None
         for bid in run_ids:
+            abstained = bid == BaselineId.B0_RULES.value and b0_abstains
             per_episode: list[float] = []
             per_valid: list[float] = []
             for variant in st.VARIANTS:
@@ -128,7 +141,10 @@ def run_matrix(
                     per_valid.append(1.0 if result.score.validity.value == "VALID" else 0.0)
             if per_episode:
                 mean_score = sum(per_episode) / len(per_episode)
-                scores[bid][sid].append(mean_score)
+                if abstained:
+                    abstentions[bid].append(sid)
+                else:
+                    scores[bid][sid].append(mean_score)
                 cells.append(
                     CellResult(
                         subtask_id=sid,
@@ -138,9 +154,11 @@ def run_matrix(
                         mean_score=mean_score,
                         validity_rate=sum(per_valid) / len(per_valid),
                         episodes=len(per_episode),
+                        abstained=abstained,
                     )
                 )
 
+    scored_cells = [c for c in cells if not c.abstained]
     report = ExperimentReport(
         generated_at=datetime.now(UTC),
         scorer_version=SCORER_VERSION,
@@ -151,11 +169,13 @@ def run_matrix(
         subtasks=list(ids),
         cells=cells,
         by_baseline=[_group("all", bid, [v[0] for v in scores[bid].values()]) for bid in run_ids],
-        by_service=_grouped(cells, run_ids, key="service"),
-        by_environment=_grouped(cells, run_ids, key="environment"),
+        by_service=_grouped(scored_cells, run_ids, key="service"),
+        by_environment=_grouped(scored_cells, run_ids, key="environment"),
         specialist_coverage=dict(coverage),
-        notes="B0 is the rules-only reference; ORACLE is the evaluator upper bound (not a competitor). "
-        "LLM baselines are BLOCKED_INTEGRATION (subscription-only, no API budget).",
+        abstentions=dict(abstentions),
+        notes="B0 is the rules-only reference (abstains where no rules oracle exists; those are "
+        "excluded from its aggregate, not scored 0). ORACLE is the evaluator upper bound, not a "
+        "competitor. LLM baselines are BLOCKED_INTEGRATION (subscription-only, no API budget).",
     )
     return report.model_dump(mode="json")
 
@@ -169,6 +189,7 @@ def _group(group: str, baseline: str, values: list[float]) -> GroupStat:
         ci_low=ci.low,
         ci_high=ci.high,
         n_subtasks=ci.n,
+        reliable_ci=ci.n >= 3,
     )
 
 

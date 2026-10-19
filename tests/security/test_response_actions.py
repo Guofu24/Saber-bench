@@ -67,6 +67,7 @@ REGISTRY = LabAssetRegistry(
     protected_hosts=frozenset({"lab-vip-01"}),
 )
 AGENTS = frozenset({"ir-agent"})
+OPERATORS = frozenset({"operator:alice", "operator:bob"})
 
 
 def _action(
@@ -95,8 +96,11 @@ def _approval(
 
 def _svc(track: Track = Track.RESPONSE_ENABLED, driver: object = None) -> ResponseService:
     return ResponseService(
-        policy=PolicyEngine(REGISTRY, track=track, agent_ids=AGENTS),
+        policy=PolicyEngine(
+            REGISTRY, track=track, authorized_operators=OPERATORS, agent_ids=AGENTS
+        ),
         driver=driver or DryRunResponseAdapter(),
+        executor_token="operator-held-secret-token",
     )
 
 
@@ -201,6 +205,43 @@ def test_dry_run_driver_cannot_fake_lab_execution() -> None:
     action = _action().model_copy(update={"status": ActionStatus.APPROVED})
     result = svc.execute(action, _approval(action), now=NOW)
     assert result.status is ActionStatus.FAILED
+
+
+@pytest.mark.security
+def test_default_policy_authorizes_no_operator() -> None:
+    # Fail closed: with no authorized_operators allowlist, nobody can approve, even "operator:x".
+    engine = PolicyEngine(REGISTRY, track=Track.RESPONSE_ENABLED)
+    ok, _ = engine.may_approve("operator:alice")
+    assert not ok
+
+
+@pytest.mark.security
+def test_approval_cannot_outlast_action_ttl() -> None:
+    svc = _svc()
+    action = _action()  # expires NOW+1h
+    long_approval = _approval(action, ttl_hours=3)
+    with pytest.raises(PolicyDenied):
+        svc.execute(action, long_approval, now=NOW)
+
+
+@pytest.mark.security
+def test_action_expired_rejected_even_with_valid_approval() -> None:
+    svc = _svc()
+    action = _action()  # expires NOW+1h
+    approval = _approval(action, ttl_hours=1)
+    with pytest.raises(PolicyDenied):
+        svc.execute(action, approval, now=NOW + timedelta(minutes=90))
+
+
+@pytest.mark.security
+def test_path_traversal_target_rejected() -> None:
+    from pydantic import ValidationError as PydanticValidationError
+
+    with pytest.raises(PydanticValidationError):
+        ActionTarget(host_id="lab-ws-01", path="/var/www/../../etc/shadow")
+    with pytest.raises(PydanticValidationError):
+        ActionTarget(host_id="lab-ws-01", path="relative/evidence.bin")
+    ActionTarget(host_id="lab-ws-01", path="/var/www/html/shell.php")  # absolute, no traversal: ok
 
 
 @pytest.mark.security

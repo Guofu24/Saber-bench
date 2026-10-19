@@ -9,10 +9,67 @@ capture is simulated. Real hypervisor snapshotting is a BLOCKED_INTEGRATION adap
 
 from __future__ import annotations
 
-from typing import Any
+import hashlib
+from collections.abc import Mapping, Sequence
+from typing import Any, Literal
 
+from pydantic import Field
+
+from saber.domain.base import StrictModel
 from saber.grading.state import FileState, MachineSnapshot, ServiceState
 from saber.subtasks._hv.common import Rng, iso
+
+
+class GuestAction(StrictModel):
+    """One declared action against the guest. The evaluator applies it to the sealed before-state.
+
+    This is how a VM subtask stays sound offline: the agent declares operations, and the evaluator
+    computes their effect on the sealed snapshot rather than trusting an agent-supplied after-state.
+    `read` changes nothing (it is how an observe-only task declares it did not mutate).
+    """
+
+    op: Literal["read", "remove", "move", "modify"]
+    path: str = Field(min_length=1, max_length=1024)
+    to: str | None = Field(default=None, max_length=1024)
+
+    @property
+    def mutates(self) -> bool:
+        return self.op != "read"
+
+
+def _mutated_hash(old: str, path: str) -> str:
+    return hashlib.sha256(f"modified:{old}:{path}".encode()).hexdigest()
+
+
+def apply_actions(
+    before: MachineSnapshot, actions: Sequence[GuestAction | Mapping[str, Any]], *, taken_at: str
+) -> MachineSnapshot:
+    """Derive the after-state by applying declared actions to the sealed before-snapshot."""
+    files = dict(before.files)
+    for raw in actions:
+        action = raw if isinstance(raw, GuestAction) else GuestAction.model_validate(raw)
+        if action.op == "read":
+            continue
+        if action.op == "remove":
+            files.pop(action.path, None)
+        elif action.op == "move" and action.to:
+            fs = files.pop(action.path, None)
+            if fs is not None:
+                files[action.to] = fs.model_copy(update={"path": action.to})
+        elif action.op == "modify":
+            fs = files.get(action.path)
+            if fs is not None:
+                files[action.path] = fs.model_copy(
+                    update={"sha256": _mutated_hash(fs.sha256, action.path)}
+                )
+    return MachineSnapshot(
+        machine_id=before.machine_id,
+        taken_at=taken_at,
+        files=files,
+        services=dict(before.services),
+        cron_entries=list(before.cron_entries),
+        users=list(before.users),
+    )
 
 
 def file_state(

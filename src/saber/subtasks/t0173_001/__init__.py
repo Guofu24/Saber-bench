@@ -86,13 +86,19 @@ class Subtask(SubtaskBase):
         return {"event_order": list(truth["event_order"])}
 
     def score_parts(self, answer: Any, truth: Mapping[str, Any], ctx: GradeContext) -> ScoreParts:
+        # Completeness-weighted Kendall tau: ordering a correct subset of events cannot earn full
+        # credit (the source warns tau must be paired with coverage; see docs/GRADER_CONTRACT.md).
         comp = self.order_item(
-            "event_order", answer.event_order, truth["event_order"], mode="tau", subtype="text"
+            "event_order",
+            answer.event_order,
+            truth["event_order"],
+            mode="tau*recall",
+            subtype="text",
         )
         return ScoreParts(
             components=[comp],
             raw_score=comp.score,
-            trace=[f"event_order Kendall tau -> {comp.score:.4f} ({comp.detail})"],
+            trace=[f"event_order tau*recall -> {comp.score:.4f} ({comp.detail})"],
         )
 
     def reference_solve(
@@ -110,6 +116,8 @@ class Subtask(SubtaskBase):
             GoldenCase(
                 "one_swap", {"event_order": _swap(truth)}, expected_min=0.9, expected_max=0.999
             ),
+            # Omission gaming: a perfectly ordered 2-of-30 subset must NOT score highly.
+            GoldenCase("correct_but_incomplete", {"event_order": truth[:2]}, expected_max=0.2),
         ]
 
 

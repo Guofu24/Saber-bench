@@ -92,3 +92,26 @@ real hypervisor snapshots are `BLOCKED_INTEGRATION`.
 
 Missing required evidence, unhealthy data source, contaminated snapshot or unverified
 isolation → episode `INVALID` and excluded from efficacy denominators. Wrong answers → 0.
+
+## Review-driven refinements (pre-freeze, still `score_v1`)
+
+These were finalized during independent review, before any blind-test freeze, so no regrade is
+owed yet. Once `score_v1` is frozen for a hidden split, any further change bumps `SCORER_VERSION`.
+
+- **Order / Kendall τ completeness.** `order` items may use `tau*recall` so that ordering a
+  correct *subset* cannot earn full credit (score = `max(0,τ) · recall`). T0173.001 uses this; a
+  correct 2-of-30 subset scores about `0.067`, a reversed-but-complete list scores `0`, and a
+  complete correct list scores `1.0`. This matches the source warning that τ must be paired with
+  coverage (`docs/GRADER_CONTRACT.md`).
+- **VM state verification is evaluator-derived.** For `vm` subtasks the agent declares the actions
+  it took (`read`/`remove`/`move`/`modify`); the evaluator applies them to the sealed
+  before-snapshot and runs the state gates on the derived after-snapshot. The agent never supplies
+  an after-snapshot, so it cannot fabricate hashes or echo the before-state. Real execution with an
+  independent out-of-guest capture remains `BLOCKED_INTEGRATION`.
+- **No label bleed into agent inputs.** A decision label (verdict, classification) must be
+  *inferable* from agent-visible evidence but never byte-present in the inputs, and the two classes
+  of a fixture must differ in their evidence, not in a hidden flag. Enforced by
+  `tests/security/test_truth_isolation.py` (value-level check + per-class discriminability).
+- **B0 abstention vs failure.** Where a subtask has no rules oracle, B0 abstains; those subtasks
+  are excluded from B0's aggregate rather than scored `0`, and listed under `abstentions` in the
+  experiment report. Bootstrap CIs over fewer than three subtasks are flagged `reliable_ci=false`.

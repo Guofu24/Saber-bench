@@ -59,14 +59,17 @@ class PlanResult:
     violations: list[IsolationViolation] = field(default_factory=list)
 
 
-def _in_production(addr: str) -> bool:
+def _route_forbidden(addr: str) -> bool:
+    """Allowlist semantics: a route is forbidden unless it lies entirely within the lab CIDR.
+
+    This rejects not only production/global ranges but also special-use ranges (link-local,
+    CGNAT, documentation nets) that a default-allow check would silently pass.
+    """
     try:
         net = ipaddress.IPv4Network(addr, strict=False)
     except ValueError:
         return True  # unparseable (or IPv6) -> treat as unsafe
-    if net.subnet_of(LAB_CIDR):
-        return False
-    return any(net.overlaps(p) for p in PRODUCTION_CIDRS) or net.is_global
+    return not net.subnet_of(LAB_CIDR)
 
 
 def validate_lab_plan(plan: LabPlan) -> PlanResult:
@@ -101,10 +104,11 @@ def validate_lab_plan(plan: LabPlan) -> PlanResult:
         )
 
     for route in net.routes_to:
-        if _in_production(route):
+        if _route_forbidden(route):
             violations.append(
                 IsolationViolation(
-                    "route_to_production", f"route to {route!r} reaches production/Internet"
+                    "route_outside_lab",
+                    f"route to {route!r} leaves the dedicated lab range {LAB_CIDR}",
                 )
             )
 

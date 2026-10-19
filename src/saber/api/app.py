@@ -88,7 +88,11 @@ def create_app() -> FastAPI:
         events = _episode_events(subtask_id, episode)
         store = FakeEventStore(events)
         gateway = QueryGateway(store)
-        as_of = episode.manifest.deadline_at or datetime.now(UTC)
+        # The benchmark clock is the task's visibility cutoff when it sets one; the episode
+        # deadline is only a fallback. Using the cutoff prevents revealing events the task
+        # intends to keep beyond the observation window.
+        time_policy = episode.subtask.spec().time_policy
+        as_of = time_policy.visibility_cutoff or episode.manifest.deadline_at or datetime.now(UTC)
         session = gateway.open_session(episode.bundle.episode_id, as_of)
         query = EventQueryRequest.model_validate(request or {})
         page = gateway.search(session, query)

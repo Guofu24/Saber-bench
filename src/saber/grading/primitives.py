@@ -262,6 +262,11 @@ def score_order(
     if mode == "tau+recall":
         score = 0.5 * base + 0.5 * recall
         formula = "0.5*max(0,tau) + 0.5*recall"
+    elif mode == "tau*recall":
+        # Completeness-weighted ordering: full ordering quality only at full recall, so omitting
+        # elements cannot inflate the score (a correct 2-of-30 subset scores ~tau*(2/30)).
+        score = base * recall
+        formula = "max(0,tau) * recall"
     else:
         score = base
         formula = f"max(0,{mode})"

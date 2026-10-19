@@ -35,9 +35,10 @@ from saber.subtasks._framework import (
 )
 from saber.subtasks._hv.common import Rng
 from saber.subtasks._vm import (
+    GuestAction,
+    apply_actions,
     file_state,
     now_iso,
-    rebuild_snapshot,
     snapshot_from_files,
     snapshot_to_public,
 )
@@ -47,9 +48,16 @@ _WEB_INDEX = "/var/www/html/index.php"
 _CLEAN_FILES = ("/var/www/html/app.php", "/var/www/html/style.css", "/etc/hosts")
 
 
+class ActionItem(StrictModel):
+    op: str
+    path: str
+    to: str | None = None
+
+
 class T1109Output(StrictModel):
-    removed: list[str] = Field(default_factory=list)
-    machine_after: dict[str, Any] = Field(default_factory=dict)
+    # The agent declares the eradication actions it took; the evaluator applies them to the sealed
+    # before-snapshot and verifies the derived state. A fabricated after-snapshot is not accepted.
+    actions: list[ActionItem] = Field(default_factory=list)
 
 
 class Subtask(SubtaskBase):
@@ -103,20 +111,12 @@ class Subtask(SubtaskBase):
         return MachineSnapshot.model_validate(truth["machine_before"])
 
     def answer_from_truth(self, truth: Mapping[str, Any]) -> dict[str, Any]:
-        before = self._before(truth)
-        after_files = {
-            p: {"sha256": f.sha256, "size": f.size}
-            for p, f in before.files.items()
-            if p not in set(truth["malicious_paths"])
-        }
-        pub = snapshot_to_public(before)
-        pub["files"] = after_files
-        return {"removed": list(truth["malicious_paths"]), "machine_after": pub}
+        # Correct eradication: remove each malicious component.
+        return {"actions": [{"op": "remove", "path": p} for p in truth["malicious_paths"]]}
 
     def _after(self, answer: Any, truth: Mapping[str, Any]) -> MachineSnapshot:
-        return rebuild_snapshot(
-            answer.machine_after, taken_at=truth["taken_at"], base=self._before(truth)
-        )
+        actions = [GuestAction.model_validate(a.model_dump()) for a in answer.actions]
+        return apply_actions(self._before(truth), actions, taken_at=truth["taken_at"])
 
     def score_parts(self, answer: Any, truth: Mapping[str, Any], ctx: GradeContext) -> ScoreParts:
         before = self._before(truth)
@@ -152,31 +152,24 @@ class Subtask(SubtaskBase):
 
     def golden_cases(self, bundle: FixtureBundle) -> list[GoldenCase]:
         t = bundle.sealed_truth
-        before = self._before(t)
-        full = self.answer_from_truth(t)
-        # Relocate one malicious file instead of deleting -> all_6_removed fails.
-        relocated = dict(full)
-        files = dict(full["machine_after"]["files"])
-        mal0 = t["malicious_paths"][0]
-        files["/var/www/html/.backup_blob"] = {
-            "sha256": before.files[mal0].sha256,
-            "size": before.files[mal0].size,
-        }
-        relocated["machine_after"] = {**full["machine_after"], "files": files}
-        # Delete the web index while cleaning -> service_alive fails.
-        killed = dict(full)
-        kfiles = {p: m for p, m in full["machine_after"]["files"].items() if p != _WEB_INDEX}
-        killed["machine_after"] = {**full["machine_after"], "files": kfiles}
+        malicious = t["malicious_paths"]
+        # Relocate one malicious file instead of deleting -> content hash still present -> fails.
+        relocated = [{"op": "move", "path": malicious[0], "to": "/var/www/html/.backup_blob"}]
+        relocated += [{"op": "remove", "path": p} for p in malicious[1:]]
+        # Delete every malicious file but also delete the web index -> service_alive fails.
+        killed = [{"op": "remove", "path": p} for p in malicious] + [
+            {"op": "remove", "path": _WEB_INDEX}
+        ]
         return [
             GoldenCase(
                 "relocated_not_removed",
-                relocated,
+                {"actions": relocated},
                 expected_score=0.0,
                 expect_trace_contains="all_6_removed=False",
             ),
             GoldenCase(
                 "service_killed",
-                killed,
+                {"actions": killed},
                 expected_score=0.0,
                 expect_trace_contains="service_alive=False",
             ),

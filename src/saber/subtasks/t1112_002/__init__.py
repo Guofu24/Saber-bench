@@ -20,11 +20,64 @@ from saber.subtasks._framework import (
 from saber.subtasks._hv.common import Rng, iso
 
 Verdict = Literal["TP", "FP"]
-_RULES = (
-    "SIGMA_OFFICE_SPAWNS_INTERPRETER",
-    "EDR_SUSPICIOUS_DROPPER",
-    "NSM_PORT_SCAN",
-    "SIEM_MASS_FILE_ACCESS",
+# (rule, verdict, raw-log evidence lines). The verdict must be INFERRED from the evidence lines,
+# never read from a label field. TP lines show attack-shaped behaviour; FP lines show the benign
+# cause (approved change, whitelisted scanner) that explains why the rule fired.
+_TEMPLATES: tuple[tuple[str, Verdict, tuple[str, ...]], ...] = (
+    (
+        "SIGMA_OFFICE_SPAWNS_INTERPRETER",
+        "TP",
+        (
+            "winword.exe spawned an interpreter with encoded arguments",
+            "interpreter opened an external connection to a rare host",
+        ),
+    ),
+    (
+        "EDR_SUSPICIOUS_DROPPER",
+        "TP",
+        (
+            "unsigned binary written to a user temp directory",
+            "binary created an autorun entry and beaconed outbound",
+        ),
+    ),
+    (
+        "SIGMA_REMOTE_EXEC_TOOL",
+        "FP",
+        (
+            "remote-exec utility signed by a trusted IT vendor",
+            "source host is in the admin subnet and an approved change ticket is linked",
+        ),
+    ),
+    (
+        "SIEM_MASS_FILE_ACCESS",
+        "FP",
+        (
+            "process is the signed backup agent",
+            "activity occurred inside the scheduled backup window",
+        ),
+    ),
+    (
+        "NSM_PORT_SCAN",
+        "FP",
+        (
+            "source is a whitelisted vulnerability scanner",
+            "scan matches the scheduled monthly sweep",
+        ),
+    ),
+)
+_TP_MARKERS = (
+    "encoded arguments",
+    "unsigned binary",
+    "beaconed",
+    "autorun",
+    "external connection to a rare host",
+)
+_FP_MARKERS = (
+    "trusted IT vendor",
+    "approved change ticket",
+    "backup agent",
+    "whitelisted",
+    "scheduled",
 )
 
 
@@ -41,27 +94,17 @@ class Subtask(SubtaskBase):
 
     def build_fixture(self, seed: int, variant: str = "default") -> FixtureBundle:
         rng = Rng(seed, self.SUBTASK_ID, variant)
-        verdict: Verdict = "FP" if variant == "fp" else "TP"
+        want: Verdict | None = {"tp": "TP", "fp": "FP"}.get(variant)  # type: ignore[assignment]
+        pool = [t for t in _TEMPLATES if want is None or t[1] == want]
+        rule, verdict, evidence = rng.pick(pool)
         host = rng.hostname("ws")
-        rule = rng.pick(_RULES)
         alert_id = rng.hexid("ALERT")
         t0 = rng.time()
-        raw = [
-            {"ts": iso(t0), "host": host, "rule": rule, "event": "alert_raised", "asset": host},
-            {
-                "ts": iso(t0),
-                "host": host,
-                "event": "process_event",
-                "detail": "parent/child chain recorded",
-            },
+        raw = [{"ts": iso(t0), "host": host, "rule": rule, "event": "alert_raised", "asset": host}]
+        raw += [
+            {"ts": iso(t0), "host": host, "event": "context", "detail": line} for line in evidence
         ]
-        alert = {
-            "hv": "HV-01",
-            "alert_id": alert_id,
-            "rule_name": rule,
-            "host": host,
-            "verdict_hint": "attack-shaped" if verdict == "TP" else "legitimate-admin",
-        }
+        alert = {"hv": "HV-01", "alert_id": alert_id, "rule_name": rule, "host": host}
         logs = {"hv": "HV-02", "window": "+/-60min", "lines": raw}
         return FixtureBundle(
             subtask_id=self.SUBTASK_ID,
@@ -92,7 +135,10 @@ class Subtask(SubtaskBase):
         self, public_inputs: Mapping[str, Any]
     ) -> tuple[dict[str, Any], list[str]] | None:
         alert = public_inputs["alert"]
-        verdict = "TP" if alert.get("verdict_hint") == "attack-shaped" else "FP"
+        text = " ".join(line.get("detail", "") for line in public_inputs["logs"]["lines"]).lower()
+        tp_hits = sum(m in text for m in _TP_MARKERS)
+        fp_hits = sum(m in text for m in _FP_MARKERS)
+        verdict = "TP" if tp_hits > fp_hits else "FP"
         return {
             "verdict": verdict,
             "triggering_rule": alert["rule_name"],

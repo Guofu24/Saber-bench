@@ -21,7 +21,9 @@ from saber.response.policy import ApprovalRecord, PolicyEngine
 class ResponseService:
     policy: PolicyEngine
     driver: ResponseDriver
-    executor_token: str = "operator-executor-token"
+    # No default: the executor token must be injected from a secret held by the operator, never an
+    # agent (SECURITY.md separation of duties). A dry-run driver ignores it; a real one requires it.
+    executor_token: str = ""
     audit: list[str] = field(default_factory=list)
 
     def _log(self, msg: str) -> None:

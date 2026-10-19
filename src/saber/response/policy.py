@@ -76,10 +76,18 @@ class PolicyEngine:
     """Deterministic, deny-by-default policy. No LLM input; operator identity is distinct from agents."""
 
     def __init__(
-        self, registry: LabAssetRegistry, *, track: Track, agent_ids: frozenset[str] = frozenset()
+        self,
+        registry: LabAssetRegistry,
+        *,
+        track: Track,
+        authorized_operators: frozenset[str] = frozenset(),
+        agent_ids: frozenset[str] = frozenset(),
     ) -> None:
         self.registry = registry
         self.track = track
+        # Deny-by-default: only principals explicitly authorised here may approve. An empty
+        # allowlist means nothing can be approved (fail closed), regardless of naming convention.
+        self.authorized_operators = authorized_operators
         self.agent_ids = agent_ids
 
     def evaluate_proposal(self, action: ResponseAction) -> tuple[bool, str]:
@@ -92,8 +100,8 @@ class PolicyEngine:
     def may_approve(self, operator_id: str) -> tuple[bool, str]:
         if operator_id in self.agent_ids:
             return False, "an agent cannot approve its own (or any) action"
-        if not operator_id.startswith("operator:"):
-            return False, "approver is not a recognised operator identity"
+        if operator_id not in self.authorized_operators:
+            return False, "approver is not an authorised operator principal (deny-by-default)"
         return True, "operator may approve"
 
     def authorize_execution(
@@ -103,9 +111,13 @@ class PolicyEngine:
             return False, "DETECTION_ONLY track cannot execute"
         if action.mode is not ResponseMode.APPROVED_LAB:
             return False, "execution requires approved_lab mode"
+        if now >= action.expires_at:
+            return False, "action TTL expired"
         ok, reason = self.registry.permits(action)
         if not ok:
             return False, reason
         if approval is None:
             return False, "no operator approval present"
+        if approval.expires_at > action.expires_at:
+            return False, "approval TTL outlasts the action's own expiry"
         return approval.valid_for(action, self.registry.lab_environment_id, now)

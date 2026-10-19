@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from enum import StrEnum
 from typing import Literal
 from uuid import UUID
@@ -9,6 +10,8 @@ from uuid import UUID
 from pydantic import Field, model_validator
 
 from saber.domain.base import HostId, SafeStr, StrictModel, UtcDatetime
+
+_DRIVE_PATH = re.compile(r"^[A-Za-z]:/")
 
 
 class ActionKind(StrEnum):
@@ -88,6 +91,12 @@ class ActionTarget(StrictModel):
     def _non_empty(self) -> ActionTarget:
         if not any(v is not None for v in self.model_dump().values()):
             raise ValueError("action target must name at least one attribute")
+        if self.path is not None:
+            normalized = self.path.replace("\\", "/")
+            if ".." in normalized.split("/"):
+                raise ValueError("action target path must not contain a '..' traversal segment")
+            if not normalized.startswith("/") and not _DRIVE_PATH.match(normalized):
+                raise ValueError("action target path must be absolute (lab-scoped)")
         return self
 
 

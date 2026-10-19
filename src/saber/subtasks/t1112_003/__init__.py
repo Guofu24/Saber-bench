@@ -58,30 +58,38 @@ class Subtask(SubtaskBase):
             ["SIGMA_OFFICE_SPAWNS_INTERPRETER", "EDR_SUSPICIOUS_DROPPER", "NSM_PORT_SCAN"]
         )
         ev_alert, ev_log, ev_proc = rng.hexid("ALERT"), rng.hexid("LOG"), rng.hexid("PROC")
+        claim_text = (
+            "alert asserts an interpreter was spawned by an office document and beaconed out"
+        )
         if variant == "fp":
             classification: Classification = "FALSE_POSITIVE"
             claim: ClaimConfirmed = "refuted"
             alert_claim: AlertClaim = "invalid"
+            # Evidence that REFUTES the alert's claim: the flagged process is a signed admin tool
+            # launched interactively, with no office parent and no external connection.
+            proc_detail = "process is a signed IT admin tool launched from an interactive console; parent is explorer.exe, not an office app"
+            log_detail = (
+                "no outbound connection in the window; activity matches an approved change ticket"
+            )
         else:
             classification = "TRUE_POSITIVE"
             claim = "confirmed"
             alert_claim = "valid"
+            # Evidence that CONFIRMS the alert's claim.
+            proc_detail = "winword.exe spawned an interpreter with encoded arguments (office parent confirmed)"
+            log_detail = (
+                "interpreter opened an outbound connection to a rare external host in the window"
+            )
         case = {
             "hv": "HV-07",
             "case_id": rng.hexid("CASE"),
             "alert_id": ev_alert,
             "rule_name": rule,
             "host": host,
-            "alert_claim_text": "alert asserts interpreter spawned by office document",
+            "alert_claim_text": claim_text,
         }
-        logs = {
-            "hv": "HV-02",
-            "lines": [{"id": ev_log, "host": host, "detail": "process chain recorded"}],
-        }
-        proc = {
-            "hv": "HV-15",
-            "events": [{"id": ev_proc, "host": host, "detail": "interpreter process observed"}],
-        }
+        logs = {"hv": "HV-02", "lines": [{"id": ev_log, "host": host, "detail": log_detail}]}
+        proc = {"hv": "HV-15", "events": [{"id": ev_proc, "host": host, "detail": proc_detail}]}
         assets = {"hv": "HV-38", "assets": [{"host": host, "tier": rng.pick(["t1", "t2", "t3"])}]}
         return FixtureBundle(
             subtask_id=self.SUBTASK_ID,
@@ -135,6 +143,36 @@ class Subtask(SubtaskBase):
 
     def perfect_evidence_refs(self, bundle: FixtureBundle) -> list[str]:
         return list(bundle.evidence_ids[:1])
+
+    def reference_solve(
+        self, public_inputs: Mapping[str, Any]
+    ) -> tuple[dict[str, Any], list[str]] | None:
+        case = public_inputs["case"]
+        proc_text = " ".join(
+            e.get("detail", "") for e in public_inputs["process"]["events"]
+        ).lower()
+        log_text = " ".join(
+            line.get("detail", "") for line in public_inputs["logs"]["lines"]
+        ).lower()
+        text = proc_text + " " + log_text
+        confirms = any(
+            m in text
+            for m in ("office parent", "encoded arguments", "outbound connection to a rare")
+        )
+        refutes = any(
+            m in text
+            for m in ("signed it admin tool", "approved change ticket", "no outbound connection")
+        )
+        malicious = confirms and not refutes
+        answer = {
+            "classification": "TRUE_POSITIVE" if malicious else "FALSE_POSITIVE",
+            "claim_confirmed": "confirmed" if malicious else "refuted",
+            "alert_claim": "valid" if malicious else "invalid",
+            "triggering_rule": case["rule_name"],
+            "affected_asset": case["host"],
+            "explain": [case["alert_id"]],
+        }
+        return answer, [case["alert_id"]]
 
     def golden_cases(self, bundle: FixtureBundle) -> list[GoldenCase]:
         t = bundle.sealed_truth

@@ -117,8 +117,9 @@ class Subtask(SubtaskBase):
             "signed": bool(features.get("file_signed")),
             "signer": features.get("signer"),
             "org_prevalence": features.get("org_prevalence", "unknown"),
-            # inert family tag only present on attack-shaped samples
-            "heuristic_family": rng.pick(INERT_FAMILIES) if verdict == "TP" else None,
+            # Every alerted file carries an AV heuristic tag (that is why it fired); a benign PUA
+            # tool gets one too, so the tag is NOT a label tell and must not be bijective with TP/FP.
+            "heuristic_family": rng.pick(INERT_FAMILIES),
         }
         alert = {
             "hv": "HV-01",
