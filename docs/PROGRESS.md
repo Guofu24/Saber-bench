@@ -1,6 +1,6 @@
 # SABER implementation progress (machine-generated from status/ledger.json)
 
-Updated: 2026-10-19T03:27:05+00:00
+Updated: 2026-10-19T03:30:35+00:00
 
 Status meanings: `DONE_DEV`/`IMPLEMENTED_DEV` = implementation + independent offline tests ran green;
 `PARTIAL` = safe parts done, remainder listed in blockers; `BLOCKED_INTEGRATION` = needs external
@@ -11,7 +11,7 @@ independently validated private data, lab verification and human adjudication.
 
 | Kind | BLOCKED | BLOCKED_INTEGRATION | DONE_DEV | IMPLEMENTED_DEV | PARTIAL | PENDING |
 |---|---|---|---|---|---|---|
-| engineering | 0 | 0 | 2 | 0 | 0 | 36 |
+| engineering | 0 | 0 | 4 | 0 | 0 | 34 |
 | bridge | 0 | 0 | 5 | 0 | 0 | 0 |
 | domain | 0 | 0 | 0 | 12 | 0 | 163 |
 
@@ -31,8 +31,8 @@ independently validated private data, lab verification and human adjudication.
 | B005 | bridge | bridge | DONE_DEV | `uv run pytest tests/unit/test_cli.py` | CLI: task list/show/build/run/grade/report + smoke; deterministic reports labelled DEV_SIMULATION_ONLY. |
 | T006 | engineering | offline_engine | PENDING |  |  |
 | T007 | engineering | offline_engine | PENDING |  |  |
-| T008 | engineering | offline_engine | PENDING |  |  |
-| T009 | engineering | offline_engine | PENDING |  |  |
+| T008 | engineering | offline_engine | DONE_DEV | `uv run pytest tests/security/test_query_guards.py` | FakeEventStore: deterministic, visibility-aware, episode-isolated, paginated. |
+| T009 | engineering | offline_engine | DONE_DEV | `uv run pytest tests/security/test_query_guards.py` | Bounded gateway: server-bound as_of/episode, HMAC cursors, budgets, audited denials. OpenSearch/Wazuh adapter = T018 BLOCKED_INTEGRATION. |
 | T010 | engineering | offline_engine | PENDING |  |  |
 | T011 | engineering | offline_engine | PENDING |  |  |
 | T012 | engineering | offline_engine | PENDING |  |  |

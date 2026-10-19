@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T03:27:05+00:00",
+  "updated_at": "2026-10-19T03:30:35+00:00",
   "items": {
     "T001": {
       "kind": "engineering",
@@ -181,12 +181,36 @@
     "T008": {
       "kind": "engineering",
       "phase": "offline_engine",
-      "status": "PENDING"
+      "status": "DONE_DEV",
+      "updated_at": "2026-10-19T03:30:35+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/security/test_query_guards.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/telemetry/fake_store.py",
+        "src/saber/telemetry/ports.py"
+      ],
+      "notes": "FakeEventStore: deterministic, visibility-aware, episode-isolated, paginated."
     },
     "T009": {
       "kind": "engineering",
       "phase": "offline_engine",
-      "status": "PENDING"
+      "status": "DONE_DEV",
+      "updated_at": "2026-10-19T03:30:35+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/security/test_query_guards.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/telemetry/gateway.py",
+        "tests/security/test_query_guards.py"
+      ],
+      "notes": "Bounded gateway: server-bound as_of/episode, HMAC cursors, budgets, audited denials. OpenSearch/Wazuh adapter = T018 BLOCKED_INTEGRATION."
     },
     "T010": {
       "kind": "engineering",
