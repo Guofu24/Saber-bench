@@ -1,0 +1,26 @@
+[
+  {
+    "id": "MON",
+    "name": "Vận hành giám sát ATTT 24/7",
+    "description_source": "Phân tích, điều tra cảnh báo theo cơ chế alert-based, gán cảnh báo vào case hoặc đóng False Positive, phản ứng nhanh (containment) khi được cấp quyền, vận hành ticket theo SLA.",
+    "sla_source": "Cảnh báo NGHIÊM TRỌNG/CAO ≤ 30 phút · TRUNG BÌNH ≤ 1 giờ · sự cố có hướng dẫn ≤ 24/72 giờ · mục tiêu 90%, bỏ lọt sự cố Nghiêm trọng/Cao = 0"
+  },
+  {
+    "id": "CNT",
+    "name": "Tối ưu ATTT — Content Security",
+    "description_source": "Xây dựng và tối ưu tập luật giám sát cho SIEM (VCS và 3rd party), tăng coverage MITRE ATT&CK, giảm FP/Noise, phát triển parser, chuyển TI/IR thành rule.",
+    "sla_source": "Rule/use-case mới: Nghiêm trọng 20h · Cao 40h · TB 80h · Thấp 160h. Tối ưu FP: >50 alert/8h → 4h. Rule cho lỗ hổng High/Critical từ TI/IR: 24h (24/7)"
+  },
+  {
+    "id": "HUNT",
+    "name": "Threat Hunt",
+    "description_source": "Săn tìm chủ động trên endpoint bằng Viettel Scanner + IOC/pattern mới nhất (tiến trình, persistence, RAM, file thực thi, source code webshell, kết nối outbound C2), mở rộng sang rà soát chuyên sâu: anti-forensics, log AV xử lý thất bại, cấu hình không an toàn, lateral movement qua remote service, dựng Patient Zero + bản đồ lây nhiễm + timeline, Threat Removal Plan.",
+    "sla_source": "Thực hiện một lần · săn tìm: khuyến nghị 6 tháng/lần toàn hệ thống, 3 tháng/lần với hệ thống quan trọng · rà soát chuyên sâu: khuyến nghị 12 tháng/lần toàn hệ thống, 6 tháng/lần với hệ thống quan trọng · chuyển sang IR ngay khi phát hiện tấn công"
+  },
+  {
+    "id": "IR",
+    "name": "Xử lý sự cố ATTT",
+    "description_source": "Điều tra bằng chứng số chuyên sâu: correlation log đa nguồn, endpoint artifact, malware analysis static/dynamic, webshell, timeline, root cause, scope of compromise, containment, eradication, báo cáo.",
+    "sla_source": "Phản hồi Critical ≤ 15 phút · High ≤ 30 phút · kích hoạt điều tra ≤ 10 phút sau khi xác nhận phạm vi · báo cáo sơ bộ ≤ 24h · báo cáo chính thức ≤ 24h sau khi xong phân tích + peer review"
+  }
+]

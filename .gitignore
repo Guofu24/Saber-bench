@@ -1,0 +1,4 @@
+
+# Autonomous local supervisor state, logs, receipts, secrets
+.saber-autonomous/
+config/existing-environment.json

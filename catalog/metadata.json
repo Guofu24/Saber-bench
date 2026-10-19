@@ -1,0 +1,44 @@
+{
+  "source_file": "source/nice_coverage_4dichvu_SOC_subtask.html",
+  "source_sha256": "92b53fad8d20909381875c70c8b0d9d198273256d0d2ff86b617c74c68080d6b",
+  "nice_task_count": 55,
+  "subtask_count": 175,
+  "artifact_type_count": 40,
+  "environment_breakdown": {
+    "file": 110,
+    "soc": 47,
+    "vm": 18
+  },
+  "primary_service_breakdown": {
+    "MON": {
+      "nice": 16,
+      "subs": 58,
+      "file": 30,
+      "soc": 25,
+      "nonzero_raw_n": 4,
+      "vm": 3
+    },
+    "CNT": {
+      "nice": 5,
+      "subs": 15,
+      "file": 9,
+      "soc": 6
+    },
+    "HUNT": {
+      "nice": 13,
+      "subs": 39,
+      "file": 25,
+      "soc": 6,
+      "vm": 8,
+      "nonzero_raw_n": 1
+    },
+    "IR": {
+      "nice": 21,
+      "subs": 63,
+      "file": 46,
+      "soc": 10,
+      "vm": 7
+    }
+  },
+  "dropped_tasks_count": 9
+}

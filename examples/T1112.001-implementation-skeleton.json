@@ -1,0 +1,17 @@
+{
+  "subtask_id": "T1112.001",
+  "task_ref": "catalog/subtasks.json#T1112.001",
+  "mode": "file",
+  "input": "HV-01 — Cảnh báo gốc",
+  "output_contract_proposed": {
+    "verdict": "TP|FP"
+  },
+  "scorer_contract_source": "[verdict]",
+  "ground_truth": {
+    "visibility": "EVALUATOR_ONLY",
+    "storage": "NOT_INCLUDED"
+  },
+  "fixture_status": "NOT_INCLUDED",
+  "status": "SPECIFIED_NOT_IMPLEMENTED",
+  "note": "Do not treat this as a runnable benchmark. Add real/synthetic expert-verified input and private truth before grading."
+}

@@ -1,0 +1,22 @@
+{
+  "services": [
+    {
+      "capability": "SIEM",
+      "name": "existing-siem-if-any",
+      "api_base_url": "https://REPLACE-WITH-APPROVED-LAB-URL",
+      "credential_env_name": "SABER_SIEM_TOKEN",
+      "approved_for_read_only_use": false,
+      "health_check_path": "/health",
+      "notes": "Example only. Remove this entry if no authorized existing SIEM."
+    }
+  ],
+  "approved_lab_hosts": [],
+  "allowed_actions": ["read_fixture", "search_approved_lab_logs"],
+  "explicit_authorizations": [],
+  "allow_project_local_dependency_install": true,
+  "allow_privileged_host_install": false,
+  "allow_new_vm_provision": false,
+  "allow_attack_emulation": false,
+  "allow_stateful_response": false,
+  "notes": "Use config/existing-environment.json only for actual approved resources; never enter secret values."
+}

@@ -1,0 +1,10 @@
+{
+  "_notice": "DEV-ONLY grader fixture. Not a hidden benchmark test. This file must never be mounted into the Blue agent runtime.",
+  "schema_version": 1,
+  "episode_id": "22222222-2222-4222-8222-222222222222",
+  "is_malicious": false,
+  "attack_verification": "NOT_APPLICABLE_BENIGN",
+  "expected_affected_assets": [],
+  "expected_evidence_event_ids": [],
+  "expected_response_targets": []
+}

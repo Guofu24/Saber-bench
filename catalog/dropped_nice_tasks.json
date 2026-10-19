@@ -1,0 +1,47 @@
+[
+  {
+    "nice_id": "T0164",
+    "source_id": "PD001-T0164",
+    "reason_original": "Nghiệp vụ của team TI (Threat Intelligence), ngoài phạm vi SOC VCS."
+  },
+  {
+    "nice_id": "T1582",
+    "source_id": "PD001-T1582",
+    "reason_original": "Có thể bỏ phần này — công việc chỉ là thêm IOC sẵn có vào hệ thống, không cần benchmark."
+  },
+  {
+    "nice_id": "T1191",
+    "source_id": "PD002-T1191",
+    "reason_original": "VCS chưa có phần này — có thể bỏ khỏi lưới."
+  },
+  {
+    "nice_id": "T1260",
+    "source_id": "PD002-T1260",
+    "reason_original": "Không liên quan nghiệp vụ SOC. Mô tả chỉ nói có đội trực 24/7, không phải ý xử lý thời gian thực đúng nghĩa của task."
+  },
+  {
+    "nice_id": "T1333",
+    "source_id": "PD003-T1333",
+    "reason_original": "Liên quan tới nghiệp vụ điều tra tội phạm — VCS không có nghiệp vụ này."
+  },
+  {
+    "nice_id": "T1562",
+    "source_id": "PD004-T1562",
+    "reason_original": "Phần này không phải nghiệp vụ SOC của VCS."
+  },
+  {
+    "nice_id": "T1804",
+    "source_id": "PD006-T1804",
+    "reason_original": "Soạn báo cáo chi tiết về hành vi xâm nhập/sự kiện bất thường — trùng với phần báo cáo sự cố (vd T1332). Có thể bỏ."
+  },
+  {
+    "nice_id": "T1192",
+    "source_id": "IN001-T1192",
+    "reason_original": "Phần này không áp dụng ở VCS."
+  },
+  {
+    "nice_id": "T2017",
+    "source_id": "IN002-T2017",
+    "reason_original": "Phần này ở VCS không áp dụng."
+  }
+]

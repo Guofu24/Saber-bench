@@ -1,0 +1,202 @@
+[
+  {
+    "id": "HV-01",
+    "name": "Cảnh báo gốc",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-02",
+    "name": "Log thô quanh cảnh báo",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-03",
+    "name": "Truy vấn của analyst",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-04",
+    "name": "Danh mục & sức khoẻ log source",
+    "scope": "shared_environment"
+  },
+  {
+    "id": "HV-05",
+    "name": "Kho rule + mapping ATT&CK",
+    "scope": "shared_environment"
+  },
+  {
+    "id": "HV-06",
+    "name": "Thống kê alert theo rule",
+    "scope": "per_period"
+  },
+  {
+    "id": "HV-07",
+    "name": "Case + phán quyết",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-08",
+    "name": "Worklog trong case",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-09",
+    "name": "Nhật ký playbook & hành động",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-10",
+    "name": "Vòng đời case & SLA",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-11",
+    "name": "Ticket tối ưu cảnh báo",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-12",
+    "name": "Ticket lỗ hổng",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-13",
+    "name": "Chuỗi leo thang",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-14",
+    "name": "Detection EDR",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-15",
+    "name": "Telemetry tiến trình",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-16",
+    "name": "File/Registry/Service/Task",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-17",
+    "name": "Netconn từ endpoint",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-18",
+    "name": "Hash & siêu dữ liệu tệp",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-19",
+    "name": "Hành động phản ứng EDR",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-20",
+    "name": "Ảnh bộ nhớ",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-21",
+    "name": "Cảnh báo NSM/IDS",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-22",
+    "name": "Flow/session mạng",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-23",
+    "name": "Log DNS/HTTP/TLS",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-24",
+    "name": "PCAP",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-25",
+    "name": "Tệp tách từ luồng mạng",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-26",
+    "name": "Log AD/Windows",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-27",
+    "name": "Log Firewall/Proxy/VPN",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-28",
+    "name": "Log web & WAF",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-29",
+    "name": "Log email security",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-30",
+    "name": "Log cloud",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-31",
+    "name": "Log ứng dụng & CSDL",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-32",
+    "name": "Báo cáo IR",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-33",
+    "name": "Báo cáo TH/CA",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-34",
+    "name": "Báo cáo phân tích mã độc",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-35",
+    "name": "Báo cáo tháng / bản tin TI",
+    "scope": "per_period"
+  },
+  {
+    "id": "HV-36",
+    "name": "Gói bằng chứng & biên bản",
+    "scope": "case_or_episode"
+  },
+  {
+    "id": "HV-37",
+    "name": "Sơ đồ mạng & phân vùng",
+    "scope": "shared_environment"
+  },
+  {
+    "id": "HV-38",
+    "name": "Danh mục tài sản",
+    "scope": "shared_environment"
+  },
+  {
+    "id": "HV-39",
+    "name": "Ma trận severity & SOP",
+    "scope": "shared_environment"
+  },
+  {
+    "id": "HV-40",
+    "name": "Whitelist nội bộ",
+    "scope": "shared_environment"
+  }
+]
