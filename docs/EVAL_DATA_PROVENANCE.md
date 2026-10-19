@@ -51,11 +51,17 @@ each tested on realistic fixtures (`tests/evaldata/`).
 ## Scenario-lineage contamination control
 
 `saber.evaldata.lineage_key` fingerprints a scenario by its underlying attack — the sorted set of
-ATT&CK techniques, the sorted IOC set, and a hash of any detection logic — **excluding identifier
-fields** (task/subtask/NICE/rule IDs). So the same attack appearing under two different task IDs
+ATT&CK techniques, the sorted IOC set, and a hash of any detection logic — **excluding scalar
+identifier fields** (a scalar task/subtask/NICE/rule ID is skipped; genuine techniques nested under
+an id-named structure are still counted). So the same attack appearing under two different task IDs
 maps to the same lineage key, and `assert_no_lineage_crosses_split` refuses to let one lineage land
-in more than one of train/dev/test. This augments the existing family-based split; it does not
-replace it.
+in more than one of train/dev/test.
+
+Honest scope: this is an **advisory guard** meant to be wired into the pipeline that assigns real
+ingested datasets to splits; there is no such multi-source ingestion pipeline enforced today, so it
+is not yet guarding a live split. It is also a content fingerprint, not a cryptographic boundary: an
+adversarial dataset author can reformat an IOC or append a token to make two copies of one attack
+hash differently. Treat it as defense against accidental reuse, not against a determined author.
 
 ## Candidate public sources (reviewed, not auto-downloaded)
 

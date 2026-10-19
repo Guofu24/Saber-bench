@@ -52,7 +52,14 @@ DEFAULT_DISALLOWED_TOOLS: tuple[str, ...] = (
     "Task",
     "TodoWrite",
     "KillShell",
+    "BashOutput",
+    "NotebookRead",
+    "SlashCommand",
+    "ExitPlanMode",
 )
+# NOTE: this denylist is defence-in-depth. The real guarantees that the model cannot reach the repo
+# or sealed truth are: --max-turns 1 (no tool-result turn), --strict-mcp-config (no MCP servers),
+# and an isolated empty cwd. A tool the CLI adds later and not named here still cannot run a loop.
 
 # Environment variables that would route the CLI to a non-subscription provider or a
 # raw API key. Removed from the child environment so subscription auth is the only path.

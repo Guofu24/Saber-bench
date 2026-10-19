@@ -36,8 +36,11 @@ def _techniques(obj: Any) -> set[str]:
             found.update(m.group(0).upper() for m in _TECH_RE.finditer(x))
         elif isinstance(x, Mapping):
             for k, v in x.items():
-                if str(k).lower() in _ID_KEYS:
-                    continue  # skip identifier fields (task/subtask/rule IDs)
+                # Skip only a SCALAR identifier string (e.g. task_id="T1112.002"); still recurse
+                # into nested structures so genuine techniques nested under an id-named dict/list
+                # are not dropped.
+                if str(k).lower() in _ID_KEYS and isinstance(v, str):
+                    continue
                 walk(v)
         elif isinstance(x, (list, tuple, set)):
             for v in x:

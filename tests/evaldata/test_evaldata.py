@@ -153,3 +153,27 @@ def test_catalog_sources_are_licensed_and_permitted() -> None:
 def test_label_tiers_distinct() -> None:
     assert LabelTier.SOURCE_PROVIDED != LabelTier.INDEPENDENTLY_VERIFIED
     assert LabelTier("synthetic") == LabelTier.SYNTHETIC
+
+
+def test_import_refuses_unpermitted_license(tmp_path: Path) -> None:
+    p = tmp_path / "x.json"
+    p.write_text(json.dumps([{"timestamp": "t", "host": "h"}]), encoding="utf-8")
+    src = DataSource(
+        name="forbidden",
+        kind="event_log",
+        url="https://x.invalid",
+        license="proprietary-no-redistribution",
+        usage_permitted=False,
+    )
+    with pytest.raises(PermissionError, match="usage_permitted is False"):
+        import_dataset(p, source=src, label_tier=LabelTier.SOURCE_PROVIDED)
+
+
+def test_lineage_scalar_id_dropped_but_nested_techniques_kept() -> None:
+    # A scalar task_id must not leak into the fingerprint, but a genuine technique nested under an
+    # id-named structure must still be counted.
+    scalar = {"id": "T1112.002", "iocs": ["evil.example"]}
+    nested = {"id": {"technique": "T1059"}, "iocs": ["evil.example"]}
+    plain = {"iocs": ["evil.example"]}
+    assert lineage_key(scalar) == lineage_key(plain)  # scalar id ignored
+    assert lineage_key(nested) != lineage_key(plain)  # nested technique counted

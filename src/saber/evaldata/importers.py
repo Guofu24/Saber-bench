@@ -242,7 +242,16 @@ def import_dataset(
     label_tier: LabelTier,
     retrieved_at: datetime | None = None,
 ) -> ImportResult:
-    """Import + validate one artifact, attaching provenance (checksum, tier, lineage keys)."""
+    """Import + validate one artifact, attaching provenance (checksum, tier, lineage keys).
+
+    Refuses to ingest a source whose license does not permit research/eval use: the license gate is
+    ENFORCED here, not merely recorded, so a ``usage_permitted=False`` source cannot slip through.
+    """
+    if not source.usage_permitted:
+        raise PermissionError(
+            f"refusing to ingest {source.name!r}: usage_permitted is False "
+            f"(license {source.license!r} does not clear research/eval use)"
+        )
     p = Path(path)
     importer = _IMPORTERS.get(source.kind)
     if importer is None:

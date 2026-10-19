@@ -51,8 +51,43 @@ def docker_daemon_up(timeout: float = 20.0) -> bool:
     return r.returncode == 0 and bool(r.stdout.strip())
 
 
+def _attached_networks(svc: dict[str, Any]) -> list[str] | None:
+    """Networks a service attaches to (list or dict form); None if it declares none (-> default)."""
+    nets = svc.get("networks")
+    if nets is None:
+        return None
+    if isinstance(nets, dict):
+        return list(nets.keys())
+    if isinstance(nets, list):
+        return [str(n) for n in nets]
+    return []
+
+
+def _volume_issue(name: str, vol: Any) -> str | None:
+    """Flag a writable host bind or a docker-socket mount (string OR long-form dict)."""
+    if isinstance(vol, str):
+        src = vol.split(":")[0]
+        if "docker.sock" in vol:
+            return f"service {name}: docker socket mount is forbidden (host control): {vol}"
+        if src.startswith((".", "/")) and not vol.rstrip().endswith(":ro"):
+            return f"service {name}: host bind mount not read-only: {vol}"
+        return None
+    if isinstance(vol, dict):
+        source = str(vol.get("source", ""))
+        if "docker.sock" in source or "docker.sock" in str(vol.get("target", "")):
+            return f"service {name}: docker socket mount is forbidden (host control)"
+        if vol.get("type") == "bind" and vol.get("read_only") is not True:
+            return f"service {name}: long-form host bind not read_only: {source}"
+    return None
+
+
 def validate_lab_plan(path: Path | None = None) -> tuple[bool, list[str]]:
-    """Offline isolation/safety validation of the compose plan (no daemon needed)."""
+    """Offline STRUCTURAL isolation checks on the compose plan (no daemon needed).
+
+    This verifies the compose does not declare known escape/egress vectors. It is NOT proof of
+    runtime isolation (SECURITY.md H2 — only an exercised, verified-isolated lab is); a clean plan
+    is a precondition, not a guarantee.
+    """
     p = path or lab_compose_path()
     issues: list[str] = []
     if not p.exists():
@@ -65,7 +100,10 @@ def validate_lab_plan(path: Path | None = None) -> tuple[bool, list[str]]:
         return False, ["compose root is not a mapping"]
 
     networks = doc.get("networks") or {}
-    if not any(isinstance(n, dict) and n.get("internal") is True for n in networks.values()):
+    internal_nets = {
+        n for n, cfg in networks.items() if isinstance(cfg, dict) and cfg.get("internal") is True
+    }
+    if not internal_nets:
         issues.append("no network marked internal: true (egress isolation required)")
 
     services = doc.get("services") or {}
@@ -75,18 +113,42 @@ def validate_lab_plan(path: Path | None = None) -> tuple[bool, list[str]]:
         if not isinstance(svc, dict):
             continue
         if svc.get("privileged") is True:
-            issues.append(f"service {name}: privileged is forbidden in the lab")
+            issues.append(f"service {name}: privileged is forbidden")
         if "ALL" not in (svc.get("cap_drop") or []):
             issues.append(f"service {name}: must cap_drop ALL")
-        if "no-new-privileges:true" not in (svc.get("security_opt") or []):
-            issues.append(f"service {name}: must set no-new-privileges")
+        if svc.get("cap_add"):
+            issues.append(f"service {name}: cap_add re-grants capabilities: {svc['cap_add']}")
+        secopt = svc.get("security_opt") or []
+        if "no-new-privileges:true" not in secopt:
+            issues.append(f"service {name}: must set no-new-privileges:true")
+        if any("unconfined" in str(o) for o in secopt):
+            issues.append(
+                f"service {name}: security_opt unconfined (seccomp/apparmor) is forbidden"
+            )
         if svc.get("network_mode") == "host":
             issues.append(f"service {name}: host network mode is forbidden")
+        for ns in ("pid", "ipc", "uts"):
+            if str(svc.get(ns, "")) == "host":
+                issues.append(f"service {name}: {ns}: host namespace is forbidden")
+        if str(svc.get("userns_mode", "")) == "host":
+            issues.append(f"service {name}: userns_mode host is forbidden")
+        if svc.get("devices"):
+            issues.append(f"service {name}: device passthrough is forbidden: {svc['devices']}")
+        if svc.get("ports"):
+            issues.append(f"service {name}: host port exposure breaks isolation: {svc['ports']}")
+        # Every attached network must be internal; a service with no explicit network gets the
+        # implicit (egress) default, which is not allowed.
+        attached = _attached_networks(svc)
+        if attached is None:
+            issues.append(f"service {name}: no explicit internal network (implicit egress default)")
+        else:
+            for net in attached:
+                if net not in internal_nets:
+                    issues.append(f"service {name}: attached to non-internal network {net!r}")
         for vol in svc.get("volumes") or []:
-            vs = vol if isinstance(vol, str) else ""
-            # bind mounts from the host must be read-only (named volumes like 'telemetry:/x' are ok)
-            if vs.startswith((".", "/")) and not vs.rstrip().endswith(":ro"):
-                issues.append(f"service {name}: host bind mount not read-only: {vs}")
+            vissue = _volume_issue(name, vol)
+            if vissue:
+                issues.append(vissue)
     return (not issues), issues
 
 

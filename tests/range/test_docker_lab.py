@@ -35,6 +35,39 @@ def test_plan_validation_flags_missing_isolation_and_hardening(tmp_path: object)
     assert "host network" in joined and "read-only" in joined
 
 
+def test_plan_validation_closes_escape_vectors(tmp_path: object) -> None:
+    from pathlib import Path
+
+    # A compose that passed the OLD shallow denylist but is NOT isolated: a docker.sock mount (:ro),
+    # cap_add, pid:host, seccomp unconfined, a long-form writable bind, and attachment to a
+    # non-internal egress network while an internal net also exists.
+    bad = Path(str(tmp_path)) / "sneaky.yml"  # type: ignore[arg-type]
+    bad.write_text(
+        "services:\n"
+        "  w:\n"
+        "    image: x\n"
+        "    cap_drop: [ALL]\n"
+        "    cap_add: [SYS_ADMIN]\n"
+        "    pid: host\n"
+        "    security_opt: ['no-new-privileges:true', 'seccomp:unconfined']\n"
+        "    networks: [egress]\n"
+        "    volumes:\n"
+        "      - /var/run/docker.sock:/var/run/docker.sock:ro\n"
+        "      - {type: bind, source: /etc, target: /etc, read_only: false}\n"
+        "networks:\n  internal_net:\n    internal: true\n  egress: {}\n",
+        encoding="utf-8",
+    )
+    ok, issues = validate_lab_plan(bad)
+    assert not ok
+    joined = " ".join(issues)
+    assert "docker socket" in joined
+    assert "cap_add" in joined
+    assert "pid: host" in joined
+    assert "unconfined" in joined
+    assert "non-internal network 'egress'" in joined
+    assert "long-form host bind not read_only" in joined
+
+
 def test_controller_is_a_range_controller() -> None:
     assert isinstance(DockerLabController(), RangeController)
 
