@@ -76,3 +76,26 @@ To resume after interruption or solving a blocker, run **the same command**. Pro
 After resolving a concrete blocker, run with the same flags plus `--retry-blocked`; otherwise exhausted items are skipped to prevent endless reattempts. The supervisor also performs read-only `docker ps`/`podman ps`/`virsh list` checks when those CLIs are already present, and records the results in the environment snapshot without inspecting secrets.
 
 Strict sandbox access to existing network services is restricted to hosts whose entries in `config/existing-environment.json` set `approved_for_read_only_use: true`; this does not bypass API credentials or any additional sandbox restrictions.
+
+## Implementation status (this build)
+
+This repository now contains a working **offline benchmark core** on top of the planning kit.
+See `docs/READINESS.md` for the full three-tier breakdown and `docs/PROGRESS.md` (generated from
+`status/ledger.json`) for per-item status. Quick start:
+
+```bash
+uv sync --locked
+uv run python scripts/validate_catalog.py     # frozen 55/175/40 catalog, source hash verified
+uv run pytest                                  # offline suite (unit, security, subtasks, API)
+uv run saber task list --implemented           # subtasks with a runnable scorer
+uv run saber smoke --subtask T1112.001         # build -> oracle -> reference -> grade
+uv run saber experiment --seeds 1,42           # B0 vs ORACLE across implemented subtasks
+```
+
+Implemented and tested offline: domain contracts, catalog loader, deterministic grading library,
+episode builder (public manifest vs sealed truth), bounded time-guarded query gateway, lab-only
+response policy + state machine, specialist router + baselines + experiment matrix, read-mostly
+API, and a plan-only lab-isolation validator. Twelve subtasks run end to end across `file`/`soc`/
+`vm`. Everything needing a real SIEM, hypervisor, emulation, forensic artifacts, or an LLM-backed
+baseline is wired behind fail-closed adapters marked `BLOCKED_INTEGRATION`. **No result is
+`READY_BENCHMARK`.**
