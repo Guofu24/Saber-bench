@@ -1,6 +1,6 @@
 # SABER implementation progress (machine-generated from status/ledger.json)
 
-Updated: 2026-10-19T02:57:53+00:00
+Updated: 2026-10-19T03:18:59+00:00
 
 Status meanings: `DONE_DEV`/`IMPLEMENTED_DEV` = implementation + independent offline tests ran green;
 `PARTIAL` = safe parts done, remainder listed in blockers; `BLOCKED_INTEGRATION` = needs external
@@ -12,8 +12,8 @@ independently validated private data, lab verification and human adjudication.
 | Kind | BLOCKED | BLOCKED_INTEGRATION | DONE_DEV | IMPLEMENTED_DEV | PARTIAL | PENDING |
 |---|---|---|---|---|---|---|
 | engineering | 0 | 0 | 2 | 0 | 0 | 36 |
-| bridge | 0 | 0 | 3 | 0 | 0 | 2 |
-| domain | 0 | 0 | 0 | 0 | 0 | 175 |
+| bridge | 0 | 0 | 5 | 0 | 0 | 0 |
+| domain | 0 | 0 | 0 | 5 | 0 | 170 |
 
 ## Items
 
@@ -27,8 +27,8 @@ independently validated private data, lab verification and human adjudication.
 | B001 | bridge | bridge | DONE_DEV | `uv run pytest tests/unit/catalog/test_loader.py` | 175 items parsed, 0 CUSTOM aggregates, weights verified; source hash verified. |
 | B002 | bridge | bridge | DONE_DEV | `uv run pytest tests/unit/domain/test_subtask_spec.py` | SubtaskSpecV1 builds for all 175 records; env-specific invariants enforced. |
 | B003 | bridge | bridge | DONE_DEV | `uv run pytest tests/unit/grading`<br>`uv run mypy` | Conventions in docs/adr/0001; real YARA/Suricata/hypervisor adapters remain BLOCKED_INTEGRATION. |
-| B004 | bridge | bridge | PENDING |  |  |
-| B005 | bridge | bridge | PENDING |  |  |
+| B004 | bridge | bridge | DONE_DEV | `uv run pytest tests/security/test_truth_isolation.py` | Episode builder: public manifest + sealed truth split; leak guard on public payload. |
+| B005 | bridge | bridge | DONE_DEV | `uv run pytest tests/unit/test_cli.py` | CLI: task list/show/build/run/grade/report + smoke; deterministic reports labelled DEV_SIMULATION_ONLY. |
 | T006 | engineering | offline_engine | PENDING |  |  |
 | T007 | engineering | offline_engine | PENDING |  |  |
 | T008 | engineering | offline_engine | PENDING |  |  |
@@ -38,11 +38,11 @@ independently validated private data, lab verification and human adjudication.
 | T012 | engineering | offline_engine | PENDING |  |  |
 | T013 | engineering | offline_engine | PENDING |  |  |
 | T014 | engineering | offline_engine | PENDING |  |  |
-| T1112.001 | domain | pilot_file | PENDING |  |  |
-| T1348.001 | domain | pilot_file | PENDING |  |  |
-| T2012.001 | domain | pilot_file | PENDING |  |  |
-| T0020.001 | domain | pilot_file | PENDING |  |  |
-| T0173.001 | domain | pilot_file | PENDING |  |  |
+| T1112.001 | domain | pilot_file | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t1112_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY. |
+| T1348.001 | domain | pilot_file | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t1348_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY. |
+| T2012.001 | domain | pilot_file | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t2012_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY. |
+| T0020.001 | domain | pilot_file | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t0020_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY. |
+| T0173.001 | domain | pilot_file | IMPLEMENTED_DEV | `uv run pytest tests/subtasks/test_t0173_001.py` | No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only — Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY. |
 | T015 | engineering | range_adapters | PENDING |  |  |
 | T016 | engineering | range_adapters | PENDING |  |  |
 | T017 | engineering | range_adapters | PENDING |  |  |

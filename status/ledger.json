@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T02:57:53+00:00",
+  "updated_at": "2026-10-19T03:18:59+00:00",
   "items": {
     "T001": {
       "kind": "engineering",
@@ -136,12 +136,37 @@
     "B004": {
       "kind": "bridge",
       "phase": "bridge",
-      "status": "PENDING"
+      "status": "DONE_DEV",
+      "updated_at": "2026-10-19T03:18:59+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/security/test_truth_isolation.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/episodes/builder.py",
+        "src/saber/subtasks/_framework.py"
+      ],
+      "notes": "Episode builder: public manifest + sealed truth split; leak guard on public payload."
     },
     "B005": {
       "kind": "bridge",
       "phase": "bridge",
-      "status": "PENDING"
+      "status": "DONE_DEV",
+      "updated_at": "2026-10-19T03:18:59+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/unit/test_cli.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/cli/main.py",
+        "src/saber/episodes/runner.py",
+        "src/saber/benchmark/report.py"
+      ],
+      "notes": "CLI: task list/show/build/run/grade/report + smoke; deterministic reports labelled DEV_SIMULATION_ONLY."
     },
     "T006": {
       "kind": "engineering",
@@ -191,27 +216,102 @@
     "T1112.001": {
       "kind": "domain",
       "phase": "pilot_file",
-      "status": "PENDING"
+      "status": "IMPLEMENTED_DEV",
+      "updated_at": "2026-10-19T03:18:59+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_t1112_001.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/t1112_001/__init__.py",
+        "tests/subtasks/test_t1112_001.py"
+      ],
+      "blockers": [
+        "No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only"
+      ],
+      "notes": "Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY."
     },
     "T1348.001": {
       "kind": "domain",
       "phase": "pilot_file",
-      "status": "PENDING"
+      "status": "IMPLEMENTED_DEV",
+      "updated_at": "2026-10-19T03:18:59+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_t1348_001.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/t1348_001/__init__.py",
+        "tests/subtasks/test_t1348_001.py"
+      ],
+      "blockers": [
+        "No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only"
+      ],
+      "notes": "Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY."
     },
     "T2012.001": {
       "kind": "domain",
       "phase": "pilot_file",
-      "status": "PENDING"
+      "status": "IMPLEMENTED_DEV",
+      "updated_at": "2026-10-19T03:18:59+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_t2012_001.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/t2012_001/__init__.py",
+        "tests/subtasks/test_t2012_001.py"
+      ],
+      "blockers": [
+        "No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only"
+      ],
+      "notes": "Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY."
     },
     "T0020.001": {
       "kind": "domain",
       "phase": "pilot_file",
-      "status": "PENDING"
+      "status": "IMPLEMENTED_DEV",
+      "updated_at": "2026-10-19T03:18:59+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_t0020_001.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/t0020_001/__init__.py",
+        "tests/subtasks/test_t0020_001.py"
+      ],
+      "blockers": [
+        "No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only"
+      ],
+      "notes": "Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY."
     },
     "T0173.001": {
       "kind": "domain",
       "phase": "pilot_file",
-      "status": "PENDING"
+      "status": "IMPLEMENTED_DEV",
+      "updated_at": "2026-10-19T03:18:59+00:00",
+      "tests": [
+        {
+          "command": "uv run pytest tests/subtasks/test_t0173_001.py",
+          "exit_code": 0
+        }
+      ],
+      "changed_files": [
+        "src/saber/subtasks/t0173_001/__init__.py",
+        "tests/subtasks/test_t0173_001.py"
+      ],
+      "blockers": [
+        "No independently-sourced private gold labels / expert adjudication; synthetic DEV fixtures only"
+      ],
+      "notes": "Oracle reaches full credit on all variants; reference B0 baseline present. DEV_SIMULATION_ONLY."
     },
     "T015": {
       "kind": "engineering",
