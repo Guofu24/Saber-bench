@@ -349,6 +349,43 @@ class SubtaskBase(ABC):
             field_name, res.score, weight if weight is not None else it.weight, res.detail()
         )
 
+    def set_partial_item(
+        self,
+        field_name: str,
+        pred: Any,
+        truth: Any,
+        *,
+        key_canon: Callable[[Any], str],
+        attr_canon: Callable[[Any], str],
+        partial: float = 0.5,
+        beta: float | None = None,
+        weight: float | None = None,
+    ) -> ItemScore:
+        from saber.grading.primitives import score_set_partial
+
+        it = self._item(field_name)
+        res = score_set_partial(
+            pred or [], truth, key_canon=key_canon, attr_canon=attr_canon,
+            partial=partial, beta=beta if beta is not None else (it.beta or 1.0),
+        )  # fmt: skip
+        return item(
+            field_name, res.score, weight if weight is not None else it.weight, res.detail()
+        )
+
+    def technique_item(
+        self,
+        field_name: str,
+        pred: Any,
+        truth: Any,
+        tactic_of: Mapping[str, str],
+        *,
+        weight: float | None = None,
+    ) -> ItemScore:
+        from saber.grading.primitives import technique_tactic_score
+
+        s, d = technique_tactic_score(pred, truth, tactic_of)
+        return item(field_name, s, weight if weight is not None else self._weight(field_name), d)
+
     def numeric_item(
         self,
         field_name: str,
