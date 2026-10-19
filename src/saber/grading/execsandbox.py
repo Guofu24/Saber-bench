@@ -118,6 +118,29 @@ class ExecResult:
         }  # fmt: skip
 
 
+def _rlimit_preexec() -> Any:
+    """Best-effort CPU/address-space caps for the sandbox child (POSIX only; no-op elsewhere)."""
+    import os
+
+    if os.name != "posix":
+        return None
+    try:
+        import resource
+    except ImportError:  # pragma: no cover - non-POSIX
+        return None
+
+    setrlimit = resource.setrlimit  # type: ignore[attr-defined]
+    rlimit_cpu = resource.RLIMIT_CPU  # type: ignore[attr-defined]
+    rlimit_as = resource.RLIMIT_AS  # type: ignore[attr-defined]
+
+    def _apply() -> None:  # pragma: no cover - runs in the child before exec
+        setrlimit(rlimit_cpu, (6, 6))
+        gigabyte = 1024 * 1024 * 1024
+        setrlimit(rlimit_as, (gigabyte, gigabyte))
+
+    return _apply
+
+
 def _run(payload: dict[str, Any], *, timeout_s: float) -> ExecResult:
     engine = str(payload.get("engine"))
     data = json.dumps(payload).encode("utf-8")
@@ -129,6 +152,7 @@ def _run(payload: dict[str, Any], *, timeout_s: float) -> ExecResult:
             [sys.executable, "-I", "-S", "-c", _RUNNER],
             input=data, capture_output=True, timeout=timeout_s, check=False,
             env={"PYTHONIOENCODING": "utf-8", "PYTHONHASHSEED": "0", "SYSTEMROOT": _systemroot()},
+            preexec_fn=_rlimit_preexec(),
         )  # fmt: skip
     except subprocess.TimeoutExpired:
         return ExecResult(

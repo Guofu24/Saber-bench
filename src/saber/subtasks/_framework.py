@@ -251,7 +251,18 @@ class SubtaskBase(ABC):
                 + "; ".join(str(e.get("msg", "")) for e in exc.errors()[:5])
             ]
             return ScoreResult(score=0.0, raw_score=0.0, trace=trace, **base)
-        parts = self.score_parts(answer, truth, ctx)
+        # Scoring must fail closed: a malformed-but-schema-valid answer (e.g. a bare `list`/`dict`
+        # field whose inner shape the scorer rejects) becomes a recorded zero, never an escaping
+        # exception (SECURITY.md: record a denial; never treat attempted execution as success).
+        try:
+            parts = self.score_parts(answer, truth, ctx)
+        except (ValueError, TypeError, KeyError, PydanticValidationError) as exc:
+            return ScoreResult(
+                score=0.0,
+                raw_score=0.0,
+                trace=[f"invalid_submission_for_scoring: {type(exc).__name__}: {str(exc)[:160]}"],
+                **base,
+            )
         raw = parts.raw_score if parts.raw_score is not None else parts.weighted()
         raw = min(1.0, max(0.0, raw))
         score = raw
