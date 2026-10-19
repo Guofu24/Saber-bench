@@ -159,6 +159,22 @@ def _false_positive_count(components: list[dict[str, Any]]) -> int | None:
     return total
 
 
+def _false_negative_count(components: list[dict[str, Any]]) -> int | None:
+    """Pull a false-negative (missed) count out of RAW component detail where exposed."""
+    total: int | None = None
+    for comp in components:
+        detail = comp.get("detail") or {}
+        if not isinstance(detail, dict):
+            continue
+        for key in ("fn", "false_negatives", "missed"):
+            v = detail.get(key)
+            if isinstance(v, int):
+                total = (total or 0) + v
+            elif isinstance(v, (list, tuple)):
+                total = (total or 0) + len(v)
+    return total
+
+
 def _sanitize_components(components: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Strip truth-derived values from component detail so reports carry no gold answers."""
     clean: list[dict[str, Any]] = []

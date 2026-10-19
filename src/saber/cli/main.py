@@ -345,6 +345,57 @@ def gold_baseline(
     click.echo(f"wrote {mpath}")
 
 
+@gold.command(
+    "compare",
+    help="Four-way baseline comparison (oracle/naive/strong + LLM single/specialist/multi-agent).",
+)
+@click.option("--model", default="haiku", help="Fixed Claude model alias/id for the LLM modes.")
+@click.option(
+    "--llm/--no-llm", "use_llm", default=False, help="Include the subscription LLM modes."
+)
+@click.option("--split", "split_name", type=click.Choice(["dev", "hidden"]), default="dev")
+@click.option("--seeds", default="1", help="Comma-separated seeds.")
+@click.option("--subtasks", default=None, help="Comma-separated subtask IDs (default: all 12).")
+@click.option("--modes", default="single,specialist,multi_agent", help="LLM modes to run.")
+@click.option("--timeout", "timeout_s", type=float, default=150.0, help="Per-call timeout (s).")
+@click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
+def gold_compare(
+    model: str,
+    use_llm: bool,
+    split_name: str,
+    seeds: str,
+    subtasks: str | None,
+    modes: str,
+    timeout_s: float,
+    out_dir: Path | None,
+) -> None:
+    from typing import cast
+
+    from saber.baselines.compare import run_comparison, write_comparison
+    from saber.gold.base import Split
+
+    ids = [s.strip() for s in subtasks.split(",") if s.strip()] if subtasks else None
+    mode_tuple = tuple(m.strip() for m in modes.split(",") if m.strip())
+    report = run_comparison(
+        ids,
+        split=cast(Split, split_name),
+        seeds=[int(x) for x in seeds.split(",") if x.strip()],
+        model=model,
+        llm_modes=mode_tuple,
+        use_llm=use_llm,
+        timeout_s=timeout_s,
+    )
+    for b in report["baselines"]:
+        a = report["summary"][b]
+        click.echo(f"  {b:12s} score={a['score']['mean']} fp={a['fp_total']} fn={a['fn_total']}")
+    if split_name == "hidden":
+        click.echo("hidden split: report NOT written to disk (sealed split).")
+        return
+    jpath, mpath = write_comparison(report, out_dir)
+    click.echo(f"wrote {jpath}")
+    click.echo(f"wrote {mpath}")
+
+
 @cli.command(
     "split", help="Show the frozen family-based train/dev/test split and run leakage checks."
 )

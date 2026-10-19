@@ -7,6 +7,13 @@ isolation and operator approval exists (SECURITY.md H1-H4).
 """
 
 from saber.range.blocked import BlockedEmulationDriver, BlockedRangeController
+from saber.range.docker_lab import (
+    DockerLabController,
+    docker_daemon_up,
+    lab_compose_path,
+    lab_status,
+    validate_lab_plan,
+)
 from saber.range.localdir import LocalDirMachine
 from saber.range.ports import AttackVerifier, EmulationDriver, RangeController, SnapshotRef
 
@@ -14,8 +21,13 @@ __all__ = [
     "AttackVerifier",
     "BlockedEmulationDriver",
     "BlockedRangeController",
+    "DockerLabController",
     "EmulationDriver",
     "LocalDirMachine",
     "RangeController",
     "SnapshotRef",
+    "docker_daemon_up",
+    "lab_compose_path",
+    "lab_status",
+    "validate_lab_plan",
 ]

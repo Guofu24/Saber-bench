@@ -1,0 +1,39 @@
+# SABER reproducible Linux lab (Phase E3) — isolated, benign, telemetry-emitting.
+#
+# Brought up by the OPERATOR once the Docker Linux daemon is available (the agent never starts it).
+# Isolation: the network is `internal: true` (no egress); containers are hardened (cap_drop ALL,
+# no-new-privileges, read-only rootfs + tmpfs). The workload is deliberately BENIGN — it emits
+# Sysmon-like JSON telemetry to a shared volume for ingestion by `saber.evaldata`. No attack tooling
+# ships here; security-validation scenarios are added only in an authorized lab.
+#
+# Bring up:   docker compose -f lab/docker-compose.yml up -d
+# Reset:      docker compose -f lab/docker-compose.yml down -v   (wipes the telemetry volume)
+name: saber-lab
+
+services:
+  workload:
+    image: debian:12-slim
+    command: ["/bin/sh", "/workload/benign_activity.sh"]
+    environment:
+      SABER_LAB_ITERS: "30"
+      SABER_LAB_INTERVAL: "2"
+    volumes:
+      - ./workload:/workload:ro
+      - telemetry:/telemetry
+    networks:
+      - labnet
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - "no-new-privileges:true"
+    restart: "no"
+
+networks:
+  labnet:
+    internal: true # no outbound egress — the lab is network-isolated
+
+volumes:
+  telemetry:

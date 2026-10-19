@@ -2,3 +2,4 @@
 *.png binary
 *.pcap binary
 *.bin binary
+lab/workload/*.sh text eol=lf
