@@ -234,6 +234,64 @@ def serve(host: str, port: int) -> None:  # pragma: no cover - thin uvicorn wrap
     uvicorn.run(create_app(), host=host, port=port)
 
 
+@cli.group(
+    help="Gold Evaluation Pilot v1: domain-faithful artifacts with independently-derived truth."
+)
+def gold() -> None:
+    """Gold pilot commands."""
+
+
+@gold.command("list", help="List the gold pilot subtasks and their status.")
+def gold_list() -> None:
+    from saber.gold import load_pilot, pilot_ids
+
+    for sid in pilot_ids():
+        p = load_pilot(sid)
+        ep = p.build("dev", 1)
+        v = p.independent_verify(ep)
+        oracle = p.grade(ep, p.answer_from_gold(ep), agent_id="gold_oracle")
+        click.echo(
+            f"  {sid:11s} verify={'OK' if v.ok else 'FAIL'} oracle={oracle.score:.2f}  {p.instructions()[:66]}"
+        )
+    click.echo(f"\n{len(pilot_ids())} gold pilots (GOLD_PILOT_V1; not READY_BENCHMARK).")
+
+
+@gold.command(
+    "verify", help="Run independent verification + gold oracle for every pilot and split."
+)
+def gold_verify() -> None:
+    from saber.gold import load_pilot, pilot_ids
+
+    failures = 0
+    for sid in pilot_ids():
+        p = load_pilot(sid)
+        for split_name in ("dev", "hidden"):
+            ep = p.build(split_name, 1)
+            v = p.independent_verify(ep)
+            oracle = p.grade(ep, p.answer_from_gold(ep), agent_id="gold_oracle")
+            if not (v.ok and abs(oracle.score - 1.0) < 1e-9):
+                failures += 1
+                click.echo(
+                    f"  FAIL {sid}/{split_name}: verify={v.ok} oracle={oracle.score:.3f} {v.detail}"
+                )
+    if failures:
+        raise click.ClickException(f"{failures} gold verification failures")
+    click.echo(
+        "GOLD VERIFY OK: all pilots independently verified and oracle reaches full credit (dev+hidden)."
+    )
+
+
+@gold.command(
+    "emit", help="Write gold/MANIFEST.json (provenance + checksums) and the adjudication queue."
+)
+def gold_emit() -> None:
+    from saber.gold.emit import write_manifest
+
+    mpath, qpath = write_manifest()
+    click.echo(f"wrote {mpath}")
+    click.echo(f"wrote {qpath}")
+
+
 @cli.command(
     "split", help="Show the frozen family-based train/dev/test split and run leakage checks."
 )

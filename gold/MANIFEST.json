@@ -1,0 +1,599 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-19T07:39:55+00:00",
+  "label": "GOLD_PILOT_V1 — domain-faithful synthetic, independently cross-validated, NOT human-signed; not READY_BENCHMARK",
+  "pilots": [
+    {
+      "subtask_id": "T1112.002",
+      "splits": {
+        "dev": {
+          "episode_id": "2e547ffc-b68d-5ca9-b600-7a0b6535a3c3",
+          "artifact_sha256": "ca2b4895626f8da3f5229e235193ccba8d9c814808cd802441d905d1753f7bd7",
+          "independent_verification": {
+            "ok": true,
+            "detail": "telemetry-derived verdict=FP",
+            "fields": [
+              "verdict"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        },
+        "hidden": {
+          "episode_id": "0caa4149-866e-5e6b-aae7-5bba51a947f5",
+          "artifact_sha256": "e76d260191ded0041e801db910ff7ddd076662553cb14fca96f9e2dd7b28610b",
+          "independent_verification": {
+            "ok": true,
+            "detail": "telemetry-derived verdict=FP",
+            "fields": [
+              "verdict"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        }
+      },
+      "provenance": {
+        "builder": "saber.gold.pilots.g1112_002.Pilot",
+        "method": "authored alert + corroborating/refuting telemetry; verdict follows the telemetry, not a label field",
+        "independent_derivation": "verifier re-derives the verdict from telemetry signal words (TP: encoded/beacon/unsigned/rare host; FP: signed/change-ticket/backup-window/no external); must equal the authored verdict",
+        "source_versions": {
+          "alert_schema": "HV-01",
+          "log_schema": "HV-02"
+        },
+        "hard_negatives": [
+          "FP cases are signed admin tools in approved windows that fire the same rules as TP cases"
+        ],
+        "adjudication_required": [],
+        "labels": [
+          "GOLD_PILOT_V1",
+          "SYNTHETIC_DOMAIN_FAITHFUL"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1348.002",
+      "splits": {
+        "dev": {
+          "episode_id": "c8db77e7-0d49-5387-9723-1390f59bb0cc",
+          "artifact_sha256": "3affc6e2494820e7fd14926c15e4ee7ce35423daee01b7d22cdbb52545bca99d",
+          "independent_verification": {
+            "ok": true,
+            "detail": "policy verifier matched 11 labels",
+            "fields": [
+              "labels"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        },
+        "hidden": {
+          "episode_id": "42408023-8409-511a-89ba-e04f6b5a9b19",
+          "artifact_sha256": "187be393ef229740d06c0141e072e22b700889e5f1b8bfd603f23018c9a055c3",
+          "independent_verification": {
+            "ok": true,
+            "detail": "policy verifier matched 11 labels",
+            "fields": [
+              "labels"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        }
+      },
+      "provenance": {
+        "builder": "saber.gold.pilots.g1348_002.Pilot",
+        "method": "authored admin-activity log + internal whitelist; same tool appears legit and attack",
+        "independent_derivation": "label re-derived from (admin account AND target in managed scope => legit) — a policy route, not a tool-name heuristic",
+        "source_versions": {
+          "artifact": "admin-activity-log",
+          "policy": "internal-whitelist"
+        },
+        "hard_negatives": [
+          "PsExec/WMI legit for a whitelisted admin but attack from a non-admin",
+          "admin acting outside managed scope is attack"
+        ],
+        "adjudication_required": [
+          "whether an admin acting out-of-scope is 'attack' vs 'policy-violation' — owner to confirm the binary label"
+        ],
+        "labels": [
+          "GOLD_PILOT_V1",
+          "SYNTHETIC_DOMAIN_FAITHFUL"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1387.002",
+      "splits": {
+        "dev": {
+          "episode_id": "1a3bc9ec-7160-5b32-90ba-dfff272486cd",
+          "artifact_sha256": "2c46ea224b5cf14837689317eb461af9058bd9ded7224bba29fcf7f8ad18166e",
+          "independent_verification": {
+            "ok": true,
+            "detail": "payload search verified verdict=FP",
+            "fields": [
+              "verdict",
+              "payload_offset"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        },
+        "hidden": {
+          "episode_id": "f8d4fc21-c8a8-5dbf-8707-7db2a11765c1",
+          "artifact_sha256": "3080a5cd0a28292cdf0edcb5d213c7ce6cbf8769455decbfb1fba455aa0b6fa7",
+          "independent_verification": {
+            "ok": true,
+            "detail": "payload search verified verdict=TP",
+            "fields": [
+              "verdict",
+              "payload_offset"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        }
+      },
+      "provenance": {
+        "builder": "saber.gold.pilots.g1387_002.Pilot",
+        "method": "authored IDS alert + session payload; TP embeds the signature content, FP omits it",
+        "independent_derivation": "verifier searches the payload for the signature's literal content (str.index); TP iff present and the interval equals the found span",
+        "source_versions": {
+          "ids": "suricata-style-subset",
+          "evidence": "session-payload"
+        },
+        "hard_negatives": [
+          "FP alert whose signature content is absent from the payload"
+        ],
+        "adjudication_required": [],
+        "labels": [
+          "GOLD_PILOT_V1",
+          "SYNTHETIC_DOMAIN_FAITHFUL"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T0020.001",
+      "splits": {
+        "dev": {
+          "episode_id": "0cc0846a-0b98-5195-9cad-c5c12ea14cc7",
+          "artifact_sha256": "a3bea2785d2b31b8d51d9907e2cadf37016399b73e57e8e148e33eedd698bc02",
+          "independent_verification": {
+            "ok": true,
+            "detail": "semantic verifier matched 8 malicious lines",
+            "fields": [
+              "positive_lines"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        },
+        "hidden": {
+          "episode_id": "20ab74cd-be2d-52b1-aa3b-8d66d151af11",
+          "artifact_sha256": "fc7799648d778a5561793c8cdb5cac385fc95a1a839c485691a891d21e180187",
+          "independent_verification": {
+            "ok": true,
+            "detail": "semantic verifier matched 9 malicious lines",
+            "fields": [
+              "positive_lines"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        }
+      },
+      "provenance": {
+        "builder": "saber.gold.pilots.g0020_001.Pilot",
+        "method": "authored URL-encoded access log; SQLi probes malicious, plain+tricky requests benign",
+        "independent_derivation": "semantic verifier URL-decodes each request and requires a SQL token combination (not a single word); must equal the authored labels",
+        "source_versions": {
+          "log_format": "access-log-url-encoded",
+          "technique": "sql_injection_probe"
+        },
+        "hard_negatives": [
+          "q=select+ssd (search word)",
+          "/wiki/SQL_union_types (page name)",
+          "coupon=SAVE1EQ1 (not 1=1)",
+          "drop-shipping (word)",
+          "status=selected (substring)",
+          "how-we-sleep-better (word, no paren)"
+        ],
+        "adjudication_required": [],
+        "labels": [
+          "GOLD_PILOT_V1",
+          "SYNTHETIC_DOMAIN_FAITHFUL"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1406.001",
+      "splits": {
+        "dev": {
+          "episode_id": "1cb83875-9e0c-5090-bba5-eec4b89300c3",
+          "artifact_sha256": "83e41ff1963f7111a207ae30ed2d587d6e41831185759cb9b98614f8af9bf10a",
+          "independent_verification": {
+            "ok": true,
+            "detail": "marker verifier matched 5 family samples",
+            "fields": [
+              "family_ids"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        },
+        "hidden": {
+          "episode_id": "9f76ac1c-bc56-5268-b1cc-3e54121d4f57",
+          "artifact_sha256": "447c06f3ccdeb9d68747ac86ad755ccb25833f7d4e85a7aee303841ebbc4ee10",
+          "independent_verification": {
+            "ok": true,
+            "detail": "marker verifier matched 5 family samples",
+            "fields": [
+              "family_ids"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        }
+      },
+      "provenance": {
+        "builder": "saber.gold.pilots.g1406_001.Pilot",
+        "method": "authored byte samples; family samples embed a stable config marker; clean samples do not (one near-miss carries a similar string)",
+        "independent_derivation": "family set re-derived by marker presence in the decoded bytes; must equal the labelled family",
+        "source_versions": {
+          "engine": "saber-yara-subset",
+          "family": "SynthBeacon"
+        },
+        "hard_negatives": [
+          "a clean sample contains 'cfg=SynthBackup;v=3;' (similar to the family marker 'cfg=SynthBeacon;v=3;')"
+        ],
+        "adjudication_required": [],
+        "labels": [
+          "GOLD_PILOT_V1",
+          "SYNTHETIC_DOMAIN_FAITHFUL"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1111.002",
+      "splits": {
+        "dev": {
+          "episode_id": "aa4e3808-8949-514e-b8ae-6b436e630a63",
+          "artifact_sha256": "41cd8fd43c0a7842a24a4091db68191e27f277bcbd8ef88ddd2e2eac5413d1b9",
+          "independent_verification": {
+            "ok": true,
+            "detail": "benign-attribute verifier matched 7 FPs; cause=rule_logic",
+            "fields": [
+              "fp_ids",
+              "fp_cause"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        },
+        "hidden": {
+          "episode_id": "b5d288cd-584a-5b45-80d9-2c8f8551f947",
+          "artifact_sha256": "f14984d09bb204f5f71084dfff3fc88b81be97980b48cbd04a05d7a61084651e",
+          "independent_verification": {
+            "ok": true,
+            "detail": "benign-attribute verifier matched 5 FPs; cause=rule_logic",
+            "fields": [
+              "fp_ids",
+              "fp_cause"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        }
+      },
+      "provenance": {
+        "builder": "saber.gold.pilots.g1111_002.Pilot",
+        "method": "authored noisy mass-file-access rule + alerts; FPs are the signed backup agent; rule lacks the exclusion",
+        "independent_derivation": "FP set re-derived from the benign attribute (signed backup account); cause=rule_logic because the rule has no backup exclusion",
+        "source_versions": {
+          "artifact": "rule+alert-replay"
+        },
+        "hard_negatives": [
+          "TP ransomware reads many files too; filtering purely on file-count would lose TPs"
+        ],
+        "adjudication_required": [
+          "the single-label FP cause can be multi-factor in reality; owner to confirm the primary cause taxonomy"
+        ],
+        "labels": [
+          "GOLD_PILOT_V1",
+          "SYNTHETIC_DOMAIN_FAITHFUL"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T2013.001",
+      "splits": {
+        "dev": {
+          "episode_id": "88024973-cd80-502d-93a0-42d92dd00168",
+          "artifact_sha256": "ab9679c45050fb8fb56782ee31edb2dbf4e37512c91f4840ccdc31588c155922",
+          "independent_verification": {
+            "ok": true,
+            "detail": "all 15 IOCs grep-present, normalised, benign-free",
+            "fields": [
+              "ipv4",
+              "domain",
+              "url",
+              "sha256",
+              "email",
+              "cve"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        },
+        "hidden": {
+          "episode_id": "44410e03-cc67-50bc-9f52-07b99092f263",
+          "artifact_sha256": "b19bd23bf4a533a7143f97ef04a072ef1625b7d2bed4c08da3b605b3fa5e1e2f",
+          "independent_verification": {
+            "ok": true,
+            "detail": "all 14 IOCs grep-present, normalised, benign-free",
+            "fields": [
+              "ipv4",
+              "domain",
+              "url",
+              "sha256",
+              "email",
+              "cve"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        }
+      },
+      "provenance": {
+        "builder": "saber.gold.pilots.g2013_001.Pilot",
+        "method": "authored raw log with 6 disjoint IOC types (some defanged) + benign distractors; truth = documented extraction spec applied to the log",
+        "independent_derivation": "independent check: every truth IOC is literally grep-present in the refanged log, no benign-allowlisted indicator is included, and normalisation is idempotent",
+        "source_versions": {
+          "ioc_types": "ipv4,domain,url,sha256,email,cve",
+          "defang": "hxxp/[.]"
+        },
+        "hard_negatives": [
+          "RFC1918 IPs",
+          "example/org domains (shop.example, corp-lab.example)",
+          "defanged hxxp/[.]",
+          "kernel32.dll is not a domain"
+        ],
+        "adjudication_required": [
+          "domain-vs-url scoping (does a URL host also count as a domain IOC?) — convention needs owner sign-off; current spec keeps them disjoint"
+        ],
+        "labels": [
+          "GOLD_PILOT_V1",
+          "SYNTHETIC_DOMAIN_FAITHFUL"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1102.002",
+      "splits": {
+        "dev": {
+          "episode_id": "8fda4e95-6363-533a-9225-8664c149c586",
+          "artifact_sha256": "3ca0a98b2b4fb4afe1875b1dd414b226272ca8ab46f8d735042dfc5c9cb63e66",
+          "independent_verification": {
+            "ok": true,
+            "detail": "indicator verifier matched 4 hosts",
+            "fields": [
+              "compromised"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        },
+        "hidden": {
+          "episode_id": "4f86eda4-be57-51bf-b470-43d6175f0376",
+          "artifact_sha256": "6da25e20f9e6cec9793626bb36d8a5e134cf33d9566c676203f485344961733c",
+          "independent_verification": {
+            "ok": true,
+            "detail": "indicator verifier matched 4 hosts",
+            "fields": [
+              "compromised"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        }
+      },
+      "provenance": {
+        "builder": "saber.gold.pilots.g1102_002.Pilot",
+        "method": "authored multi-host extract with live, clean and past-only-trace hosts",
+        "independent_derivation": "verifier marks a host compromised on any live OR historical indicator; must equal authored compromised set",
+        "source_versions": {
+          "artifact": "multi-host-extract"
+        },
+        "hard_negatives": [
+          "one host has ONLY an AV-quarantine log + prefetch (file deleted) — a recall trap for F2"
+        ],
+        "adjudication_required": [],
+        "labels": [
+          "GOLD_PILOT_V1",
+          "SYNTHETIC_DOMAIN_FAITHFUL"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T0167.002",
+      "splits": {
+        "dev": {
+          "episode_id": "302eeba8-65e1-5a98-9a11-e72b09156501",
+          "artifact_sha256": "0ebb0a74748a94003db9b718ecb1a5208e55c864e3a993ab9d9b47b930dbce0a",
+          "independent_verification": {
+            "ok": true,
+            "detail": "signer+API verifier matched 8 verdicts",
+            "fields": [
+              "verdicts"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        },
+        "hidden": {
+          "episode_id": "c5cd60f3-973b-59aa-8899-bc1b9e56d277",
+          "artifact_sha256": "c0f39ac6bd9177827ceb01ad7a876b920ec9c31f792633995c1348bc90ccf55e",
+          "independent_verification": {
+            "ok": true,
+            "detail": "signer+API verifier matched 7 verdicts",
+            "fields": [
+              "verdicts"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        }
+      },
+      "provenance": {
+        "builder": "saber.gold.pilots.g0167_002.Pilot",
+        "method": "authored file-triage extract; benign-tricky files legitimately use eval/base64/packing",
+        "independent_derivation": "verdict re-derived from signer + suspicious-API count (>=2 unsigned APIs => malicious), not from mere eval/base64 presence",
+        "source_versions": {
+          "artifact": "file-triage-extract"
+        },
+        "hard_negatives": [
+          "webpack minified eval()",
+          "jinja eval/compile",
+          "signed packed installer (UPX+base64)",
+          "signed IT PowerShell using base64"
+        ],
+        "adjudication_required": [
+          "border cases where a signer is unknown but behaviour is benign need analyst review"
+        ],
+        "labels": [
+          "GOLD_PILOT_V1",
+          "SYNTHETIC_DOMAIN_FAITHFUL"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T0173.002",
+      "splits": {
+        "dev": {
+          "episode_id": "255f243c-b32a-5d72-9a15-1e28f1ddfaf8",
+          "artifact_sha256": "cdac9e8a6f458431f7d4d4d6000f51d3525429229ed51bcb5f3f2a8607d6fc51",
+          "independent_verification": {
+            "ok": true,
+            "detail": "UTC recomputation matched order+times for 9 events",
+            "fields": [
+              "event_order",
+              "utc_times"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        },
+        "hidden": {
+          "episode_id": "d3661104-b48a-586d-8fda-d4018628b5fe",
+          "artifact_sha256": "b30b56df223f0530e315cf7e8fb7ccb4dc9b83b0df71503d5089c5725b851793",
+          "independent_verification": {
+            "ok": true,
+            "detail": "UTC recomputation matched order+times for 9 events",
+            "fields": [
+              "event_order",
+              "utc_times"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        }
+      },
+      "provenance": {
+        "builder": "saber.gold.pilots.g0173_002.Pilot",
+        "method": "authored multi-timezone event log; UTC order computed from local+offset",
+        "independent_derivation": "verifier recomputes UTC = local - offset and re-sorts; must equal the gold order and times",
+        "source_versions": {
+          "artifact": "multi-tz-event-log"
+        },
+        "hard_negatives": [
+          "cross-zone pairs whose local order is the reverse of their true UTC order"
+        ],
+        "adjudication_required": [],
+        "labels": [
+          "GOLD_PILOT_V1",
+          "SYNTHETIC_DOMAIN_FAITHFUL"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T0397.002",
+      "splits": {
+        "dev": {
+          "episode_id": "5fdbb74d-ad33-5bdc-8e2e-b09c51ef354c",
+          "artifact_sha256": "4788dca9e7b5a4f4acaeaf3e200bb03029f1209b5ea4c2c8cdb4c823c248005f",
+          "independent_verification": {
+            "ok": true,
+            "detail": "reputation verifier matched 4 malicious entries",
+            "fields": [
+              "entries"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        },
+        "hidden": {
+          "episode_id": "2af631cb-a9eb-581a-83cf-770a6c54879e",
+          "artifact_sha256": "5175fba1ad941d4323415a9f9034c50ac5172d9c34d1648439fabaf9cdc01021",
+          "independent_verification": {
+            "ok": true,
+            "detail": "reputation verifier matched 4 malicious entries",
+            "fields": [
+              "entries"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        }
+      },
+      "provenance": {
+        "builder": "saber.gold.pilots.g0397_002.Pilot",
+        "method": "authored autoruns export; malicious entries are unsigned pointing to temp/roaming/encoded targets",
+        "independent_derivation": "verifier re-derives malicious set from (unsigned AND suspect target path); must equal authored malicious set",
+        "source_versions": {
+          "export": "autoruns-subset"
+        },
+        "hard_negatives": [
+          "signed OneDrive/Slack Run keys",
+          "signed Spooler service",
+          "GoogleUpdate/Windows scheduled tasks",
+          "nginx systemd unit"
+        ],
+        "adjudication_required": [
+          "wmi CommandLineEventConsumer is a strong signal; confirm type taxonomy with owner"
+        ],
+        "labels": [
+          "GOLD_PILOT_V1",
+          "SYNTHETIC_DOMAIN_FAITHFUL"
+        ]
+      }
+    },
+    {
+      "subtask_id": "T1324.002",
+      "splits": {
+        "dev": {
+          "episode_id": "149a4526-971e-5d08-aaa7-26644acb4675",
+          "artifact_sha256": "e791b8125917e8a4264db859ea62fb361748e95f93b7a448a23a89f25fd62d36",
+          "independent_verification": {
+            "ok": true,
+            "detail": "volatility order + catalog matched 5 types",
+            "fields": [
+              "collection_order",
+              "preservation"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        },
+        "hidden": {
+          "episode_id": "98d67f7c-cbb1-507b-bdc7-e125c10aa892",
+          "artifact_sha256": "f77da4730ec916346f7d17eabfe8eeb8ca76deb540931f38c4ad410cbbcfc96a",
+          "independent_verification": {
+            "ok": true,
+            "detail": "volatility order + catalog matched 6 types",
+            "fields": [
+              "collection_order",
+              "preservation"
+            ]
+          },
+          "gold_oracle_score": 1.0
+        }
+      },
+      "provenance": {
+        "builder": "saber.gold.pilots.g1324_002.Pilot",
+        "method": "authored evidence-type set; order = RFC 3227 volatility; preservation from a documented catalog",
+        "independent_derivation": "verifier re-derives order by sorting present types on the canonical volatility index; preservation checked against the catalog",
+        "source_versions": {
+          "order_standard": "RFC3227-order-of-volatility"
+        },
+        "hard_negatives": [
+          "order is shuffled in the input so a positional copy fails"
+        ],
+        "adjudication_required": [
+          "exact preservation wording per evidence type should be confirmed with an IR lead; the catalog is a documented default"
+        ],
+        "labels": [
+          "GOLD_PILOT_V1",
+          "SYNTHETIC_DOMAIN_FAITHFUL"
+        ]
+      }
+    }
+  ],
+  "adjudication_queue_size": 6
+}

@@ -68,3 +68,41 @@ def test_report_command() -> None:
     assert payload["oracle_full_credit"] is True
     assert payload["labels"] == ["DEV_SIMULATION_ONLY"]
     assert payload["scorer_version"] == "score_v1"
+
+
+def test_gold_list_command() -> None:
+    code, out = _run("gold", "list")
+    assert code == 0, out
+    assert "12 gold pilots" in out
+    assert "not READY_BENCHMARK" in out
+    assert "T0020.001" in out and "verify=OK" in out
+
+
+def test_gold_verify_command() -> None:
+    code, out = _run("gold", "verify")
+    assert code == 0, out
+    assert "GOLD VERIFY OK" in out
+
+
+def test_gold_emit_writes_manifest(tmp_path: object) -> None:
+    import json as _json
+    from pathlib import Path
+
+    from saber.gold.emit import write_manifest
+
+    mpath, qpath = write_manifest(root=Path(str(tmp_path)))  # type: ignore[arg-type]
+    manifest = _json.loads(mpath.read_text(encoding="utf-8"))
+    assert manifest["label"].startswith("GOLD_PILOT_V1")
+    assert len(manifest["pilots"]) == 12
+    for entry in manifest["pilots"]:
+        for split_name in ("dev", "hidden"):
+            leaf = entry["splits"][split_name]
+            assert leaf["independent_verification"]["ok"] is True
+            assert leaf["gold_oracle_score"] == 1.0
+    # dev and hidden artifacts must differ (no contamination of the sealed split)
+    for entry in manifest["pilots"]:
+        assert (
+            entry["splits"]["dev"]["artifact_sha256"]
+            != entry["splits"]["hidden"]["artifact_sha256"]
+        )
+    assert qpath.exists() and "adjudication" in qpath.read_text(encoding="utf-8").lower()

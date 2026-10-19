@@ -26,14 +26,16 @@ synthetic DEV data, not domain-crafted or independently validated gold.
 |---|---|
 | VERIFIED_OFFLINE (scorer + fixture + tests ran green on synthetic DEV data) | 175 |
 | IMPLEMENTED_OFFLINE / SPECIFIED | 0 |
-| BLOCKED_INTEGRATION (real-lab dependency on top of offline-verified) | 64 (18 vm + 46 soc) |
+| BLOCKED_INTEGRATION (real-lab dependency on top of offline-verified) | 65 (18 vm + 47 soc) |
 | READY_BENCHMARK | 0 |
 
 `docs/COVERAGE.md` is the full per-subtask matrix (service, environment, aggregate, split, status).
 The 12 hand-written exemplars are higher-fidelity; the 163 engine-backed ones are faithful to the
 source scoring formula but use structural fixtures. Subtasks whose real mode needs a lab (18 `vm`,
-46 `soc`) additionally carry a `BLOCKED_INTEGRATION` dependency on the adapters below; their
-*offline* implementation is nonetheless verified.
+47 `soc`, i.e. 65 of 175) additionally carry a `BLOCKED_INTEGRATION` dependency on the adapters
+below; their *offline* implementation is nonetheless verified. (An earlier revision of this report
+wrote 64/46 — an off-by-one undercount of the 47 `soc` subtasks; the catalog breakdown is 110
+`file` / 47 `soc` / 18 `vm`.)
 
 ## Three readiness tiers
 
