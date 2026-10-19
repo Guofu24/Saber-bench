@@ -26,9 +26,11 @@ subscription auth) and are informational only.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import shutil
+import signal
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -121,6 +123,30 @@ def _primary_model_info(model_usage: dict[str, Any]) -> tuple[str | None, str | 
     return best
 
 
+def _terminate_tree(proc: subprocess.Popen[str]) -> None:
+    """Kill the child process and its descendants (the claude CLI spawns a node subtree)."""
+    try:
+        if os.name == "nt":
+            subprocess.run(  # noqa: S603,S607 - fixed taskkill argv, no shell
+                ["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+                capture_output=True,
+                check=False,
+                timeout=15,
+            )
+        else:
+            # getattr-guarded: killpg/getpgid/SIGKILL are POSIX-only (absent on Windows).
+            killpg = getattr(os, "killpg", None)
+            getpgid = getattr(os, "getpgid", None)
+            sigkill = getattr(signal, "SIGKILL", signal.SIGTERM)
+            if killpg is not None and getpgid is not None:
+                killpg(getpgid(proc.pid), sigkill)
+            else:  # pragma: no cover
+                proc.kill()
+    except (OSError, subprocess.SubprocessError):  # pragma: no cover - best effort
+        with contextlib.suppress(Exception):
+            proc.kill()
+
+
 def _resolve_executable(executable: str | None) -> tuple[str | None, str | None]:
     """Resolve the claude executable, rejecting one planted in the current directory.
 
@@ -171,45 +197,57 @@ def run_claude_cli(
         "--model",
         model,
     ]
+    # Popen (not subprocess.run) so a timeout kills the whole `claude` child PROCESS TREE.
+    # subprocess.run's timeout only signals the direct child; the CLI's node grandchildren keep the
+    # stdout pipe open, so wall time overran the bound (observed 343 s against a 150 s timeout).
+    popen_kwargs: dict[str, Any] = {}
+    if os.name == "posix":
+        popen_kwargs["start_new_session"] = True  # own process group for killpg
     try:
-        proc = subprocess.run(  # noqa: S603 - argv is fully constructed, no shell
+        proc = subprocess.Popen(  # noqa: S603 - argv is fully constructed, no shell
             argv,
-            input="",
-            capture_output=True,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
-            timeout=timeout_s,
             env=subscription_env(),
             cwd=cwd,
-            check=False,
-        )
-    except subprocess.TimeoutExpired:
-        return CliInvocation(
-            ok=False,
-            requested_model=model,
-            timed_out=True,
-            error_detail=f"claude CLI timed out after {timeout_s:.0f}s",
+            **popen_kwargs,
         )
     except OSError as exc:  # pragma: no cover - environment dependent
         return CliInvocation(
             ok=False, requested_model=model, error_detail=f"failed to launch claude: {exc}"
         )
-
-    stdout = proc.stdout or ""
     try:
-        env_json = json.loads(stdout)
-    except json.JSONDecodeError:
-        tail = (proc.stderr or "")[-400:]
+        stdout, stderr = proc.communicate(timeout=timeout_s)
+        returncode = proc.returncode
+    except subprocess.TimeoutExpired:
+        _terminate_tree(proc)
+        with contextlib.suppress(Exception):
+            proc.communicate(timeout=10)
         return CliInvocation(
             ok=False,
             requested_model=model,
-            returncode=proc.returncode,
-            error_detail=f"non-JSON stdout (rc={proc.returncode}); stderr tail: {tail}",
+            timed_out=True,
+            error_detail=f"claude CLI timed out after {timeout_s:.0f}s (process tree killed)",
+        )
+
+    stdout = stdout or ""
+    try:
+        env_json = json.loads(stdout)
+    except json.JSONDecodeError:
+        tail = (stderr or "")[-400:]
+        return CliInvocation(
+            ok=False,
+            requested_model=model,
+            returncode=returncode,
+            error_detail=f"non-JSON stdout (rc={returncode}); stderr tail: {tail}",
         )
     if not isinstance(env_json, dict):
         return CliInvocation(
             ok=False,
             requested_model=model,
-            returncode=proc.returncode,
+            returncode=returncode,
             error_detail="unexpected JSON shape (not an object)",
         )
 
@@ -231,5 +269,5 @@ def run_claude_cli(
         total_cost_usd=env_json.get("total_cost_usd"),
         permission_denials=list(denials) if isinstance(denials, list) else [],
         usage=usage if isinstance(usage, dict) else {},
-        returncode=proc.returncode,
+        returncode=returncode,
     )

@@ -19,6 +19,7 @@ from saber.baselines.pilot_runner import (
 )
 from saber.baselines.prompt import build_prompt, extract_answer_json
 from saber.baselines.rules import naive_answer
+from saber.baselines.strong import strong_answer
 from saber.gold.base import load_pilot, pilot_ids
 
 ENVELOPE = {
@@ -50,6 +51,19 @@ def test_rules_baseline_discriminates_on_every_pilot() -> None:
         rules = pilot.grade(ep, naive_answer(sid, ep), agent_id="rules").score
         assert abs(oracle - 1.0) < 1e-9, f"{sid} oracle should be full credit"
         assert 0.0 <= rules < 1.0, f"{sid} naive rules must score below oracle, got {rules}"
+
+
+def test_strong_baseline_dominates_naive_and_reaches_oracle() -> None:
+    # The conventional (non-LLM) baseline must use public inputs only, beat (or match) the naive
+    # floor on every pilot, and never exceed the oracle.
+    for sid in pilot_ids():
+        pilot = load_pilot(sid)
+        for seed in (1, 2):
+            ep = pilot.build("dev", seed)
+            strong = pilot.grade(ep, strong_answer(sid, ep), agent_id="strong").score
+            naive = pilot.grade(ep, naive_answer(sid, ep), agent_id="naive").score
+            assert strong >= naive - 1e-9, f"{sid} seed {seed}: strong {strong} < naive {naive}"
+            assert strong <= 1.0 + 1e-9
 
 
 def test_rules_mean_leaves_headroom() -> None:
@@ -111,22 +125,46 @@ def test_subscription_env_scrubs_api_keys(monkeypatch: pytest.MonkeyPatch) -> No
     assert "CLAUDE_CODE_USE_BEDROCK" not in env
 
 
+class _FakePopen:
+    """Minimal stand-in for subprocess.Popen used to drive run_claude_cli deterministically."""
+
+    def __init__(self, stdout: str, stderr: str = "", returncode: int = 0, timeout: bool = False):
+        self._stdout = stdout
+        self._stderr = stderr
+        self.returncode = returncode
+        self.pid = 4242
+        self._timeout = timeout
+        self._calls = 0
+
+    def communicate(self, timeout: float | None = None) -> tuple[str, str]:
+        self._calls += 1
+        if self._timeout and self._calls == 1:
+            raise subprocess.TimeoutExpired(cmd="claude", timeout=timeout or 0)
+        return self._stdout, self._stderr
+
+    def kill(self) -> None:  # pragma: no cover - fallback path
+        pass
+
+
 def test_run_claude_cli_parses_envelope(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     import json as _json
 
-    def fake_run(argv: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
-        assert "--disallowed-tools" in argv
-        assert "--strict-mcp-config" in argv  # no operator MCP servers load
-        assert "--output-format" in argv and "json" in argv
-        assert kwargs["cwd"] == "somedir"
-        assert "ANTHROPIC_API_KEY" not in kwargs["env"]
-        return subprocess.CompletedProcess(argv, 0, stdout=_json.dumps(ENVELOPE), stderr="")
+    captured: dict[str, Any] = {}
 
-    monkeypatch.setattr(claude_cli.subprocess, "run", fake_run)
+    def fake_popen(argv: list[str], **kwargs: Any) -> _FakePopen:
+        captured["argv"] = argv
+        captured["kwargs"] = kwargs
+        return _FakePopen(_json.dumps(ENVELOPE))
+
+    monkeypatch.setattr(claude_cli.subprocess, "Popen", fake_popen)
     exe = str(tmp_path / "claude")  # outside cwd, so the resolver accepts it
     monkeypatch.setattr(claude_cli.shutil, "which", lambda _: exe)
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-x")
     inv = run_claude_cli("prompt", model="haiku", cwd="somedir")
+    assert "--disallowed-tools" in captured["argv"]
+    assert "--strict-mcp-config" in captured["argv"]  # no operator MCP servers load
+    assert captured["kwargs"]["cwd"] == "somedir"
+    assert "ANTHROPIC_API_KEY" not in captured["kwargs"]["env"]
     assert inv.ok and not inv.is_error
     assert inv.result_text == '{"ok": true}'
     assert inv.model_used == "claude-haiku-4-5"
@@ -136,13 +174,14 @@ def test_run_claude_cli_parses_envelope(monkeypatch: pytest.MonkeyPatch, tmp_pat
 
 
 def test_run_claude_cli_timeout(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    def boom(*_a: Any, **_k: Any) -> None:
-        raise subprocess.TimeoutExpired(cmd="claude", timeout=1)
-
-    monkeypatch.setattr(claude_cli.subprocess, "run", boom)
+    monkeypatch.setattr(
+        claude_cli.subprocess, "Popen", lambda *a, **k: _FakePopen("", timeout=True)
+    )
+    monkeypatch.setattr(claude_cli, "_terminate_tree", lambda _proc: None)
     monkeypatch.setattr(claude_cli.shutil, "which", lambda _: str(tmp_path / "claude"))
     inv = run_claude_cli("p", model="haiku", cwd="d", timeout_s=1)
     assert not inv.ok and inv.timed_out and inv.tool_failures() == 1
+    assert inv.error_detail is not None and "process tree killed" in inv.error_detail
 
 
 def test_run_claude_cli_missing_executable(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -161,10 +200,11 @@ def test_run_claude_cli_rejects_executable_in_cwd(monkeypatch: pytest.MonkeyPatc
 
 
 def test_non_json_stdout_is_failure(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    def fake_run(argv: list[str], **_k: Any) -> subprocess.CompletedProcess[str]:
-        return subprocess.CompletedProcess(argv, 1, stdout="not json", stderr="boom")
-
-    monkeypatch.setattr(claude_cli.subprocess, "run", fake_run)
+    monkeypatch.setattr(
+        claude_cli.subprocess,
+        "Popen",
+        lambda *a, **k: _FakePopen("not json", stderr="boom", returncode=1),
+    )
     monkeypatch.setattr(claude_cli.shutil, "which", lambda _: str(tmp_path / "claude"))
     inv = run_claude_cli("p", model="haiku", cwd="d")
     assert not inv.ok and inv.error_detail is not None and "non-JSON" in inv.error_detail
