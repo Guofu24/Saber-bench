@@ -292,6 +292,53 @@ def gold_emit() -> None:
     click.echo(f"wrote {qpath}")
 
 
+@gold.command(
+    "baseline",
+    help="Run the rules baseline (and optional subscription LLM baseline) over gold episodes.",
+)
+@click.option("--model", default="haiku", help="Fixed Claude model alias/id for the LLM baseline.")
+@click.option("--llm/--no-llm", "use_llm", default=False, help="Invoke the subscription CLI LLM.")
+@click.option("--split", "split_name", type=click.Choice(["dev", "hidden"]), default="dev")
+@click.option("--seed", type=int, default=1)
+@click.option("--subtasks", default=None, help="Comma-separated subtask IDs (default: all 12).")
+@click.option("--timeout", "timeout_s", type=float, default=120.0, help="Per-call timeout (s).")
+@click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
+def gold_baseline(
+    model: str,
+    use_llm: bool,
+    split_name: str,
+    seed: int,
+    subtasks: str | None,
+    timeout_s: float,
+    out_dir: Path | None,
+) -> None:
+    from typing import cast
+
+    from saber.baselines.pilot_runner import run_baselines, write_report
+    from saber.gold.base import Split
+
+    ids = [s.strip() for s in subtasks.split(",") if s.strip()] if subtasks else None
+    report = run_baselines(
+        ids,
+        split=cast(Split, split_name),
+        seed=seed,
+        model=model,
+        use_llm=use_llm,
+        timeout_s=timeout_s,
+    )
+    jpath, mpath = write_report(report, out_dir)
+    s = report["summary"]
+    click.echo(f"oracle_mean={s.get('oracle_mean')} rules_mean={s.get('rules_mean')}")
+    if use_llm:
+        click.echo(
+            f"llm({report.get('model_used_observed')}) completion={s.get('llm_completion_rate')} "
+            f"mean_completed={s.get('llm_mean_score_completed')} latency={s.get('llm_mean_latency_ms')}ms "
+            f"tool_failures={s.get('llm_total_tool_failures')}"
+        )
+    click.echo(f"wrote {jpath}")
+    click.echo(f"wrote {mpath}")
+
+
 @cli.command(
     "split", help="Show the frozen family-based train/dev/test split and run leakage checks."
 )
