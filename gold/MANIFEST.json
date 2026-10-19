@@ -1,7 +1,9 @@
 {
-  "schema_version": 1,
-  "generated_at": "2026-10-19T07:39:55+00:00",
-  "label": "GOLD_PILOT_V1 — domain-faithful synthetic, independently cross-validated, NOT human-signed; not READY_BENCHMARK",
+  "schema_version": 2,
+  "generated_at": "2026-10-19T08:18:13+00:00",
+  "label": "GOLD_PILOT_V1 — domain-faithful synthetic; truth independently cross-checked by a second derivation route per pilot; NOT human-signed; not READY_BENCHMARK",
+  "splits_are_blind_holdout": false,
+  "splits_note": "dev and hidden are distinct deterministic instances (different ids/values, different artifact hash), but draw from the SAME scenario templates/markers; this is NOT a blind holdout. A true holdout needs disjoint template authoring (future work).",
   "pilots": [
     {
       "subtask_id": "T1112.002",
@@ -45,7 +47,8 @@
         "adjudication_required": [],
         "labels": [
           "GOLD_PILOT_V1",
-          "SYNTHETIC_DOMAIN_FAITHFUL"
+          "SYNTHETIC_DOMAIN_FAITHFUL",
+          "DEV_SIMULATION_ONLY"
         ]
       }
     },
@@ -80,7 +83,7 @@
       "provenance": {
         "builder": "saber.gold.pilots.g1348_002.Pilot",
         "method": "authored admin-activity log + internal whitelist; same tool appears legit and attack",
-        "independent_derivation": "label re-derived from (admin account AND target in managed scope => legit) — a policy route, not a tool-name heuristic",
+        "independent_derivation": "truth = authored construction intent per activity; verify re-derives the label independently from the whitelist policy (admin account AND target in managed scope => legit) and must agree — a policy route, not a tool-name heuristic",
         "source_versions": {
           "artifact": "admin-activity-log",
           "policy": "internal-whitelist"
@@ -94,7 +97,8 @@
         ],
         "labels": [
           "GOLD_PILOT_V1",
-          "SYNTHETIC_DOMAIN_FAITHFUL"
+          "SYNTHETIC_DOMAIN_FAITHFUL",
+          "DEV_SIMULATION_ONLY"
         ]
       }
     },
@@ -142,7 +146,8 @@
         "adjudication_required": [],
         "labels": [
           "GOLD_PILOT_V1",
-          "SYNTHETIC_DOMAIN_FAITHFUL"
+          "SYNTHETIC_DOMAIN_FAITHFUL",
+          "DEV_SIMULATION_ONLY"
         ]
       }
     },
@@ -193,7 +198,8 @@
         "adjudication_required": [],
         "labels": [
           "GOLD_PILOT_V1",
-          "SYNTHETIC_DOMAIN_FAITHFUL"
+          "SYNTHETIC_DOMAIN_FAITHFUL",
+          "DEV_SIMULATION_ONLY"
         ]
       }
     },
@@ -228,7 +234,7 @@
       "provenance": {
         "builder": "saber.gold.pilots.g1406_001.Pilot",
         "method": "authored byte samples; family samples embed a stable config marker; clean samples do not (one near-miss carries a similar string)",
-        "independent_derivation": "family set re-derived by marker presence in the decoded bytes; must equal the labelled family",
+        "independent_derivation": "truth = family-generator membership; verify independently re-derives the family set by marker presence in the decoded bytes and must equal it",
         "source_versions": {
           "engine": "saber-yara-subset",
           "family": "SynthBeacon"
@@ -239,7 +245,8 @@
         "adjudication_required": [],
         "labels": [
           "GOLD_PILOT_V1",
-          "SYNTHETIC_DOMAIN_FAITHFUL"
+          "SYNTHETIC_DOMAIN_FAITHFUL",
+          "DEV_SIMULATION_ONLY"
         ]
       }
     },
@@ -288,7 +295,8 @@
         ],
         "labels": [
           "GOLD_PILOT_V1",
-          "SYNTHETIC_DOMAIN_FAITHFUL"
+          "SYNTHETIC_DOMAIN_FAITHFUL",
+          "DEV_SIMULATION_ONLY"
         ]
       }
     },
@@ -297,10 +305,10 @@
       "splits": {
         "dev": {
           "episode_id": "88024973-cd80-502d-93a0-42d92dd00168",
-          "artifact_sha256": "ab9679c45050fb8fb56782ee31edb2dbf4e37512c91f4840ccdc31588c155922",
+          "artifact_sha256": "c50bd32c829f3600604991dae18a17da4cad7a0cb986afa689457a8420c84b29",
           "independent_verification": {
             "ok": true,
-            "detail": "all 15 IOCs grep-present, normalised, benign-free",
+            "detail": "all 10 IOCs grep-present, normalised, benign-free, count-complete",
             "fields": [
               "ipv4",
               "domain",
@@ -314,10 +322,10 @@
         },
         "hidden": {
           "episode_id": "44410e03-cc67-50bc-9f52-07b99092f263",
-          "artifact_sha256": "b19bd23bf4a533a7143f97ef04a072ef1625b7d2bed4c08da3b605b3fa5e1e2f",
+          "artifact_sha256": "c7bf28b61016dd3e116b17d56fcd858da1e214f2ecb037fe9f16bbb05d5f8a1d",
           "independent_verification": {
             "ok": true,
-            "detail": "all 14 IOCs grep-present, normalised, benign-free",
+            "detail": "all 13 IOCs grep-present, normalised, benign-free, count-complete",
             "fields": [
               "ipv4",
               "domain",
@@ -333,7 +341,7 @@
       "provenance": {
         "builder": "saber.gold.pilots.g2013_001.Pilot",
         "method": "authored raw log with 6 disjoint IOC types (some defanged) + benign distractors; truth = documented extraction spec applied to the log",
-        "independent_derivation": "independent check: every truth IOC is literally grep-present in the refanged log, no benign-allowlisted indicator is included, and normalisation is idempotent",
+        "independent_derivation": "truth = documented _extract spec; independent checks: every truth IOC is grep-present in the refanged log, no benign-allowlisted indicator is included, normalisation is idempotent, AND a line-marker completeness count (a route distinct from _extract's value regexes) equals the per-type truth size (catches dropped IOCs)",
         "source_versions": {
           "ioc_types": "ipv4,domain,url,sha256,email,cve",
           "defang": "hxxp/[.]"
@@ -349,7 +357,8 @@
         ],
         "labels": [
           "GOLD_PILOT_V1",
-          "SYNTHETIC_DOMAIN_FAITHFUL"
+          "SYNTHETIC_DOMAIN_FAITHFUL",
+          "DEV_SIMULATION_ONLY"
         ]
       }
     },
@@ -384,7 +393,7 @@
       "provenance": {
         "builder": "saber.gold.pilots.g1102_002.Pilot",
         "method": "authored multi-host extract with live, clean and past-only-trace hosts",
-        "independent_derivation": "verifier marks a host compromised on any live OR historical indicator; must equal authored compromised set",
+        "independent_derivation": "truth = authored construction kind (live/past_only/clean); verify independently marks a host compromised on any live OR historical indicator scan and must equal the authored set",
         "source_versions": {
           "artifact": "multi-host-extract"
         },
@@ -394,7 +403,8 @@
         "adjudication_required": [],
         "labels": [
           "GOLD_PILOT_V1",
-          "SYNTHETIC_DOMAIN_FAITHFUL"
+          "SYNTHETIC_DOMAIN_FAITHFUL",
+          "DEV_SIMULATION_ONLY"
         ]
       }
     },
@@ -429,7 +439,7 @@
       "provenance": {
         "builder": "saber.gold.pilots.g0167_002.Pilot",
         "method": "authored file-triage extract; benign-tricky files legitimately use eval/base64/packing",
-        "independent_derivation": "verdict re-derived from signer + suspicious-API count (>=2 unsigned APIs => malicious), not from mere eval/base64 presence",
+        "independent_derivation": "truth = authored construction intent (source pool); verify re-derives independently from signer + suspicious-API count (>=2 unsigned APIs => malicious), NOT from mere eval/base64 presence, and must agree",
         "source_versions": {
           "artifact": "file-triage-extract"
         },
@@ -444,7 +454,8 @@
         ],
         "labels": [
           "GOLD_PILOT_V1",
-          "SYNTHETIC_DOMAIN_FAITHFUL"
+          "SYNTHETIC_DOMAIN_FAITHFUL",
+          "DEV_SIMULATION_ONLY"
         ]
       }
     },
@@ -491,7 +502,8 @@
         "adjudication_required": [],
         "labels": [
           "GOLD_PILOT_V1",
-          "SYNTHETIC_DOMAIN_FAITHFUL"
+          "SYNTHETIC_DOMAIN_FAITHFUL",
+          "DEV_SIMULATION_ONLY"
         ]
       }
     },
@@ -541,7 +553,8 @@
         ],
         "labels": [
           "GOLD_PILOT_V1",
-          "SYNTHETIC_DOMAIN_FAITHFUL"
+          "SYNTHETIC_DOMAIN_FAITHFUL",
+          "DEV_SIMULATION_ONLY"
         ]
       }
     },
@@ -550,7 +563,7 @@
       "splits": {
         "dev": {
           "episode_id": "149a4526-971e-5d08-aaa7-26644acb4675",
-          "artifact_sha256": "e791b8125917e8a4264db859ea62fb361748e95f93b7a448a23a89f25fd62d36",
+          "artifact_sha256": "97436b1b74a6a690c6be461d183f3e2f6defaedfce2d4e6a4a5176f55802fe5f",
           "independent_verification": {
             "ok": true,
             "detail": "volatility order + catalog matched 5 types",
@@ -563,7 +576,7 @@
         },
         "hidden": {
           "episode_id": "98d67f7c-cbb1-507b-bdc7-e125c10aa892",
-          "artifact_sha256": "f77da4730ec916346f7d17eabfe8eeb8ca76deb540931f38c4ad410cbbcfc96a",
+          "artifact_sha256": "ce632f028306d36347592c528be3bb4c5f60760953c34c51bec75670097c9081",
           "independent_verification": {
             "ok": true,
             "detail": "volatility order + catalog matched 6 types",
@@ -577,8 +590,8 @@
       },
       "provenance": {
         "builder": "saber.gold.pilots.g1324_002.Pilot",
-        "method": "authored evidence-type set; order = RFC 3227 volatility; preservation from a documented catalog",
-        "independent_derivation": "verifier re-derives order by sorting present types on the canonical volatility index; preservation checked against the catalog",
+        "method": "authored evidence-type set; order = RFC 3227 volatility; preservation = type->method-token mapping (vocabulary given, mapping withheld)",
+        "independent_derivation": "order re-derived independently by sorting present types on the canonical volatility index; preservation mapping is a documented convention checked against the method table and queued for adjudication",
         "source_versions": {
           "order_standard": "RFC3227-order-of-volatility"
         },
@@ -586,11 +599,12 @@
           "order is shuffled in the input so a positional copy fails"
         ],
         "adjudication_required": [
-          "exact preservation wording per evidence type should be confirmed with an IR lead; the catalog is a documented default"
+          "the type->preservation-method mapping should be confirmed with an IR lead; it is a documented default, and the exact method vocabulary is a convention"
         ],
         "labels": [
           "GOLD_PILOT_V1",
-          "SYNTHETIC_DOMAIN_FAITHFUL"
+          "SYNTHETIC_DOMAIN_FAITHFUL",
+          "DEV_SIMULATION_ONLY"
         ]
       }
     }

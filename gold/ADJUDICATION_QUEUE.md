@@ -11,4 +11,4 @@ READY_BENCHMARK. Nothing here is claimed as expert-approved.
 | T2013.001 | domain-vs-url scoping (does a URL host also count as a domain IOC?) — convention needs owner sign-off; current spec keeps them disjoint |
 | T0167.002 | border cases where a signer is unknown but behaviour is benign need analyst review |
 | T0397.002 | wmi CommandLineEventConsumer is a strong signal; confirm type taxonomy with owner |
-| T1324.002 | exact preservation wording per evidence type should be confirmed with an IR lead; the catalog is a documented default |
+| T1324.002 | the type->preservation-method mapping should be confirmed with an IR lead; it is a documented default, and the exact method vocabulary is a convention |

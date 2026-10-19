@@ -277,7 +277,8 @@ def gold_verify() -> None:
     if failures:
         raise click.ClickException(f"{failures} gold verification failures")
     click.echo(
-        "GOLD VERIFY OK: all pilots independently verified and oracle reaches full credit (dev+hidden)."
+        "GOLD VERIFY OK: every pilot's truth re-derived by a second (independent) route and oracle "
+        "reaches full credit (dev+hidden). Note: splits share templates (not a blind holdout)."
     )
 
 
@@ -299,7 +300,7 @@ def gold_emit() -> None:
 @click.option("--model", default="haiku", help="Fixed Claude model alias/id for the LLM baseline.")
 @click.option("--llm/--no-llm", "use_llm", default=False, help="Invoke the subscription CLI LLM.")
 @click.option("--split", "split_name", type=click.Choice(["dev", "hidden"]), default="dev")
-@click.option("--seed", type=int, default=1)
+@click.option("--seeds", default="1", help="Comma-separated seeds (e.g. 1,2,3).")
 @click.option("--subtasks", default=None, help="Comma-separated subtask IDs (default: all 12).")
 @click.option("--timeout", "timeout_s", type=float, default=120.0, help="Per-call timeout (s).")
 @click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
@@ -307,7 +308,7 @@ def gold_baseline(
     model: str,
     use_llm: bool,
     split_name: str,
-    seed: int,
+    seeds: str,
     subtasks: str | None,
     timeout_s: float,
     out_dir: Path | None,
@@ -318,23 +319,28 @@ def gold_baseline(
     from saber.gold.base import Split
 
     ids = [s.strip() for s in subtasks.split(",") if s.strip()] if subtasks else None
+    seed_list = [int(x) for x in seeds.split(",") if x.strip()]
     report = run_baselines(
         ids,
         split=cast(Split, split_name),
-        seed=seed,
+        seeds=seed_list,
         model=model,
         use_llm=use_llm,
         timeout_s=timeout_s,
     )
-    jpath, mpath = write_report(report, out_dir)
     s = report["summary"]
-    click.echo(f"oracle_mean={s.get('oracle_mean')} rules_mean={s.get('rules_mean')}")
+    click.echo(f"oracle={s['oracle']['mean']} rules={s['rules']['mean']} (n={s['n_episodes']})")
     if use_llm:
         click.echo(
-            f"llm({report.get('model_used_observed')}) completion={s.get('llm_completion_rate')} "
-            f"mean_completed={s.get('llm_mean_score_completed')} latency={s.get('llm_mean_latency_ms')}ms "
-            f"tool_failures={s.get('llm_total_tool_failures')}"
+            f"llm({report.get('model_used_observed')} via {report.get('providers_observed')}) "
+            f"completion={s.get('llm_completion_rate')} "
+            f"score_completed={s.get('llm_score_completed', {}).get('mean')} "
+            f"latency={s.get('llm_mean_latency_ms')}ms tool_failures={s.get('llm_total_tool_failures')}"
         )
+    if split_name == "hidden":
+        click.echo("hidden split: report NOT written to disk (sealed split); summary above only.")
+        return
+    jpath, mpath = write_report(report, out_dir)
     click.echo(f"wrote {jpath}")
     click.echo(f"wrote {mpath}")
 

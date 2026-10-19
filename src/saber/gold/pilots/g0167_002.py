@@ -72,16 +72,15 @@ class Pilot(GoldPilot):
         mal = rng.sample(_MAL, rng.randint(2, 4))
         files: list[dict[str, Any]] = []
         truth: dict[str, str] = {}
-        for name, signer, strings, _ in list(benign) + list(mal):
+        for name, signer, strings, is_mal in list(benign) + list(mal):
             fname = f"{rng.hexid('f', 3)}_{name}"
             files.append(
                 {"name": fname, "sha256": rng.sha256(fname), "signer": signer, "strings": strings}
             )
-            truth[fname] = (
-                "benign" if signer is not None or name in [b[0] for b in benign] else "malicious"
-            )
-        # Derive truth independently to be safe (and assert build intent matches).
-        truth = {f["name"]: _derive_verdict(f["signer"], f["strings"]) for f in files}
+            # Truth = the authored CONSTRUCTION INTENT (which pool the file came from). The
+            # independent signer+API rule (_derive_verdict) is NOT used to define truth here;
+            # independent_verify re-derives it that way and must agree — a genuine second route.
+            truth[fname] = "malicious" if is_mal else "benign"
         files = rng.shuffle(files)
         public = {
             "files": files,
@@ -91,7 +90,7 @@ class Pilot(GoldPilot):
         prov = Provenance(
             builder=f"{__name__}.Pilot",
             method="authored file-triage extract; benign-tricky files legitimately use eval/base64/packing",
-            independent_derivation="verdict re-derived from signer + suspicious-API count (>=2 unsigned APIs => malicious), not from mere eval/base64 presence",
+            independent_derivation="truth = authored construction intent (source pool); verify re-derives independently from signer + suspicious-API count (>=2 unsigned APIs => malicious), NOT from mere eval/base64 presence, and must agree",
             source_versions=self.SOURCE_VERSIONS,
             hard_negatives=[
                 "webpack minified eval()",

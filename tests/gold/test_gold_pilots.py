@@ -60,12 +60,15 @@ def test_no_label_giveaway_key_in_public(subtask_id: str) -> None:
 
 
 @pytest.mark.parametrize("subtask_id", pilot_ids())
-def test_dev_hidden_contamination(subtask_id: str) -> None:
+def test_dev_hidden_are_distinct_instances(subtask_id: str) -> None:
+    # This is a DISTINCT-INSTANCE check, NOT a blind-holdout guarantee: dev and hidden are
+    # different deterministic draws (different artifact hash and no shared concrete sha256
+    # identifier), but they draw from the SAME scenario templates/markers. A true blind holdout
+    # (disjoint templates) is documented as future work in the manifest (splits_are_blind_holdout).
     p = load_pilot(subtask_id)
     dev = p.build("dev", 1)  # type: ignore[arg-type]
     hidden = p.build("hidden", 1)  # type: ignore[arg-type]
     assert dev.artifact_sha256 != hidden.artifact_sha256, subtask_id
-    # No shared sha256 identifier across splits (the recognisable-IOC leakage check).
     import re
 
     def hashes(ep: object) -> set[str]:

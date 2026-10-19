@@ -26,20 +26,24 @@ _VOLATILITY = [
     "local_logs",
     "archived_logs",
 ]
-_PRESERVATION = {
-    "ram": "live memory acquisition with a write-blocked agent; hash the dump",
-    "network_connections": "snapshot netstat/conntrack before any containment",
-    "processes": "capture process list + loaded modules before kill",
-    "disk_images": "forensic image with a hardware write blocker; record hash + chain of custody",
-    "local_logs": "copy with original timestamps preserved; hash each file",
-    "archived_logs": "export from the central store with retention metadata",
+# type -> canonical preservation-method TOKEN (a closed vocabulary). The solver must MAP each
+# evidence type to its method itself; the type->method mapping is NOT given in public_inputs
+# (only the vocabulary is), so the preservation component is not free to copy.
+_METHOD = {
+    "ram": "live_memory_acquisition",
+    "network_connections": "snapshot_connections",
+    "processes": "capture_process_state",
+    "disk_images": "forensic_disk_image",
+    "local_logs": "copy_preserve_timestamps",
+    "archived_logs": "export_from_central_store",
 }
+_METHOD_VOCAB = sorted(set(_METHOD.values()))
 
 
 class Pilot(GoldPilot):
     SUBTASK_ID = "T1324.002"
     SOURCE_VERSIONS = {"order_standard": "RFC3227-order-of-volatility"}
-    OUTPUT_SPEC = 'JSON {"collection_order": ["<type>", ... most volatile first], "preservation": {"<type>": "<method>", ...}}'
+    OUTPUT_SPEC = 'JSON {"collection_order": ["<type>", ... most volatile first], "preservation": {"<type>": "<method token from the provided vocabulary>", ...}}'
 
     def build(self, split: Split, seed: int) -> GoldEpisode:
         rng = Rng(f"gold:{seed}", self.SUBTASK_ID, split)
@@ -47,21 +51,22 @@ class Pilot(GoldPilot):
         order_truth = [
             t for t in _VOLATILITY if t in present
         ]  # canonical order restricted to present
-        preservation = {t: _PRESERVATION[t] for t in present}
+        preservation = {t: _METHOD[t] for t in present}
         public = {
             "evidence_types": rng.shuffle(list(present)),
-            "objective": "Order the evidence by volatility (most volatile first) and state how to preserve each.",
-            "preservation_catalog": _PRESERVATION,
+            "objective": "Order the evidence by volatility (most volatile first) and map each type to its preservation method token.",
+            # Only the allowed method TOKENS are given (an enum), not the type->method mapping.
+            "method_vocabulary": _METHOD_VOCAB,
         }
         gold_truth = {"collection_order": order_truth, "preservation": preservation}
         prov = Provenance(
             builder=f"{__name__}.Pilot",
-            method="authored evidence-type set; order = RFC 3227 volatility; preservation from a documented catalog",
-            independent_derivation="verifier re-derives order by sorting present types on the canonical volatility index; preservation checked against the catalog",
+            method="authored evidence-type set; order = RFC 3227 volatility; preservation = type->method-token mapping (vocabulary given, mapping withheld)",
+            independent_derivation="order re-derived independently by sorting present types on the canonical volatility index; preservation mapping is a documented convention checked against the method table and queued for adjudication",
             source_versions=self.SOURCE_VERSIONS,
             hard_negatives=["order is shuffled in the input so a positional copy fails"],
             adjudication_required=[
-                "exact preservation wording per evidence type should be confirmed with an IR lead; the catalog is a documented default"
+                "the type->preservation-method mapping should be confirmed with an IR lead; it is a documented default, and the exact method vocabulary is a convention"
             ],
         )
         return finalize(
@@ -71,7 +76,7 @@ class Pilot(GoldPilot):
     def independent_verify(self, episode: GoldEpisode) -> VerificationResult:
         present = set(episode.public_inputs["evidence_types"])
         order = [t for t in _VOLATILITY if t in present]
-        preservation = {t: _PRESERVATION[t] for t in present}
+        preservation = {t: _METHOD[t] for t in present}
         if (
             order == episode.gold_truth["collection_order"]
             and preservation == episode.gold_truth["preservation"]

@@ -68,7 +68,9 @@ class Pilot(GoldPilot):
         kinds += ["clean"] * (n - len(kinds))
         kinds = rng.shuffle(kinds)
         records = [_host_record(rng, h, k) for h, k in zip(hosts, kinds, strict=True)]
-        truth = [r["host"] for r in records if _is_compromised(r)]
+        # Truth = authored construction kind (compromised iff the host was built live/past_only).
+        # independent_verify re-derives it from an indicator scan (_is_compromised) and must agree.
+        truth = [h for h, k in zip(hosts, kinds, strict=True) if k != "clean"]
         public = {
             "extract": {"hv": "HV-16", "hosts": records},
             "objective": "List every compromised host, including any with only historical traces (deleted file, AV log, prefetch).",
@@ -77,7 +79,7 @@ class Pilot(GoldPilot):
         prov = Provenance(
             builder=f"{__name__}.Pilot",
             method="authored multi-host extract with live, clean and past-only-trace hosts",
-            independent_derivation="verifier marks a host compromised on any live OR historical indicator; must equal authored compromised set",
+            independent_derivation="truth = authored construction kind (live/past_only/clean); verify independently marks a host compromised on any live OR historical indicator scan and must equal the authored set",
             source_versions=self.SOURCE_VERSIONS,
             hard_negatives=[
                 "one host has ONLY an AV-quarantine log + prefetch (file deleted) — a recall trap for F2"

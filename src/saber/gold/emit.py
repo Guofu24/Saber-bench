@@ -42,9 +42,15 @@ def build_manifest() -> dict[str, Any]:
                     queue.append({"subtask_id": sid, "item": item})
         rows.append(entry)
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat(),
-        "label": "GOLD_PILOT_V1 — domain-faithful synthetic, independently cross-validated, NOT human-signed; not READY_BENCHMARK",
+        "label": "GOLD_PILOT_V1 — domain-faithful synthetic; truth independently cross-checked by a second derivation route per pilot; NOT human-signed; not READY_BENCHMARK",
+        "splits_are_blind_holdout": False,
+        "splits_note": (
+            "dev and hidden are distinct deterministic instances (different ids/values, different "
+            "artifact hash), but draw from the SAME scenario templates/markers; this is NOT a blind "
+            "holdout. A true holdout needs disjoint template authoring (future work)."
+        ),
         "pilots": rows,
         "adjudication_queue_size": len(queue),
     }

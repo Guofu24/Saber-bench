@@ -66,15 +66,14 @@ class Pilot(GoldPilot):
             "samples": shuffled,
             "objective": "Write a YARA-subset rule that matches the malware family samples and not the clean ones.",
         }
-        # Rebuild family membership by id after shuffle, for the sealed truth.
-        fam_ids = sorted(
-            str(s["id"]) for s in shuffled if _MARKER.encode() in base64.b64decode(s["b64"])
-        )
+        # Truth = which samples the family GENERATOR produced (membership), independent of the
+        # marker-scan route that independent_verify uses to re-derive and cross-check it.
+        fam_ids = sorted(f"sample-{i}" for i in family_idx)
         gold_truth = {"family_ids": fam_ids, "m": len(fam_ids), "n": len(shuffled)}
         prov = Provenance(
             builder=f"{__name__}.Pilot",
             method="authored byte samples; family samples embed a stable config marker; clean samples do not (one near-miss carries a similar string)",
-            independent_derivation="family set re-derived by marker presence in the decoded bytes; must equal the labelled family",
+            independent_derivation="truth = family-generator membership; verify independently re-derives the family set by marker presence in the decoded bytes and must equal it",
             source_versions=self.SOURCE_VERSIONS,
             hard_negatives=[
                 "a clean sample contains 'cfg=SynthBackup;v=3;' (similar to the family marker 'cfg=SynthBeacon;v=3;')"

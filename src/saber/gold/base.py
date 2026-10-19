@@ -36,7 +36,11 @@ class Provenance(StrictModel):
         default_factory=list
     )  # labels/conventions needing a human
     labels: list[str] = Field(
-        default_factory=lambda: ["GOLD_PILOT_V1", "SYNTHETIC_DOMAIN_FAITHFUL"]
+        default_factory=lambda: [
+            "GOLD_PILOT_V1",
+            "SYNTHETIC_DOMAIN_FAITHFUL",
+            "DEV_SIMULATION_ONLY",
+        ]
     )
 
 

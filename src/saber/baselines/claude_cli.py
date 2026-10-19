@@ -1,20 +1,27 @@
-"""Controlled Claude Code CLI baseline runner (``claude -p``), subscription-only.
+"""Controlled Claude Code CLI baseline runner (``claude -p``).
 
 Design constraints (Phase C):
 
-* **Subscription auth only.** The child environment has every API-key / alternate-
-  provider variable removed, so the CLI uses the operator's claude.ai login or
-  fails loudly. It can never silently switch to pay-as-you-go API billing.
+* **Does not itself introduce API billing.** The child environment has every API-key /
+  alternate-provider variable removed (:data:`_SCRUBBED_ENV_KEYS`), so this runner does
+  not route the call to a pay-as-you-go key or to Bedrock/Vertex. It CANNOT, however,
+  override the operator's own machine config: a user/enterprise ``apiKeyHelper`` or a
+  settings ``env`` block, or stored console credentials, could still cause API billing.
+  Per project policy those are the account operator's responsibility; this runner
+  records the observed ``provider`` / ``cost_basis`` so a reviewer can audit the auth
+  path, and never changes the operator's billing settings.
 * **No benchmark contamination.** The child runs in a caller-provided *empty* working
-  directory with all filesystem / shell / network / search tools disallowed, so the
-  model cannot read the pilot source or the sealed gold truth, and max-turns is
-  bounded (default 1: a single answer, no tool loop).
+  directory with all filesystem / shell / network / search tools disallowed AND
+  ``--strict-mcp-config`` (so no operator-configured MCP server loads and reaches the
+  repo or network), and max-turns is bounded (default 1: a single answer, no tool
+  loop). The resolved executable is rejected if it lives in the current directory, so a
+  planted ``claude`` in the repo cannot be run.
 * **Fail-safe parsing.** A timeout, a non-zero exit, or non-JSON stdout is captured as
   a structured failure, never raised. Latency, usage, model identity and permission
   denials are recorded for every call.
 
-Cost figures reported by the CLI are LIST-price estimates and are informational only;
-under subscription auth no pay-as-you-go charge is incurred.
+Cost figures reported by the CLI are LIST-price estimates (``cost_basis="list"`` under
+subscription auth) and are informational only.
 """
 
 from __future__ import annotations
@@ -24,6 +31,7 @@ import os
 import shutil
 import subprocess
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 # Everything with a side effect or that could read the repo / sealed truth. The model
@@ -69,9 +77,11 @@ class CliInvocation:
     result_text: str = ""  # raw model output (the envelope's "result")
     is_error: bool = False
     model_used: str | None = None  # canonical model observed in modelUsage
+    provider: str | None = None  # e.g. "firstParty" (audit the auth/billing path)
+    cost_basis: str | None = None  # e.g. "list" (informational cost, not a real charge)
     num_turns: int | None = None
     duration_ms: int | None = None
-    total_cost_usd: float | None = None  # LIST price, informational (subscription auth)
+    total_cost_usd: float | None = None  # LIST price, informational
     permission_denials: list[Any] = field(default_factory=list)
     usage: dict[str, Any] = field(default_factory=dict)
     timed_out: bool = False
@@ -96,17 +106,37 @@ def subscription_env() -> dict[str, str]:
     return env
 
 
-def _primary_model(model_usage: dict[str, Any]) -> str | None:
-    """The canonical model that produced the answer (most output tokens wins)."""
-    best: str | None = None
+def _primary_model_info(model_usage: dict[str, Any]) -> tuple[str | None, str | None, str | None]:
+    """Canonical model + provider + cost_basis of the entry that produced the answer."""
+    best: tuple[str | None, str | None, str | None] = (None, None, None)
     best_out = -1
     for mid, info in model_usage.items():
-        out = int(info.get("outputTokens", 0)) if isinstance(info, dict) else 0
+        if not isinstance(info, dict):
+            continue
+        out = int(info.get("outputTokens", 0))
         if out > best_out:
             best_out = out
-            canonical = info.get("canonicalModel") if isinstance(info, dict) else None
-            best = str(canonical or mid)
+            canonical = info.get("canonicalModel")
+            best = (str(canonical or mid), info.get("provider"), info.get("costBasis"))
     return best
+
+
+def _resolve_executable(executable: str | None) -> tuple[str | None, str | None]:
+    """Resolve the claude executable, rejecting one planted in the current directory.
+
+    Returns ``(path, error)``. On Windows ``shutil.which`` searches the CWD first, so a
+    repo-local ``claude.exe`` / ``claude.bat`` could otherwise be executed.
+    """
+    exe = executable or shutil.which("claude")
+    if exe is None:
+        return None, "claude CLI not found on PATH (Phase C LLM baseline unavailable)"
+    try:
+        resolved = Path(exe).resolve()
+        if resolved.parent == Path.cwd().resolve():
+            return None, f"refusing to run claude resolved inside the working directory: {resolved}"
+    except OSError:  # pragma: no cover - path resolution is environment dependent
+        pass
+    return exe, None
 
 
 def run_claude_cli(
@@ -124,19 +154,16 @@ def run_claude_cli(
     ``cwd`` must be an existing, empty-ish directory that is NOT the repo root, so the
     model cannot read pilot source or sealed truth even if it attempted a file tool.
     """
-    exe = executable or shutil.which("claude")
+    exe, resolve_err = _resolve_executable(executable)
     if exe is None:
-        return CliInvocation(
-            ok=False,
-            requested_model=model,
-            error_detail="claude CLI not found on PATH (Phase C LLM baseline unavailable)",
-        )
+        return CliInvocation(ok=False, requested_model=model, error_detail=resolve_err)
     argv = [
         exe,
         "-p",
         prompt,
         "--output-format",
         "json",
+        "--strict-mcp-config",  # ignore operator-configured MCP servers (no repo/network reach)
         "--max-turns",
         str(max_turns),
         "--disallowed-tools",
@@ -190,12 +217,15 @@ def run_claude_cli(
     model_usage = model_usage if isinstance(model_usage, dict) else {}
     usage = env_json.get("usage")
     denials = env_json.get("permission_denials")
+    model_used, provider, cost_basis = _primary_model_info(model_usage)
     return CliInvocation(
         ok=True,
         requested_model=model,
         result_text=str(env_json.get("result", "")),
         is_error=bool(env_json.get("is_error", False)),
-        model_used=_primary_model(model_usage),
+        model_used=model_used,
+        provider=provider,
+        cost_basis=cost_basis,
         num_turns=env_json.get("num_turns"),
         duration_ms=env_json.get("duration_ms"),
         total_cost_usd=env_json.get("total_cost_usd"),

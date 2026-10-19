@@ -10,7 +10,7 @@ Scored by macro-averaged F1 across the six types (source `F1 macro theo 6 loại
 from __future__ import annotations
 
 import re
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Any
 
 from saber.gold.base import GoldEpisode, GoldPilot, Provenance, Split, VerificationResult, finalize
@@ -21,6 +21,31 @@ from saber.subtasks._hv.common import Rng
 
 _TYPES = ("ipv4", "domain", "url", "sha256", "email", "cve")
 _BENIGN_DOMAINS = ("example.com", "shop.example", "corp-lab.example")
+
+# Distinct line-context markers per type (for the independent completeness count in verify).
+_LINE_MARKERS = {
+    "ipv4": ("conn to ", " flagged"),
+    "domain": ("dns query ", " nxdomain-retry"),
+    "url": ("beacon ", "/gate.php"),
+    "sha256": ("sha256=", ""),
+    "cve": ("exploit for cve-", ""),
+    "email": ("phishing sender ", ""),
+}
+
+
+def _uniq(factory: Callable[[], str], k: int, exclude: set[str] | None = None) -> list[str]:
+    """Collect k unique values from a random factory (bounded attempts), avoiding ``exclude``."""
+    seen: list[str] = []
+    blocked = set(exclude or set())
+    for _ in range(k * 200):
+        if len(seen) >= k:
+            break
+        v = factory()
+        if v not in blocked and v not in seen:
+            seen.append(v)
+    if len(seen) < k:  # pragma: no cover - factory space is comfortably large
+        raise RuntimeError(f"could not draw {k} unique values (got {len(seen)})")
+    return seen
 
 
 def _extract(text: str) -> dict[str, set[str]]:
@@ -54,12 +79,16 @@ def _extract(text: str) -> dict[str, set[str]]:
         if not private:
             out["ipv4"].add(ip)
     url_hosts = {re.sub(r"^https?://", "", u).split("/")[0] for u in out["url"]}
+    email_domains = {e.split("@", 1)[1] for e in out["email"] if "@" in e}
     for m in re.finditer(r"\b(?:[a-z0-9-]+\.)+[a-z]{2,}\b", refanged, re.I):
         d = m.group(0).lower()
-        if d in url_hosts or d in _BENIGN_DOMAINS or "@" in text[max(0, m.start() - 1) : m.start()]:
+        before = refanged[max(0, m.start() - 1) : m.start()]  # index into refanged, not text
+        # Skip url-host (already a url IOC), email-domain, benign, @-prefixed and url-PATH segments
+        # (a token after "/" such as "gate.php" is a path component, not a domain).
+        if d in url_hosts or d in email_domains or d in _BENIGN_DOMAINS or before in ("@", "/"):
             continue
         if re.search(r"\.[a-z]{2,}$", d) and not d.endswith(
-            (".exe", ".dll", ".js", ".py", ".pdf", ".ps1", ".vbs", ".log")
+            (".exe", ".dll", ".js", ".py", ".pdf", ".ps1", ".vbs", ".log", ".php")
         ):
             out["domain"].add(d)
     return out
@@ -72,27 +101,41 @@ class Pilot(GoldPilot):
 
     def build(self, split: Split, seed: int) -> GoldEpisode:
         rng = Rng(f"gold:{seed}", self.SUBTASK_ID, split)
+        # Per-type UNIQUE and cross-type DISJOINT IOC values, so the six types never overlap and
+        # the sealed truth cannot silently lose an indicator to a domain/url-host collision.
+        n_ip, n_dom, n_url, n_sha, n_cve, n_eml = (
+            rng.randint(2, 3),
+            rng.randint(2, 3),
+            rng.randint(1, 2),
+            rng.randint(1, 2),
+            rng.randint(1, 2),
+            rng.randint(1, 2),
+        )
+        ips = _uniq(lambda: rng.external_ip(), n_ip)
+        domains = _uniq(
+            lambda: rng.domain(suspicious=True), n_dom + n_url + n_eml, exclude=set(_BENIGN_DOMAINS)
+        )
+        dom_domains, url_domains, eml_domains = (
+            domains[:n_dom],
+            domains[n_dom : n_dom + n_url],
+            domains[n_dom + n_url :],
+        )
+        shas = _uniq(lambda: rng.sha256(f"ioc-{rng.hexid('', 4)}"), n_sha)
+        cves = _uniq(lambda: f"CVE-{rng.randint(2018, 2025)}-{rng.randint(1000, 99999)}", n_cve)
+
         lines: list[str] = []
-        # Malicious IOCs embedded as standalone indicators (domains, urls and email-domains kept
-        # disjoint so the six types don't overlap). Some are defanged.
-        for _ in range(rng.randint(2, 3)):
-            lines.append(f"conn to {rng.external_ip().replace('.', '[.]')} flagged")
-        for _ in range(rng.randint(2, 3)):
-            lines.append(
-                f"dns query {rng.domain(suspicious=True)} nxdomain-retry"
-            )  # standalone domain
-        for _ in range(rng.randint(1, 2)):
-            lines.append(
-                f"beacon hxxp://{rng.domain(suspicious=True)}/gate.php"
-            )  # url (distinct host)
-        for _ in range(rng.randint(1, 2)):
-            lines.append(f"dropped file sha256={rng.sha256('ioc')}")
-        for _ in range(rng.randint(1, 2)):
-            lines.append(f"exploit for CVE-{rng.randint(2018, 2025)}-{rng.randint(1000, 99999)}")
-        for _ in range(rng.randint(1, 2)):
-            lines.append(
-                f"phishing sender {rng.pick(('payroll', 'it-helpdesk', 'ceo'))}@{rng.domain(suspicious=True)}"
-            )
+        for ip in ips:
+            lines.append(f"conn to {ip.replace('.', '[.]')} flagged")
+        for d in dom_domains:
+            lines.append(f"dns query {d} nxdomain-retry")  # standalone domain
+        for d in url_domains:
+            lines.append(f"beacon hxxp://{d}/gate.php")  # url (host disjoint from domains)
+        for s in shas:
+            lines.append(f"dropped file sha256={s}")
+        for c in cves:
+            lines.append(f"exploit for {c}")
+        for d in eml_domains:
+            lines.append(f"phishing sender {rng.pick(('payroll', 'it-helpdesk', 'ceo'))}@{d}")
         # benign distractors (must be excluded by the spec)
         lines += [
             f"internal host {rng.internal_ip()} ok",
@@ -113,7 +156,7 @@ class Pilot(GoldPilot):
         prov = Provenance(
             builder=f"{__name__}.Pilot",
             method="authored raw log with 6 disjoint IOC types (some defanged) + benign distractors; truth = documented extraction spec applied to the log",
-            independent_derivation="independent check: every truth IOC is literally grep-present in the refanged log, no benign-allowlisted indicator is included, and normalisation is idempotent",
+            independent_derivation="truth = documented _extract spec; independent checks: every truth IOC is grep-present in the refanged log, no benign-allowlisted indicator is included, normalisation is idempotent, AND a line-marker completeness count (a route distinct from _extract's value regexes) equals the per-type truth size (catches dropped IOCs)",
             source_versions=self.SOURCE_VERSIONS,
             hard_negatives=[
                 "RFC1918 IPs",
@@ -161,10 +204,19 @@ class Pilot(GoldPilot):
                 or (o[0] == 192 and o[1] == 168)
             ):
                 problems.append(f"ipv4:{ip} is private")
+        # Independent COMPLETENESS route: count malicious lines by their context markers (a route
+        # distinct from _extract's value regexes) and require the per-type count to match the truth.
+        # This catches a false negative (an IOC the value-extractor dropped, e.g. a collision).
+        for t, (pre, post) in _LINE_MARKERS.items():
+            marked = sum(1 for ln in refanged.split("\n") if pre in ln and (not post or post in ln))
+            if marked != len(gold[t]):
+                problems.append(f"{t}: {marked} marked lines but {len(gold[t])} in truth")
         if not problems:
             total = sum(len(gold[t]) for t in _TYPES)
             return VerificationResult(
-                True, f"all {total} IOCs grep-present, normalised, benign-free", list(_TYPES)
+                True,
+                f"all {total} IOCs grep-present, normalised, benign-free, count-complete",
+                list(_TYPES),
             )
         return VerificationResult(False, f"{len(problems)} problems: {problems[:6]}")
 

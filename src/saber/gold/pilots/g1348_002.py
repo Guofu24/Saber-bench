@@ -41,26 +41,25 @@ class Pilot(GoldPilot):
         whitelist = {"admin_accounts": admins, "managed_hosts": managed}
         activities: list[dict[str, Any]] = []
         n = rng.randint(8, 12)
+        intent: dict[str, str] = {}
         for i in range(n):
             tool = rng.pick(_TOOLS)
-            # mix: legit (admin+managed), attack (non-admin or out-of-scope)
+            # mix: legit (admin+managed), attack (non-admin or out-of-scope). The branch records
+            # the authored CONSTRUCTION INTENT, which is the truth; independent_verify re-derives
+            # the label from the whitelist policy (_derive) and must agree — a genuine 2nd route.
             if rng.chance(0.5):
-                acct, tgt = rng.pick(admins), rng.pick(managed)
+                acct, tgt, label = rng.pick(admins), rng.pick(managed), "legit"
             elif rng.chance(0.5):
-                acct, tgt = rng.username(), rng.pick(managed)  # non-admin source -> attack
+                acct, tgt, label = rng.username(), rng.pick(managed), "attack"  # non-admin source
             else:
-                acct, tgt = rng.pick(admins), rng.hostname("ws")  # admin but out-of-scope -> attack
+                acct, tgt, label = rng.pick(admins), rng.hostname("ws"), "attack"  # out-of-scope
+            aid = f"act-{i:02d}"
+            intent[aid] = label
             activities.append(
-                {
-                    "id": f"act-{i:02d}",
-                    "tool": tool,
-                    "account": acct,
-                    "target_host": tgt,
-                    "ts": None,
-                }
+                {"id": aid, "tool": tool, "account": acct, "target_host": tgt, "ts": None}
             )
         activities = rng.shuffle(activities)
-        truth = {a["id"]: _derive(a, whitelist) for a in activities}
+        truth = {a["id"]: intent[a["id"]] for a in activities}
         public = {
             "activities": activities,
             "whitelist": {"hv": "HV-40", **whitelist},
@@ -70,7 +69,7 @@ class Pilot(GoldPilot):
         prov = Provenance(
             builder=f"{__name__}.Pilot",
             method="authored admin-activity log + internal whitelist; same tool appears legit and attack",
-            independent_derivation="label re-derived from (admin account AND target in managed scope => legit) — a policy route, not a tool-name heuristic",
+            independent_derivation="truth = authored construction intent per activity; verify re-derives the label independently from the whitelist policy (admin account AND target in managed scope => legit) and must agree — a policy route, not a tool-name heuristic",
             source_versions=self.SOURCE_VERSIONS,
             hard_negatives=[
                 "PsExec/WMI legit for a whitelisted admin but attack from a non-admin",
