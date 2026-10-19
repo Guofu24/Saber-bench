@@ -26,6 +26,7 @@ synthetic DEV data, not domain-crafted or independently validated gold.
 |---|---|
 | VERIFIED_OFFLINE (scorer + fixture + tests ran green on synthetic DEV data) | 175 |
 | IMPLEMENTED_OFFLINE / SPECIFIED | 0 |
+| BLOCKED_INTEGRATION (real-lab dependency on top of offline-verified) | 64 (18 vm + 46 soc) |
 | READY_BENCHMARK | 0 |
 
 `docs/COVERAGE.md` is the full per-subtask matrix (service, environment, aggregate, split, status).
@@ -78,8 +79,17 @@ Offline baseline snapshot over all 175 subtasks (seeds 1 and 42, `reports/experi
 
 | Baseline | Subtasks scored | Mean | 95% CI |
 |---|---|---|---|
-| B0 rules-only | 172 (abstained on 3) | 0.890 | [0.843, 0.936] |
+| B0 rules-only | 172 (abstained on 3) | 1.000 | [1.000, 1.000] |
 | ORACLE (upper bound) | 175 | 1.000 | [1.000, 1.000] |
+
+B0 equals the oracle on the engine-backed subtasks **by construction**: the rules baseline applies
+the same inference rule (anomaly-score threshold, sort-by-time, stated computation) that the
+structural generator encodes, so it recovers the exact answer. This is the expected signature of
+structural synthetic fixtures and is why they are `VERIFIED_OFFLINE`, not `READY_BENCHMARK`:
+discriminating real systems needs domain-crafted or independently validated fixtures where the
+answer is not recoverable by a single stated rule. What the DEV suite proves is that the **scorers**
+are correct — adversarial golden cases (all-fields-wrong, hard-gate-violated, one-dimension-wrong)
+confirm wrong answers are scored down, caps/penalties/gates bind, and product factors all count.
 
 | Subtask | Service / mode | Source aggregate | Mechanic exercised |
 |---|---|---|---|
@@ -96,12 +106,30 @@ Offline baseline snapshot over all 175 subtasks (seeds 1 and 42, `reports/experi
 | T0397.002 | IR / file | `F1 (sai loại = 0.5)` | partial-credit set (location vs type) |
 | T1109.003 | IR / vm | `Π[4 điều kiện]` | eradication × clean-intact × config-restored × service-alive |
 
-The other 163 subtasks are implemented by the archetype engine against the same contracts. The
-all-175 baseline snapshot is in the "Coverage at a glance" table above (B0 0.890 over 172 scored,
-ORACLE 1.0). B0 abstains where a subtask has no rules oracle (excluded from its aggregate, not
-scored zero); per-group bootstrap CIs over fewer than three subtasks are flagged
-`reliable_ci=false`. These numbers describe the **scorer and the rules baseline on synthetic
-fixtures**, not any model and not validated benchmark cases.
+The other 163 subtasks are implemented by the archetype engine against the same contracts. B0
+abstains where a subtask has no rules oracle (excluded from its aggregate, not scored zero);
+per-group bootstrap CIs over fewer than three subtasks are flagged `reliable_ci=false`. These
+numbers describe the **scorer and the rules baseline on synthetic fixtures**, not any model and not
+validated benchmark cases.
+
+## Independent review history
+
+Three independent read-only reviews were run (two benchmark-methodology, two security; the engine
+got a dedicated methodology re-review). All findings were addressed:
+
+- **Security (round 1):** no blocker. Fixed fail-closed response-approval defaults and a required
+  executor token; hardened the query gateway, lab-plan route check, and added a redaction seam.
+- **Methodology (round 1):** fixed value-level label leakage, an omission-gameable Kendall-τ, an
+  unevidenced fixture, and VM state gates that trusted a submitted snapshot.
+- **Security (round 2, engine):** no blocker; made scoring fail closed with a recorded zero on
+  malformed input and added sandbox CPU/memory limits. Confirmed sandbox isolation, declared-action
+  VM verification, leak-guard namespacing, and per-subtask class isolation sound.
+- **Methodology (rounds 2–3, engine):** fixed the engine to apply source caps and penalties, to
+  multiply all product factors, to bind non-ENUM hard gates, to honour per-component set-delta, and
+  to stop leaking answers verbatim; let the baseline cite real evidence; added adversarial golden
+  cases and a gate-backing invariant test. Remaining documented (not silent) gaps are at
+  `VERIFIED_OFFLINE` fidelity: mixture term weights, one order-in-mixture metric choice, and a
+  stricter-than-source set-guarded cap.
 
 ### Tier 3 — Awaiting real lab / data (BLOCKED_INTEGRATION)
 
