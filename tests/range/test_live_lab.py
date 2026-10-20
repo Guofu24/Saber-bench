@@ -61,6 +61,40 @@ def test_auth_scenario_truth_is_failed_logins(tmp_path: Path) -> None:
             assert f"line-{i}" not in mal
 
 
+def test_grade_regex_uses_source_formula(tmp_path: Path) -> None:
+    from saber.range.live.bench import grade_regex
+
+    lines = [
+        '{"target": "/search?q=1=1"}',  # malicious (line-0)
+        '{"target": "/products"}',  # benign
+        '{"target": "/search?q=laptop"}',  # benign
+    ]
+    truth = {"line-0"}
+    g = grade_regex(r"1=1", lines, truth, ignore_case=True)
+    assert g["parse_ok"] and not g["timed_out"]
+    assert g["score"] == 1.0 and g["false_positives"] == 0 and g["false_negatives"] == 0
+    assert g["matched_refs"] == ["line-0"] and g["evidence_refs_valid"] is True
+    # a benign-word regex over-matches -> false positives drag the source formula down
+    bad = grade_regex(r"search", lines, truth, ignore_case=True)
+    assert bad["false_positives"] >= 1 and bad["score"] < 1.0
+
+
+def test_live_benchmark_offline_on_real_telemetry(tmp_path: Path) -> None:
+    from saber.range.live import run_live_benchmark
+
+    report = run_live_benchmark(
+        seeds=[1, 2], modes=("naive", "strong"), use_llm=False, workdir=tmp_path
+    )
+    assert report["subtask"] == "T0020.001"
+    for ep in report["episodes"]:
+        assert ep["scenario_success"] is True  # cross-check + reset held
+        assert ep["telemetry"]["log_lines"] > 0
+    s = report["summary"]
+    assert s["strong"]["score_mean"] == 1.0
+    assert s["naive"]["score_mean"] <= s["strong"]["score_mean"]
+    assert s["strong"]["evidence_valid_all"] is True
+
+
 def test_service_refuses_non_loopback(tmp_path: Path) -> None:
     rc = service_main.main(
         [

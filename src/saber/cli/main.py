@@ -430,6 +430,37 @@ def range_run(scenario: str, seed: int, out_dir: Path | None) -> None:
     )
 
 
+@range_.command(
+    "bench", help="Exercise the T0020 contract on live episodes; compare single vs multi-agent."
+)
+@click.option("--model", default="haiku")
+@click.option("--llm/--no-llm", "use_llm", default=False)
+@click.option("--seeds", default="1")
+@click.option("--modes", default="naive,strong,single,multi_agent")
+@click.option("--timeout", "timeout_s", type=float, default=150.0)
+@click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
+def range_bench(
+    model: str, use_llm: bool, seeds: str, modes: str, timeout_s: float, out_dir: Path | None
+) -> None:
+    from saber.range.live import run_live_benchmark, write_live_benchmark
+
+    report = run_live_benchmark(
+        seeds=[int(x) for x in seeds.split(",") if x.strip()],
+        model=model,
+        modes=tuple(m.strip() for m in modes.split(",") if m.strip()),
+        use_llm=use_llm,
+        timeout_s=timeout_s,
+    )
+    for mode, a in report["summary"].items():
+        click.echo(
+            f"  {mode:12s} score={a['score_mean']} completed={a['score_completed_mean']} "
+            f"fp={a['fp_total']} fn={a['fn_total']} calls={a['n_calls_total']} "
+            f"evidence_valid={a['evidence_valid_all']}"
+        )
+    path = write_live_benchmark(report, out_dir)
+    click.echo(f"wrote {path}")
+
+
 @cli.command(
     "split", help="Show the frozen family-based train/dev/test split and run leakage checks."
 )

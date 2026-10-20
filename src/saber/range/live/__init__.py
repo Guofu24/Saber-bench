@@ -16,8 +16,17 @@ Two backends share this control plane:
 
 from __future__ import annotations
 
+from saber.range.live.bench import run_live_benchmark, write_live_benchmark
 from saber.range.live.controlplane import LiveLab, run_episode
 from saber.range.live.episode import LiveEpisode
 from saber.range.live.scenarios import SCENARIOS, scenario_ids
 
-__all__ = ["SCENARIOS", "LiveEpisode", "LiveLab", "run_episode", "scenario_ids"]
+__all__ = [
+    "SCENARIOS",
+    "LiveEpisode",
+    "LiveLab",
+    "run_episode",
+    "run_live_benchmark",
+    "scenario_ids",
+    "write_live_benchmark",
+]
