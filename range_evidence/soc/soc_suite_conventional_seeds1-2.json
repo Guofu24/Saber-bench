@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T09:16:06+00:00",
+  "generated_at": "2026-10-20T09:49:56+00:00",
   "detector": "conventional",
   "scenarios": [
     "web_sqli_probe",
@@ -164,7 +164,6 @@
         },
         "response": {
           "eligible": true,
-          "approval_id": "OPS-APPROVAL-G2",
           "actions": [],
           "proposed_containment": "deploy the detection rule inline",
           "verified": false,
@@ -179,6 +178,7 @@
           "heldout_precision": 1.0,
           "heldout_recall": 1.0,
           "heldout_noise_fp": 0,
+          "heldout_kind": "same-family re-draw (disjoint seed) — tests robustness to a re-draw, NOT cross-family generalization",
           "heldout_score": 1.0,
           "heldout_false_positives": 0,
           "heldout_false_negatives": 0
@@ -202,16 +202,17 @@
           },
           {
             "workflow": "complete",
-            "at": "2026-10-20T09:15:57.240595+00:00"
+            "at": "2026-10-20T09:49:46.972090+00:00"
           }
         ],
         "labels": [
           "LIVE_LAB_EXECUTION",
-          "AUTOMATED_LAB_GROUND_TRUTH"
+          "AUTOMATED_LAB_GROUND_TRUTH",
+          "DEV_SIMULATION_ONLY"
         ]
       },
       "episode_success": true,
-      "telemetry_sha256": "27f7583dcaea766700fc84dd5112cb1c88fcc7bd1695e1006b4300eca2cf3ab7",
+      "telemetry_sha256": "18eec82117d6f2c0996aacf9ea5c291dee878a2aec7b5a0dcd55d7454c6c04a0",
       "malicious_truth_count": 5
     },
     {
@@ -238,7 +239,6 @@
         },
         "response": {
           "eligible": true,
-          "approval_id": "OPS-APPROVAL-G2",
           "actions": [],
           "proposed_containment": "deploy the detection rule inline",
           "verified": false,
@@ -253,6 +253,7 @@
           "heldout_precision": 1.0,
           "heldout_recall": 1.0,
           "heldout_noise_fp": 0,
+          "heldout_kind": "same-family re-draw (disjoint seed) — tests robustness to a re-draw, NOT cross-family generalization",
           "heldout_score": 1.0,
           "heldout_false_positives": 0,
           "heldout_false_negatives": 0
@@ -276,16 +277,17 @@
           },
           {
             "workflow": "complete",
-            "at": "2026-10-20T09:15:59.358282+00:00"
+            "at": "2026-10-20T09:49:48.997077+00:00"
           }
         ],
         "labels": [
           "LIVE_LAB_EXECUTION",
-          "AUTOMATED_LAB_GROUND_TRUTH"
+          "AUTOMATED_LAB_GROUND_TRUTH",
+          "DEV_SIMULATION_ONLY"
         ]
       },
       "episode_success": true,
-      "telemetry_sha256": "0bfd222cd07565f0d8adfa2d49f006904272be1738be6717156dbc9e5d560573",
+      "telemetry_sha256": "f5ed40225e94cb96b495eb349f07a938aa73b4154c05ccf56a735945236b125d",
       "malicious_truth_count": 6
     },
     {
@@ -312,7 +314,6 @@
         },
         "response": {
           "eligible": true,
-          "approval_id": "OPS-APPROVAL-G2",
           "actions": [],
           "proposed_containment": "rate-limit/block the offending source",
           "verified": false,
@@ -327,6 +328,7 @@
           "heldout_precision": 1.0,
           "heldout_recall": 1.0,
           "heldout_noise_fp": 0,
+          "heldout_kind": "same-family re-draw (disjoint seed) — tests robustness to a re-draw, NOT cross-family generalization",
           "heldout_score": 1.0,
           "heldout_false_positives": 0,
           "heldout_false_negatives": 0
@@ -350,16 +352,17 @@
           },
           {
             "workflow": "complete",
-            "at": "2026-10-20T09:16:01.222810+00:00"
+            "at": "2026-10-20T09:49:50.740068+00:00"
           }
         ],
         "labels": [
           "LIVE_LAB_EXECUTION",
-          "AUTOMATED_LAB_GROUND_TRUTH"
+          "AUTOMATED_LAB_GROUND_TRUTH",
+          "DEV_SIMULATION_ONLY"
         ]
       },
       "episode_success": true,
-      "telemetry_sha256": "df33e5070aa678c2915c0367c1b03761957f97247919848573060cbb10050ff3",
+      "telemetry_sha256": "831ad41dfdc74a5441a2bfe486b125619d125002f6c8a14e4e136819c796d2cc",
       "malicious_truth_count": 9
     },
     {
@@ -386,7 +389,6 @@
         },
         "response": {
           "eligible": true,
-          "approval_id": "OPS-APPROVAL-G2",
           "actions": [],
           "proposed_containment": "rate-limit/block the offending source",
           "verified": false,
@@ -401,6 +403,7 @@
           "heldout_precision": 1.0,
           "heldout_recall": 1.0,
           "heldout_noise_fp": 0,
+          "heldout_kind": "same-family re-draw (disjoint seed) — tests robustness to a re-draw, NOT cross-family generalization",
           "heldout_score": 1.0,
           "heldout_false_positives": 0,
           "heldout_false_negatives": 0
@@ -424,16 +427,17 @@
           },
           {
             "workflow": "complete",
-            "at": "2026-10-20T09:16:03.182937+00:00"
+            "at": "2026-10-20T09:49:52.545832+00:00"
           }
         ],
         "labels": [
           "LIVE_LAB_EXECUTION",
-          "AUTOMATED_LAB_GROUND_TRUTH"
+          "AUTOMATED_LAB_GROUND_TRUTH",
+          "DEV_SIMULATION_ONLY"
         ]
       },
       "episode_success": true,
-      "telemetry_sha256": "189d60d010ab25393ec9578f83bf4ece4e45e47ebc9ba75a3de95c56f60e12fb",
+      "telemetry_sha256": "a414debb56fd2cff40c85835cea67f6fa5d593532af46c85677919916e88dad9",
       "malicious_truth_count": 10
     },
     {
@@ -441,7 +445,7 @@
         "case_id": "CASE-fs_change-1",
         "scenario": "fs_change",
         "seed": 1,
-        "evidence_ref_count": 7,
+        "evidence_ref_count": 9,
         "monitoring": {
           "subtask": "T1347.001",
           "contract": "set_delta max(0, M'/M - N'/(N'+M'))",
@@ -450,7 +454,7 @@
           "score": 1.0,
           "false_positives": 0,
           "false_negatives": 0,
-          "rule_pattern": "/fs/put\\?name=[^&\\s]*\\.(?:php|aspx|jsp|cgi)"
+          "rule_pattern": "/fs/put\\?name=[^&\\s]*(?:shell|cmd|backdoor|c99|r57|exploit)[^&\\s]*\\.(?:php|aspx|jsp|cgi)"
         },
         "hunting": {
           "hypothesis": "malicious activity of type fs_change present in the window",
@@ -460,20 +464,20 @@
         },
         "response": {
           "eligible": true,
-          "approval_id": "OPS-APPROVAL-G2",
           "actions": [
             {
               "action": "quarantine_webroot_file",
-              "target": "up.aspx",
-              "approval_id": "OPS-APPROVAL-G2",
+              "target": "sha256:886b4b0a3539",
+              "approval_id": "APPR-85ef8efa",
               "executed": true,
               "reversible": true,
               "verified": true,
               "collateral": [],
-              "detail": "quarantined; webroot no longer serves the file",
-              "ts": "2026-10-20T09:16:04.926485+00:00"
+              "detail": "quarantined; verified from real fs state",
+              "ts": "2026-10-20T09:49:54.250594+00:00"
             }
           ],
+          "targets_from": "agent_confirmed_findings",
           "verified": true,
           "collateral": [],
           "note": "executed approved reversible quarantine; effect verified from real fs state"
@@ -482,11 +486,12 @@
           "subtask": "T0020.001",
           "contract": "set_delta max(0, M'/M - N'/(N'+M'))",
           "rule_version": "v1",
-          "pattern": "/fs/put\\?name=[^&\\s]*\\.(?:php|aspx|jsp|cgi)",
+          "pattern": "/fs/put\\?name=[^&\\s]*(?:shell|cmd|backdoor|c99|r57|exploit)[^&\\s]*\\.(?:php|aspx|jsp|cgi)",
           "heldout_seed": 1001,
           "heldout_precision": 1.0,
           "heldout_recall": 1.0,
           "heldout_noise_fp": 0,
+          "heldout_kind": "same-family re-draw (disjoint seed) — tests robustness to a re-draw, NOT cross-family generalization",
           "heldout_score": 1.0,
           "heldout_false_positives": 0,
           "heldout_false_negatives": 0
@@ -507,14 +512,14 @@
             "service": "incident_response",
             "tool": "quarantine",
             "action": "quarantine_webroot_file",
-            "target": "up.aspx",
-            "approval_id": "OPS-APPROVAL-G2",
+            "target": "sha256:886b4b0a3539",
+            "approval_id": "APPR-85ef8efa",
             "executed": true,
             "reversible": true,
             "verified": true,
             "collateral": [],
-            "detail": "quarantined; webroot no longer serves the file",
-            "ts": "2026-10-20T09:16:04.926485+00:00"
+            "detail": "quarantined; verified from real fs state",
+            "ts": "2026-10-20T09:49:54.250594+00:00"
           },
           {
             "service": "content_security",
@@ -523,16 +528,17 @@
           },
           {
             "workflow": "complete",
-            "at": "2026-10-20T09:16:04.966025+00:00"
+            "at": "2026-10-20T09:49:54.285636+00:00"
           }
         ],
         "labels": [
           "LIVE_LAB_EXECUTION",
-          "AUTOMATED_LAB_GROUND_TRUTH"
+          "AUTOMATED_LAB_GROUND_TRUTH",
+          "DEV_SIMULATION_ONLY"
         ]
       },
       "episode_success": true,
-      "telemetry_sha256": "69fec764bd2e3235efee87ef370ed5759b24541070e00ebaa69a72858da93285",
+      "telemetry_sha256": "6203bb5b13a0279d28e25e98a6f2613d94fc6beda6348a34325c4bcc03d1d8b1",
       "malicious_truth_count": 1
     },
     {
@@ -540,7 +546,7 @@
         "case_id": "CASE-fs_change-2",
         "scenario": "fs_change",
         "seed": 2,
-        "evidence_ref_count": 8,
+        "evidence_ref_count": 10,
         "monitoring": {
           "subtask": "T1347.001",
           "contract": "set_delta max(0, M'/M - N'/(N'+M'))",
@@ -549,7 +555,7 @@
           "score": 1.0,
           "false_positives": 0,
           "false_negatives": 0,
-          "rule_pattern": "/fs/put\\?name=[^&\\s]*\\.(?:php|aspx|jsp|cgi)"
+          "rule_pattern": "/fs/put\\?name=[^&\\s]*(?:shell|cmd|backdoor|c99|r57|exploit)[^&\\s]*\\.(?:php|aspx|jsp|cgi)"
         },
         "hunting": {
           "hypothesis": "malicious activity of type fs_change present in the window",
@@ -559,20 +565,20 @@
         },
         "response": {
           "eligible": true,
-          "approval_id": "OPS-APPROVAL-G2",
           "actions": [
             {
               "action": "quarantine_webroot_file",
-              "target": "shell.php",
-              "approval_id": "OPS-APPROVAL-G2",
+              "target": "sha256:886b4b0a3539",
+              "approval_id": "APPR-586e6bb4",
               "executed": true,
               "reversible": true,
               "verified": true,
               "collateral": [],
-              "detail": "quarantined; webroot no longer serves the file",
-              "ts": "2026-10-20T09:16:06.798218+00:00"
+              "detail": "quarantined; verified from real fs state",
+              "ts": "2026-10-20T09:49:55.983125+00:00"
             }
           ],
+          "targets_from": "agent_confirmed_findings",
           "verified": true,
           "collateral": [],
           "note": "executed approved reversible quarantine; effect verified from real fs state"
@@ -581,11 +587,12 @@
           "subtask": "T0020.001",
           "contract": "set_delta max(0, M'/M - N'/(N'+M'))",
           "rule_version": "v1",
-          "pattern": "/fs/put\\?name=[^&\\s]*\\.(?:php|aspx|jsp|cgi)",
+          "pattern": "/fs/put\\?name=[^&\\s]*(?:shell|cmd|backdoor|c99|r57|exploit)[^&\\s]*\\.(?:php|aspx|jsp|cgi)",
           "heldout_seed": 1002,
           "heldout_precision": 1.0,
           "heldout_recall": 1.0,
           "heldout_noise_fp": 0,
+          "heldout_kind": "same-family re-draw (disjoint seed) — tests robustness to a re-draw, NOT cross-family generalization",
           "heldout_score": 1.0,
           "heldout_false_positives": 0,
           "heldout_false_negatives": 0
@@ -606,14 +613,14 @@
             "service": "incident_response",
             "tool": "quarantine",
             "action": "quarantine_webroot_file",
-            "target": "shell.php",
-            "approval_id": "OPS-APPROVAL-G2",
+            "target": "sha256:886b4b0a3539",
+            "approval_id": "APPR-586e6bb4",
             "executed": true,
             "reversible": true,
             "verified": true,
             "collateral": [],
-            "detail": "quarantined; webroot no longer serves the file",
-            "ts": "2026-10-20T09:16:06.798218+00:00"
+            "detail": "quarantined; verified from real fs state",
+            "ts": "2026-10-20T09:49:55.983125+00:00"
           },
           {
             "service": "content_security",
@@ -622,16 +629,17 @@
           },
           {
             "workflow": "complete",
-            "at": "2026-10-20T09:16:06.833454+00:00"
+            "at": "2026-10-20T09:49:56.015205+00:00"
           }
         ],
         "labels": [
           "LIVE_LAB_EXECUTION",
-          "AUTOMATED_LAB_GROUND_TRUTH"
+          "AUTOMATED_LAB_GROUND_TRUTH",
+          "DEV_SIMULATION_ONLY"
         ]
       },
       "episode_success": true,
-      "telemetry_sha256": "088baecc371e2eccfc3abf4734e7d0f9100924ed899ce54c748041e9112bdcd4",
+      "telemetry_sha256": "4fa8ccc1d9aba147e1ac466f70ab838b2ee6f9243b1f709db808f6c8771a8308",
       "malicious_truth_count": 1
     }
   ],

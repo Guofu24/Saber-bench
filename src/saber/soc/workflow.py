@@ -23,11 +23,13 @@ from datetime import UTC, datetime
 from typing import Any
 from urllib.parse import parse_qs, urlsplit
 
-from saber.range.live import quarantine_file
+from saber.range.live import Approval, grant_approval, quarantine_file
 from saber.range.live.episode import LiveEpisode
 
 # A detector (the agent config under test) -> {pattern, ignore_case, matched_line_ids, calls, wall_ms}.
 Detector = Callable[[LiveEpisode], dict[str, Any]]
+# The operator role (NOT the detector) grants an approval bound to a specific action + target.
+OperatorApprover = Callable[[str, str], Approval]
 
 MON_SUBTASK = "T1347.001"  # set_delta: list the exploit lines
 CNT_SUBTASK = "T0020.001"  # set_delta: author a detection rule
@@ -45,7 +47,11 @@ class Case:
     content_security: dict[str, Any] = field(default_factory=dict)
     audit: list[dict[str, Any]] = field(default_factory=list)
     labels: list[str] = field(
-        default_factory=lambda: ["LIVE_LAB_EXECUTION", "AUTOMATED_LAB_GROUND_TRUTH"]
+        default_factory=lambda: [
+            "LIVE_LAB_EXECUTION",
+            "AUTOMATED_LAB_GROUND_TRUTH",
+            "DEV_SIMULATION_ONLY",
+        ]
     )
 
     def to_dict(self) -> dict[str, Any]:
@@ -156,26 +162,48 @@ def _ts_raw(episode: LiveEpisode, lid: str) -> str:
         return ""
 
 
-def _incident_response(episode: LiveEpisode, case: Case, *, approval_id: str) -> None:
+def _incident_response(
+    episode: LiveEpisode, case: Case, *, operator_approve: OperatorApprover, executor_token: str
+) -> None:
     confirmed = case.monitoring.get("cited_evidence", [])
     eligible = bool(confirmed)
-    resp: dict[str, Any] = {"eligible": eligible, "approval_id": approval_id or None, "actions": []}
+    resp: dict[str, Any] = {"eligible": eligible, "actions": []}
     if not eligible:
         resp["note"] = "no confirmed finding; no containment"
         case.response = resp
         return
     if episode.scenario == "fs_change" and episode.evidence_dir:
+        import json as _json
         from pathlib import Path
+        from urllib.parse import parse_qs, urlsplit
 
         webroot = Path(episode.evidence_dir) / "webroot"
-        # Only the confirmed unauthorized script files are candidates; quarantine each (reversible).
-        scripts = [f["name"] for f in episode.lab_state.get("fs_state", []) if f.get("is_script")]
-        for name in scripts:
-            result = quarantine_file(webroot, name, approval_id=approval_id)
+        # Targets come from the AGENT's confirmed findings (cited evidence), NOT privileged lab
+        # state — so IR outcomes depend on detection quality (a missed webshell is not contained; a
+        # false positive causes benign collateral). Separation of duties: the OPERATOR (not the
+        # detector) grants an approval bound to the exact file; the executor runs it with its token.
+        targets: list[str] = []
+        for lid in confirmed:
+            try:
+                rec = _json.loads(episode.access_log_lines[int(str(lid).split("-")[1])])
+            except (ValueError, IndexError, _json.JSONDecodeError):
+                continue
+            if "/fs/put" in str(rec.get("target", "")):
+                name = Path(
+                    (parse_qs(urlsplit(str(rec["target"])).query).get("name") or [""])[0]
+                ).name
+                if name:
+                    targets.append(name)
+        for name in dict.fromkeys(targets):  # dedupe, preserve order
+            approval = operator_approve("quarantine_webroot_file", name)
+            result = quarantine_file(
+                webroot, name, approval=approval, executor_token=executor_token
+            )
             resp["actions"].append(result.audit())
             case.audit.append(
                 {"service": "incident_response", "tool": "quarantine", **result.audit()}
             )
+        resp["targets_from"] = "agent_confirmed_findings"
         resp["verified"] = all(a["verified"] for a in resp["actions"]) if resp["actions"] else False
         resp["collateral"] = sorted({c for a in resp["actions"] for c in a.get("collateral", [])})
         resp["note"] = "executed approved reversible quarantine; effect verified from real fs state"
@@ -217,11 +245,22 @@ def _content_security(
         "heldout_precision": round(prec, 4),
         "heldout_recall": round(rec, 4),
         "heldout_noise_fp": n_fp,
+        "heldout_kind": "same-family re-draw (disjoint seed) — tests robustness to a re-draw, NOT "
+        "cross-family generalization",
         **{"heldout_" + k: v for k, v in _set_delta_score(matched, heldout_truth).items()},
     }
     case.audit.append(
         {"service": "content_security", "tool": "rule_test_heldout", "heldout_seed": heldout.seed}
     )
+
+
+def default_lab_operator(executor_token: str) -> OperatorApprover:
+    """A lab operator role (distinct from the detector) that grants per-target bound approvals."""
+
+    def approve(action: str, target: str) -> Approval:
+        return grant_approval(action, target, executor_token=executor_token, ttl_s=300)
+
+    return approve
 
 
 def run_case_workflow(
@@ -231,9 +270,16 @@ def run_case_workflow(
     *,
     episode_truth: set[str],
     heldout_truth: set[str],
-    approval_id: str = "OPS-APPROVAL-G2",
+    operator_approve: OperatorApprover | None = None,
+    executor_token: str | None = None,
 ) -> Case:
-    """Run the four services end-to-end on a live episode; return the structured case."""
+    """Run the four services end-to-end on a live episode; return the structured case.
+
+    The IR executor token and the operator (approver) are kept distinct from the detector/agent
+    (separation of duties). A lab operator + token are used by default.
+    """
+    token = executor_token or "LAB-EXECUTOR-TOKEN"
+    approver = operator_approve or default_lab_operator(token)
     case = Case(
         case_id=f"CASE-{episode.scenario}-{episode.seed}",
         scenario=episode.scenario,
@@ -243,7 +289,7 @@ def run_case_workflow(
     detection = detect(episode)
     _monitoring(episode, detection, episode_truth, case)
     _threat_hunting(episode, detection, episode_truth, case)
-    _incident_response(episode, case, approval_id=approval_id)
+    _incident_response(episode, case, operator_approve=approver, executor_token=token)
     _content_security(episode, heldout, heldout_truth, detect(heldout), case)
     case.monitoring["rule_pattern"] = detection.get("pattern")
     case.audit.append({"workflow": "complete", "at": datetime.now(UTC).isoformat()})

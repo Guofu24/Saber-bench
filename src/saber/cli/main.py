@@ -529,7 +529,7 @@ def soc_eval(model: str, use_llm: bool, seeds: str, timeout_s: float, out_dir: P
 
 @soc.command("adjudicate", help="Build the gold-label adjudication package (NOT auto-approved).")
 @click.option("--scenarios", default="web_sqli_probe,auth_bruteforce,fs_change")
-@click.option("--seed", type=int, default=1)
+@click.option("--seed", type=int, default=9001)
 @click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
 def soc_adjudicate(scenarios: str, seed: int, out_dir: Path | None) -> None:
     from saber.soc import build_adjudication_package, write_adjudication_package

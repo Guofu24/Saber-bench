@@ -104,6 +104,8 @@ def _sanitize_for_publish(report: dict[str, Any]) -> dict[str, Any]:
     """Drop the detection ANSWER KEY (cited line ids, timeline line ids, entities) from the written
     cases — for a perfect detector these equal the control-plane truth. Scores/counts and the IR
     verified-action audit (the point of the workflow) are kept."""
+    import hashlib
+
     out: dict[str, Any] = json.loads(json.dumps(report))
     for c in out.get("cases", []):
         case = c.get("case", {})
@@ -111,6 +113,14 @@ def _sanitize_for_publish(report: dict[str, Any]) -> dict[str, Any]:
         hunt = case.get("hunting", {})
         hunt.pop("timeline", None)
         hunt.pop("affected_entities", None)
+        # The IR action target is the implicated filename (= the answer for fs_change); hash it so
+        # the audit trail is preserved without publishing the malicious filename.
+        for act in case.get("response", {}).get("actions", []):
+            if act.get("target"):
+                act["target"] = "sha256:" + hashlib.sha256(act["target"].encode()).hexdigest()[:12]
+        for a in case.get("audit", []):
+            if a.get("tool") == "quarantine" and a.get("target"):
+                a["target"] = "sha256:" + hashlib.sha256(a["target"].encode()).hexdigest()[:12]
     return out
 
 

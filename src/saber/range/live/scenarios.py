@@ -89,25 +89,32 @@ def auth_bruteforce(rng: Rng) -> list[dict[str, Any]]:
 
 
 _BENIGN_UPLOADS = ("index.html", "about.html", "style.css", "report.html", "notes.txt", "logo.svg")
-# Server-side script uploads into the webroot — the unauthorized change (inert webshell marker).
-_SUSPECT_UPLOADS = ("shell.php", "cmd.php", "up.aspx", "x.jsp")
+# HARD NEGATIVES: authorized server-side SCRIPT deployments (same extensions as a webshell, benign
+# content) — a naive "any .php/.aspx/.jsp is bad" rule false-positives on these.
+_AUTHORIZED_SCRIPTS = ("health.php", "status.aspx", "api.jsp", "login.php")
+# The unauthorized change: a server-side script whose NAME matches a known webshell token.
+_SUSPECT_UPLOADS = ("shell.php", "cmd.php", "backdoor.aspx", "c99.php")
 
 
 def fs_change(rng: Rng) -> list[dict[str, Any]]:
-    """Approved admin file uploads (benign) + a bounded unauthorized script upload (webshell-shaped).
+    """Approved uploads (benign files AND authorized scripts) + a bounded webshell upload.
 
-    Suspiciousness inheres in the resulting FILE (a server-side script in the webroot), never a
-    request label; overlapping admin actors appear on both benign and (rarely) the suspect change.
+    Suspiciousness inheres in the resulting FILE (a webshell-named server-side script carrying the
+    marker), never a request label. Authorized scripts (health.php, ...) are benign hard negatives
+    with the same extension, so flagging by extension alone false-positives. Overlapping admin
+    actors appear on benign and (rarely) the suspect change.
     """
     admins = [f"adm.{n}" for n in ("an", "huy", "binh")]
     plan: list[dict[str, Any]] = []
-    for _ in range(rng.randint(6, 10)):
+    for _ in range(rng.randint(5, 8)):
         name = rng.pick(_BENIGN_UPLOADS)
+        plan.append({"target": f"/fs/put?name={name}&actor={rng.pick(admins)}", "intent": "benign"})
+    for _ in range(rng.randint(2, 3)):  # authorized script deployments (hard negatives)
+        name = rng.pick(_AUTHORIZED_SCRIPTS)
         plan.append({"target": f"/fs/put?name={name}&actor={rng.pick(admins)}", "intent": "benign"})
     for _ in range(rng.randint(1, 2)):
         shell = rng.pick(_SUSPECT_UPLOADS)
-        # overlapping users: the unauthorized upload sometimes reuses a real admin's name
-        actor = rng.pick([*admins, "unknown"])
+        actor = rng.pick([*admins, "unknown"])  # overlapping users
         plan.append({"target": f"/fs/put?name={shell}&actor={actor}", "intent": "probe"})
     return rng.shuffle(plan)
 

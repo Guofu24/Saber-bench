@@ -143,27 +143,42 @@ def test_fs_change_scenario_real_state_and_truth(tmp_path: Path) -> None:
     assert ep.gold_truth["m"] >= 1  # at least one unauthorized change detected from real state
 
 
-def test_ir_quarantine_is_approved_reversible_and_verified(tmp_path: Path) -> None:
-    from saber.range.live import quarantine_file, restore_file
+def test_ir_quarantine_is_bound_approved_reversible_and_verified(tmp_path: Path) -> None:
+    from saber.range.live import grant_approval, quarantine_file, restore_file
 
     ep = run_episode("fs_change", 2, workdir=tmp_path)
     webroot = Path(ep.evidence_dir) / "webroot"
-    script = next(f["name"] for f in ep.lab_state["fs_state"] if f["is_script"])
+    # the unauthorized webshell is a script carrying the marker on disk
 
-    # deny-by-default: no approval id -> refused, no state change
-    refused = quarantine_file(webroot, script, approval_id="")
+    script = next(
+        n
+        for n in [f["name"] for f in ep.lab_state["fs_state"] if f["is_script"]]
+        if "<?php" in (webroot / n).read_text()
+    )
+    token = "EXEC-TOKEN-1"
+
+    # deny-by-default: no approval -> refused, no state change
+    refused = quarantine_file(webroot, script, approval=None, executor_token=token)
     assert not refused.executed and (webroot / script).is_file()
 
-    # approved: quarantines, verified from REAL state, no collateral
-    res = quarantine_file(webroot, script, approval_id="OPS-APPROVAL-1")
-    assert res.executed and res.verified and res.reversible
-    assert not (webroot / script).is_file()  # webroot no longer serves it
-    assert (webroot / ".quarantine" / script).is_file()
-    assert res.collateral == []  # other files untouched
+    # approval bound to a DIFFERENT target must be rejected (no reuse across targets)
+    other = grant_approval("quarantine_webroot_file", "someone_else.php", executor_token=token)
+    assert not quarantine_file(webroot, script, approval=other, executor_token=token).executed
 
-    # reversible: restore puts it back, verified
-    back = restore_file(webroot, script, approval_id="OPS-APPROVAL-1")
-    assert back.executed and back.verified and (webroot / script).is_file()
+    # wrong executor token rejected
+    good = grant_approval("quarantine_webroot_file", script, executor_token=token)
+    assert not quarantine_file(webroot, script, approval=good, executor_token="WRONG").executed
+
+    # correctly bound + correct token: quarantines, verified from REAL state, no collateral
+    res = quarantine_file(webroot, script, approval=good, executor_token=token)
+    assert res.executed and res.verified and res.reversible
+    assert not (webroot / script).is_file() and (webroot / ".quarantine" / script).is_file()
+    assert res.collateral == []
+
+    # reversible
+    back = grant_approval("restore_webroot_file", script, executor_token=token)
+    r = restore_file(webroot, script, approval=back, executor_token=token)
+    assert r.executed and r.verified and (webroot / script).is_file()
 
 
 def test_service_refuses_non_loopback(tmp_path: Path) -> None:

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import threading
 from datetime import UTC, datetime
@@ -31,11 +32,14 @@ class _Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
 
     def _write_log(self, status: int) -> None:
+        # Redact any pass= credential value before it is logged/exported (SECURITY.md: secrets in
+        # fixtures are redacted from operational logs and exported reports).
+        target = re.sub(r"(pass=)[^&\s]*", r"\1***", self.path)
         rec = {
             "ts": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
             "client": self.client_address[0],
             "method": self.command,
-            "target": self.path,  # raw request target incl. query (url-encoded as sent)
+            "target": target,
             "status": status,
             "ua": self.headers.get("User-Agent", "-"),
         }
@@ -64,10 +68,16 @@ class _Handler(BaseHTTPRequestHandler):
         name = Path((qs.get("name") or ["x"])[0]).name  # basename only — no path traversal
         if not name or name.startswith("."):
             return 400
-        is_script = name.lower().endswith((".php", ".aspx", ".jsp", ".cgi"))
+        low = name.lower()
+        is_script = low.endswith((".php", ".aspx", ".jsp", ".cgi"))
+        # A webshell is a script whose name matches a known webshell token; an authorized script
+        # (e.g. health.php) is a benign HARD NEGATIVE — same extension, benign content, no marker.
+        webshell = is_script and any(
+            t in low for t in ("shell", "cmd", "backdoor", "c99", "r57", "exploit")
+        )
         body = (
             "<?php /*inert lab marker; not executed*/ echo 'x'; ?>\n"
-            if is_script
+            if webshell
             else "<html>benign content</html>\n"
         )
         (self.fs_root / name).write_text(body, encoding="utf-8")

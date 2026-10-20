@@ -61,7 +61,7 @@ _CONVENTIONS: dict[str, dict[str, Any]] = {
 
 
 def build_adjudication_package(
-    scenarios: list[str], *, seed: int = 1, workdir: Path | None = None
+    scenarios: list[str], *, seed: int = 9001, workdir: Path | None = None
 ) -> dict[str, Any]:
     wd = workdir or (repo_root() / "runs" / "adjudication")
     bundles = []

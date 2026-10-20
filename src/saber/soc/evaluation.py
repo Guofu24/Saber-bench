@@ -147,9 +147,13 @@ def _ablation(per_config: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:
         "multi_agent_vs_multi_no_reviewer": paired_delta("multi_agent", "multi_no_reviewer"),
         "multi_agent_vs_single": paired_delta("multi_agent", "single"),
         "interpretation": (
-            "multi_agent, budget_single and multi_no_reviewer all spend 2 calls; if multi_agent does "
-            "not beat the other two, the reviewer/coordination adds no value beyond the extra call. "
-            "Read the per-seed deltas, not a mean over 3 seeds."
+            "multi_agent, budget_single and multi_no_reviewer all spend 2 calls AND share the same "
+            "specialist first-turn prompt, so the comparison isolates the second step: reviewer "
+            "(multi_agent) vs self-refine (budget_single) vs a second independent analyst "
+            "(multi_no_reviewer). If multi_agent does not beat the other two, coordination adds no "
+            "value beyond the extra call. Caveat: multi_no_reviewer OR-ensembles the two regexes, "
+            "which biases toward recall and can inflate false positives. Read the per-seed deltas, "
+            "not a mean over 3 seeds; this is not a significance claim."
         ),
     }
 

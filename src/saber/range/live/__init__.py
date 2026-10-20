@@ -22,6 +22,8 @@ from saber.range.live.episode import LiveEpisode
 from saber.range.live.ir_actions import (
     ALLOWLISTED_ACTIONS,
     ActionResult,
+    Approval,
+    grant_approval,
     quarantine_file,
     restore_file,
 )
@@ -31,8 +33,10 @@ __all__ = [
     "ALLOWLISTED_ACTIONS",
     "SCENARIOS",
     "ActionResult",
+    "Approval",
     "LiveEpisode",
     "LiveLab",
+    "grant_approval",
     "quarantine_file",
     "restore_file",
     "run_episode",

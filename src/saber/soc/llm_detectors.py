@@ -117,8 +117,10 @@ def make_detector(
                 calls.append(inv2)
                 ans = rev if rev is not None else draft
         elif mode == "budget_single":
+            # H2: same specialist first turn as multi_agent, so the only difference is
+            # self-refine vs reviewer (isolates coordination from compute and from the role prompt).
             draft, inv1 = _call(
-                _analyst_prompt(log, specialist=False), model=model, timeout_s=timeout_s
+                _analyst_prompt(log, specialist=True), model=model, timeout_s=timeout_s
             )
             calls.append(inv1)
             ans = draft
@@ -127,11 +129,12 @@ def make_detector(
                 calls.append(inv2)
                 ans = ref if ref is not None else draft
         elif mode == "multi_no_reviewer":
+            # Same specialist first turn; a second INDEPENDENT analyst (no reviewer), OR-ensembled.
             a1, inv1 = _call(
-                _analyst_prompt(log, specialist=False), model=model, timeout_s=timeout_s
+                _analyst_prompt(log, specialist=True), model=model, timeout_s=timeout_s
             )
             a2, inv2 = _call(
-                _analyst_prompt(log, specialist=False), model=model, timeout_s=timeout_s
+                _analyst_prompt(log, specialist=True), model=model, timeout_s=timeout_s
             )
             calls.extend([inv1, inv2])
             # ensemble without coordination: OR the two patterns (union of matches)

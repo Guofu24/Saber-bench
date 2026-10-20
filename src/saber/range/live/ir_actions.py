@@ -1,24 +1,72 @@
 """Approved, allowlisted, reversible lab-only IR actions with real state verification (Phase G).
 
-The only live containment action is quarantining a file inside the sandboxed webroot: it is
-deny-by-default (refused without a non-empty operator approval id), allowlisted, confined to the
-webroot (basename only, no traversal), reversible (restore), and VERIFIED from the actual
-filesystem state after execution (the file is gone from the webroot and present in quarantine, with
-no collateral change to other files). An action recommendation is never treated as containment —
-only a verified ActionResult is.
+The only live containment action is quarantining a file inside the sandboxed webroot. Per
+SECURITY.md's incident-response contract, authorization is strict:
+
+* **Allowlisted** — the action must be in :data:`ALLOWLISTED_ACTIONS`.
+* **Bound approval** — an :class:`Approval` is granted for a specific action + target (+ scope, TTL);
+  reusing it for a different action/target, or after it expires, is rejected.
+* **Separate executor token** — execution requires an executor token that matches the one the
+  approval was granted to; the detection/agent path does not hold it (separation of duties).
+* **Reversible + verified** — quarantine has a restore, and the effect is VERIFIED from the real
+  post-action filesystem state (target gone from the webroot, present in quarantine, zero
+  collateral). A recommendation is never treated as containment — only a verified ActionResult is.
 """
 
 from __future__ import annotations
 
 import hashlib
+import secrets
 import shutil
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 ALLOWLISTED_ACTIONS = ("quarantine_webroot_file", "restore_webroot_file")
 _QUARANTINE = ".quarantine"
+
+
+@dataclass(frozen=True)
+class Approval:
+    """An operator approval bound to one action + target, with an executor token and a TTL."""
+
+    approval_id: str
+    action: str
+    target: str
+    scope: str
+    executor_token: str
+    expires_at: datetime
+
+    def covers(self, action: str, target: str, *, now: datetime | None = None) -> tuple[bool, str]:
+        now = now or datetime.now(UTC)
+        if action not in ALLOWLISTED_ACTIONS:
+            return False, f"action {action!r} not allowlisted"
+        if self.action != action:
+            return False, f"approval is for action {self.action!r}, not {action!r}"
+        if self.target != target:
+            return False, f"approval is bound to target {self.target!r}, not {target!r}"
+        if now > self.expires_at:
+            return False, "approval expired"
+        return True, "ok"
+
+
+def grant_approval(
+    action: str, target: str, *, executor_token: str, scope: str = "webroot", ttl_s: int = 300
+) -> Approval:
+    """Operator mints an approval bound to the exact action + target (lab operator role)."""
+    if action not in ALLOWLISTED_ACTIONS:
+        raise ValueError(f"cannot approve non-allowlisted action {action!r}")
+    if not executor_token:
+        raise ValueError("executor_token required")
+    return Approval(
+        approval_id=f"APPR-{secrets.token_hex(4)}",
+        action=action,
+        target=Path(target).name,
+        scope=scope,
+        executor_token=executor_token,
+        expires_at=datetime.now(UTC) + timedelta(seconds=ttl_s),
+    )
 
 
 @dataclass
@@ -59,46 +107,61 @@ def _snapshot(d: Path) -> dict[str, str]:
 
 
 def _collateral(before: dict[str, str], after: dict[str, str], exclude: str) -> list[str]:
-    """Files (other than the target) whose content changed or vanished — should be empty."""
-    changed = []
-    for name, sha in before.items():
-        if name == exclude:
-            continue
-        if after.get(name) != sha:
-            changed.append(name)
-    return sorted(changed)
+    return sorted(n for n, sha in before.items() if n != exclude and after.get(n) != sha)
 
 
-def quarantine_file(fs_root: Path, name: str, *, approval_id: str) -> ActionResult:
-    """Move a webroot file into quarantine. Refuses without approval; verifies from real state."""
-    action = "quarantine_webroot_file"
-    name = Path(name).name  # basename only — no traversal
-    qdir = fs_root / _QUARANTINE
-    before = _snapshot(fs_root)
-    if not approval_id:
+def _authorize(
+    action: str, name: str, approval: Approval | None, executor_token: str, before: dict[str, str]
+) -> ActionResult | None:
+    """Return a refusal ActionResult if not authorized, else None (authorized)."""
+
+    def refuse(detail: str) -> ActionResult:
         return ActionResult(
             action,
             name,
-            approval_id,
+            approval.approval_id if approval else "none",
             executed=False,
             reversible=True,
             verified=False,
             before=before,
             after=before,
-            detail="refused: deny-by-default, no operator approval id",
+            detail="refused: " + detail,
         )
+
+    if approval is None:
+        return refuse("deny-by-default, no operator approval")
+    ok, reason = approval.covers(action, name)
+    if not ok:
+        return refuse(reason)
+    if not executor_token or executor_token != approval.executor_token:
+        return refuse("executor token missing or does not match the approval")
+    return None
+
+
+def quarantine_file(
+    fs_root: Path, name: str, *, approval: Approval | None, executor_token: str
+) -> ActionResult:
+    """Move a webroot file into quarantine under a bound approval + executor token; verify from state."""
+    action = "quarantine_webroot_file"
+    name = Path(name).name  # basename only — no traversal
+    qdir = fs_root / _QUARANTINE
+    before = _snapshot(fs_root)
+    refusal = _authorize(action, name, approval, executor_token, before)
+    if refusal is not None:
+        return refusal
+    assert approval is not None
     src = fs_root / name
     if not src.is_file():
         return ActionResult(
             action,
             name,
-            approval_id,
+            approval.approval_id,
             executed=False,
             reversible=True,
             verified=False,
             before=before,
             after=before,
-            detail=f"refused: {name} not present in webroot",
+            detail=f"refused: {name} not present",
         )
     qdir.mkdir(exist_ok=True)
     shutil.move(str(src), str(qdir / name))
@@ -108,43 +171,37 @@ def quarantine_file(fs_root: Path, name: str, *, approval_id: str) -> ActionResu
     return ActionResult(
         action,
         name,
-        approval_id,
+        approval.approval_id,
         executed=True,
         reversible=True,
         verified=verified,
         before=before,
         after=after,
         collateral=collateral,
-        detail="quarantined; webroot no longer serves the file"
+        detail="quarantined; verified from real fs state"
         if verified
-        else "executed but state verification failed",
+        else "executed but verification failed",
     )
 
 
-def restore_file(fs_root: Path, name: str, *, approval_id: str) -> ActionResult:
-    """Reverse a quarantine (restore the file to the webroot), verified from real state."""
+def restore_file(
+    fs_root: Path, name: str, *, approval: Approval | None, executor_token: str
+) -> ActionResult:
+    """Reverse a quarantine under a bound approval + executor token; verify from state."""
     action = "restore_webroot_file"
     name = Path(name).name
     qdir = fs_root / _QUARANTINE
     before = _snapshot(fs_root)
-    if not approval_id:
-        return ActionResult(
-            action,
-            name,
-            approval_id,
-            executed=False,
-            reversible=True,
-            verified=False,
-            before=before,
-            after=before,
-            detail="refused: deny-by-default, no operator approval id",
-        )
+    refusal = _authorize(action, name, approval, executor_token, before)
+    if refusal is not None:
+        return refusal
+    assert approval is not None
     src = qdir / name
     if not src.is_file():
         return ActionResult(
             action,
             name,
-            approval_id,
+            approval.approval_id,
             executed=False,
             reversible=True,
             verified=False,
@@ -158,7 +215,7 @@ def restore_file(fs_root: Path, name: str, *, approval_id: str) -> ActionResult:
     return ActionResult(
         action,
         name,
-        approval_id,
+        approval.approval_id,
         executed=True,
         reversible=True,
         verified=verified,

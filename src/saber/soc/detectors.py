@@ -21,8 +21,11 @@ _SQLI = (
     r"union(?:\s|%20|\+)+select|(?:or|and)(?:\s|%20|\+)+\d+(?:\s|%20|\+)*(?:=|%3[dd])"
     r"|sleep(?:\(|%28)|(?:--|%2[dd]%2[dd])|(?:'|%27)(?:\s|%20|\+)*or|'1'(?:=|%3[dd])'1|information_schema"
 )
-# fs: a /fs/put request that uploads a server-side script into the webroot.
-_FS_SCRIPT = r"/fs/put\?name=[^&\s]*\.(?:php|aspx|jsp|cgi)"
+# fs: a /fs/put that uploads a WEBSHELL-named server-side script (not just any script, so an
+# authorized health.php/status.aspx deployment is not flagged — the precision hard negative).
+_FS_SCRIPT = (
+    r"/fs/put\?name=[^&\s]*(?:shell|cmd|backdoor|c99|r57|exploit)[^&\s]*\.(?:php|aspx|jsp|cgi)"
+)
 _BRUTEFORCE_THRESHOLD = 3
 
 

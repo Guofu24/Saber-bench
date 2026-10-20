@@ -46,7 +46,11 @@ class LiveEpisode(StrictModel):
     evidence_dir: str = ""
     evidence_files: list[EvidenceFile] = Field(default_factory=list)
     labels: list[str] = Field(
-        default_factory=lambda: ["LIVE_LAB_EXECUTION", "AUTOMATED_LAB_GROUND_TRUTH"]
+        default_factory=lambda: [
+            "LIVE_LAB_EXECUTION",
+            "AUTOMATED_LAB_GROUND_TRUTH",
+            "DEV_SIMULATION_ONLY",
+        ]
     )
 
     def public_inputs(self) -> dict[str, Any]:
@@ -83,7 +87,11 @@ class LiveEpisode(StrictModel):
             "evidence_ids_count": len(self.evidence_ids),
             "malicious_count": self.gold_truth.get("m"),  # count only, not which lines
             "cross_check_ok": self.cross_check_ok,
-            "lab_state": self.lab_state,
+            # reset/returncode only — NOT fs_state (its is_script flags would disclose the webshells).
+            "lab_state": {
+                "reset_ok": self.lab_state.get("reset_ok"),
+                "service_returncode": self.lab_state.get("service_returncode"),
+            },
             "evidence_files": [f.model_dump() for f in self.evidence_files],
             "labels": self.labels,
         }

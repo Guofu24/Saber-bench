@@ -274,8 +274,12 @@ def run_episode(
                 )
 
     # Independent consistency cross-check: the server-derived probe TARGETS must equal the targets
-    # the scenario generated with intent "probe" (two routes agreeing), else flag it.
-    sent_probe_targets = {r["target"] for r in plan if r["intent"] == "probe"}
+    # the scenario generated with intent "probe" (two routes agreeing), else flag it. Normalize the
+    # generated side with the same pass= redaction the log applies, so auth still cross-checks.
+    def _redact(t: str) -> str:
+        return re.sub(r"(pass=)[^&\s]*", r"\1***", t)
+
+    sent_probe_targets = {_redact(r["target"]) for r in plan if r["intent"] == "probe"}
     derived_probe_targets = {str(parsed[i].get("target", "")) for i in probe_idx}
     cross_ok = derived_probe_targets == sent_probe_targets
     cross_detail = (
