@@ -1,0 +1,63 @@
+# Opt-in, MANUALLY triggered live Cyber Range run on a GitHub-hosted Ubuntu runner.
+# It executes the genuine live lab (real loopback HTTP service + real traffic + real telemetry) on
+# Linux and uploads hashed evidence as an artifact. No Claude subscription credentials are used or
+# uploaded — the LLM agent comparison runs locally, never in CI. Loopback-only networking, no
+# exposed host ports, minimum permissions, a short timeout, and no auto/scheduled triggers (so it
+# never consumes hosted-runner minutes unless a maintainer clicks "Run workflow").
+name: cyber-range
+
+on:
+  workflow_dispatch:
+    inputs:
+      seeds:
+        description: "Comma-separated seeds for the live benchmark"
+        default: "1,2,3"
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cyber-range
+  cancel-in-progress: false
+
+jobs:
+  live-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SABER_ENV: dev
+      SEEDS: ${{ inputs.seeds }} # via env to avoid script injection from the input
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.9.13"
+          enable-cache: true
+      - name: Install locked deps
+        run: uv sync --locked
+      - name: Validate container lab plan (offline isolation checks)
+        run: |
+          uv run python - <<'PY'
+          from saber.range import validate_lab_plan
+          ok, issues = validate_lab_plan()
+          print("plan_valid:", ok, issues)
+          raise SystemExit(0 if ok else 1)
+          PY
+      - name: Run genuine live episodes (loopback only; real Linux telemetry)
+        run: |
+          uv run saber range run --scenario web_sqli_probe --seed 1 --out evidence
+          uv run saber range run --scenario auth_bruteforce --seed 1 --out evidence
+      - name: Live benchmark — T0020 contract (naive + strong; NO LLM, no credentials)
+        run: uv run saber range bench --no-llm --seeds "$SEEDS" --modes naive,strong --out evidence
+      - name: Show evidence hashes
+        run: |
+          find evidence -type f -name 'access.log' -print -exec sha256sum {} \;
+          find evidence -type f -name '*.json' -print
+      - name: Upload hashed evidence + receipts
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-lab-evidence
+          path: evidence/
+          retention-days: 7
+          if-no-files-found: error
