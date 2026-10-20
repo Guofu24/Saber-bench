@@ -88,9 +88,34 @@ def auth_bruteforce(rng: Rng) -> list[dict[str, Any]]:
     return rng.shuffle(plan)
 
 
+_BENIGN_UPLOADS = ("index.html", "about.html", "style.css", "report.html", "notes.txt", "logo.svg")
+# Server-side script uploads into the webroot — the unauthorized change (inert webshell marker).
+_SUSPECT_UPLOADS = ("shell.php", "cmd.php", "up.aspx", "x.jsp")
+
+
+def fs_change(rng: Rng) -> list[dict[str, Any]]:
+    """Approved admin file uploads (benign) + a bounded unauthorized script upload (webshell-shaped).
+
+    Suspiciousness inheres in the resulting FILE (a server-side script in the webroot), never a
+    request label; overlapping admin actors appear on both benign and (rarely) the suspect change.
+    """
+    admins = [f"adm.{n}" for n in ("an", "huy", "binh")]
+    plan: list[dict[str, Any]] = []
+    for _ in range(rng.randint(6, 10)):
+        name = rng.pick(_BENIGN_UPLOADS)
+        plan.append({"target": f"/fs/put?name={name}&actor={rng.pick(admins)}", "intent": "benign"})
+    for _ in range(rng.randint(1, 2)):
+        shell = rng.pick(_SUSPECT_UPLOADS)
+        # overlapping users: the unauthorized upload sometimes reuses a real admin's name
+        actor = rng.pick([*admins, "unknown"])
+        plan.append({"target": f"/fs/put?name={shell}&actor={actor}", "intent": "probe"})
+    return rng.shuffle(plan)
+
+
 SCENARIOS: dict[str, Callable[[Rng], list[dict[str, Any]]]] = {
     "web_sqli_probe": web_sqli_probe,
     "auth_bruteforce": auth_bruteforce,
+    "fs_change": fs_change,
 }
 
 

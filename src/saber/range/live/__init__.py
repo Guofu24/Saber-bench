@@ -19,12 +19,22 @@ from __future__ import annotations
 from saber.range.live.bench import run_live_benchmark, write_live_benchmark
 from saber.range.live.controlplane import LiveLab, run_episode
 from saber.range.live.episode import LiveEpisode
+from saber.range.live.ir_actions import (
+    ALLOWLISTED_ACTIONS,
+    ActionResult,
+    quarantine_file,
+    restore_file,
+)
 from saber.range.live.scenarios import SCENARIOS, scenario_ids
 
 __all__ = [
+    "ALLOWLISTED_ACTIONS",
     "SCENARIOS",
+    "ActionResult",
     "LiveEpisode",
     "LiveLab",
+    "quarantine_file",
+    "restore_file",
     "run_episode",
     "run_live_benchmark",
     "scenario_ids",

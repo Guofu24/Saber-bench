@@ -26,6 +26,7 @@ _AUTH_OK_PASSWORD = "correct-horse-battery"  # the one valid password for the to
 
 class _Handler(BaseHTTPRequestHandler):
     log_path: Path = Path("access.log")
+    fs_root: Path | None = None  # sandboxed webroot for filesystem-change scenarios (optional)
     _lock = threading.Lock()
     protocol_version = "HTTP/1.1"
 
@@ -49,15 +50,40 @@ class _Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _fs_put(self, qs: dict[str, list[str]]) -> int:
+        """Write a file into the sandboxed webroot (real state change). Basename only; inert content.
+
+        The request carries ONLY the filename (no maliciousness label — that would leak into the
+        log). Content is determined by the uploaded file's extension: a server-side script upload
+        (.php/.aspx/.jsp) into the webroot gets a webshell-SHAPED but INERT marker (nothing executes
+        here); any other file gets benign content. Whether a resulting file is unauthorized is then
+        inferred independently from the real file on disk, not from any request label.
+        """
+        if self.fs_root is None:
+            return 404
+        name = Path((qs.get("name") or ["x"])[0]).name  # basename only — no path traversal
+        if not name or name.startswith("."):
+            return 400
+        is_script = name.lower().endswith((".php", ".aspx", ".jsp", ".cgi"))
+        body = (
+            "<?php /*inert lab marker; not executed*/ echo 'x'; ?>\n"
+            if is_script
+            else "<html>benign content</html>\n"
+        )
+        (self.fs_root / name).write_text(body, encoding="utf-8")
+        return 201
+
     def do_GET(self) -> None:  # noqa: N802 - http.server API
         parts = urlsplit(self.path)
+        qs = parse_qs(parts.query)
         status = 200
         if parts.path == "/login":
-            qs = parse_qs(parts.query)
             pw = (qs.get("pass") or [""])[0]
             status = 200 if pw == _AUTH_OK_PASSWORD else 401
+        elif parts.path == "/fs/put":
+            status = self._fs_put(qs)
         self._write_log(status)
-        self._respond(status, b"ok" if status == 200 else b"unauthorized")
+        self._respond(status, b"ok" if status < 400 else b"error")
 
     def log_message(self, _format: str, *_args: object) -> None:
         # Silence the default stderr logging; the JSON access log is the telemetry of record.
@@ -70,6 +96,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--port", type=int, default=0)
     ap.add_argument("--log", required=True)
     ap.add_argument("--ready-file", required=True)
+    ap.add_argument("--fsroot", default=None, help="sandboxed webroot dir for fs-change scenarios")
     args = ap.parse_args(argv)
 
     if args.host not in ("127.0.0.1", "::1"):
@@ -78,6 +105,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"refusing to bind non-loopback host {args.host!r}", file=sys.stderr)
         return 2
 
+    if args.fsroot:
+        _Handler.fs_root = Path(args.fsroot)
+        _Handler.fs_root.mkdir(parents=True, exist_ok=True)
     _Handler.log_path = Path(args.log)
     _Handler.log_path.parent.mkdir(parents=True, exist_ok=True)
     httpd = ThreadingHTTPServer((args.host, args.port), _Handler)

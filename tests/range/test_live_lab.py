@@ -130,6 +130,42 @@ def test_live_benchmark_offline_on_real_telemetry(tmp_path: Path) -> None:
     assert s["strong"]["evidence_valid_all"] is True
 
 
+def test_fs_change_scenario_real_state_and_truth(tmp_path: Path) -> None:
+    ep = run_episode("fs_change", 1, workdir=tmp_path)
+    assert ep.scenario == "fs_change" and ep.cross_check_ok and ep.lab_state["reset_ok"]
+    fs_state = ep.lab_state["fs_state"]
+    assert fs_state, "real files should exist in the webroot"
+    assert any(f["is_script"] for f in fs_state)  # the unauthorized webshell upload landed on disk
+    # a real script file on disk exists and is hashed
+    webroot = Path(ep.evidence_dir) / "webroot"
+    for f in fs_state:
+        assert (webroot / f["name"]).is_file()
+    assert ep.gold_truth["m"] >= 1  # at least one unauthorized change detected from real state
+
+
+def test_ir_quarantine_is_approved_reversible_and_verified(tmp_path: Path) -> None:
+    from saber.range.live import quarantine_file, restore_file
+
+    ep = run_episode("fs_change", 2, workdir=tmp_path)
+    webroot = Path(ep.evidence_dir) / "webroot"
+    script = next(f["name"] for f in ep.lab_state["fs_state"] if f["is_script"])
+
+    # deny-by-default: no approval id -> refused, no state change
+    refused = quarantine_file(webroot, script, approval_id="")
+    assert not refused.executed and (webroot / script).is_file()
+
+    # approved: quarantines, verified from REAL state, no collateral
+    res = quarantine_file(webroot, script, approval_id="OPS-APPROVAL-1")
+    assert res.executed and res.verified and res.reversible
+    assert not (webroot / script).is_file()  # webroot no longer serves it
+    assert (webroot / ".quarantine" / script).is_file()
+    assert res.collateral == []  # other files untouched
+
+    # reversible: restore puts it back, verified
+    back = restore_file(webroot, script, approval_id="OPS-APPROVAL-1")
+    assert back.executed and back.verified and (webroot / script).is_file()
+
+
 def test_service_refuses_non_loopback(tmp_path: Path) -> None:
     rc = service_main.main(
         [
