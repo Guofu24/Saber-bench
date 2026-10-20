@@ -493,6 +493,40 @@ def soc_run(scenarios: str, seeds: str, detector: str, out_dir: Path | None) -> 
     click.echo(f"wrote {path}")
 
 
+@soc.command("eval", help="G3 six-config multi-agent evaluation + budget-matched ablation.")
+@click.option("--model", default="haiku")
+@click.option("--llm/--no-llm", "use_llm", default=False)
+@click.option("--seeds", default="1,2,3")
+@click.option("--timeout", "timeout_s", type=float, default=180.0)
+@click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
+def soc_eval(model: str, use_llm: bool, seeds: str, timeout_s: float, out_dir: Path | None) -> None:
+    from saber.soc import run_g3_evaluation, write_g3_evaluation
+
+    report = run_g3_evaluation(
+        seeds=[int(x) for x in seeds.split(",") if x.strip()],
+        model=model,
+        use_llm=use_llm,
+        timeout_s=timeout_s,
+    )
+    for c in report["configs"]:
+        a = report["summary"][c]
+        click.echo(
+            f"  {c:18s} score={a['score_mean']} fp={a['fp_total']} fn={a['fn_total']} "
+            f"calls={a['n_calls_total']} cost=${a['cost_listprice']}"
+        )
+    if report["ablation"]:
+        ab = report["ablation"]
+        click.echo(f"  ABLATION {ab['budget_note']}")
+        click.echo(
+            f"    multi_agent - budget_single   = {ab['multi_agent_vs_budget_single']['mean_delta']}"
+        )
+        click.echo(
+            f"    multi_agent - multi_no_reviewer = {ab['multi_agent_vs_multi_no_reviewer']['mean_delta']}"
+        )
+    path = write_g3_evaluation(report, out_dir)
+    click.echo(f"wrote {path}")
+
+
 @cli.command(
     "split", help="Show the frozen family-based train/dev/test split and run leakage checks."
 )

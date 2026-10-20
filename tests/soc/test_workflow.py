@@ -59,6 +59,27 @@ def test_no_service_reads_truth() -> None:
         assert "gold_truth" not in src
 
 
+def test_g3_offline_conventional_and_ablation_shape(tmp_path: Path) -> None:
+    from saber.soc import run_g3_evaluation
+    from saber.soc.evaluation import _ablation
+
+    r = run_g3_evaluation(seeds=[1, 2], use_llm=False, workdir=tmp_path)
+    assert r["configs"] == ["conventional"]
+    assert r["summary"]["conventional"]["score_mean"] == 1.0
+    assert r["subtask"] == "T1347.001"
+    assert "significance" in r["caveat"].lower()
+    # ablation paired-delta logic (synthetic): multi_agent beats budget_single on both seeds
+    pc = {
+        "multi_agent": [{"seed": 1, "score": 1.0}, {"seed": 2, "score": 1.0}],
+        "budget_single": [{"seed": 1, "score": 0.8}, {"seed": 2, "score": 0.6}],
+        "multi_no_reviewer": [{"seed": 1, "score": 0.9}, {"seed": 2, "score": 0.9}],
+        "single": [{"seed": 1, "score": 0.8}, {"seed": 2, "score": 0.6}],
+    }
+    ab = _ablation(pc)
+    assert ab["multi_agent_vs_budget_single"]["mean_delta"] == 0.3
+    assert ab["multi_agent_vs_multi_no_reviewer"]["mean_delta"] == 0.1
+
+
 def test_suite_coverage_and_sanitized_receipt(tmp_path: Path) -> None:
     report = run_soc_suite(
         ["web_sqli_probe", "fs_change"], [1], detector="conventional", workdir=tmp_path

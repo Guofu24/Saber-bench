@@ -1,0 +1,86 @@
+{
+  "generated_at": "2026-10-20T09:18:58+00:00",
+  "subtask": "T1347.001",
+  "source_aggregate": "set_delta max(0, M'/M - N'/(N'+M'))",
+  "scenario": "web_sqli_probe",
+  "model_requested": "haiku",
+  "seeds": [
+    1,
+    2,
+    3
+  ],
+  "labels": [
+    "LIVE_LAB_EXECUTION",
+    "AUTOMATED_LAB_GROUND_TRUTH",
+    "DEV_SIMULATION_ONLY"
+  ],
+  "configs": [
+    "conventional"
+  ],
+  "summary": {
+    "conventional": {
+      "score_mean": 1.0,
+      "score_ci95": [
+        1.0,
+        1.0
+      ],
+      "score_completed_mean": 1.0,
+      "completion_rate": 1.0,
+      "fp_total": 0,
+      "fn_total": 0,
+      "evidence_valid_all": true,
+      "n_calls_total": 0,
+      "tool_failures_total": 0,
+      "latency_mean_ms": null,
+      "cost_listprice": 0.0
+    }
+  },
+  "ablation": {},
+  "per_config": {
+    "conventional": [
+      {
+        "seed": 1,
+        "episode_valid": true,
+        "completed": true,
+        "score": 1.0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "evidence_refs_valid": true,
+        "n_calls": 0,
+        "tool_failures": 0,
+        "duration_ms": null,
+        "wall_ms": 0,
+        "cost_usd_listprice": 0.0
+      },
+      {
+        "seed": 2,
+        "episode_valid": true,
+        "completed": true,
+        "score": 1.0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "evidence_refs_valid": true,
+        "n_calls": 0,
+        "tool_failures": 0,
+        "duration_ms": null,
+        "wall_ms": 0,
+        "cost_usd_listprice": 0.0
+      },
+      {
+        "seed": 3,
+        "episode_valid": true,
+        "completed": true,
+        "score": 1.0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "evidence_refs_valid": true,
+        "n_calls": 0,
+        "tool_failures": 0,
+        "duration_ms": null,
+        "wall_ms": 0,
+        "cost_usd_listprice": 0.0
+      }
+    ]
+  },
+  "caveat": "3 seeds, 1 scenario family — point estimates with wide bootstrap CIs, explicitly NOT a statistical-significance claim. All configs run on identical episodes with equal data access and tool permissions; budgets measured (n_calls/cost). AUTOMATED_LAB_GROUND_TRUTH, not expert gold; NOT READY_BENCHMARK."
+}
