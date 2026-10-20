@@ -138,7 +138,7 @@ def _ablation(per_config: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:
         }
 
     calls = {
-        c: _mean([r["n_calls"] for r in per_config.get(c, [])])
+        c: _mean([r.get("n_calls", 0) for r in per_config.get(c, [])])
         for c in ("multi_agent", "budget_single", "multi_no_reviewer", "single")
     }
     return {
