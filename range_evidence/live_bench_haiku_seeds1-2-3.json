@@ -1,0 +1,353 @@
+{
+  "schema_version": 2,
+  "generated_at": "2026-10-20T07:16:48+00:00",
+  "subtask": "T0020.001",
+  "source_aggregate": "max(0, M'/M - N'/(N'+M'))",
+  "labels": [
+    "LIVE_LAB_EXECUTION",
+    "T0020_CONTRACT",
+    "DEV_SIMULATION_ONLY"
+  ],
+  "model_requested": "haiku",
+  "seeds": [
+    1,
+    2,
+    3
+  ],
+  "scenario": "web_sqli_probe",
+  "n_valid_episodes": 3,
+  "n_invalid_episodes": 0,
+  "invalid_episodes": [],
+  "episodes": [
+    {
+      "scenario": "web_sqli_probe",
+      "seed": 1,
+      "host_os": "Windows-11-10.0.26200-SP0",
+      "scenario_success": true,
+      "telemetry": {
+        "log_lines": 26,
+        "access_log_sha256": "5224460a1e80388b7819d027dfe3700131b545eb6297cdc75486c69f31de1d7c"
+      },
+      "control_plane_truth": {
+        "m": 5,
+        "cross_check_ok": true
+      },
+      "lab_state": {
+        "reset_ok": true,
+        "service_returncode": 1
+      },
+      "evidence_ids": 26,
+      "results": {
+        "naive": {
+          "score": 0.1333,
+          "parse_ok": true,
+          "timed_out": false,
+          "error": null,
+          "false_positives": 8,
+          "false_negatives": 1,
+          "evidence_refs_valid": true,
+          "completed": true,
+          "n_calls": 0,
+          "wall_ms": 0,
+          "tool_failures": 0,
+          "duration_ms": null,
+          "model_used": null,
+          "cost_usd_listprice": 0,
+          "pattern": "select|union|drop|or|sleep"
+        },
+        "strong": {
+          "score": 1.0,
+          "parse_ok": true,
+          "timed_out": false,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "evidence_refs_valid": true,
+          "completed": true,
+          "n_calls": 0,
+          "wall_ms": 0,
+          "tool_failures": 0,
+          "duration_ms": null,
+          "model_used": null,
+          "cost_usd_listprice": 0,
+          "pattern": "union(?:\\s|%20|\\+)+select|(?:or|and)(?:\\s|%20|\\+)+\\d+(?:\\s|%20|\\+)*(?:=|%3[dd])|sleep(?:\\(|%28)|benchmark(?:\\(|%28)|(?:--|%2[dd]%2[dd])|(?:'|%27)(?:\\s|%20|\\+)*or|information_schema|(?:;|%3[bb])(?:\\s|%20|\\+)*drop"
+        },
+        "single": {
+          "score": 1.0,
+          "parse_ok": true,
+          "timed_out": false,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "evidence_refs_valid": true,
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 38640,
+          "tool_failures": 0,
+          "duration_ms": 37462,
+          "model_used": "claude-haiku-4-5",
+          "cost_usd_listprice": 0.042796,
+          "pattern": "%27.*?(or|union|select|--)"
+        },
+        "multi_agent": {
+          "score": 1.0,
+          "parse_ok": true,
+          "timed_out": false,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "evidence_refs_valid": true,
+          "completed": true,
+          "n_calls": 2,
+          "wall_ms": 121702,
+          "tool_failures": 0,
+          "duration_ms": 119264,
+          "model_used": "claude-haiku-4-5",
+          "cost_usd_listprice": 0.118611,
+          "pattern": "%27.*(UNION|FROM|WHERE|INSERT|DELETE|UPDATE|DROP|CREATE|ALTER|--)"
+        }
+      }
+    },
+    {
+      "scenario": "web_sqli_probe",
+      "seed": 2,
+      "host_os": "Windows-11-10.0.26200-SP0",
+      "scenario_success": true,
+      "telemetry": {
+        "log_lines": 26,
+        "access_log_sha256": "1ee1a7dfc4e01152c0e472692ff87d2ce1280466a4a8e440d686fd338b23206f"
+      },
+      "control_plane_truth": {
+        "m": 6,
+        "cross_check_ok": true
+      },
+      "lab_state": {
+        "reset_ok": true,
+        "service_returncode": 1
+      },
+      "evidence_ids": 26,
+      "results": {
+        "naive": {
+          "score": 0.0,
+          "parse_ok": true,
+          "timed_out": false,
+          "error": null,
+          "false_positives": 4,
+          "false_negatives": 3,
+          "evidence_refs_valid": true,
+          "completed": true,
+          "n_calls": 0,
+          "wall_ms": 0,
+          "tool_failures": 0,
+          "duration_ms": null,
+          "model_used": null,
+          "cost_usd_listprice": 0,
+          "pattern": "select|union|drop|or|sleep"
+        },
+        "strong": {
+          "score": 1.0,
+          "parse_ok": true,
+          "timed_out": false,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "evidence_refs_valid": true,
+          "completed": true,
+          "n_calls": 0,
+          "wall_ms": 0,
+          "tool_failures": 0,
+          "duration_ms": null,
+          "model_used": null,
+          "cost_usd_listprice": 0,
+          "pattern": "union(?:\\s|%20|\\+)+select|(?:or|and)(?:\\s|%20|\\+)+\\d+(?:\\s|%20|\\+)*(?:=|%3[dd])|sleep(?:\\(|%28)|benchmark(?:\\(|%28)|(?:--|%2[dd]%2[dd])|(?:'|%27)(?:\\s|%20|\\+)*or|information_schema|(?:;|%3[bb])(?:\\s|%20|\\+)*drop"
+        },
+        "single": {
+          "score": 1.0,
+          "parse_ok": true,
+          "timed_out": false,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "evidence_refs_valid": true,
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 81827,
+          "tool_failures": 0,
+          "duration_ms": 80274,
+          "model_used": "claude-haiku-4-5",
+          "cost_usd_listprice": 0.075614,
+          "pattern": "(%27|')[^&]*?(--|UNION|SELECT|OR|%2D%2D)|UNION[^&]*?SELECT|SLEEP(?:\\(|%28)|AND[^&]*?SLEEP(?:\\(|%28)"
+        },
+        "multi_agent": {
+          "score": 1.0,
+          "parse_ok": true,
+          "timed_out": false,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "evidence_refs_valid": true,
+          "completed": true,
+          "n_calls": 2,
+          "wall_ms": 163921,
+          "tool_failures": 0,
+          "duration_ms": 161343,
+          "model_used": "claude-haiku-4-5",
+          "cost_usd_listprice": 0.151211,
+          "pattern": "(%27--)|(%27%23)|(%27/*)|(%27%20OR%20)|(UNION%20SELECT)|(UNION%20ALL%20SELECT)|(SLEEP%28)|(%20AND%20SLEEP)"
+        }
+      }
+    },
+    {
+      "scenario": "web_sqli_probe",
+      "seed": 3,
+      "host_os": "Windows-11-10.0.26200-SP0",
+      "scenario_success": true,
+      "telemetry": {
+        "log_lines": 25,
+        "access_log_sha256": "b997990f5dc32ee4a969a2d6efd3beea00b9f30aba234e0636f5a704f471a5a9"
+      },
+      "control_plane_truth": {
+        "m": 5,
+        "cross_check_ok": true
+      },
+      "lab_state": {
+        "reset_ok": true,
+        "service_returncode": 1
+      },
+      "evidence_ids": 25,
+      "results": {
+        "naive": {
+          "score": 0.0,
+          "parse_ok": true,
+          "timed_out": false,
+          "error": null,
+          "false_positives": 5,
+          "false_negatives": 2,
+          "evidence_refs_valid": true,
+          "completed": true,
+          "n_calls": 0,
+          "wall_ms": 0,
+          "tool_failures": 0,
+          "duration_ms": null,
+          "model_used": null,
+          "cost_usd_listprice": 0,
+          "pattern": "select|union|drop|or|sleep"
+        },
+        "strong": {
+          "score": 1.0,
+          "parse_ok": true,
+          "timed_out": false,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "evidence_refs_valid": true,
+          "completed": true,
+          "n_calls": 0,
+          "wall_ms": 0,
+          "tool_failures": 0,
+          "duration_ms": null,
+          "model_used": null,
+          "cost_usd_listprice": 0,
+          "pattern": "union(?:\\s|%20|\\+)+select|(?:or|and)(?:\\s|%20|\\+)+\\d+(?:\\s|%20|\\+)*(?:=|%3[dd])|sleep(?:\\(|%28)|benchmark(?:\\(|%28)|(?:--|%2[dd]%2[dd])|(?:'|%27)(?:\\s|%20|\\+)*or|information_schema|(?:;|%3[bb])(?:\\s|%20|\\+)*drop"
+        },
+        "single": {
+          "score": 0.7143,
+          "parse_ok": true,
+          "timed_out": false,
+          "error": null,
+          "false_positives": 2,
+          "false_negatives": 0,
+          "evidence_refs_valid": true,
+          "completed": true,
+          "n_calls": 1,
+          "wall_ms": 42844,
+          "tool_failures": 0,
+          "duration_ms": 41627,
+          "model_used": "claude-haiku-4-5",
+          "cost_usd_listprice": 0.050276,
+          "pattern": "(%27.*?--|UNION.*?SELECT|SLEEP|%27.*?(?:OR|AND))"
+        },
+        "multi_agent": {
+          "score": 1.0,
+          "parse_ok": true,
+          "timed_out": false,
+          "error": null,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "evidence_refs_valid": true,
+          "completed": true,
+          "n_calls": 2,
+          "wall_ms": 165797,
+          "tool_failures": 0,
+          "duration_ms": 163260,
+          "model_used": "claude-haiku-4-5",
+          "cost_usd_listprice": 0.155121,
+          "pattern": "(%27%20(?:UNION|SELECT|OR|AND)|%27--|UNION%20SELECT|SLEEP%28|AND%20SLEEP)"
+        }
+      }
+    }
+  ],
+  "summary": {
+    "naive": {
+      "score_mean": 0.0444,
+      "score_ci95": [
+        0.0,
+        0.1333
+      ],
+      "score_completed_mean": 0.0444,
+      "completion_rate": 1.0,
+      "fp_total": 17,
+      "fn_total": 6,
+      "n_calls_total": 0,
+      "tool_failures_total": 0,
+      "evidence_valid_all": true,
+      "cost_listprice": 0
+    },
+    "strong": {
+      "score_mean": 1.0,
+      "score_ci95": [
+        1.0,
+        1.0
+      ],
+      "score_completed_mean": 1.0,
+      "completion_rate": 1.0,
+      "fp_total": 0,
+      "fn_total": 0,
+      "n_calls_total": 0,
+      "tool_failures_total": 0,
+      "evidence_valid_all": true,
+      "cost_listprice": 0
+    },
+    "single": {
+      "score_mean": 0.9048,
+      "score_ci95": [
+        0.7143,
+        1.0
+      ],
+      "score_completed_mean": 0.9048,
+      "completion_rate": 1.0,
+      "fp_total": 2,
+      "fn_total": 0,
+      "n_calls_total": 3,
+      "tool_failures_total": 0,
+      "evidence_valid_all": true,
+      "cost_listprice": 0.1687
+    },
+    "multi_agent": {
+      "score_mean": 1.0,
+      "score_ci95": [
+        1.0,
+        1.0
+      ],
+      "score_completed_mean": 1.0,
+      "completion_rate": 1.0,
+      "fp_total": 0,
+      "fn_total": 0,
+      "n_calls_total": 6,
+      "tool_failures_total": 0,
+      "evidence_valid_all": true,
+      "cost_listprice": 0.4249
+    }
+  },
+  "caveat": "Real telemetry, automated-lab ground truth; the T0020 source contract is exercised verbatim on the web_sqli_probe corpus (with SQL-word hard negatives). Scope: 1 scenario family, 3 seeds (small n — the score_ci95 bootstrap is wide and development-grade, not a benchmark claim). multi_agent uses 2 calls vs single's 1 (see n_calls/cost — the comparison is NOT equal-budget). Measurement only; NOT independently validated gold; NOT READY_BENCHMARK."
+}

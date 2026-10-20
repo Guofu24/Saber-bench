@@ -275,11 +275,25 @@ def run_live_benchmark(
     }
 
 
+def _sanitize_for_publish(report: dict[str, Any]) -> dict[str, Any]:
+    """Drop per-episode matched_refs before writing: a perfect agent's matched lines ARE the truth,
+    so publishing them would leak the per-seed answer key. Counts (fp/fn/score) are kept."""
+    out: dict[str, Any] = json.loads(json.dumps(report))  # deep copy
+    for ep in out.get("episodes", []):
+        for res in ep.get("results", {}).values():
+            res.pop("matched_refs", None)
+    return out
+
+
 def write_live_benchmark(report: dict[str, Any], out_dir: Path | None = None) -> Path:
-    # Written OUTSIDE the gold/ tree (automated-lab output must not sit beside expert-validated gold).
+    # Written OUTSIDE the gold/ tree (automated-lab output must not sit beside expert-validated gold),
+    # and sanitized so no per-seed answer key (matched line ids) is published.
     base = out_dir or (repo_root() / "range_evidence")
     base.mkdir(parents=True, exist_ok=True)
     seeds = "-".join(str(s) for s in report["seeds"])
     path = base / f"live_bench_{report['model_requested']}_seeds{seeds}.json"
-    path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(_sanitize_for_publish(report), indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
     return path

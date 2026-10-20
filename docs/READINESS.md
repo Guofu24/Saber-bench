@@ -88,6 +88,27 @@ Phase E does **not** change the tier table below. `soc`/`vm` modes still need an
 (CR-1..CR-4), and no external gold has been independently validated, so nothing is promoted to
 `READY_BENCHMARK`. `DEV_SIMULATION_ONLY` is preserved throughout.
 
+## Phase F — Operational live lab + evidence tags (capabilities, not a tier change)
+
+Phase F adds a genuinely executable SOC lab and runs a real subtask contract against its telemetry.
+
+- **Live lab** (`saber.range.live`): a real loopback HTTP service runs as a subprocess, the control
+  plane drives bounded benign + inert-probe traffic (with SQL-word HARD NEGATIVES), collects the
+  service's REAL access log, derives ground truth from server-side observations independently of the
+  agent, verifies a clean reset, and stores SHA256-hashed evidence. `saber range run|bench`. The
+  same lab runs on an authorized Linux runner via the opt-in `cyber-range` GitHub Actions workflow
+  (manual, least-privilege, no credentials). Evidence tag: `LIVE_LAB_EXECUTION` +
+  `AUTOMATED_LAB_GROUND_TRUTH`.
+- **Live benchmark** (`saber.range.live.bench`): subtask **T0020.001**'s source contract
+  (`max(0, M'/M − N'/(N'+M'))`) exercised VERBATIM on the live telemetry; naive / strong / single /
+  multi-agent compared on identical episodes with FP/FN, latency, calls, cost, bootstrap CIs, and
+  invalidation gating. See `docs/PHASE_F_REPORT.md`; sample evidence in `range_evidence/`.
+
+**Automated-lab ground truth is a distinct, lower tier than independently validated gold** — it is
+not expert-signed. Independently validated gold labels remain **0**. Phase F does not change the
+tier table: no subtask is `READY_BENCHMARK` (that still requires the full independent-validation
+standard), and `DEV_SIMULATION_ONLY` is preserved.
+
 ## Three readiness tiers
 
 ### Tier 1 — Implemented software, tested offline

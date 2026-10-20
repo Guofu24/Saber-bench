@@ -4,6 +4,37 @@ Written for: the account operator and an independent reviewer deciding whether a
 can be stood up here. This is a **read-only** inventory taken at the start of Phase E; no networks
 were enumerated, no auth was bypassed, no services were started or mutated.
 
+## Operational live lab (Phase F) — what executes today
+
+A **genuinely executable** minimal SOC lab now runs, with two backends sharing one control plane:
+
+- **process-local (runs here, verified):** a real HTTP service runs as a subprocess bound to
+  `127.0.0.1` only; the control plane drives real benign + inert-probe traffic at it, collects the
+  service's REAL JSON access log, derives ground truth from server-side observations (independently
+  of the agent and of the generation labels, cross-checked), kills the service (clean reset
+  verified: process dead + port closed), and stores SHA256-hashed, timestamped evidence. Nothing is
+  fabricated; all traffic is loopback with inert payloads; no external system is contacted.
+- **container / CI (authorized Linux runner):** the same lab runs on a GitHub-hosted Ubuntu runner
+  via the opt-in `cyber-range` workflow (manual `workflow_dispatch` only, `contents: read`, 10-min
+  timeout, loopback-only, no exposed ports, no secrets), which uploads the hashed evidence as an
+  artifact. No Claude credentials are used in CI.
+
+**Reproducible deployment and execution:**
+
+```bash
+uv run saber range scenarios                     # list scenarios
+uv run saber range run --scenario web_sqli_probe --seed 1 --out evidence   # one genuine episode
+uv run saber range bench --no-llm --seeds 1,2,3  # exercise the T0020 contract on live telemetry
+uv run saber range bench --llm --model haiku --seeds 1,2,3   # + single & multi-agent (subscription)
+```
+
+On an authorized Linux runner: Actions → `cyber-range` → Run workflow, then download the
+`live-lab-evidence` artifact (access logs + receipts, all hashed).
+
+The hardened docker-compose lab (`lab/`) remains the stronger-isolation container option and still
+needs the Docker daemon (CR-1); its plan validates offline. Verified runtime logs, telemetry
+samples, and the live end-to-end benchmark are reported in `docs/PHASE_F_REPORT.md`.
+
 ## Environment inventory (read-only, observed)
 
 | Capability | Observed | Usable now? |
