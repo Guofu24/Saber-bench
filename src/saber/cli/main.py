@@ -396,6 +396,40 @@ def gold_compare(
     click.echo(f"wrote {mpath}")
 
 
+@cli.group("range", help="Operational live lab (Phase F): run genuine local SOC episodes.")
+def range_() -> None:
+    """Live lab commands."""
+
+
+@range_.command("scenarios", help="List the live lab scenarios.")
+def range_scenarios() -> None:
+    from saber.range.live import scenario_ids
+
+    for sid in scenario_ids():
+        click.echo(sid)
+
+
+@range_.command("run", help="Execute one genuine live episode (real loopback service + traffic).")
+@click.option("--scenario", "scenario", default="web_sqli_probe")
+@click.option("--seed", type=int, default=1)
+@click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
+def range_run(scenario: str, seed: int, out_dir: Path | None) -> None:
+    from saber.range.live import run_episode
+
+    workdir = out_dir or (Path("runs") / "live")
+    ep = run_episode(scenario, seed, workdir=workdir)
+    ep_path = Path(ep.evidence_dir) / "episode.json"
+    ep_path.write_text(ep.model_dump_json(indent=2), encoding="utf-8")
+    click.echo(
+        f"scenario={ep.scenario} seed={ep.seed} host={ep.host_os}\n"
+        f"requests_sent={ep.network['requests_sent']} log_lines={len(ep.access_log_lines)} "
+        f"malicious={ep.gold_truth['m']}\n"
+        f"cross_check_ok={ep.cross_check_ok} reset_ok={ep.lab_state['reset_ok']} "
+        f"access_log_sha256={ep.access_log_sha256[:16]}\n"
+        f"wrote {ep_path}"
+    )
+
+
 @cli.command(
     "split", help="Show the frozen family-based train/dev/test split and run leakage checks."
 )
