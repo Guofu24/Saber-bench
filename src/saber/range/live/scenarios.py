@@ -28,17 +28,30 @@ _SQLI_PROBES = (
 )
 _BENIGN_QUERIES = ("laptop", "phone case", "usb-c cable", "monitor stand", "webcam")
 _BENIGN_PATHS = ("/", "/index.html", "/products", "/about", "/health", "/static/app.css")
+# HARD NEGATIVES: benign requests that contain a SQL *word* in a non-SQL context. A naive
+# word-level rule false-positives on these; the semantic (token-combination) truth does not flag
+# them, so precision is genuinely tested (mirrors the gold pilot g0020_001 benign-tricky set).
+_BENIGN_TRICKY = (
+    "/search?q=select+ssd+drive",
+    "/wiki/SQL_union_types",
+    "/cart?coupon=SAVE1EQ1",
+    "/docs/drop-shipping-guide",
+    "/api/v1/orders?status=selected",
+    "/blog/how-we-sleep-better",
+)
 
 
 def web_sqli_probe(rng: Rng) -> list[dict[str, Any]]:
-    """Benign browsing + a bounded burst of inert SQLi probes in the query string."""
+    """Benign browsing (incl. SQL-word hard negatives) + a bounded burst of inert SQLi probes."""
     plan: list[dict[str, Any]] = []
-    for _ in range(rng.randint(14, 20)):
+    for _ in range(rng.randint(12, 16)):
         if rng.chance(0.5):
             q = quote(rng.pick(_BENIGN_QUERIES))
             plan.append({"target": f"/search?q={q}", "intent": "benign"})
         else:
             plan.append({"target": rng.pick(_BENIGN_PATHS), "intent": "benign"})
+    for _ in range(rng.randint(4, 6)):  # hard negatives: SQL words, benign context
+        plan.append({"target": rng.pick(_BENIGN_TRICKY), "intent": "benign"})
     for _ in range(rng.randint(4, 7)):
         payload = quote(rng.pick(_SQLI_PROBES))
         param = rng.pick(("q", "id", "user"))
@@ -46,17 +59,32 @@ def web_sqli_probe(rng: Rng) -> list[dict[str, Any]]:
     return rng.shuffle(plan)
 
 
+# Brute force is a VOLUME phenomenon: a user is malicious only above this failed-login threshold,
+# so a single benign typo (one 401) is a hard negative, not an attack.
+BRUTEFORCE_THRESHOLD = 3
+
+
 def auth_bruteforce(rng: Rng) -> list[dict[str, Any]]:
-    """Benign logins (valid password) + a bounded burst of failed logins (wrong password)."""
+    """Benign logins + ONE benign typo (hard negative) + a bounded brute-force burst (repeat users)."""
     plan: list[dict[str, Any]] = []
     good = "correct-horse-battery"
     for _ in range(rng.randint(6, 10)):
         user = rng.pick(("alice", "bob", "carol"))
         plan.append({"target": f"/login?user={user}&pass={good}", "intent": "benign"})
-    for _ in range(rng.randint(5, 9)):
-        user = rng.pick(("admin", "root", "svc"))
-        pw = quote(f"wrong{rng.randint(1000, 9999)}")
-        plan.append({"target": f"/login?user={user}&pass={pw}", "intent": "probe"})
+    # one benign typo: a legitimate user fat-fingers the password once (a single 401, NOT an attack)
+    typo_user = rng.pick(("alice", "bob", "carol"))
+    plan.append(
+        {
+            "target": f"/login?user={typo_user}&pass={quote('typo' + str(rng.randint(10, 99)))}",
+            "intent": "benign",
+        }
+    )
+    # brute force: a small set of attacker users each fail many times (>= threshold)
+    attackers = rng.sample(("admin", "root", "svc"), 2)
+    for user in attackers:
+        for _ in range(rng.randint(BRUTEFORCE_THRESHOLD, BRUTEFORCE_THRESHOLD + 3)):
+            pw = quote(f"wrong{rng.randint(1000, 9999)}")
+            plan.append({"target": f"/login?user={user}&pass={pw}", "intent": "probe"})
     return rng.shuffle(plan)
 
 

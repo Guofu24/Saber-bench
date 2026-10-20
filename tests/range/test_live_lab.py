@@ -50,15 +50,50 @@ def test_evidence_is_hashed_and_timestamped(tmp_path: Path) -> None:
     assert ep.started_at <= ep.ended_at
 
 
-def test_auth_scenario_truth_is_failed_logins(tmp_path: Path) -> None:
+def test_auth_truth_is_threshold_based_not_every_401(tmp_path: Path) -> None:
+    from urllib.parse import parse_qs, urlsplit
+
+    from saber.range.live.scenarios import BRUTEFORCE_THRESHOLD
+
     ep = run_episode("auth_bruteforce", 6, workdir=tmp_path)
     mal = set(ep.gold_truth["malicious_line_ids"])
-    for i, ln in enumerate(ep.access_log_lines):
+    # count 401s per user
+    fails: dict[str, int] = {}
+    for ln in ep.access_log_lines:
         rec = json.loads(ln)
         if rec["status"] == 401:
-            assert f"line-{i}" in mal  # every failed login is flagged malicious
+            u = (parse_qs(urlsplit(rec["target"]).query).get("user") or [""])[0]
+            fails[u] = fails.get(u, 0) + 1
+    had_benign_single_401 = False
+    for i, ln in enumerate(ep.access_log_lines):
+        rec = json.loads(ln)
+        u = (parse_qs(urlsplit(rec["target"]).query).get("user") or [""])[0]
+        if rec["status"] == 401 and fails[u] >= BRUTEFORCE_THRESHOLD:
+            assert f"line-{i}" in mal  # brute-force (above threshold) is malicious
         else:
-            assert f"line-{i}" not in mal
+            assert f"line-{i}" not in mal  # 200s AND a single benign typo 401 are NOT malicious
+            if rec["status"] == 401:
+                had_benign_single_401 = True
+    assert had_benign_single_401  # the benign typo hard negative is present and excluded
+
+
+def test_range_run_public_receipt_has_no_truth(tmp_path: Path) -> None:
+    from click.testing import CliRunner
+
+    from saber.cli.main import cli
+
+    out = str(tmp_path / "evidence")
+    res = CliRunner().invoke(
+        cli, ["range", "run", "--scenario", "web_sqli_probe", "--seed", "1", "--out", out]
+    )
+    assert res.exit_code == 0, res.output
+    public = next(Path(out).rglob("episode_public.json"))
+    text = public.read_text(encoding="utf-8")
+    # the uploaded/public receipt must NOT carry the answer key
+    assert "malicious_line_ids" not in text
+    assert "generated_probe_targets" not in text
+    assert "line-" not in text  # no per-line truth
+    assert '"malicious_count"' in text  # count only is fine
 
 
 def test_grade_regex_uses_source_formula(tmp_path: Path) -> None:

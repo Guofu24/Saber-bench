@@ -72,7 +72,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--ready-file", required=True)
     args = ap.parse_args(argv)
 
-    if args.host not in ("127.0.0.1", "::1", "localhost"):
+    if args.host not in ("127.0.0.1", "::1"):
+        # Bind by validated loopback IP literal only (not the name "localhost", whose resolution
+        # could map off-loopback via the host resolver/hosts file).
         print(f"refusing to bind non-loopback host {args.host!r}", file=sys.stderr)
         return 2
 

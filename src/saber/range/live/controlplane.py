@@ -21,10 +21,10 @@ import urllib.request
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-from urllib.parse import unquote_plus
+from urllib.parse import parse_qs, unquote_plus, urlsplit
 
 from saber.range.live.episode import EvidenceFile, LiveEpisode
-from saber.range.live.scenarios import SCENARIOS
+from saber.range.live.scenarios import BRUTEFORCE_THRESHOLD, SCENARIOS
 from saber.subtasks._hv.common import Rng
 
 _READY_TIMEOUT_S = 15.0
@@ -77,6 +77,7 @@ class LiveLab:
             "--ready-file",
             str(self._ready_file),
         ]
+        self._ready_file.unlink(missing_ok=True)  # never attach to a prior run's port
         self._proc = subprocess.Popen(argv)  # noqa: S603 - fixed argv, no shell
         deadline = time.monotonic() + _READY_TIMEOUT_S
         while time.monotonic() < deadline:
@@ -94,7 +95,12 @@ class LiveLab:
             raise RuntimeError("lab not started")
         sent = 0
         for req in plan:
-            url = f"http://127.0.0.1:{self.port}{req['target']}"
+            target = str(req["target"])
+            if not target.startswith("/"):
+                # Guard the loopback guarantee: a non-"/"-prefixed target (e.g. "@evil/x" or a full
+                # URL) could redirect the request off-box. Refuse rather than dispatch.
+                raise ValueError(f"refusing non-path request target {target!r}")
+            url = f"http://127.0.0.1:{self.port}{target}"
             try:
                 r = urllib.request.urlopen(url, timeout=_REQ_TIMEOUT_S)  # noqa: S310 - loopback only
                 r.read()
@@ -150,17 +156,35 @@ class LiveLab:
         return [ln for ln in self.access_log.read_text(encoding="utf-8").splitlines() if ln.strip()]
 
 
+def _login_user(target: str) -> str:
+    return (parse_qs(urlsplit(target).query).get("user") or [""])[0]
+
+
 def _derive_truth(scenario: str, lines: list[dict[str, Any]]) -> set[int]:
-    """Server-side ground truth: indices of malicious log lines, derived from observations."""
+    """Server-side ground truth: indices of malicious log lines, derived from observations.
+
+    web_sqli_probe: malicious iff the decoded target carries a SQL token COMBINATION (so a SQL
+    *word* in a benign request is correctly NOT flagged). auth_bruteforce: brute force is a VOLUME
+    phenomenon — a 401 is malicious only if its user exceeds BRUTEFORCE_THRESHOLD failures, so a
+    single benign typo (one 401) is a hard negative, not an attack.
+    """
     probe: set[int] = set()
-    for i, rec in enumerate(lines):
-        if (
-            scenario == "web_sqli_probe"
-            and _is_sqli_target(str(rec.get("target", "")))
-            or scenario == "auth_bruteforce"
-            and rec.get("status") == 401
-        ):
-            probe.add(i)
+    if scenario == "web_sqli_probe":
+        for i, rec in enumerate(lines):
+            if _is_sqli_target(str(rec.get("target", ""))):
+                probe.add(i)
+    elif scenario == "auth_bruteforce":
+        fails: dict[str, int] = {}
+        for rec in lines:
+            if rec.get("status") == 401:
+                u = _login_user(str(rec.get("target", "")))
+                fails[u] = fails.get(u, 0) + 1
+        for i, rec in enumerate(lines):
+            if (
+                rec.get("status") == 401
+                and fails.get(_login_user(str(rec.get("target", ""))), 0) >= BRUTEFORCE_THRESHOLD
+            ):
+                probe.add(i)
     return probe
 
 

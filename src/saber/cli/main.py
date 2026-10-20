@@ -414,12 +414,16 @@ def range_scenarios() -> None:
 @click.option("--seed", type=int, default=1)
 @click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
 def range_run(scenario: str, seed: int, out_dir: Path | None) -> None:
+    import json as _json
+
     from saber.range.live import run_episode
 
     workdir = out_dir or (Path("runs") / "live")
     ep = run_episode(scenario, seed, workdir=workdir)
-    ep_path = Path(ep.evidence_dir) / "episode.json"
-    ep_path.write_text(ep.model_dump_json(indent=2), encoding="utf-8")
+    # Write only the TRUTH-FREE public receipt into the evidence dir (safe to upload/publish); the
+    # sealed control-plane truth (which lines are malicious) is never persisted here.
+    ep_path = Path(ep.evidence_dir) / "episode_public.json"
+    ep_path.write_text(_json.dumps(ep.public_receipt(), indent=2) + "\n", encoding="utf-8")
     click.echo(
         f"scenario={ep.scenario} seed={ep.seed} host={ep.host_os}\n"
         f"requests_sent={ep.network['requests_sent']} log_lines={len(ep.access_log_lines)} "

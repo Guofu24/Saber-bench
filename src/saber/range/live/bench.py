@@ -14,6 +14,7 @@ the access log only — the control-plane truth stays sealed. Measurement only; 
 from __future__ import annotations
 
 import json
+import random
 import shutil
 import tempfile
 import time
@@ -214,12 +215,26 @@ def run_live_benchmark(
     def mean(xs: list[float]) -> float | None:
         return round(sum(xs) / len(xs), 4) if xs else None
 
+    def ci95(xs: list[float]) -> list[float] | None:
+        if len(xs) < 2:
+            return None
+        rng = random.Random(20261020)
+        n = len(xs)
+        means = sorted(sum(rng.choice(xs) for _ in range(n)) / n for _ in range(2000))
+        return [round(means[int(0.025 * 2000)], 4), round(means[int(0.975 * 2000) - 1], 4)]
+
+    # INVALIDATION GATING (protocol G2): efficacy is computed over VALID episodes only (cross-check
+    # held AND reset clean); invalid episodes are reported separately, never folded in as FN.
+    valid = [e for e in episodes_out if e["scenario_success"]]
+    invalid = [e for e in episodes_out if not e["scenario_success"]]
     summary = {}
     for mode in active:
-        rs = [e["results"][mode] for e in episodes_out]
+        rs = [e["results"][mode] for e in valid]
         done = [r for r in rs if r["completed"]]
+        scores = [r["score"] for r in rs]
         summary[mode] = {
-            "score_mean": mean([r["score"] for r in rs]),
+            "score_mean": mean(scores),
+            "score_ci95": ci95(scores),
             "score_completed_mean": mean([r["score"] for r in done]),
             "completion_rate": round(len(done) / len(rs), 4) if rs else None,
             "fp_total": sum(
@@ -236,7 +251,7 @@ def run_live_benchmark(
             "cost_listprice": round(sum(r["cost_usd_listprice"] for r in rs), 4),
         }
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat(),
         "subtask": SUBTASK_ID,
         "source_aggregate": SOURCE_AGGREGATE,
@@ -244,15 +259,25 @@ def run_live_benchmark(
         "model_requested": model,
         "seeds": seeds,
         "scenario": "web_sqli_probe",
+        "n_valid_episodes": len(valid),
+        "n_invalid_episodes": len(invalid),
+        "invalid_episodes": [{"seed": e["seed"], "lab_state": e["lab_state"]} for e in invalid],
         "episodes": episodes_out,
         "summary": summary,
-        "caveat": "Real telemetry, automated-lab ground truth; T0020 source contract exercised "
-        "verbatim. Measurement only; NOT independently validated gold; NOT READY_BENCHMARK.",
+        "caveat": (
+            "Real telemetry, automated-lab ground truth; the T0020 source contract is exercised "
+            f"verbatim on the web_sqli_probe corpus (with SQL-word hard negatives). Scope: 1 scenario "
+            f"family, {len(seeds)} seeds (small n — the score_ci95 bootstrap is wide and "
+            "development-grade, not a benchmark claim). multi_agent uses 2 calls vs single's 1 (see "
+            "n_calls/cost — the comparison is NOT equal-budget). Measurement only; NOT independently "
+            "validated gold; NOT READY_BENCHMARK."
+        ),
     }
 
 
 def write_live_benchmark(report: dict[str, Any], out_dir: Path | None = None) -> Path:
-    base = out_dir or (repo_root() / "gold" / "range")
+    # Written OUTSIDE the gold/ tree (automated-lab output must not sit beside expert-validated gold).
+    base = out_dir or (repo_root() / "range_evidence")
     base.mkdir(parents=True, exist_ok=True)
     seeds = "-".join(str(s) for s in report["seeds"])
     path = base / f"live_bench_{report['model_requested']}_seeds{seeds}.json"

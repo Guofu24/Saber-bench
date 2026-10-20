@@ -59,3 +59,31 @@ class LiveEpisode(StrictModel):
             },
             "objective": "Detect the malicious requests in this real access log.",
         }
+
+    def public_receipt(self) -> dict[str, Any]:
+        """A truth-free execution receipt safe to publish/upload (no malicious_line_ids, no intent).
+
+        Deliberately EXCLUDES gold_truth, control_plane_intent, and cross_check_detail (which lists
+        the probe targets), so an uploaded CI artifact cannot carry the answer key. Only the truth
+        COUNT and the cross-check boolean are exposed.
+        """
+        return {
+            "scenario": self.scenario,
+            "seed": self.seed,
+            "backend": self.backend,
+            "host_os": self.host_os,
+            "started_at": self.started_at.isoformat(),
+            "ended_at": self.ended_at.isoformat(),
+            "service": self.service,
+            "network": self.network,
+            "telemetry": {
+                "log_lines": len(self.access_log_lines),
+                "access_log_sha256": self.access_log_sha256,
+            },
+            "evidence_ids_count": len(self.evidence_ids),
+            "malicious_count": self.gold_truth.get("m"),  # count only, not which lines
+            "cross_check_ok": self.cross_check_ok,
+            "lab_state": self.lab_state,
+            "evidence_files": [f.model_dump() for f in self.evidence_files],
+            "labels": self.labels,
+        }

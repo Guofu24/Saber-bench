@@ -1,0 +1,48 @@
+{
+  "scenario": "web_sqli_probe",
+  "seed": 1,
+  "backend": "process-local",
+  "host_os": "Windows-11-10.0.26200-SP0",
+  "started_at": "2026-10-20T07:06:40.518165+00:00",
+  "ended_at": "2026-10-20T07:06:41.486286+00:00",
+  "service": {
+    "pid": 33556,
+    "port": 60859,
+    "returncode": 1,
+    "executable": "E:\\Saber-bench\\.venv\\Scripts\\python.exe"
+  },
+  "network": {
+    "endpoint": "127.0.0.1:60859",
+    "requests_sent": 26,
+    "loopback_only": true
+  },
+  "telemetry": {
+    "log_lines": 26,
+    "access_log_sha256": "64e2ec4faf0ad4798f9c103beac3c69df06407d7237d916859f90f10eba6b91f"
+  },
+  "evidence_ids_count": 26,
+  "malicious_count": 5,
+  "cross_check_ok": true,
+  "lab_state": {
+    "reset_ok": true,
+    "service_returncode": 1
+  },
+  "evidence_files": [
+    {
+      "path": "C:\\Users\\phunq3\\AppData\\Local\\Temp\\saber-sample-0nhh7pe5\\web_sqli_probe\\seed-1\\access.log",
+      "kind": "access_log",
+      "sha256": "64e2ec4faf0ad4798f9c103beac3c69df06407d7237d916859f90f10eba6b91f",
+      "size_bytes": 4034
+    },
+    {
+      "path": "C:\\Users\\phunq3\\AppData\\Local\\Temp\\saber-sample-0nhh7pe5\\web_sqli_probe\\seed-1\\manifest.json",
+      "kind": "manifest",
+      "sha256": "9ca6c25f786a838b661b9be3f302d493b62a0affb7b93bd3ce2f28d721965f1c",
+      "size_bytes": 385
+    }
+  ],
+  "labels": [
+    "LIVE_LAB_EXECUTION",
+    "AUTOMATED_LAB_GROUND_TRUTH"
+  ]
+}
