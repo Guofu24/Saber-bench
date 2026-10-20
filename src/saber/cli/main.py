@@ -527,6 +527,25 @@ def soc_eval(model: str, use_llm: bool, seeds: str, timeout_s: float, out_dir: P
     click.echo(f"wrote {path}")
 
 
+@soc.command("adjudicate", help="Build the gold-label adjudication package (NOT auto-approved).")
+@click.option("--scenarios", default="web_sqli_probe,auth_bruteforce,fs_change")
+@click.option("--seed", type=int, default=1)
+@click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
+def soc_adjudicate(scenarios: str, seed: int, out_dir: Path | None) -> None:
+    from saber.soc import build_adjudication_package, write_adjudication_package
+
+    pkg = build_adjudication_package(
+        [s.strip() for s in scenarios.split(",") if s.strip()], seed=seed
+    )
+    jpath, mpath = write_adjudication_package(pkg, out_dir)
+    click.echo(
+        f"status={pkg['status']} gold_labels={pkg['independently_validated_gold_labels']} "
+        f"ready_benchmark={pkg['ready_benchmark_subtasks']} bundles={len(pkg['bundles'])}"
+    )
+    click.echo(f"wrote {jpath}")
+    click.echo(f"wrote {mpath}")
+
+
 @cli.command(
     "split", help="Show the frozen family-based train/dev/test split and run leakage checks."
 )

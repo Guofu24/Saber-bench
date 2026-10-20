@@ -13,15 +13,18 @@ are genuine workflow artifacts with measured outcomes, NOT claimed as source-con
 
 from __future__ import annotations
 
+from saber.soc.adjudication import build_adjudication_package, write_adjudication_package
 from saber.soc.evaluation import run_g3_evaluation, write_g3_evaluation
 from saber.soc.suite import run_soc_suite, write_soc_suite
 from saber.soc.workflow import Case, run_case_workflow
 
 __all__ = [
     "Case",
+    "build_adjudication_package",
     "run_case_workflow",
     "run_g3_evaluation",
     "run_soc_suite",
+    "write_adjudication_package",
     "write_g3_evaluation",
     "write_soc_suite",
 ]

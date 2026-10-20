@@ -80,6 +80,20 @@ def test_g3_offline_conventional_and_ablation_shape(tmp_path: Path) -> None:
     assert ab["multi_agent_vs_multi_no_reviewer"]["mean_delta"] == 0.1
 
 
+def test_adjudication_package_is_not_auto_approved(tmp_path: Path) -> None:
+    from saber.soc import build_adjudication_package
+
+    pkg = build_adjudication_package(["web_sqli_probe", "fs_change"], seed=1, workdir=tmp_path)
+    assert pkg["status"] == "PENDING_EXPERT_REVIEW" and pkg["sign_off"] is None
+    assert pkg["independently_validated_gold_labels"] == 0
+    assert pkg["ready_benchmark_subtasks"] == 0
+    assert pkg["external_review_required"]["reviewer"]
+    for b in pkg["bundles"]:
+        assert b["reviewer_decision"] is None  # must NOT be auto-filled
+        assert b["proposed_labels"]["source"].startswith("AUTOMATED")
+        assert b["unresolved_ambiguities"]  # ambiguities surfaced for the reviewer
+
+
 def test_suite_coverage_and_sanitized_receipt(tmp_path: Path) -> None:
     report = run_soc_suite(
         ["web_sqli_probe", "fs_change"], [1], detector="conventional", workdir=tmp_path

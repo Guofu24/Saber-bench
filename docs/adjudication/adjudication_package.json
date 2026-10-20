@@ -1,0 +1,169 @@
+{
+  "generated_at": "2026-10-20T09:34:49+00:00",
+  "status": "PENDING_EXPERT_REVIEW",
+  "sign_off": null,
+  "labels": [
+    "AUTOMATED_LAB_GROUND_TRUTH",
+    "PENDING_ADJUDICATION",
+    "DEV_SIMULATION_ONLY"
+  ],
+  "ready_benchmark_subtasks": 0,
+  "independently_validated_gold_labels": 0,
+  "external_review_required": {
+    "reviewer": "a qualified SOC/IR lead independent of this project",
+    "scope": "confirm, per family, the proposed malicious labels and the scoring convention; resolve the listed ambiguities; sign off or return corrections",
+    "promotion_rule": "only a signed, independent confirmation may move a subtask from AUTOMATED_LAB_GROUND_TRUTH toward INDEPENDENTLY_VERIFIED / READY_BENCHMARK"
+  },
+  "bundles": [
+    {
+      "scenario": "web_sqli_probe",
+      "seed": 1,
+      "evidence": {
+        "access_log_sample": [
+          "{\"ts\": \"2026-10-20T09:34:47.166735Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/\", \"status\": 200, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:47.167729Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/about\", \"status\": 200, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:47.182838Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/search?q=monitor%20stand\", \"status\": 200, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:47.198241Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/search?q=select+ssd+drive\", \"status\": 200, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:47.200242Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/products\", \"status\": 200, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:47.229314Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/docs/drop-shipping-guide\", \"status\": 200, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:47.244880Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/search?id=1%27%20OR%201%3D1--\", \"status\": 200, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:47.247400Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/search?id=1%27%20OR%201%3D1--\", \"status\": 200, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:47.249400Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/\", \"status\": 200, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:47.260099Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/search?q=phone%20case\", \"status\": 200, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:47.275421Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/api/v1/orders?status=selected\", \"status\": 200, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:47.291820Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/docs/drop-shipping-guide\", \"status\": 200, \"ua\": \"Python-urllib/3.12\"}"
+        ],
+        "access_log_sha256": "bc40147670883083713c802bfc1ce56f3759812ce30babdf3e55b72931671040",
+        "fs_state": []
+      },
+      "proposed_labels": {
+        "malicious_line_ids": [
+          "line-13",
+          "line-15",
+          "line-24",
+          "line-6",
+          "line-7"
+        ],
+        "source": "AUTOMATED_LAB_GROUND_TRUTH (control plane; NOT expert-approved)",
+        "cross_check_ok": true
+      },
+      "bound_subtask": "T1347.001 / T0020.001 (set_delta)",
+      "scoring_convention": "A request line is malicious iff its URL-decoded target contains a SQL token COMBINATION (e.g. UNION SELECT, ' OR, 1=1, SLEEP(); a lone SQL word is benign.",
+      "accepted_alternatives": [
+        "treat a benign request with a single SQL keyword as benign (current)",
+        "a stricter policy could flag any request from a scanner UA regardless of payload"
+      ],
+      "unresolved_ambiguities": [
+        "is an in-scope authorized pentest's probe a true positive or an exclusion?",
+        "should obfuscated/double-encoded payloads beyond the current token set count?"
+      ],
+      "reviewer_decision": null
+    },
+    {
+      "scenario": "auth_bruteforce",
+      "seed": 1,
+      "evidence": {
+        "access_log_sample": [
+          "{\"ts\": \"2026-10-20T09:34:48.160132Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/login?user=root&pass=wrong3400\", \"status\": 401, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:48.161637Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/login?user=alice&pass=correct-horse-battery\", \"status\": 200, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:48.176047Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/login?user=root&pass=wrong7269\", \"status\": 401, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:48.178044Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/login?user=root&pass=wrong9376\", \"status\": 401, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:48.179044Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/login?user=root&pass=wrong8333\", \"status\": 401, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:48.191706Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/login?user=root&pass=wrong1796\", \"status\": 401, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:48.192210Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/login?user=alice&pass=correct-horse-battery\", \"status\": 200, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:48.207433Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/login?user=admin&pass=wrong6672\", \"status\": 401, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:48.209437Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/login?user=carol&pass=correct-horse-battery\", \"status\": 200, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:48.223557Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/login?user=bob&pass=correct-horse-battery\", \"status\": 200, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:48.225555Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/login?user=admin&pass=wrong4484\", \"status\": 401, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:48.226555Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/login?user=bob&pass=correct-horse-battery\", \"status\": 200, \"ua\": \"Python-urllib/3.12\"}"
+        ],
+        "access_log_sha256": "2f081a26f02bab5786c8dd9dbfc175605d7a5c39629230de265c02629219b58e",
+        "fs_state": []
+      },
+      "proposed_labels": {
+        "malicious_line_ids": [
+          "line-0",
+          "line-10",
+          "line-14",
+          "line-15",
+          "line-2",
+          "line-3",
+          "line-4",
+          "line-5",
+          "line-7"
+        ],
+        "source": "AUTOMATED_LAB_GROUND_TRUTH (control plane; NOT expert-approved)",
+        "cross_check_ok": true
+      },
+      "bound_subtask": "none (workflow artifact; threshold convention needs a business owner)",
+      "scoring_convention": "A 401 is malicious iff its user exceeds 3 failed logins in the window (brute force is a volume phenomenon); a single benign typo is not an attack.",
+      "accepted_alternatives": [
+        "threshold could be 5 or time-windowed; low-and-slow distributed attempts are NOT captured"
+      ],
+      "unresolved_ambiguities": [
+        "the exact threshold is business-specific",
+        "credential stuffing (one attempt per account across many accounts) is not modeled"
+      ],
+      "reviewer_decision": null
+    },
+    {
+      "scenario": "fs_change",
+      "seed": 1,
+      "evidence": {
+        "access_log_sample": [
+          "{\"ts\": \"2026-10-20T09:34:48.967911Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/fs/put?name=notes.txt&actor=adm.huy\", \"status\": 201, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:48.984585Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/fs/put?name=notes.txt&actor=adm.an\", \"status\": 201, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:48.986583Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/fs/put?name=notes.txt&actor=adm.huy\", \"status\": 201, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:48.988584Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/fs/put?name=index.html&actor=adm.huy\", \"status\": 201, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:48.989583Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/fs/put?name=up.aspx&actor=unknown\", \"status\": 201, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:48.990584Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/fs/put?name=report.html&actor=adm.huy\", \"status\": 201, \"ua\": \"Python-urllib/3.12\"}",
+          "{\"ts\": \"2026-10-20T09:34:48.992544Z\", \"client\": \"127.0.0.1\", \"method\": \"GET\", \"target\": \"/fs/put?name=index.html&actor=adm.binh\", \"status\": 201, \"ua\": \"Python-urllib/3.12\"}"
+        ],
+        "access_log_sha256": "7ceba75135b2799b9fad1c4c34ad6e582cf838c5777c80862222d5a07aea6131",
+        "fs_state": [
+          {
+            "name": "index.html",
+            "sha256": "5b0c336f94dce28206287ab093e8f6262340ea20a1e520a6382420a2e89fb497",
+            "size_bytes": 29,
+            "is_script": false
+          },
+          {
+            "name": "notes.txt",
+            "sha256": "5b0c336f94dce28206287ab093e8f6262340ea20a1e520a6382420a2e89fb497",
+            "size_bytes": 29,
+            "is_script": false
+          },
+          {
+            "name": "report.html",
+            "sha256": "5b0c336f94dce28206287ab093e8f6262340ea20a1e520a6382420a2e89fb497",
+            "size_bytes": 29,
+            "is_script": false
+          },
+          {
+            "name": "up.aspx",
+            "sha256": "1db880d15a5b4cd7fb9198535432e5dff87396040a5c22d36c17c98ea92d461d",
+            "size_bytes": 55,
+            "is_script": true
+          }
+        ]
+      },
+      "proposed_labels": {
+        "malicious_line_ids": [
+          "line-4"
+        ],
+        "source": "AUTOMATED_LAB_GROUND_TRUTH (control plane; NOT expert-approved)",
+        "cross_check_ok": true
+      },
+      "bound_subtask": "none (workflow artifact; verified reversible IR action, not a scored contract)",
+      "scoring_convention": "A webroot file is unauthorized iff it is a server-side script (.php/.aspx/.jsp/.cgi) present on disk with the webshell marker.",
+      "accepted_alternatives": [
+        "an approved/signed script deployment could be legitimate; a change-management allowlist would reclassify it"
+      ],
+      "unresolved_ambiguities": [
+        "is ANY server-side script in the webroot unauthorized, or only unexpected ones?",
+        "who is the approving authority for a legitimate deployment?"
+      ],
+      "reviewer_decision": null
+    }
+  ]
+}
