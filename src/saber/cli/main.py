@@ -465,6 +465,34 @@ def range_bench(
     click.echo(f"wrote {path}")
 
 
+@cli.group("soc", help="Four-service SOC case workflow over live lab evidence (Phase G).")
+def soc() -> None:
+    """SOC workflow commands."""
+
+
+@soc.command("run", help="Run the four-service workflow across scenario families; emit coverage.")
+@click.option("--scenarios", default="web_sqli_probe,auth_bruteforce,fs_change")
+@click.option("--seeds", default="1,2")
+@click.option("--detector", default="conventional", type=click.Choice(["conventional", "naive"]))
+@click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
+def soc_run(scenarios: str, seeds: str, detector: str, out_dir: Path | None) -> None:
+    from saber.soc import run_soc_suite, write_soc_suite
+
+    report = run_soc_suite(
+        [s.strip() for s in scenarios.split(",") if s.strip()],
+        [int(x) for x in seeds.split(",") if x.strip()],
+        detector=detector,
+    )
+    for row in report["coverage_matrix"]:
+        click.echo(
+            f"  {row['scenario']:16s} seed={row['seed']} ok={row['episode_success']} "
+            f"mon={row['monitoring_score']}(fp{row['monitoring_fp']}/fn{row['monitoring_fn']}) "
+            f"hunt_f1={row['hunting_entity_f1']} ir_exec={row['ir_executed']} ir_verified={row['ir_verified']}"
+        )
+    path = write_soc_suite(report, out_dir)
+    click.echo(f"wrote {path}")
+
+
 @cli.command(
     "split", help="Show the frozen family-based train/dev/test split and run leakage checks."
 )

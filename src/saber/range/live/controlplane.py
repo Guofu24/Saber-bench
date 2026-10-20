@@ -13,6 +13,7 @@ import hashlib
 import json
 import platform
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -232,7 +233,10 @@ def run_episode(
     evidence_dir = workdir / scenario / f"seed-{seed}"
     if evidence_dir.exists():
         for p in sorted(evidence_dir.glob("*")):
-            p.unlink()
+            if p.is_dir():
+                shutil.rmtree(p, ignore_errors=True)  # e.g. a prior webroot/ with quarantine
+            else:
+                p.unlink()
     rng = Rng("live", scenario, str(seed))
     plan = SCENARIOS[scenario](rng)
 
