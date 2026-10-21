@@ -105,6 +105,16 @@ def _sanitize_for_publish(report: dict[str, Any]) -> dict[str, Any]:
     cases — for a perfect detector these equal the control-plane truth. Scores/counts and the IR
     verified-action audit (the point of the workflow) are kept."""
     import hashlib
+    import hmac
+    import secrets
+
+    # KEYED (not plain) opaque id: a plain sha256 of a tiny filename space (shell.php, cmd.php, ...)
+    # is brute-forceable, so use HMAC with a per-publish random key that is NOT emitted. The id is
+    # stable within this report (same target -> same id) but not reversible by an outside reader.
+    key = secrets.token_bytes(16)
+
+    def opaque(target: str) -> str:
+        return "ir-target:" + hmac.new(key, target.encode(), hashlib.sha256).hexdigest()[:12]
 
     out: dict[str, Any] = json.loads(json.dumps(report))
     for c in out.get("cases", []):
@@ -113,14 +123,12 @@ def _sanitize_for_publish(report: dict[str, Any]) -> dict[str, Any]:
         hunt = case.get("hunting", {})
         hunt.pop("timeline", None)
         hunt.pop("affected_entities", None)
-        # The IR action target is the implicated filename (= the answer for fs_change); hash it so
-        # the audit trail is preserved without publishing the malicious filename.
         for act in case.get("response", {}).get("actions", []):
             if act.get("target"):
-                act["target"] = "sha256:" + hashlib.sha256(act["target"].encode()).hexdigest()[:12]
+                act["target"] = opaque(act["target"])
         for a in case.get("audit", []):
             if a.get("tool") == "quarantine" and a.get("target"):
-                a["target"] = "sha256:" + hashlib.sha256(a["target"].encode()).hexdigest()[:12]
+                a["target"] = opaque(a["target"])
     return out
 
 

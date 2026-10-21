@@ -508,22 +508,22 @@ def soc_eval(model: str, use_llm: bool, seeds: str, timeout_s: float, out_dir: P
         use_llm=use_llm,
         timeout_s=timeout_s,
     )
-    for c in report["configs"]:
-        a = report["summary"][c]
-        click.echo(
-            f"  {c:18s} score={a['score_mean']} fp={a['fp_total']} fn={a['fn_total']} "
-            f"calls={a['n_calls_total']} cost=${a['cost_listprice']}"
-        )
-    if report["ablation"]:
-        ab = report["ablation"]
-        click.echo(f"  ABLATION {ab['budget_note']}")
-        click.echo(
-            f"    multi_agent - budget_single   = {ab['multi_agent_vs_budget_single']['mean_delta']}"
-        )
-        click.echo(
-            f"    multi_agent - multi_no_reviewer = {ab['multi_agent_vs_multi_no_reviewer']['mean_delta']}"
-        )
+    for scenario, fam in report["families"].items():
+        click.echo(f"[{scenario}]")
+        for c in report["configs"]:
+            a = fam["summary"][c]
+            click.echo(
+                f"  {c:18s} score={a['score_mean']} fp={a['fp_total']} fn={a['fn_total']} "
+                f"calls={a['n_calls_total']} cost=${a['cost_listprice']}"
+            )
+        ab = fam.get("ablation")
+        if ab:
+            click.echo(
+                f"  ABLATION ma-budget_single={ab['multi_agent_vs_budget_single']['mean_delta']} "
+                f"ma-multi_no_reviewer={ab['multi_agent_vs_multi_no_reviewer']['mean_delta']}"
+            )
     path = write_g3_evaluation(report, out_dir)
+    click.echo(f"models_observed={report['models_observed']}")
     click.echo(f"wrote {path}")
 
 

@@ -111,9 +111,15 @@ def _collateral(before: dict[str, str], after: dict[str, str], exclude: str) -> 
 
 
 def _authorize(
-    action: str, name: str, approval: Approval | None, executor_token: str, before: dict[str, str]
+    action: str,
+    name: str,
+    approval: Approval | None,
+    executor_token: str,
+    before: dict[str, str],
+    used_registry: set[str] | None,
 ) -> ActionResult | None:
-    """Return a refusal ActionResult if not authorized, else None (authorized)."""
+    """Return a refusal ActionResult if not authorized, else None (authorized). Consumes the
+    approval in ``used_registry`` on success so a replay of the same approval fails closed."""
 
     def refuse(detail: str) -> ActionResult:
         return ActionResult(
@@ -135,18 +141,27 @@ def _authorize(
         return refuse(reason)
     if not executor_token or executor_token != approval.executor_token:
         return refuse("executor token missing or does not match the approval")
+    if used_registry is not None and approval.approval_id in used_registry:
+        return refuse("approval already used (replay rejected)")
+    if used_registry is not None:
+        used_registry.add(approval.approval_id)  # single-use: consume on authorization
     return None
 
 
 def quarantine_file(
-    fs_root: Path, name: str, *, approval: Approval | None, executor_token: str
+    fs_root: Path,
+    name: str,
+    *,
+    approval: Approval | None,
+    executor_token: str,
+    used_registry: set[str] | None = None,
 ) -> ActionResult:
     """Move a webroot file into quarantine under a bound approval + executor token; verify from state."""
     action = "quarantine_webroot_file"
     name = Path(name).name  # basename only — no traversal
     qdir = fs_root / _QUARANTINE
     before = _snapshot(fs_root)
-    refusal = _authorize(action, name, approval, executor_token, before)
+    refusal = _authorize(action, name, approval, executor_token, before, used_registry)
     if refusal is not None:
         return refusal
     assert approval is not None
@@ -185,14 +200,19 @@ def quarantine_file(
 
 
 def restore_file(
-    fs_root: Path, name: str, *, approval: Approval | None, executor_token: str
+    fs_root: Path,
+    name: str,
+    *,
+    approval: Approval | None,
+    executor_token: str,
+    used_registry: set[str] | None = None,
 ) -> ActionResult:
     """Reverse a quarantine under a bound approval + executor token; verify from state."""
     action = "restore_webroot_file"
     name = Path(name).name
     qdir = fs_root / _QUARANTINE
     before = _snapshot(fs_root)
-    refusal = _authorize(action, name, approval, executor_token, before)
+    refusal = _authorize(action, name, approval, executor_token, before, used_registry)
     if refusal is not None:
         return refusal
     assert approval is not None

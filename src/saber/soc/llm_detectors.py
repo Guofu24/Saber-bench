@@ -31,36 +31,45 @@ if TYPE_CHECKING:
     from saber.range.live.episode import LiveEpisode
 
 _OUT = '{"rule": {"engine": "regex", "pattern": "<regex>", "ignore_case": true}}'
+# Per-family detection task text (the regex runs over the real access log lines).
+_TASK = {
+    "web_sqli_probe": "Some requests are SQL-injection probes; many benign requests merely contain "
+    "a SQL word. Write ONE Python regex matching the SQL-injection request lines and NOT the benign "
+    "ones.",
+    "fs_change": "Some /fs/put requests upload an unauthorized server-side webshell (names like "
+    "shell.php, cmd.php, backdoor.aspx); authorized script deployments (e.g. health.php, "
+    "status.aspx) and static files are benign. Write ONE Python regex matching the malicious "
+    "webshell-upload lines and NOT the benign uploads.",
+}
 
 
-def _analyst_prompt(log: list[str], *, specialist: bool) -> str:
+def _analyst_prompt(log: list[str], scenario: str, *, specialist: bool) -> str:
     role = (
-        "You are a specialized SOC web-attack detection analyst. "
+        "You are a specialized SOC detection analyst. "
         if specialist
         else "You are a SOC detection engineer. "
     )
     return (
-        f"{role}Below is a REAL web access log (one JSON record per line) from a live service. "
-        "Some requests are SQL-injection probes; many benign requests merely contain a SQL word.\n\n"
+        f"{role}Below is a REAL access log (one JSON record per line) from a live service.\n"
+        f"{_TASK.get(scenario, '')}\n\n"
         f"ACCESS LOG:\n{chr(10).join(log)}\n\n"
-        f"Write ONE Python regex matching the SQL-injection lines and NOT the benign ones. "
         f"Respond with ONLY this JSON, no commentary:\n{_OUT}"
     )
 
 
-def _reviewer_prompt(log: list[str], draft: dict[str, Any]) -> str:
+def _reviewer_prompt(log: list[str], scenario: str, draft: dict[str, Any]) -> str:
     return (
         "You are a senior detection REVIEWER. Improve the analyst's regex to cut false positives "
-        "(benign SQL-word lines) and false negatives (missed probes).\n\n"
+        f"and false negatives for this task: {_TASK.get(scenario, '')}\n\n"
         f"ACCESS LOG:\n{chr(10).join(log)}\n\nDRAFT: {json.dumps(draft)}\n\n"
         f"Return ONLY the corrected JSON:\n{_OUT}"
     )
 
 
-def _selfrefine_prompt(log: list[str], draft: dict[str, Any]) -> str:
+def _selfrefine_prompt(log: list[str], scenario: str, draft: dict[str, Any]) -> str:
     return (
         "You are a SOC detection engineer. Here is YOUR OWN draft regex. Critique it yourself and "
-        "return an improved version that reduces false positives and false negatives.\n\n"
+        f"return an improved version with fewer false positives/negatives for: {_TASK.get(scenario, '')}\n\n"
         f"ACCESS LOG:\n{chr(10).join(log)}\n\nYOUR DRAFT: {json.dumps(draft)}\n\n"
         f"Return ONLY the improved JSON:\n{_OUT}"
     )
@@ -97,44 +106,49 @@ def make_detector(
 
     def detector(episode: LiveEpisode) -> dict[str, Any]:
         log = episode.access_log_lines
+        sc = episode.scenario
         t0 = time.monotonic()
         calls: list[CliInvocation] = []
         if mode in ("single", "specialist"):
             ans, inv = _call(
-                _analyst_prompt(log, specialist=(mode == "specialist")),
+                _analyst_prompt(log, sc, specialist=(mode == "specialist")),
                 model=model,
                 timeout_s=timeout_s,
             )
             calls.append(inv)
         elif mode == "multi_agent":
             draft, inv1 = _call(
-                _analyst_prompt(log, specialist=True), model=model, timeout_s=timeout_s
+                _analyst_prompt(log, sc, specialist=True), model=model, timeout_s=timeout_s
             )
             calls.append(inv1)
             ans = draft
             if draft is not None:
-                rev, inv2 = _call(_reviewer_prompt(log, draft), model=model, timeout_s=timeout_s)
+                rev, inv2 = _call(
+                    _reviewer_prompt(log, sc, draft), model=model, timeout_s=timeout_s
+                )
                 calls.append(inv2)
                 ans = rev if rev is not None else draft
         elif mode == "budget_single":
             # H2: same specialist first turn as multi_agent, so the only difference is
             # self-refine vs reviewer (isolates coordination from compute and from the role prompt).
             draft, inv1 = _call(
-                _analyst_prompt(log, specialist=True), model=model, timeout_s=timeout_s
+                _analyst_prompt(log, sc, specialist=True), model=model, timeout_s=timeout_s
             )
             calls.append(inv1)
             ans = draft
             if draft is not None:
-                ref, inv2 = _call(_selfrefine_prompt(log, draft), model=model, timeout_s=timeout_s)
+                ref, inv2 = _call(
+                    _selfrefine_prompt(log, sc, draft), model=model, timeout_s=timeout_s
+                )
                 calls.append(inv2)
                 ans = ref if ref is not None else draft
         elif mode == "multi_no_reviewer":
             # Same specialist first turn; a second INDEPENDENT analyst (no reviewer), OR-ensembled.
             a1, inv1 = _call(
-                _analyst_prompt(log, specialist=True), model=model, timeout_s=timeout_s
+                _analyst_prompt(log, sc, specialist=True), model=model, timeout_s=timeout_s
             )
             a2, inv2 = _call(
-                _analyst_prompt(log, specialist=True), model=model, timeout_s=timeout_s
+                _analyst_prompt(log, sc, specialist=True), model=model, timeout_s=timeout_s
             )
             calls.extend([inv1, inv2])
             # ensemble without coordination: OR the two patterns (union of matches)

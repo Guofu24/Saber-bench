@@ -181,6 +181,44 @@ def test_ir_quarantine_is_bound_approved_reversible_and_verified(tmp_path: Path)
     assert r.executed and r.verified and (webroot / script).is_file()
 
 
+def test_ir_approval_replay_fails_closed(tmp_path: Path) -> None:
+    from saber.range.live import grant_approval, quarantine_file, restore_file
+
+    ep = run_episode("fs_change", 3, workdir=tmp_path)
+    webroot = Path(ep.evidence_dir) / "webroot"
+    script = next(
+        n
+        for n in [f["name"] for f in ep.lab_state["fs_state"] if f["is_script"]]
+        if "<?php" in (webroot / n).read_text()
+    )
+    token = "EXEC-REPLAY"
+    reg: set[str] = set()
+    appr = grant_approval("quarantine_webroot_file", script, executor_token=token)
+    r1 = quarantine_file(webroot, script, approval=appr, executor_token=token, used_registry=reg)
+    assert r1.executed and r1.verified
+    # restore so the file is back, then REPLAY the same (already-consumed) approval -> fail closed
+    rb = grant_approval("restore_webroot_file", script, executor_token=token)
+    restore_file(webroot, script, approval=rb, executor_token=token, used_registry=reg)
+    r2 = quarantine_file(webroot, script, approval=appr, executor_token=token, used_registry=reg)
+    assert not r2.executed and "replay" in r2.detail.lower()
+
+
+def test_published_ir_target_is_keyed_not_plain_hash(tmp_path: Path) -> None:
+    import hashlib
+
+    from saber.soc import run_soc_suite
+    from saber.soc.suite import write_soc_suite
+
+    report = run_soc_suite(["fs_change"], [1], detector="conventional", workdir=tmp_path)
+    path = write_soc_suite(report, tmp_path / "out")
+    text = path.read_text(encoding="utf-8")
+    # the published IR target must be a keyed opaque id, not a reversible sha256 of the filename
+    for cand in ("shell.php", "cmd.php", "backdoor.aspx", "c99.php"):
+        assert cand not in text
+        assert "sha256:" + hashlib.sha256(cand.encode()).hexdigest()[:12] not in text
+    assert "ir-target:" in text  # keyed opaque id present
+
+
 def test_service_refuses_non_loopback(tmp_path: Path) -> None:
     rc = service_main.main(
         [

@@ -163,7 +163,12 @@ def _ts_raw(episode: LiveEpisode, lid: str) -> str:
 
 
 def _incident_response(
-    episode: LiveEpisode, case: Case, *, operator_approve: OperatorApprover, executor_token: str
+    episode: LiveEpisode,
+    case: Case,
+    *,
+    operator_approve: OperatorApprover,
+    executor_token: str,
+    used_registry: set[str],
 ) -> None:
     confirmed = case.monitoring.get("cited_evidence", [])
     eligible = bool(confirmed)
@@ -197,7 +202,11 @@ def _incident_response(
         for name in dict.fromkeys(targets):  # dedupe, preserve order
             approval = operator_approve("quarantine_webroot_file", name)
             result = quarantine_file(
-                webroot, name, approval=approval, executor_token=executor_token
+                webroot,
+                name,
+                approval=approval,
+                executor_token=executor_token,
+                used_registry=used_registry,
             )
             resp["actions"].append(result.audit())
             case.audit.append(
@@ -289,7 +298,9 @@ def run_case_workflow(
     detection = detect(episode)
     _monitoring(episode, detection, episode_truth, case)
     _threat_hunting(episode, detection, episode_truth, case)
-    _incident_response(episode, case, operator_approve=approver, executor_token=token)
+    _incident_response(
+        episode, case, operator_approve=approver, executor_token=token, used_registry=set()
+    )
     _content_security(episode, heldout, heldout_truth, detect(heldout), case)
     case.monitoring["rule_pattern"] = detection.get("pattern")
     case.audit.append({"workflow": "complete", "at": datetime.now(UTC).isoformat()})

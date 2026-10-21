@@ -63,10 +63,14 @@ def test_g3_offline_conventional_and_ablation_shape(tmp_path: Path) -> None:
     from saber.soc import run_g3_evaluation
     from saber.soc.evaluation import _ablation
 
-    r = run_g3_evaluation(seeds=[1, 2], use_llm=False, workdir=tmp_path)
+    r = run_g3_evaluation(
+        seeds=[1, 2], scenarios=["web_sqli_probe", "fs_change"], use_llm=False, workdir=tmp_path
+    )
     assert r["configs"] == ["conventional"]
-    assert r["summary"]["conventional"]["score_mean"] == 1.0
-    assert r["subtask"] == "T1347.001"
+    assert set(r["families"]) == {"web_sqli_probe", "fs_change"}
+    for fam in r["families"].values():
+        assert fam["summary"]["conventional"]["score_mean"] == 1.0
+        assert fam["subtask"] == "T1347.001"
     assert "significance" in r["caveat"].lower()
     # ablation paired-delta logic (synthetic): multi_agent beats budget_single on both seeds
     pc = {

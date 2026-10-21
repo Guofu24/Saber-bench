@@ -23,7 +23,9 @@ from saber.soc.llm_detectors import make_detector
 from saber.soc.workflow import MON_SUBTASK, _set_delta_score
 
 _LLM_MODES = ("single", "specialist", "multi_agent", "budget_single", "multi_no_reviewer")
-_SCENARIO = "web_sqli_probe"
+# Families where the detection task is a regex-authoring task (so the LLM configs apply). auth is a
+# threshold rule, not a regex task, and is excluded from the six-config LLM eval (see note_auth).
+_SCENARIOS = ("web_sqli_probe", "fs_change")
 
 
 def _mean(xs: list[float]) -> float | None:
@@ -39,24 +41,13 @@ def _ci95(xs: list[float]) -> list[float] | None:
     return [round(means[int(0.025 * 2000)], 4), round(means[int(0.975 * 2000) - 1], 4)]
 
 
-def run_g3_evaluation(
-    *,
-    seeds: list[int],
-    model: str = "haiku",
-    use_llm: bool = True,
-    timeout_s: float = 180.0,
-    workdir: Path | None = None,
-) -> dict[str, Any]:
-    wd = workdir or (repo_root() / "runs" / "g3")
-    configs: dict[str, Any] = {"conventional": conventional_detector}
-    if use_llm:
-        for m in _LLM_MODES:
-            configs[m] = make_detector(m, model=model, timeout_s=timeout_s)
-
-    # Build each episode once; run every config on the SAME episode object (matched conditions).
+def _run_family(
+    scenario: str, seeds: list[int], configs: dict[str, Any], wd: Path
+) -> tuple[dict[str, list[dict[str, Any]]], set[str]]:
     per_config: dict[str, list[dict[str, Any]]] = {c: [] for c in configs}
+    models: set[str] = set()
     for seed in seeds:
-        ep = run_episode(_SCENARIO, seed, workdir=wd)
+        ep = run_episode(scenario, seed, workdir=wd)
         truth = set(ep.gold_truth["malicious_line_ids"])
         valid_episode = ep.cross_check_ok and ep.lab_state["reset_ok"]
         for cname, det in configs.items():
@@ -64,6 +55,7 @@ def run_g3_evaluation(
             matched = {str(x) for x in d.get("matched_line_ids", [])}
             completed = d.get("completed", True)
             sd = _set_delta_score(matched, truth)
+            models.update(c.get("model") for c in d.get("calls", []) if c.get("model"))
             per_config[cname].append(
                 {
                     "seed": seed,
@@ -81,7 +73,10 @@ def run_g3_evaluation(
                     "cost_usd_listprice": d.get("cost_usd_listprice", 0.0),
                 }
             )
+    return per_config, models
 
+
+def _summarize(per_config: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:
     summary = {}
     for cname, rows in per_config.items():
         valid = [r for r in rows if r["episode_valid"]]  # invalidation gating
@@ -100,25 +95,56 @@ def run_g3_evaluation(
             "latency_mean_ms": _mean([r["duration_ms"] for r in done if r["duration_ms"]]),
             "cost_listprice": round(sum(r["cost_usd_listprice"] for r in valid), 4),
         }
+    return summary
 
-    ablation = _ablation(per_config) if use_llm else {}
+
+def run_g3_evaluation(
+    *,
+    seeds: list[int],
+    scenarios: list[str] | None = None,
+    model: str = "haiku",
+    use_llm: bool = True,
+    timeout_s: float = 180.0,
+    workdir: Path | None = None,
+) -> dict[str, Any]:
+    wd = workdir or (repo_root() / "runs" / "g3")
+    fams = scenarios or list(_SCENARIOS)
+    configs: dict[str, Any] = {"conventional": conventional_detector}
+    if use_llm:
+        for m in _LLM_MODES:
+            configs[m] = make_detector(m, model=model, timeout_s=timeout_s)
+
+    families: dict[str, Any] = {}
+    models_observed: set[str] = set()
+    for scenario in fams:
+        per_config, models = _run_family(scenario, seeds, configs, wd)
+        models_observed |= models
+        families[scenario] = {
+            "subtask": MON_SUBTASK,
+            "summary": _summarize(per_config),
+            "ablation": _ablation(per_config) if use_llm else {},
+            "per_config": per_config,
+        }
+
     return {
         "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat(),
         "subtask": MON_SUBTASK,
         "source_aggregate": "set_delta max(0, M'/M - N'/(N'+M'))",
-        "scenario": _SCENARIO,
+        "scenarios": fams,
         "model_requested": model,
+        "models_observed": sorted(models_observed),
         "seeds": seeds,
         "labels": ["LIVE_LAB_EXECUTION", "AUTOMATED_LAB_GROUND_TRUTH", "DEV_SIMULATION_ONLY"],
         "configs": list(configs),
-        "summary": summary,
-        "ablation": ablation,
-        "per_config": per_config,
+        "families": families,
+        "note_auth": "auth_bruteforce is a volume/threshold rule, not a regex-authoring task, so the "
+        "six LLM configs are not run on it; its conventional baseline is in the SOC coverage matrix.",
         "caveat": (
-            f"{len(seeds)} seeds, 1 scenario family — point estimates with wide bootstrap CIs, "
-            "explicitly NOT a statistical-significance claim. All configs run on identical episodes "
-            "with equal data access and tool permissions; budgets measured (n_calls/cost). "
-            "AUTOMATED_LAB_GROUND_TRUTH, not expert gold; NOT READY_BENCHMARK."
+            f"{len(seeds)} seeds x {len(fams)} scenario families — point estimates with wide "
+            "bootstrap CIs, explicitly NOT a statistical-significance claim. All configs run on "
+            "identical episodes with equal data access, tool permissions, first-turn context and "
+            "measured budgets (n_calls/cost). AUTOMATED_LAB_GROUND_TRUTH, not expert gold; NOT "
+            "READY_BENCHMARK."
         ),
     }
 
