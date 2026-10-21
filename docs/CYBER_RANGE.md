@@ -35,6 +35,29 @@ The hardened docker-compose lab (`lab/`) remains the stronger-isolation containe
 needs the Docker daemon (CR-1); its plan validates offline. Verified runtime logs, telemetry
 samples, and the live end-to-end benchmark are reported in `docs/PHASE_F_REPORT.md`.
 
+### Multi-service workflow (Phase G)
+
+Three genuinely-different scenario families now execute: `web_sqli_probe` (HTTP + SQLi with SQL-word
+hard negatives), `auth_bruteforce` (threshold brute force + a benign-typo hard negative), and
+`fs_change` (unauthorized webshell upload into a sandboxed webroot, with authorized-script hard
+negatives; truth from the real resulting filesystem state). A four-service case workflow
+(`saber.soc`) runs Monitoring, Threat Hunting, Incident Response and Content Security over one case
+with cited evidence and audited tool calls:
+
+```bash
+uv run saber range scenarios                       # web_sqli_probe, auth_bruteforce, fs_change
+uv run saber soc run --seeds 1,2 --detector conventional   # four-service coverage matrix
+uv run saber soc eval --llm --model haiku --seeds 1,2,3     # 6-config ablation (subscription)
+uv run saber soc adjudicate                          # gold-label adjudication package (PENDING)
+```
+
+Incident Response executes only an **approved, allowlisted, reversible, verified** quarantine of a
+webshell on `fs_change`: the approval is bound to a specific action+target with a separate executor
+token (the detector never holds it), and the effect is verified from the real post-action filesystem
+state with collateral recorded. Monitoring and Content Security are scored against real set_delta
+contracts (T1347.001, T0020.001); Threat Hunting and IR are genuine workflow artifacts, not claimed
+as source-contract coverage. Full account: `docs/PHASE_G_REPORT.md`.
+
 ## Environment inventory (read-only, observed)
 
 | Capability | Observed | Usable now? |

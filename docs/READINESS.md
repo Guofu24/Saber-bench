@@ -109,6 +109,33 @@ not expert-signed. Independently validated gold labels remain **0**. Phase F doe
 tier table: no subtask is `READY_BENCHMARK` (that still requires the full independent-validation
 standard), and `DEV_SIMULATION_ONLY` is preserved.
 
+## Phase G — Multi-service operational SOC workflow (capabilities, not a tier change)
+
+Phase G extends the live lab into three genuinely-different scenario families and a four-service
+case workflow.
+
+- **Three scenario families** (`saber.range.live`): `web_sqli_probe` (HTTP + inert SQLi probes +
+  SQL-word hard negatives), `auth_bruteforce` (threshold brute force + a benign-typo hard negative,
+  overlapping users), and `fs_change` (unauthorized server-side-script upload into a sandboxed
+  webroot; truth derived from the REAL resulting filesystem state). All execute genuinely, with
+  cross-checked server-side truth, hashed evidence, and clean reset.
+- **Four-service workflow** (`saber.soc`): Monitoring, Threat Hunting, Incident Response, Content
+  Security over one `Case` with cited evidence refs and audited tool calls; no service reads the
+  sealed truth. Monitoring and Content Security are SCORED against real set_delta contracts
+  (T1347.001, T0020.001); Threat Hunting (timeline + entities) and Incident Response (a VERIFIED,
+  reversible, approved quarantine action on fs_change) are genuine workflow artifacts, NOT claimed
+  as source-contract coverage.
+- **Six-config evaluation** (`saber soc eval`): conventional / single / specialist / multi_agent /
+  budget_single / multi_no_reviewer on matched live episodes, with a call-budget-matched ablation
+  isolating whether coordination beats spending more calls. See `docs/PHASE_G_REPORT.md`.
+- **Gold-label adjudication** (`docs/adjudication/`): a PENDING_EXPERT_REVIEW package;
+  independently-validated gold labels remain **0**.
+
+Phase G changes no tier: automated-lab ground truth stays a distinct, lower tier than expert gold,
+`soc`/`vm` source contracts are exercised only at the aggregate level on live telemetry for the two
+bound subtasks (full bespoke coverage remains the offline VERIFIED path), and nothing is
+`READY_BENCHMARK`. `DEV_SIMULATION_ONLY` preserved.
+
 ## Three readiness tiers
 
 ### Tier 1 — Implemented software, tested offline
