@@ -50,35 +50,41 @@ executed + verified on `fs_change`; proposed-only where no reversible action exi
 
 ## G3 — Six-configuration evaluation and the coordination ablation
 
-On identical live `web_sqli_probe` episodes (3 seeds), scored with `T1347.001`'s set_delta contract,
-invalidation-gated, bootstrap CIs. `multi_agent`, `budget_single` and `multi_no_reviewer` all spend
-2 calls AND share the same specialist first-turn prompt, so the comparison isolates the second step.
-Data: `range_evidence/g3/g3_eval_haiku_seeds1-2-3.json`.
+On identical live episodes (3 seeds) across TWO scenario families, scored with `T1347.001`'s
+set_delta contract, invalidation-gated, cluster-independent bootstrap CIs, model `claude-haiku-4-5`
+(`models_observed`). `multi_agent`, `budget_single` and `multi_no_reviewer` all spend 2 calls AND
+share the same specialist first-turn prompt, so the comparison isolates the second step
+(reviewer vs self-refine vs a 2nd analyst). `auth_bruteforce` is a volume/threshold rule, not a
+regex-authoring task, so the six LLM configs are **NOT_EVALUATED** on it (conventional-only — in the
+SOC coverage matrix). Data: `range_evidence/g3/g3_eval_haiku_seeds1-2-3.json`.
 
-| Config | Score | 95% CI | Completion | FP | FN | LLM calls | Cost (list) |
-|---|---|---|---|---|---|---|---|
-| conventional | 1.00 | [1.00, 1.00] | — | 0 | 0 | 0 | — |
-| single (1 call) | 1.00 | [1.00, 1.00] | 1.00 | 0 | 0 | 3 | $0.15 |
-| specialist (1 call) | 0.93 | [0.80, 1.00] | 1.00 | 0 | 1 | 3 | $0.16 |
-| multi_agent (2 calls) | 1.00 | [1.00, 1.00] | 1.00 | 0 | 0 | 6 | $0.37 |
-| budget_single (2 calls) | 0.67 | [0.00, 1.00] | 0.67 | 0 | 6 | 5 | $0.23 |
-| multi_no_reviewer (2 calls) | 0.67 | [0.00, 1.00] | 0.67 | 0 | — | 6 | $0.30 |
+| Config | web_sqli_probe | fs_change | auth_bruteforce | Completion | Calls | Cost (list) |
+|---|---|---|---|---|---|---|
+| conventional | 1.00 [1.00,1.00] | 1.00 [1.00,1.00] | 1.00 (coverage matrix) | — | 0 | — |
+| single (1 call) | 1.00 [1.00,1.00] | 1.00 [1.00,1.00] | NOT_EVALUATED | 1.00 | 3+3 | $0.19 / $0.12 |
+| specialist (1 call) | 1.00 [1.00,1.00] | 1.00 [1.00,1.00] | NOT_EVALUATED | 1.00 | 3+3 | $0.18 / $0.11 |
+| multi_agent (2 calls) | 1.00 [1.00,1.00] | 1.00 [1.00,1.00] | NOT_EVALUATED | 1.00 | 6+6 | $0.36 / $0.27 |
+| budget_single (2 calls) | 0.94 [0.83,1.00] | 1.00 [1.00,1.00] | NOT_EVALUATED | 1.00 | 6+6 | $0.36 / $0.23 |
+| multi_no_reviewer (2 calls) | 1.00 [1.00,1.00] | 0.83 [0.50,1.00] | NOT_EVALUATED | 1.00 | 6+6 | $0.35 / $0.21 |
 
-**Does coordination add value beyond spending more calls? On this evidence, no.**
+(FP/FN totals: all 0 except budget_single one FN on web_sqli seed 2, and multi_no_reviewer one FP on
+fs_change seed 2. Evidence references valid in every cell. 100% completion everywhere — the earlier
+run's one-seed completion artifact is gone.)
 
-- A **single call already maxes the task** (single 1.00 = conventional 1.00). The task is
-  conventionally solvable, so extra inference calls had no headroom to add value.
-- The apparent `multi_agent − budget_single` and `multi_agent − multi_no_reviewer` gaps (+0.33 each)
-  come **entirely from seed 2**: there both 2-call controls hit a one-off parse failure
-  (completion 0.67, scored 0) while `multi_agent` happened to complete. On seeds 1 and 3 every
-  config ties at 1.00 (per-seed deltas: 0.0, 1.0, 0.0).
-- So the gap is a **reliability artifact on one seed, not a coordination effect**. With n=3, one
-  family, and a completion confound, there is **no support** for a claim that the reviewer earns its
-  extra call. If anything, `single == multi_agent` shows the second call bought nothing here.
+**Does coordination add value beyond spending more calls? On this evidence, no — and the task is
+ceiling-saturated, so the question cannot even be answered here.**
 
-This is a deliberately anti-hype result: the eval did not manufacture a multi-agent win. A fair,
-powered test would need many seeds across multiple families and would have to separate completion
-reliability from capability.
+- On **both** families, `conventional (0 calls) == single (1 call) == specialist == multi_agent = 1.00`.
+  A single call already maxes the task, so extra inference and coordination have no headroom.
+- `multi_agent − single = 0.00` on every seed of both families. The reviewer's second call bought
+  nothing over one call.
+- The only sub-1.0 cells are two ISOLATED single-episode errors in the budget-matched controls (one
+  FN, one FP, both on seed 2). At n=3 with wide CIs these are noise, not a coordination signal; per
+  the ceiling-saturation caveat we do **not** read multi_agent's +0.06 / +0.17 edges as improvement.
+- Verdict: **no support for "coordination beats more calls."** A real test needs genuinely hard
+  (non-ceiling) tasks, many seeds, and multiple families, separating reliability from capability.
+
+This is a deliberately anti-hype result: the eval did not manufacture a multi-agent win.
 
 ## G4 — Independent gold-label readiness
 
@@ -94,11 +100,16 @@ a qualified SOC/IR lead independent of the project — and the promotion rule ar
 Both independent reviews ran read-only; actionable findings fixed (commit `a76e727`).
 
 - **Security:** the IR approval model was weaker than SECURITY.md required — now approvals are bound
-  to a specific action+target with a TTL, require a separate executor token the detector does not
-  hold, and enforce the allowlist. Credentials redacted from logs/exports; the public receipt no
-  longer discloses the webshells; the published suite receipt hashes the IR target filename.
-  Confirmed sound: fs path confinement + inert marker, loopback-only traffic, sandboxed untrusted
-  regex, truth sealed from detectors, and the dispatch-only credential-free CI workflow.
+  to a specific action+target with a TTL, are **single-use (a replayed approval fails closed)**,
+  require a separate executor token the proposing detector does not hold, and enforce the allowlist.
+  Credentials (`pass=`) are redacted from logs/exports; the public receipt no longer discloses the
+  webshells; the published suite receipt replaces the IR target filename with a **keyed opaque id**
+  (HMAC with an unpublished per-publish key — a plain hash of the tiny filename space was
+  brute-forceable). Confirmed sound: fs path confinement + inert marker, loopback-only traffic,
+  sandboxed untrusted regex, truth sealed from detectors, and the dispatch-only credential-free CI
+  workflow. Regression re-run after these fixes: provenance (frozen 175-subtask catalog), reset
+  repeatability (deterministic truth, clean reset on all three families), and the security subset
+  all green.
 - **Methodology:** the ablation was unconfounded (budget-matched controls now share the specialist
   first turn); IR targets now come from the agent's findings; `fs_change` gained authorized-script
   hard negatives; the OR-ensemble bias and the same-family held-out are disclosed; invalid episodes
@@ -122,7 +133,31 @@ Outstanding blockers:
 
 **Definition of done:** demonstrated a reproducible, genuinely executed multi-service SOC workflow
 across three scenario families, with evidence-backed agent decisions (cited evidence refs), a
-verified reversible lab-state effect under a bound approval, fair call-budget-matched baselines, and
-honest readiness — including the honest negative finding that coordination showed no value beyond
-extra calls on this task. What remains is external: an authorized lab (CR-1) and independent gold
-validation (ED-1).
+verified reversible lab-state effect under a bound, single-use approval, fair call-budget-matched
+baselines, and honest readiness — including the honest negative finding that coordination showed no
+value beyond extra calls on this task. What remains is external: an authorized lab (CR-1) and
+independent gold validation (ED-1).
+
+## Phase H recommendation
+
+The internal engineering is now ahead of the evidence it can produce; the limiting factors are
+external and statistical, not code. Phase H should:
+
+1. **Unblock independent validation (ED-1).** Route the `docs/adjudication/` package to a qualified
+   SOC/IR lead for sign-off. Only a signed, independent confirmation may move a subtask from
+   `AUTOMATED_LAB_GROUND_TRUTH` toward `INDEPENDENTLY_VERIFIED` — the single gate to any
+   `READY_BENCHMARK` promotion.
+2. **Stand up an authorized lab (CR-1).** With the operator starting Docker/WSL2 (or attaching a
+   real SIEM), run the container backend via the `cyber-range` workflow for stronger isolation and
+   real host/network telemetry beyond loopback.
+3. **Power the coordination question (G-1).** The current ablation is underpowered (3 seeds, and the
+   one apparent gap was a completion artifact). Phase H should run many seeds across several
+   scenario families, SEPARATE reliability (completion) from capability (score on completed
+   episodes), add a completion-robust budget-matched single, and only then test coordination value
+   with clustered uncertainty over families — expecting, on current evidence, little to no benefit
+   on conventionally-solvable tasks and reserving the question for genuinely ambiguous ones.
+4. **Broaden beyond regex-detectable families.** auth_bruteforce (threshold) and richer host/network
+   scenarios need agent interfaces beyond regex authoring to exercise more source contracts live.
+
+No new framework is required for Phase H — only the external lab, the independent reviewer, and a
+powered experiment.

@@ -1,9 +1,15 @@
 {
-  "generated_at": "2026-10-21T06:25:53+00:00",
+  "generated_at": "2026-10-21T08:07:57+00:00",
   "subtask": "T1347.001",
   "source_aggregate": "set_delta max(0, M'/M - N'/(N'+M'))",
-  "scenario": "web_sqli_probe",
+  "scenarios": [
+    "web_sqli_probe",
+    "fs_change"
+  ],
   "model_requested": "haiku",
+  "models_observed": [
+    "claude-haiku-4-5"
+  ],
   "seeds": [
     1,
     2,
@@ -22,400 +28,804 @@
     "budget_single",
     "multi_no_reviewer"
   ],
-  "summary": {
-    "conventional": {
-      "score_mean": 1.0,
-      "score_ci95": [
-        1.0,
-        1.0
-      ],
-      "score_completed_mean": 1.0,
-      "completion_rate": 1.0,
-      "fp_total": 0,
-      "fn_total": 0,
-      "evidence_valid_all": true,
-      "n_calls_total": 0,
-      "tool_failures_total": 0,
-      "latency_mean_ms": null,
-      "cost_listprice": 0.0
+  "families": {
+    "web_sqli_probe": {
+      "subtask": "T1347.001",
+      "summary": {
+        "conventional": {
+          "score_mean": 1.0,
+          "score_ci95": [
+            1.0,
+            1.0
+          ],
+          "score_completed_mean": 1.0,
+          "completion_rate": 1.0,
+          "fp_total": 0,
+          "fn_total": 0,
+          "evidence_valid_all": true,
+          "n_calls_total": 0,
+          "tool_failures_total": 0,
+          "latency_mean_ms": null,
+          "cost_listprice": 0.0
+        },
+        "single": {
+          "score_mean": 1.0,
+          "score_ci95": [
+            1.0,
+            1.0
+          ],
+          "score_completed_mean": 1.0,
+          "completion_rate": 1.0,
+          "fp_total": 0,
+          "fn_total": 0,
+          "evidence_valid_all": true,
+          "n_calls_total": 3,
+          "tool_failures_total": 0,
+          "latency_mean_ms": 39255.3333,
+          "cost_listprice": 0.188
+        },
+        "specialist": {
+          "score_mean": 1.0,
+          "score_ci95": [
+            1.0,
+            1.0
+          ],
+          "score_completed_mean": 1.0,
+          "completion_rate": 1.0,
+          "fp_total": 0,
+          "fn_total": 0,
+          "evidence_valid_all": true,
+          "n_calls_total": 3,
+          "tool_failures_total": 0,
+          "latency_mean_ms": 56863.3333,
+          "cost_listprice": 0.182
+        },
+        "multi_agent": {
+          "score_mean": 1.0,
+          "score_ci95": [
+            1.0,
+            1.0
+          ],
+          "score_completed_mean": 1.0,
+          "completion_rate": 1.0,
+          "fp_total": 0,
+          "fn_total": 0,
+          "evidence_valid_all": true,
+          "n_calls_total": 6,
+          "tool_failures_total": 0,
+          "latency_mean_ms": 118015.0,
+          "cost_listprice": 0.3571
+        },
+        "budget_single": {
+          "score_mean": 0.9444,
+          "score_ci95": [
+            0.8333,
+            1.0
+          ],
+          "score_completed_mean": 0.9444,
+          "completion_rate": 1.0,
+          "fp_total": 0,
+          "fn_total": 1,
+          "evidence_valid_all": true,
+          "n_calls_total": 6,
+          "tool_failures_total": 0,
+          "latency_mean_ms": 116753.3333,
+          "cost_listprice": 0.3572
+        },
+        "multi_no_reviewer": {
+          "score_mean": 1.0,
+          "score_ci95": [
+            1.0,
+            1.0
+          ],
+          "score_completed_mean": 1.0,
+          "completion_rate": 1.0,
+          "fp_total": 0,
+          "fn_total": 0,
+          "evidence_valid_all": true,
+          "n_calls_total": 6,
+          "tool_failures_total": 0,
+          "latency_mean_ms": 108225.6667,
+          "cost_listprice": 0.3455
+        }
+      },
+      "ablation": {
+        "budget_note": "mean calls: {'multi_agent': 2.0, 'budget_single': 2.0, 'multi_no_reviewer': 2.0, 'single': 1.0}",
+        "multi_agent_vs_budget_single": {
+          "pairs": 3,
+          "mean_delta": 0.0556,
+          "per_seed_delta": {
+            "1": 0.0,
+            "2": 0.1667,
+            "3": 0.0
+          }
+        },
+        "multi_agent_vs_multi_no_reviewer": {
+          "pairs": 3,
+          "mean_delta": 0.0,
+          "per_seed_delta": {
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          }
+        },
+        "multi_agent_vs_single": {
+          "pairs": 3,
+          "mean_delta": 0.0,
+          "per_seed_delta": {
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          }
+        },
+        "interpretation": "multi_agent, budget_single and multi_no_reviewer all spend 2 calls AND share the same specialist first-turn prompt, so the comparison isolates the second step: reviewer (multi_agent) vs self-refine (budget_single) vs a second independent analyst (multi_no_reviewer). If multi_agent does not beat the other two, coordination adds no value beyond the extra call. Caveat: multi_no_reviewer OR-ensembles the two regexes, which biases toward recall and can inflate false positives. Read the per-seed deltas, not a mean over 3 seeds; this is not a significance claim."
+      },
+      "per_config": {
+        "conventional": [
+          {
+            "seed": 1,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 0,
+            "tool_failures": 0,
+            "duration_ms": null,
+            "wall_ms": 0,
+            "cost_usd_listprice": 0.0
+          },
+          {
+            "seed": 2,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 0,
+            "tool_failures": 0,
+            "duration_ms": null,
+            "wall_ms": 0,
+            "cost_usd_listprice": 0.0
+          },
+          {
+            "seed": 3,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 0,
+            "tool_failures": 0,
+            "duration_ms": null,
+            "wall_ms": 0,
+            "cost_usd_listprice": 0.0
+          }
+        ],
+        "single": [
+          {
+            "seed": 1,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 1,
+            "tool_failures": 0,
+            "duration_ms": 24039,
+            "wall_ms": 25562,
+            "cost_usd_listprice": 0.080832
+          },
+          {
+            "seed": 2,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 1,
+            "tool_failures": 0,
+            "duration_ms": 41825,
+            "wall_ms": 43063,
+            "cost_usd_listprice": 0.050013
+          },
+          {
+            "seed": 3,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 1,
+            "tool_failures": 0,
+            "duration_ms": 51902,
+            "wall_ms": 53030,
+            "cost_usd_listprice": 0.057141
+          }
+        ],
+        "specialist": [
+          {
+            "seed": 1,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 1,
+            "tool_failures": 0,
+            "duration_ms": 55379,
+            "wall_ms": 56500,
+            "cost_usd_listprice": 0.057591
+          },
+          {
+            "seed": 2,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 1,
+            "tool_failures": 0,
+            "duration_ms": 53585,
+            "wall_ms": 54890,
+            "cost_usd_listprice": 0.060485
+          },
+          {
+            "seed": 3,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 1,
+            "tool_failures": 0,
+            "duration_ms": 61626,
+            "wall_ms": 62797,
+            "cost_usd_listprice": 0.063905
+          }
+        ],
+        "multi_agent": [
+          {
+            "seed": 1,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 94755,
+            "wall_ms": 97047,
+            "cost_usd_listprice": 0.101323
+          },
+          {
+            "seed": 2,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 147877,
+            "wall_ms": 150452,
+            "cost_usd_listprice": 0.136539
+          },
+          {
+            "seed": 3,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 111413,
+            "wall_ms": 113687,
+            "cost_usd_listprice": 0.119262
+          }
+        ],
+        "budget_single": [
+          {
+            "seed": 1,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 87465,
+            "wall_ms": 89875,
+            "cost_usd_listprice": 0.099171
+          },
+          {
+            "seed": 2,
+            "episode_valid": true,
+            "completed": true,
+            "score": 0.8333,
+            "false_positives": 0,
+            "false_negatives": 1,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 119671,
+            "wall_ms": 121952,
+            "cost_usd_listprice": 0.122018
+          },
+          {
+            "seed": 3,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 143124,
+            "wall_ms": 145453,
+            "cost_usd_listprice": 0.135966
+          }
+        ],
+        "multi_no_reviewer": [
+          {
+            "seed": 1,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 91780,
+            "wall_ms": 94250,
+            "cost_usd_listprice": 0.105441
+          },
+          {
+            "seed": 2,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 115286,
+            "wall_ms": 117672,
+            "cost_usd_listprice": 0.114051
+          },
+          {
+            "seed": 3,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 117611,
+            "wall_ms": 119952,
+            "cost_usd_listprice": 0.12598
+          }
+        ]
+      }
     },
-    "single": {
-      "score_mean": 1.0,
-      "score_ci95": [
-        1.0,
-        1.0
-      ],
-      "score_completed_mean": 1.0,
-      "completion_rate": 1.0,
-      "fp_total": 0,
-      "fn_total": 0,
-      "evidence_valid_all": true,
-      "n_calls_total": 3,
-      "tool_failures_total": 0,
-      "latency_mean_ms": 41148.0,
-      "cost_listprice": 0.1505
-    },
-    "specialist": {
-      "score_mean": 0.9333,
-      "score_ci95": [
-        0.8,
-        1.0
-      ],
-      "score_completed_mean": 0.9333,
-      "completion_rate": 1.0,
-      "fp_total": 0,
-      "fn_total": 1,
-      "evidence_valid_all": true,
-      "n_calls_total": 3,
-      "tool_failures_total": 0,
-      "latency_mean_ms": 46203.0,
-      "cost_listprice": 0.1615
-    },
-    "multi_agent": {
-      "score_mean": 1.0,
-      "score_ci95": [
-        1.0,
-        1.0
-      ],
-      "score_completed_mean": 1.0,
-      "completion_rate": 1.0,
-      "fp_total": 0,
-      "fn_total": 0,
-      "evidence_valid_all": true,
-      "n_calls_total": 6,
-      "tool_failures_total": 0,
-      "latency_mean_ms": 117643.0,
-      "cost_listprice": 0.3696
-    },
-    "budget_single": {
-      "score_mean": 0.6667,
-      "score_ci95": [
-        0.0,
-        1.0
-      ],
-      "score_completed_mean": 1.0,
-      "completion_rate": 0.6667,
-      "fp_total": 0,
-      "fn_total": 6,
-      "evidence_valid_all": true,
-      "n_calls_total": 5,
-      "tool_failures_total": 1,
-      "latency_mean_ms": 106242.0,
-      "cost_listprice": 0.2277
-    },
-    "multi_no_reviewer": {
-      "score_mean": 0.6667,
-      "score_ci95": [
-        0.0,
-        1.0
-      ],
-      "score_completed_mean": 1.0,
-      "completion_rate": 0.6667,
-      "fp_total": 0,
-      "fn_total": 0,
-      "evidence_valid_all": true,
-      "n_calls_total": 6,
-      "tool_failures_total": 1,
-      "latency_mean_ms": 83278.5,
-      "cost_listprice": 0.295
+    "fs_change": {
+      "subtask": "T1347.001",
+      "summary": {
+        "conventional": {
+          "score_mean": 1.0,
+          "score_ci95": [
+            1.0,
+            1.0
+          ],
+          "score_completed_mean": 1.0,
+          "completion_rate": 1.0,
+          "fp_total": 0,
+          "fn_total": 0,
+          "evidence_valid_all": true,
+          "n_calls_total": 0,
+          "tool_failures_total": 0,
+          "latency_mean_ms": null,
+          "cost_listprice": 0.0
+        },
+        "single": {
+          "score_mean": 1.0,
+          "score_ci95": [
+            1.0,
+            1.0
+          ],
+          "score_completed_mean": 1.0,
+          "completion_rate": 1.0,
+          "fp_total": 0,
+          "fn_total": 0,
+          "evidence_valid_all": true,
+          "n_calls_total": 3,
+          "tool_failures_total": 0,
+          "latency_mean_ms": 31622.0,
+          "cost_listprice": 0.1198
+        },
+        "specialist": {
+          "score_mean": 1.0,
+          "score_ci95": [
+            1.0,
+            1.0
+          ],
+          "score_completed_mean": 1.0,
+          "completion_rate": 1.0,
+          "fp_total": 0,
+          "fn_total": 0,
+          "evidence_valid_all": true,
+          "n_calls_total": 3,
+          "tool_failures_total": 0,
+          "latency_mean_ms": 25868.3333,
+          "cost_listprice": 0.1098
+        },
+        "multi_agent": {
+          "score_mean": 1.0,
+          "score_ci95": [
+            1.0,
+            1.0
+          ],
+          "score_completed_mean": 1.0,
+          "completion_rate": 1.0,
+          "fp_total": 0,
+          "fn_total": 0,
+          "evidence_valid_all": true,
+          "n_calls_total": 6,
+          "tool_failures_total": 0,
+          "latency_mean_ms": 81327.0,
+          "cost_listprice": 0.2693
+        },
+        "budget_single": {
+          "score_mean": 1.0,
+          "score_ci95": [
+            1.0,
+            1.0
+          ],
+          "score_completed_mean": 1.0,
+          "completion_rate": 1.0,
+          "fp_total": 0,
+          "fn_total": 0,
+          "evidence_valid_all": true,
+          "n_calls_total": 6,
+          "tool_failures_total": 0,
+          "latency_mean_ms": 65387.3333,
+          "cost_listprice": 0.2293
+        },
+        "multi_no_reviewer": {
+          "score_mean": 0.8333,
+          "score_ci95": [
+            0.5,
+            1.0
+          ],
+          "score_completed_mean": 0.8333,
+          "completion_rate": 1.0,
+          "fp_total": 1,
+          "fn_total": 0,
+          "evidence_valid_all": true,
+          "n_calls_total": 6,
+          "tool_failures_total": 0,
+          "latency_mean_ms": 47058.0,
+          "cost_listprice": 0.2063
+        }
+      },
+      "ablation": {
+        "budget_note": "mean calls: {'multi_agent': 2.0, 'budget_single': 2.0, 'multi_no_reviewer': 2.0, 'single': 1.0}",
+        "multi_agent_vs_budget_single": {
+          "pairs": 3,
+          "mean_delta": 0.0,
+          "per_seed_delta": {
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          }
+        },
+        "multi_agent_vs_multi_no_reviewer": {
+          "pairs": 3,
+          "mean_delta": 0.1667,
+          "per_seed_delta": {
+            "1": 0.0,
+            "2": 0.5,
+            "3": 0.0
+          }
+        },
+        "multi_agent_vs_single": {
+          "pairs": 3,
+          "mean_delta": 0.0,
+          "per_seed_delta": {
+            "1": 0.0,
+            "2": 0.0,
+            "3": 0.0
+          }
+        },
+        "interpretation": "multi_agent, budget_single and multi_no_reviewer all spend 2 calls AND share the same specialist first-turn prompt, so the comparison isolates the second step: reviewer (multi_agent) vs self-refine (budget_single) vs a second independent analyst (multi_no_reviewer). If multi_agent does not beat the other two, coordination adds no value beyond the extra call. Caveat: multi_no_reviewer OR-ensembles the two regexes, which biases toward recall and can inflate false positives. Read the per-seed deltas, not a mean over 3 seeds; this is not a significance claim."
+      },
+      "per_config": {
+        "conventional": [
+          {
+            "seed": 1,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 0,
+            "tool_failures": 0,
+            "duration_ms": null,
+            "wall_ms": 0,
+            "cost_usd_listprice": 0.0
+          },
+          {
+            "seed": 2,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 0,
+            "tool_failures": 0,
+            "duration_ms": null,
+            "wall_ms": 0,
+            "cost_usd_listprice": 0.0
+          },
+          {
+            "seed": 3,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 0,
+            "tool_failures": 0,
+            "duration_ms": null,
+            "wall_ms": 0,
+            "cost_usd_listprice": 0.0
+          }
+        ],
+        "single": [
+          {
+            "seed": 1,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 1,
+            "tool_failures": 0,
+            "duration_ms": 34926,
+            "wall_ms": 36140,
+            "cost_usd_listprice": 0.042048
+          },
+          {
+            "seed": 2,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 1,
+            "tool_failures": 0,
+            "duration_ms": 47785,
+            "wall_ms": 49000,
+            "cost_usd_listprice": 0.051173
+          },
+          {
+            "seed": 3,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 1,
+            "tool_failures": 0,
+            "duration_ms": 12155,
+            "wall_ms": 13484,
+            "cost_usd_listprice": 0.02657
+          }
+        ],
+        "specialist": [
+          {
+            "seed": 1,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 1,
+            "tool_failures": 0,
+            "duration_ms": 23624,
+            "wall_ms": 24750,
+            "cost_usd_listprice": 0.03462
+          },
+          {
+            "seed": 2,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 1,
+            "tool_failures": 0,
+            "duration_ms": 34234,
+            "wall_ms": 35421,
+            "cost_usd_listprice": 0.04265
+          },
+          {
+            "seed": 3,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 1,
+            "tool_failures": 0,
+            "duration_ms": 19747,
+            "wall_ms": 21015,
+            "cost_usd_listprice": 0.032528
+          }
+        ],
+        "multi_agent": [
+          {
+            "seed": 1,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 59152,
+            "wall_ms": 61562,
+            "cost_usd_listprice": 0.077093
+          },
+          {
+            "seed": 2,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 87528,
+            "wall_ms": 89812,
+            "cost_usd_listprice": 0.091277
+          },
+          {
+            "seed": 3,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 97301,
+            "wall_ms": 99609,
+            "cost_usd_listprice": 0.100926
+          }
+        ],
+        "budget_single": [
+          {
+            "seed": 1,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 102516,
+            "wall_ms": 104937,
+            "cost_usd_listprice": 0.106351
+          },
+          {
+            "seed": 2,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 78111,
+            "wall_ms": 80452,
+            "cost_usd_listprice": 0.093921
+          },
+          {
+            "seed": 3,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 15535,
+            "wall_ms": 87437,
+            "cost_usd_listprice": 0.029076
+          }
+        ],
+        "multi_no_reviewer": [
+          {
+            "seed": 1,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 55570,
+            "wall_ms": 57842,
+            "cost_usd_listprice": 0.071816
+          },
+          {
+            "seed": 2,
+            "episode_valid": true,
+            "completed": true,
+            "score": 0.5,
+            "false_positives": 1,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 50412,
+            "wall_ms": 52938,
+            "cost_usd_listprice": 0.070777
+          },
+          {
+            "seed": 3,
+            "episode_valid": true,
+            "completed": true,
+            "score": 1.0,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "evidence_refs_valid": true,
+            "n_calls": 2,
+            "tool_failures": 0,
+            "duration_ms": 35192,
+            "wall_ms": 39157,
+            "cost_usd_listprice": 0.063678
+          }
+        ]
+      }
     }
   },
-  "ablation": {
-    "budget_note": "mean calls: {'multi_agent': 2.0, 'budget_single': 1.6667, 'multi_no_reviewer': 2.0, 'single': 1.0}",
-    "multi_agent_vs_budget_single": {
-      "pairs": 3,
-      "mean_delta": 0.3333,
-      "per_seed_delta": {
-        "1": 0.0,
-        "2": 1.0,
-        "3": 0.0
-      }
-    },
-    "multi_agent_vs_multi_no_reviewer": {
-      "pairs": 3,
-      "mean_delta": 0.3333,
-      "per_seed_delta": {
-        "1": 0.0,
-        "2": 1.0,
-        "3": 0.0
-      }
-    },
-    "multi_agent_vs_single": {
-      "pairs": 3,
-      "mean_delta": 0.0,
-      "per_seed_delta": {
-        "1": 0.0,
-        "2": 0.0,
-        "3": 0.0
-      }
-    },
-    "interpretation": "multi_agent, budget_single and multi_no_reviewer all spend 2 calls AND share the same specialist first-turn prompt, so the comparison isolates the second step: reviewer (multi_agent) vs self-refine (budget_single) vs a second independent analyst (multi_no_reviewer). If multi_agent does not beat the other two, coordination adds no value beyond the extra call. Caveat: multi_no_reviewer OR-ensembles the two regexes, which biases toward recall and can inflate false positives. Read the per-seed deltas, not a mean over 3 seeds; this is not a significance claim."
-  },
-  "per_config": {
-    "conventional": [
-      {
-        "seed": 1,
-        "episode_valid": true,
-        "completed": true,
-        "score": 1.0,
-        "false_positives": 0,
-        "false_negatives": 0,
-        "evidence_refs_valid": true,
-        "n_calls": 0,
-        "tool_failures": 0,
-        "duration_ms": null,
-        "wall_ms": 0,
-        "cost_usd_listprice": 0.0
-      },
-      {
-        "seed": 2,
-        "episode_valid": true,
-        "completed": true,
-        "score": 1.0,
-        "false_positives": 0,
-        "false_negatives": 0,
-        "evidence_refs_valid": true,
-        "n_calls": 0,
-        "tool_failures": 0,
-        "duration_ms": null,
-        "wall_ms": 0,
-        "cost_usd_listprice": 0.0
-      },
-      {
-        "seed": 3,
-        "episode_valid": true,
-        "completed": true,
-        "score": 1.0,
-        "false_positives": 0,
-        "false_negatives": 0,
-        "evidence_refs_valid": true,
-        "n_calls": 0,
-        "tool_failures": 0,
-        "duration_ms": null,
-        "wall_ms": 0,
-        "cost_usd_listprice": 0.0
-      }
-    ],
-    "single": [
-      {
-        "seed": 1,
-        "episode_valid": true,
-        "completed": true,
-        "score": 1.0,
-        "false_positives": 0,
-        "false_negatives": 0,
-        "evidence_refs_valid": true,
-        "n_calls": 1,
-        "tool_failures": 0,
-        "duration_ms": 33255,
-        "wall_ms": 34422,
-        "cost_usd_listprice": 0.044932
-      },
-      {
-        "seed": 2,
-        "episode_valid": true,
-        "completed": true,
-        "score": 1.0,
-        "false_positives": 0,
-        "false_negatives": 0,
-        "evidence_refs_valid": true,
-        "n_calls": 1,
-        "tool_failures": 0,
-        "duration_ms": 39731,
-        "wall_ms": 40952,
-        "cost_usd_listprice": 0.049828
-      },
-      {
-        "seed": 3,
-        "episode_valid": true,
-        "completed": true,
-        "score": 1.0,
-        "false_positives": 0,
-        "false_negatives": 0,
-        "evidence_refs_valid": true,
-        "n_calls": 1,
-        "tool_failures": 0,
-        "duration_ms": 50458,
-        "wall_ms": 51702,
-        "cost_usd_listprice": 0.055732
-      }
-    ],
-    "specialist": [
-      {
-        "seed": 1,
-        "episode_valid": true,
-        "completed": true,
-        "score": 0.8,
-        "false_positives": 0,
-        "false_negatives": 1,
-        "evidence_refs_valid": true,
-        "n_calls": 1,
-        "tool_failures": 0,
-        "duration_ms": 46175,
-        "wall_ms": 47390,
-        "cost_usd_listprice": 0.054002
-      },
-      {
-        "seed": 2,
-        "episode_valid": true,
-        "completed": true,
-        "score": 1.0,
-        "false_positives": 0,
-        "false_negatives": 0,
-        "evidence_refs_valid": true,
-        "n_calls": 1,
-        "tool_failures": 0,
-        "duration_ms": 58794,
-        "wall_ms": 59969,
-        "cost_usd_listprice": 0.062116
-      },
-      {
-        "seed": 3,
-        "episode_valid": true,
-        "completed": true,
-        "score": 1.0,
-        "false_positives": 0,
-        "false_negatives": 0,
-        "evidence_refs_valid": true,
-        "n_calls": 1,
-        "tool_failures": 0,
-        "duration_ms": 33640,
-        "wall_ms": 34875,
-        "cost_usd_listprice": 0.045418
-      }
-    ],
-    "multi_agent": [
-      {
-        "seed": 1,
-        "episode_valid": true,
-        "completed": true,
-        "score": 1.0,
-        "false_positives": 0,
-        "false_negatives": 0,
-        "evidence_refs_valid": true,
-        "n_calls": 2,
-        "tool_failures": 0,
-        "duration_ms": 152911,
-        "wall_ms": 155406,
-        "cost_usd_listprice": 0.144328
-      },
-      {
-        "seed": 2,
-        "episode_valid": true,
-        "completed": true,
-        "score": 1.0,
-        "false_positives": 0,
-        "false_negatives": 0,
-        "evidence_refs_valid": true,
-        "n_calls": 2,
-        "tool_failures": 0,
-        "duration_ms": 86568,
-        "wall_ms": 88890,
-        "cost_usd_listprice": 0.104051
-      },
-      {
-        "seed": 3,
-        "episode_valid": true,
-        "completed": true,
-        "score": 1.0,
-        "false_positives": 0,
-        "false_negatives": 0,
-        "evidence_refs_valid": true,
-        "n_calls": 2,
-        "tool_failures": 0,
-        "duration_ms": 113450,
-        "wall_ms": 115797,
-        "cost_usd_listprice": 0.121194
-      }
-    ],
-    "budget_single": [
-      {
-        "seed": 1,
-        "episode_valid": true,
-        "completed": true,
-        "score": 1.0,
-        "false_positives": 0,
-        "false_negatives": 0,
-        "evidence_refs_valid": true,
-        "n_calls": 2,
-        "tool_failures": 0,
-        "duration_ms": 78725,
-        "wall_ms": 81030,
-        "cost_usd_listprice": 0.096721
-      },
-      {
-        "seed": 2,
-        "episode_valid": true,
-        "completed": false,
-        "score": 0.0,
-        "false_positives": 0,
-        "false_negatives": 6,
-        "evidence_refs_valid": true,
-        "n_calls": 1,
-        "tool_failures": 1,
-        "duration_ms": null,
-        "wall_ms": 28977265,
-        "cost_usd_listprice": 0.0
-      },
-      {
-        "seed": 3,
-        "episode_valid": true,
-        "completed": true,
-        "score": 1.0,
-        "false_positives": 0,
-        "false_negatives": 0,
-        "evidence_refs_valid": true,
-        "n_calls": 2,
-        "tool_failures": 0,
-        "duration_ms": 133759,
-        "wall_ms": 136217,
-        "cost_usd_listprice": 0.131012
-      }
-    ],
-    "multi_no_reviewer": [
-      {
-        "seed": 1,
-        "episode_valid": true,
-        "completed": true,
-        "score": 1.0,
-        "false_positives": 0,
-        "false_negatives": 0,
-        "evidence_refs_valid": true,
-        "n_calls": 2,
-        "tool_failures": 0,
-        "duration_ms": 67009,
-        "wall_ms": 69782,
-        "cost_usd_listprice": 0.089867
-      },
-      {
-        "seed": 2,
-        "episode_valid": true,
-        "completed": false,
-        "score": 0.0,
-        "false_positives": 0,
-        "false_negatives": 0,
-        "evidence_refs_valid": true,
-        "n_calls": 2,
-        "tool_failures": 1,
-        "duration_ms": 59314,
-        "wall_ms": 44079766,
-        "cost_usd_listprice": 0.090846
-      },
-      {
-        "seed": 3,
-        "episode_valid": true,
-        "completed": true,
-        "score": 1.0,
-        "false_positives": 0,
-        "false_negatives": 0,
-        "evidence_refs_valid": true,
-        "n_calls": 2,
-        "tool_failures": 0,
-        "duration_ms": 99548,
-        "wall_ms": 102016,
-        "cost_usd_listprice": 0.114241
-      }
-    ]
-  },
-  "caveat": "3 seeds, 1 scenario family — point estimates with wide bootstrap CIs, explicitly NOT a statistical-significance claim. All configs run on identical episodes with equal data access and tool permissions; budgets measured (n_calls/cost). AUTOMATED_LAB_GROUND_TRUTH, not expert gold; NOT READY_BENCHMARK."
+  "note_auth": "auth_bruteforce is a volume/threshold rule, not a regex-authoring task, so the six LLM configs are not run on it; its conventional baseline is in the SOC coverage matrix.",
+  "caveat": "3 seeds x 2 scenario families — point estimates with wide bootstrap CIs, explicitly NOT a statistical-significance claim. All configs run on identical episodes with equal data access, tool permissions, first-turn context and measured budgets (n_calls/cost). AUTOMATED_LAB_GROUND_TRUTH, not expert gold; NOT READY_BENCHMARK."
 }
