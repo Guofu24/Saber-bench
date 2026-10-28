@@ -213,7 +213,10 @@ Theo `docs/BENCHMARK_PROTOCOL.md` (2 track):
   verifier độc lập, test ép phủ đúng SCENARIOS) + `detect_bench.py` / `saber soc detect-bench`:
   conventional vs naive trên 4 họ × seed × nhiễu client, TP/FP/FN/TN vs truth niêm phong, CI
   bootstrap theo cụm (cụm = họ). Kết quả LIVE: conventional recall 1.0/precision 1.0/0 FP; naive
-  precision 0.385/73 FP — **phân biệt được, không bão hoà trần**. Xem `docs/PHASE_H_REPORT.md`.
+  precision 0.385/73 FP — **phân biệt được, không bão hoà trần**. **Track B** (`response_bench.py`
+  / `saber soc response-bench`) chấm ngăn chặn thật trên fs_change: cả hai contain webshell
+  (recall 1.0) nhưng naive gây 17 false-containment (quarantine nhầm file hợp lệ) vs conventional 0.
+  Xem `docs/PHASE_H_REPORT.md`.
 - **H4 — Scale + (tùy chọn) LLM sequencer.** Nhiều seed × 4 họ; tách reliability/capability (G-1);
   chỉ khi đó mới cân nhắc LLM-hóa driver và thêm họ `process`/`lateral`.
 

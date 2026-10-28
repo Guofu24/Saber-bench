@@ -16,6 +16,7 @@ from __future__ import annotations
 from saber.soc.adjudication import build_adjudication_package, write_adjudication_package
 from saber.soc.detect_bench import run_detection_bench, write_detection_bench
 from saber.soc.evaluation import run_g3_evaluation, write_g3_evaluation
+from saber.soc.response_bench import run_response_bench, write_response_bench
 from saber.soc.suite import run_soc_suite, write_soc_suite
 from saber.soc.workflow import Case, run_case_workflow
 
@@ -25,9 +26,11 @@ __all__ = [
     "run_case_workflow",
     "run_detection_bench",
     "run_g3_evaluation",
+    "run_response_bench",
     "run_soc_suite",
     "write_adjudication_package",
     "write_detection_bench",
     "write_g3_evaluation",
+    "write_response_bench",
     "write_soc_suite",
 ]

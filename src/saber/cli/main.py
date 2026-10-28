@@ -545,6 +545,28 @@ def soc_detect_bench(seeds: str, noise_clients: int, out_dir: Path | None) -> No
     click.echo(f"wrote {path}")
 
 
+@soc.command(
+    "response-bench",
+    help="Track B response benchmark: detection quality -> verified containment vs benign impact.",
+)
+@click.option("--seeds", default="1,2,3")
+@click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
+def soc_response_bench(seeds: str, out_dir: Path | None) -> None:
+    from saber.soc import run_response_bench, write_response_bench
+
+    report = run_response_bench(seeds=[int(x) for x in seeds.split(",") if x.strip()])
+    click.echo(f"family={report['family']} seeds={report['seeds']}")
+    for d, a in report["summary"].items():
+        click.echo(
+            f"  {d:12s} containment_recall={a['containment_recall_mean']} "
+            f"false_containment={a['false_containment_total']} "
+            f"eps_with_false_containment={a['episodes_with_false_containment']} "
+            f"verified_rate={a['all_verified_rate']}"
+        )
+    path = write_response_bench(report, out_dir)
+    click.echo(f"wrote {path}")
+
+
 @soc.command("eval", help="G3 six-config multi-agent evaluation + budget-matched ablation.")
 @click.option("--model", default="haiku")
 @click.option("--llm/--no-llm", "use_llm", default=False)

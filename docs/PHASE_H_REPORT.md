@@ -68,11 +68,33 @@ probes like `admin'--` that carry no flagged keyword. The gap between the two de
 the client-noise + hard-negative design produces **genuine false-positive pressure**, so this
 benchmark is not ceiling-saturated and separates detector quality cleanly.
 
+## H3 (Track B) — response benchmark: detection quality → containment outcome
+
+Detection is only half of what blue does; the other half is containing the incident. Track B
+(`saber.soc.response_bench`, `saber soc response-bench`) runs the full case workflow on `fs_change`
+— the one family with a verified, reversible IR action — so Incident Response EXECUTES an approved,
+allowlisted, operator-bound quarantine and the effect is verified from the real post-action
+filesystem. Containment targets come from the detector's confirmed findings, so the response outcome
+is driven by detection quality. Live result, seeds 1–3, evidence in
+`range_evidence/soc/response_bench_seeds1-2-3.json`:
+
+| Detector | Containment recall | False containment (benign files quarantined) | Verified rate |
+|---|---|---|---|
+| conventional | 1.00 | **0** | 1.00 |
+| naive (floor) | 1.00 | **17** | 1.00 |
+
+Both detectors contain the webshell (recall 1.0, each quarantine verified from real fs state), but
+the naive floor also quarantines **17** authorized/benign files across three episodes — real benign
+operational impact that a detection-only score never surfaces. This is the operational lesson the
+benchmark is built to show: a high recall bought with heavy false containment is not a good outcome.
+The action stays reversible, allowlisted, operator-approved and lab-only; no real host is touched.
+
 ## What this is and is not
 
 - **Is:** a genuinely executed, reproducible, scripted three-population loop with agent-independent
-  labels and a discriminating Track-A detection score. It makes the client/attacker/blue idea
-  concrete and measurable while preserving every isolation and leakage invariant.
+  labels, a discriminating Track-A detection score, and a Track-B response score that measures real,
+  verified containment and its benign impact. It makes the client/attacker/blue idea concrete and
+  measurable while preserving every isolation and leakage invariant.
 - **Is not:** an agent-coordination result. The separation here is conventional-vs-naive detector
   quality, not "multi-agent beats single" (Phase G already showed no support for that on these
   families). Client and attacker are scripted (no LLM); an LLM sequencer and the `process`/`lateral`
