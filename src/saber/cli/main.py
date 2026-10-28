@@ -516,6 +516,35 @@ def soc_run(scenarios: str, seeds: str, detector: str, out_dir: Path | None) -> 
     click.echo(f"wrote {path}")
 
 
+@soc.command(
+    "detect-bench",
+    help="Track A detection benchmark: detectors over families x seeds x benign client noise.",
+)
+@click.option("--seeds", default="1,2,3")
+@click.option("--noise-clients", type=int, default=3)
+@click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
+def soc_detect_bench(seeds: str, noise_clients: int, out_dir: Path | None) -> None:
+    from saber.soc import run_detection_bench, write_detection_bench
+
+    report = run_detection_bench(
+        seeds=[int(x) for x in seeds.split(",") if x.strip()],
+        noise_clients=noise_clients,
+    )
+    click.echo(
+        f"families={len(report['families'])} seeds={report['seeds']} noise={report['noise_clients']} "
+        f"allowlist_ok={report['allowlist_covers_scenarios']} cross_checks_ok={report['all_cross_checks_ok']}"
+    )
+    for d, a in report["summary"].items():
+        rec, prec = a["recall"], a["precision"]
+        click.echo(
+            f"  {d:12s} recall={rec['mean']} CI{rec['ci95_cluster']} "
+            f"precision={prec['mean']} CI{prec['ci95_cluster']} "
+            f"fp_total={a['fp_total']} fn_total={a['fn_total']} eps_with_fp={a['episodes_with_fp']}"
+        )
+    path = write_detection_bench(report, out_dir)
+    click.echo(f"wrote {path}")
+
+
 @soc.command("eval", help="G3 six-config multi-agent evaluation + budget-matched ablation.")
 @click.option("--model", default="haiku")
 @click.option("--llm/--no-llm", "use_llm", default=False)

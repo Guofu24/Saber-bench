@@ -209,9 +209,11 @@ Theo `docs/BENCHMARK_PROTOCOL.md` (2 track):
   thật); scenario tất định với hard-negative = job hợp lệ (backup/logrotate/...); detector
   conventional khớp truth, naive over-flag; chạy qua workflow 4 dịch vụ. (Allowlist framework
   `AttackAction` tường minh: để H3.)
-- **H3 — Blue chạy trên episode đã seal + Track A/B. ⏳ ĐANG LÀM.** MON/HUNT/IR/CNT (conventional
-  vs naive, non-LLM) trên tập episode × seed × nhiễu client; bảng Track A (detection TPR/FPR, FPR
-  nền trên nhiễu) với CI bootstrap theo cụm; registry allowlist ↔ verifier tường minh + test.
+- **H3 — Blue chạy trên episode đã seal + Track A. ✅ XONG.** `attack_registry.py` (allowlist ↔
+  verifier độc lập, test ép phủ đúng SCENARIOS) + `detect_bench.py` / `saber soc detect-bench`:
+  conventional vs naive trên 4 họ × seed × nhiễu client, TP/FP/FN/TN vs truth niêm phong, CI
+  bootstrap theo cụm (cụm = họ). Kết quả LIVE: conventional recall 1.0/precision 1.0/0 FP; naive
+  precision 0.385/73 FP — **phân biệt được, không bão hoà trần**. Xem `docs/PHASE_H_REPORT.md`.
 - **H4 — Scale + (tùy chọn) LLM sequencer.** Nhiều seed × 4 họ; tách reliability/capability (G-1);
   chỉ khi đó mới cân nhắc LLM-hóa driver và thêm họ `process`/`lateral`.
 

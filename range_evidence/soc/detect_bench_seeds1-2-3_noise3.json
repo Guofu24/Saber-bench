@@ -1,0 +1,128 @@
+{
+  "generated_at": "2026-10-28T16:49:34+00:00",
+  "track": "A_DETECTION_ONLY",
+  "families": [
+    "web_sqli_probe",
+    "auth_bruteforce",
+    "fs_change",
+    "persistence"
+  ],
+  "seeds": [
+    1,
+    2,
+    3
+  ],
+  "noise_clients": 3,
+  "detectors": [
+    "conventional",
+    "naive"
+  ],
+  "allowlist_covers_scenarios": true,
+  "all_cross_checks_ok": true,
+  "labels": [
+    "LIVE_LAB_EXECUTION",
+    "AUTOMATED_LAB_GROUND_TRUTH",
+    "DEV_SIMULATION_ONLY"
+  ],
+  "summary": {
+    "conventional": {
+      "recall": {
+        "mean": 1.0,
+        "n_episodes": 12,
+        "n_clusters": 4,
+        "ci95_cluster": [
+          1.0,
+          1.0
+        ]
+      },
+      "precision": {
+        "mean": 1.0,
+        "n_episodes": 12,
+        "n_clusters": 4,
+        "ci95_cluster": [
+          1.0,
+          1.0
+        ]
+      },
+      "fp_total": 0,
+      "fn_total": 0,
+      "episodes_with_fp": 0,
+      "n_episodes": 12
+    },
+    "naive": {
+      "recall": {
+        "mean": 0.9083,
+        "n_episodes": 12,
+        "n_clusters": 4,
+        "ci95_cluster": [
+          0.725,
+          1.0
+        ]
+      },
+      "precision": {
+        "mean": 0.385,
+        "n_episodes": 12,
+        "n_clusters": 4,
+        "ci95_cluster": [
+          0.1657,
+          0.7282
+        ]
+      },
+      "fp_total": 73,
+      "fn_total": 6,
+      "episodes_with_fp": 12,
+      "n_episodes": 12
+    }
+  },
+  "per_family": {
+    "web_sqli_probe": {
+      "conventional": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "fp": 0
+      },
+      "naive": {
+        "recall": 0.6333,
+        "precision": 0.3,
+        "fp": 24
+      }
+    },
+    "auth_bruteforce": {
+      "conventional": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "fp": 0
+      },
+      "naive": {
+        "recall": 1.0,
+        "precision": 0.9086,
+        "fp": 3
+      }
+    },
+    "fs_change": {
+      "conventional": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "fp": 0
+      },
+      "naive": {
+        "recall": 1.0,
+        "precision": 0.1444,
+        "fp": 24
+      }
+    },
+    "persistence": {
+      "conventional": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "fp": 0
+      },
+      "naive": {
+        "recall": 1.0,
+        "precision": 0.187,
+        "fp": 22
+      }
+    }
+  },
+  "caveat": "Genuine live detection benchmark with benign client-noise FP pressure. Automated-lab ground truth, NOT expert-validated gold; NOT READY_BENCHMARK."
+}
