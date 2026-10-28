@@ -26,6 +26,9 @@ _SQLI = (
 _FS_SCRIPT = (
     r"/fs/put\?name=[^&\s]*(?:shell|cmd|backdoor|c99|r57|exploit)[^&\s]*\.(?:php|aspx|jsp|cgi)"
 )
+# persistence: a /cron/add that registers an AUTOSTART-ABUSE-named job (not just any scheduled task,
+# so an authorized backup/logrotate registration is not flagged — the precision hard negative).
+_CRON_ABUSE = r"/cron/add\?name=[^&\s]*(?:beacon|autorun|implant|persist)[^&\s]*"
 _BRUTEFORCE_THRESHOLD = 3
 
 
@@ -76,6 +79,15 @@ def conventional_detector(episode: LiveEpisode) -> dict[str, Any]:
             "calls": [],
             "wall_ms": 0,
         }
+    if episode.scenario == "persistence":
+        pat = _CRON_ABUSE
+        return {
+            "pattern": pat,
+            "ignore_case": True,
+            "matched_line_ids": _matched_regex(episode, pat),
+            "calls": [],
+            "wall_ms": 0,
+        }
     if episode.scenario == "auth_bruteforce":
         return {
             "pattern": f"status==401 AND failures>={_BRUTEFORCE_THRESHOLD}/user",
@@ -92,6 +104,7 @@ def naive_detector(episode: LiveEpisode) -> dict[str, Any]:
     weak = {
         "web_sqli_probe": r"select|union|drop|or|sleep",
         "fs_change": r"/fs/put",
+        "persistence": r"/cron/add",
         "auth_bruteforce": r'"status": 401',
     }.get(episode.scenario, r"zzz")
     return {

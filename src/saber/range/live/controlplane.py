@@ -55,12 +55,18 @@ class LiveLab:
     """Owns the service subprocess and the evidence directory for one episode."""
 
     def __init__(
-        self, evidence_dir: Path, *, backend: str = "process-local", fs_root: Path | None = None
+        self,
+        evidence_dir: Path,
+        *,
+        backend: str = "process-local",
+        fs_root: Path | None = None,
+        cron_root: Path | None = None,
     ) -> None:
         self.evidence_dir = evidence_dir
         self.backend = backend
         self.access_log = evidence_dir / "access.log"
         self.fs_root = fs_root  # sandboxed webroot for fs-change scenarios (optional)
+        self.cron_root = cron_root  # sandboxed autostart store for persistence scenarios (optional)
         self._ready_file = evidence_dir / "port.txt"
         self._proc: subprocess.Popen[bytes] | None = None
         self.port: int | None = None
@@ -84,6 +90,9 @@ class LiveLab:
         if self.fs_root is not None:
             self.fs_root.mkdir(parents=True, exist_ok=True)
             argv += ["--fsroot", str(self.fs_root)]
+        if self.cron_root is not None:
+            self.cron_root.mkdir(parents=True, exist_ok=True)
+            argv += ["--cronroot", str(self.cron_root)]
         self._ready_file.unlink(missing_ok=True)  # never attach to a prior run's port
         self._proc = subprocess.Popen(argv)  # noqa: S603 - fixed argv, no shell
         deadline = time.monotonic() + _READY_TIMEOUT_S
@@ -183,8 +192,24 @@ def _is_unauthorized_file(fs_root: Path, name: str) -> bool:
     return f.is_file() and "<?php" in f.read_text(encoding="utf-8", errors="replace")
 
 
+def _cron_name(target: str) -> str:
+    return Path((parse_qs(urlsplit(target).query).get("name") or [""])[0]).name
+
+
+def _is_unauthorized_cron(cron_root: Path, name: str) -> bool:
+    """Independent server-side-state check: an autostart entry is unauthorized iff the stored file
+    exists on disk carrying the (inert) autostart marker."""
+    if not name:
+        return False
+    f = cron_root / name
+    return f.is_file() and "LAB_AUTORUN_MARKER" in f.read_text(encoding="utf-8", errors="replace")
+
+
 def _derive_truth(
-    scenario: str, lines: list[dict[str, Any]], fs_root: Path | None = None
+    scenario: str,
+    lines: list[dict[str, Any]],
+    fs_root: Path | None = None,
+    cron_root: Path | None = None,
 ) -> set[int]:
     """Server-side ground truth: indices of malicious log lines, derived from observations.
 
@@ -193,6 +218,8 @@ def _derive_truth(
     is malicious only above BRUTEFORCE_THRESHOLD per user (a single benign typo is a hard negative).
     fs_change: a /fs/put line is malicious iff it wrote a server-side script that actually exists in
     the webroot with the webshell marker (derived from the REAL resulting filesystem state).
+    persistence: a /cron/add line is malicious iff it registered an autostart entry that actually
+    exists in the store with the inert autostart marker (derived from the REAL resulting state).
     """
     probe: set[int] = set()
     if scenario == "web_sqli_probe":
@@ -215,6 +242,12 @@ def _derive_truth(
         for i, rec in enumerate(lines):
             if "/fs/put" in str(rec.get("target", "")) and _is_unauthorized_file(
                 fs_root, _put_name(str(rec.get("target", "")))
+            ):
+                probe.add(i)
+    elif scenario == "persistence" and cron_root is not None:
+        for i, rec in enumerate(lines):
+            if "/cron/add" in str(rec.get("target", "")) and _is_unauthorized_cron(
+                cron_root, _cron_name(str(rec.get("target", "")))
             ):
                 probe.add(i)
     return probe
@@ -257,7 +290,8 @@ def run_episode(
         plan = noise_rng.shuffle(plan + noise)  # interleave benign noise with the scenario traffic
 
     fs_root = (evidence_dir / "webroot") if scenario == "fs_change" else None
-    lab = LiveLab(evidence_dir, backend=backend, fs_root=fs_root)
+    cron_root = (evidence_dir / "cronroot") if scenario == "persistence" else None
+    lab = LiveLab(evidence_dir, backend=backend, fs_root=fs_root, cron_root=cron_root)
     started = datetime.now(UTC)
     lab.start()
     sent = lab.send(plan)
@@ -272,7 +306,7 @@ def run_episode(
             parsed.append(json.loads(ln))
         except json.JSONDecodeError:
             parsed.append({})
-    probe_idx = _derive_truth(scenario, parsed, fs_root)
+    probe_idx = _derive_truth(scenario, parsed, fs_root, cron_root)
 
     # Capture the REAL resulting filesystem state (for fs_change) as hashed evidence.
     fs_state: list[dict[str, Any]] = []
@@ -286,6 +320,20 @@ def run_episode(
                         "sha256": _sha256_bytes(b),
                         "size_bytes": len(b),
                         "is_script": f.name.lower().endswith(_SCRIPT_EXTS),
+                    }
+                )
+    # Capture the REAL resulting autostart-store state (for persistence) as hashed evidence.
+    cron_state: list[dict[str, Any]] = []
+    if cron_root is not None and cron_root.is_dir():
+        for f in sorted(cron_root.glob("*")):
+            if f.is_file():
+                b = f.read_bytes()
+                cron_state.append(
+                    {
+                        "name": f.name,
+                        "sha256": _sha256_bytes(b),
+                        "size_bytes": len(b),
+                        "unauthorized": _is_unauthorized_cron(cron_root, f.name),
                     }
                 )
 
@@ -323,6 +371,18 @@ def run_episode(
                 kind="fs_state",
                 sha256=_sha256_bytes(fs_state_bytes),
                 size_bytes=len(fs_state_bytes),
+            )
+        )
+    if cron_root is not None:
+        cron_state_bytes = (json.dumps(cron_state, indent=2) + "\n").encode()
+        cron_state_path = evidence_dir / "cron_state.json"
+        cron_state_path.write_bytes(cron_state_bytes)
+        evidence_files.append(
+            EvidenceFile(
+                path=str(cron_state_path),
+                kind="cron_state",
+                sha256=_sha256_bytes(cron_state_bytes),
+                size_bytes=len(cron_state_bytes),
             )
         )
     manifest = {
@@ -372,7 +432,12 @@ def run_episode(
         control_plane_intent={"generated_probe_targets": sorted(sent_probe_targets)},
         cross_check_ok=cross_ok,
         cross_check_detail=cross_detail,
-        lab_state={"reset_ok": reset_ok, "service_returncode": rc, "fs_state": fs_state},
+        lab_state={
+            "reset_ok": reset_ok,
+            "service_returncode": rc,
+            "fs_state": fs_state,
+            "cron_state": cron_state,
+        },
         evidence_dir=str(evidence_dir),
         evidence_files=evidence_files,
     )

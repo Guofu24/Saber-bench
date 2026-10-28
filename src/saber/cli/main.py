@@ -494,7 +494,7 @@ def soc() -> None:
 
 
 @soc.command("run", help="Run the four-service workflow across scenario families; emit coverage.")
-@click.option("--scenarios", default="web_sqli_probe,auth_bruteforce,fs_change")
+@click.option("--scenarios", default="web_sqli_probe,auth_bruteforce,fs_change,persistence")
 @click.option("--seeds", default="1,2")
 @click.option("--detector", default="conventional", type=click.Choice(["conventional", "naive"]))
 @click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
@@ -551,7 +551,7 @@ def soc_eval(model: str, use_llm: bool, seeds: str, timeout_s: float, out_dir: P
 
 
 @soc.command("adjudicate", help="Build the gold-label adjudication package (NOT auto-approved).")
-@click.option("--scenarios", default="web_sqli_probe,auth_bruteforce,fs_change")
+@click.option("--scenarios", default="web_sqli_probe,auth_bruteforce,fs_change,persistence")
 @click.option("--seed", type=int, default=9001)
 @click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
 def soc_adjudicate(scenarios: str, seed: int, out_dir: Path | None) -> None:

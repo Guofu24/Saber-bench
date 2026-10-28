@@ -28,6 +28,7 @@ _AUTH_OK_PASSWORD = "correct-horse-battery"  # the one valid password for the to
 class _Handler(BaseHTTPRequestHandler):
     log_path: Path = Path("access.log")
     fs_root: Path | None = None  # sandboxed webroot for filesystem-change scenarios (optional)
+    cron_root: Path | None = None  # sandboxed autostart store for persistence scenarios (optional)
     _lock = threading.Lock()
     protocol_version = "HTTP/1.1"
 
@@ -83,6 +84,30 @@ class _Handler(BaseHTTPRequestHandler):
         (self.fs_root / name).write_text(body, encoding="utf-8")
         return 201
 
+    def _cron_add(self, qs: dict[str, list[str]]) -> int:
+        """Register an autostart/scheduled-task entry in the sandboxed store (real state change).
+
+        As with ``_fs_put``, the request carries ONLY the job name (no maliciousness label). The
+        stored content is decided server-side: a job whose name matches a known persistence-abuse
+        token gets an INERT autostart marker (nothing is scheduled or executed here); an authorized
+        job (backup/logrotate/...) gets benign content and is a HARD NEGATIVE. Whether an entry is
+        unauthorized is then inferred independently from the real file on disk, not any request label.
+        """
+        if self.cron_root is None:
+            return 404
+        name = Path((qs.get("name") or ["job"])[0]).name  # basename only — no path traversal
+        if not name or name.startswith("."):
+            return 400
+        low = name.lower()
+        abuse = any(t in low for t in ("beacon", "autorun", "implant", "persist"))
+        body = (
+            "LAB_AUTORUN_MARKER inert autostart entry; not scheduled, not executed\n"
+            if abuse
+            else "schedule=hourly; task=benign-maintenance\n"
+        )
+        (self.cron_root / name).write_text(body, encoding="utf-8")
+        return 201
+
     def do_GET(self) -> None:  # noqa: N802 - http.server API
         parts = urlsplit(self.path)
         qs = parse_qs(parts.query)
@@ -92,6 +117,8 @@ class _Handler(BaseHTTPRequestHandler):
             status = 200 if pw == _AUTH_OK_PASSWORD else 401
         elif parts.path == "/fs/put":
             status = self._fs_put(qs)
+        elif parts.path == "/cron/add":
+            status = self._cron_add(qs)
         self._write_log(status)
         self._respond(status, b"ok" if status < 400 else b"error")
 
@@ -107,6 +134,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--log", required=True)
     ap.add_argument("--ready-file", required=True)
     ap.add_argument("--fsroot", default=None, help="sandboxed webroot dir for fs-change scenarios")
+    ap.add_argument(
+        "--cronroot", default=None, help="sandboxed autostart store for persistence scenarios"
+    )
     args = ap.parse_args(argv)
 
     if args.host not in ("127.0.0.1", "::1"):
@@ -118,6 +148,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.fsroot:
         _Handler.fs_root = Path(args.fsroot)
         _Handler.fs_root.mkdir(parents=True, exist_ok=True)
+    if args.cronroot:
+        _Handler.cron_root = Path(args.cronroot)
+        _Handler.cron_root.mkdir(parents=True, exist_ok=True)
     _Handler.log_path = Path(args.log)
     _Handler.log_path.parent.mkdir(parents=True, exist_ok=True)
     httpd = ThreadingHTTPServer((args.host, args.port), _Handler)

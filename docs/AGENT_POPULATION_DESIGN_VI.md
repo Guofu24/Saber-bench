@@ -200,14 +200,18 @@ Theo `docs/BENCHMARK_PROTOCOL.md` (2 track):
 
 - **H0 — operator chốt scope + bring-up lab.** Operator bấm `docker compose -f lab/docker-compose.yml
   up -d` (agent không tự bấm). Ingest telemetry benign để xác nhận đường ống thật chạy.
-- **H1 — Client driver + record/seal cho 3 họ cũ (scripted-with-jitter).** Thêm một client driver
-  sinh nhiễu benign có jitter (seeded), và một bước **record + seal episode** quanh 3 scenario hiện
-  có; cross-check `derived == generated` pass; đo FPR nền của blue hiện tại. *Chưa LLM, chưa họ mới.*
-- **H2 — Allowlist framework + họ `persistence` mới.** Thêm `AttackAction` + `effect_verifier` (đọc
-  store autostart/cron giả in-lab); sequencer tất định chọn action từ allowlist; record+seal; hard-
-  negative = scheduled job hợp lệ.
-- **H3 — Blue chạy trên episode đã seal.** MON/HUNT/IR/CNT (single vs specialist vs multi) trên tập
-  episode niêm phong; ra bảng Track A/B với CI.
+- **H1 — Client driver + record/seal cho 3 họ cũ (scripted-with-jitter). ✅ XONG.** `client_driver.py`
+  sinh nhiễu benign có jitter (seeded), `run_episode(noise_clients=N)` phủ nhiễu bằng rng stream
+  riêng; `record + seal` đã có sẵn trong `run_episode`; cross-check `derived == generated` pass;
+  test chứng minh nhiễu giữ nguyên attack truth trên cả 4 họ. *Chưa LLM.*
+- **H2 — Họ `persistence` mới (autostart/scheduled-task). ✅ XONG.** Endpoint `/cron/add` ghi store
+  sandbox; `_derive_truth` suy nhãn từ marker trơ `LAB_AUTORUN_MARKER` trên đĩa (không chữ ký
+  thật); scenario tất định với hard-negative = job hợp lệ (backup/logrotate/...); detector
+  conventional khớp truth, naive over-flag; chạy qua workflow 4 dịch vụ. (Allowlist framework
+  `AttackAction` tường minh: để H3.)
+- **H3 — Blue chạy trên episode đã seal + Track A/B. ⏳ ĐANG LÀM.** MON/HUNT/IR/CNT (conventional
+  vs naive, non-LLM) trên tập episode × seed × nhiễu client; bảng Track A (detection TPR/FPR, FPR
+  nền trên nhiễu) với CI bootstrap theo cụm; registry allowlist ↔ verifier tường minh + test.
 - **H4 — Scale + (tùy chọn) LLM sequencer.** Nhiều seed × 4 họ; tách reliability/capability (G-1);
   chỉ khi đó mới cân nhắc LLM-hóa driver và thêm họ `process`/`lateral`.
 

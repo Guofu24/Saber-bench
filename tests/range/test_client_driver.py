@@ -18,7 +18,7 @@ from saber.range.live.client_driver import _GOOD_PASSWORD
 from saber.range.live.controlplane import _derive_truth, _is_sqli_target
 from saber.subtasks._hv.common import Rng
 
-_SCENARIOS = ("web_sqli_probe", "auth_bruteforce", "fs_change")
+_SCENARIOS = ("web_sqli_probe", "auth_bruteforce", "fs_change", "persistence")
 
 
 def _noise(seed: int = 1, clients: int = 3) -> list[dict]:
