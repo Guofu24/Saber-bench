@@ -412,14 +412,20 @@ def range_scenarios() -> None:
 @range_.command("run", help="Execute one genuine live episode (real loopback service + traffic).")
 @click.option("--scenario", "scenario", default="web_sqli_probe")
 @click.option("--seed", type=int, default=1)
+@click.option(
+    "--noise-clients",
+    type=int,
+    default=0,
+    help="Overlay benign background traffic from N client identities (0 = none).",
+)
 @click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
-def range_run(scenario: str, seed: int, out_dir: Path | None) -> None:
+def range_run(scenario: str, seed: int, noise_clients: int, out_dir: Path | None) -> None:
     import json as _json
 
     from saber.range.live import run_episode
 
     workdir = out_dir or (Path("runs") / "live")
-    ep = run_episode(scenario, seed, workdir=workdir)
+    ep = run_episode(scenario, seed, workdir=workdir, noise_clients=noise_clients)
     # Write only the TRUTH-FREE public receipt into the evidence dir (safe to upload/publish); the
     # sealed control-plane truth (which lines are malicious) is never persisted here.
     ep_path = Path(ep.evidence_dir) / "episode_public.json"
@@ -429,9 +435,26 @@ def range_run(scenario: str, seed: int, out_dir: Path | None) -> None:
         f"requests_sent={ep.network['requests_sent']} log_lines={len(ep.access_log_lines)} "
         f"malicious={ep.gold_truth['m']}\n"
         f"cross_check_ok={ep.cross_check_ok} reset_ok={ep.lab_state['reset_ok']} "
+        f"client_noise={ep.network.get('client_noise_requests', 0)} "
         f"access_log_sha256={ep.access_log_sha256[:16]}\n"
         f"wrote {ep_path}"
     )
+
+
+@range_.command("noise", help="Preview the benign client-population noise plan (no service run).")
+@click.option("--scenario", "scenario", default="web_sqli_probe")
+@click.option("--seed", type=int, default=1)
+@click.option("--clients", type=int, default=3)
+def range_noise(scenario: str, seed: int, clients: int) -> None:
+    from saber.range.live import client_noise
+    from saber.subtasks._hv.common import Rng
+
+    plan = client_noise(Rng("live-noise", scenario, str(seed)), clients=clients)
+    click.echo(f"scenario={scenario} seed={seed} clients={clients} benign_requests={len(plan)}")
+    for req in plan[:12]:
+        click.echo(f"  {req['intent']:7s} {req['target']}")
+    if len(plan) > 12:
+        click.echo(f"  ... (+{len(plan) - 12} more)")
 
 
 @range_.command(

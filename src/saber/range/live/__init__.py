@@ -17,6 +17,7 @@ Two backends share this control plane:
 from __future__ import annotations
 
 from saber.range.live.bench import run_live_benchmark, write_live_benchmark
+from saber.range.live.client_driver import client_noise
 from saber.range.live.controlplane import LiveLab, run_episode
 from saber.range.live.episode import LiveEpisode
 from saber.range.live.ir_actions import (
@@ -36,6 +37,7 @@ __all__ = [
     "Approval",
     "LiveEpisode",
     "LiveLab",
+    "client_noise",
     "grant_approval",
     "quarantine_file",
     "restore_file",

@@ -226,8 +226,16 @@ def run_episode(
     *,
     workdir: Path,
     backend: str = "process-local",
+    noise_clients: int = 0,
 ) -> LiveEpisode:
-    """Execute one genuine episode end to end and return it with hashed evidence + sealed truth."""
+    """Execute one genuine episode end to end and return it with hashed evidence + sealed truth.
+
+    ``noise_clients`` (default 0, which preserves the exact no-noise behaviour) overlays benign
+    background traffic from that many client identities. The client driver uses a SEPARATE rng
+    stream, so the attack portion is byte-for-byte identical to the no-noise run for the same seed;
+    the noise only adds benign log lines and, by construction, leaves the server-side attack truth
+    unchanged.
+    """
     if scenario not in SCENARIOS:
         raise ValueError(f"unknown scenario {scenario!r}")
     evidence_dir = workdir / scenario / f"seed-{seed}"
@@ -239,6 +247,14 @@ def run_episode(
                 p.unlink()
     rng = Rng("live", scenario, str(seed))
     plan = SCENARIOS[scenario](rng)
+    noise_count = 0
+    if noise_clients > 0:
+        from saber.range.live.client_driver import client_noise
+
+        noise_rng = Rng("live-noise", scenario, str(seed))  # independent of the scenario's stream
+        noise = client_noise(noise_rng, clients=noise_clients)
+        noise_count = len(noise)
+        plan = noise_rng.shuffle(plan + noise)  # interleave benign noise with the scenario traffic
 
     fs_root = (evidence_dir / "webroot") if scenario == "fs_change" else None
     lab = LiveLab(evidence_dir, backend=backend, fs_root=fs_root)
@@ -340,7 +356,12 @@ def run_episode(
             "returncode": rc,
             "executable": sys.executable,
         },
-        network={"endpoint": f"127.0.0.1:{lab.port}", "requests_sent": sent, "loopback_only": True},
+        network={
+            "endpoint": f"127.0.0.1:{lab.port}",
+            "requests_sent": sent,
+            "loopback_only": True,
+            "client_noise_requests": noise_count,
+        },
         access_log_lines=raw_lines,
         access_log_sha256=log_sha,
         evidence_ids=[f"line-{i}" for i in range(len(raw_lines))],
