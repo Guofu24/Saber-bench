@@ -57,7 +57,10 @@ Five-tier readiness, **unchanged by any run so far**:
 | BLOCKED_INTEGRATION (real-lab dependency) | 65 (18 vm + 47 soc) |
 | READY_BENCHMARK | **0** |
 
-- Phases B–G are complete and committed. `docs/PHASE_G_REPORT.md` is the latest report.
+- Phases B–G are complete and committed on `main`. **Phase H** (scripted client/attacker/blue agent
+  populations) is complete on branch `feat/agent-population-h1`, **not yet merged** — latest report
+  `docs/PHASE_H_REPORT.md`, design `docs/AGENT_POPULATION_DESIGN_VI.md`. `docs/PHASE_G_REPORT.md`
+  remains the latest report on `main`. The tier table below is unchanged by Phase H.
 - **Phase G headline (honest, anti-hype):** the six-config evaluation is **ceiling-saturated** —
   `conventional == single == specialist == multi_agent == 1.0` on both live families; the reviewer's
   second call buys nothing (`multi_agent − single = 0.00`). **No support for "coordination beats more
@@ -103,10 +106,16 @@ Five-tier readiness, **unchanged by any run so far**:
   it. Pin by `@sha256:` digest (untrusted image). Analyze **benign, self-built binaries only** — never
   auto-pull malware. Blocked by CR-1 (Docker down) → would land as `BLOCKED_INTEGRATION` here until the
   operator starts Docker and pulls the image.
-- **Self-operating red/blue agent population** (agents self-simulate attack/defense/log-tracing). This
-  was described conceptually but is a large new direction; it conflicts with the "no self-generated
-  gold / no fabricated telemetry" rule unless ground truth stays independent of the agents. Not
-  authorized; not started.
+- **Self-operating red/blue agent population** (agents self-simulate attack/defense/log-tracing).
+  **PARTIALLY BUILT in Phase H** — see `docs/AGENT_POPULATION_DESIGN_VI.md` and
+  `docs/PHASE_H_REPORT.md`. The operator greenlit it; the *scripted* (non-LLM) version is implemented
+  with the non-negotiable preserved: blue is the scored contestant, client + attacker are environment
+  generators, and every label is derived from a real server-side effect, never an agent's claim.
+  Built: H1 client-noise driver, H2 `persistence` attack family, H3 attacker allowlist registry +
+  Track-A detection benchmark + Track-B response benchmark (conventional vs naive discriminate; not
+  ceiling-saturated). **Still future (H4):** an LLM attacker/client sequencer, and the `process` /
+  `lateral` families (need container internals / a second lab host). Any LLM sequencer must keep
+  ground truth independent of the agents, as the scripted version does.
 
 ## 8. Where the full reasoning lives
 
