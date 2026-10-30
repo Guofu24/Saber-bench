@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
 
+from saber.agents.provider import LLMProvider
 from saber.domain.errors import IntegrationBlocked
 from saber.episodes.builder import BuiltEpisode
 from saber.episodes.runner import EpisodeResult, run_oracle, run_reference, run_stub
@@ -70,10 +71,28 @@ BASELINES: dict[BaselineId, Baseline] = {
 }
 
 
+# LLM baselines a supplied provider can drive here, and whether they load the service skill.
+# B1 is a generic single agent; B2 is the service specialist (loads .claude/skills). B3 (shared
+# case state across specialists) and B4 (content feedback loop) need cross-episode orchestration
+# that is not wired yet, so they stay BLOCKED even when a provider is supplied.
+_PROVIDER_DRIVEN: dict[BaselineId, bool] = {
+    BaselineId.B1_SINGLE_AGENT: False,  # value = use_skill
+    BaselineId.B2_SPECIALISTS: True,
+}
+
+
 def solve_episode(
-    baseline: BaselineId, episode: BuiltEpisode, *, graded_at: datetime | None = None
+    baseline: BaselineId,
+    episode: BuiltEpisode,
+    *,
+    graded_at: datetime | None = None,
+    provider: LLMProvider | None = None,
 ) -> EpisodeResult:
-    """Run one baseline on one episode. Raises IntegrationBlocked for LLM baselines."""
+    """Run one baseline on one episode.
+
+    B0/ORACLE run offline. B1/B2 run only when an operator-approved ``provider`` is supplied (the
+    default ``None`` keeps them BLOCKED_INTEGRATION). B3/B4 are always BLOCKED here.
+    """
     if baseline is BaselineId.ORACLE:
         return run_oracle(episode, graded_at=graded_at)
     if baseline is BaselineId.B0_RULES:
@@ -82,8 +101,16 @@ def solve_episode(
             # No rules oracle for this subtask: B0 abstains (empty answer), graded honestly.
             return run_stub(episode, {}, [], graded_at=graded_at)
         return result
+    if provider is not None and baseline in _PROVIDER_DRIVEN:
+        from saber.agents.llm_solver import solve_episode_with_llm
+
+        run = solve_episode_with_llm(
+            episode, provider, use_skill=_PROVIDER_DRIVEN[baseline], graded_at=graded_at
+        )
+        return run.result
     raise IntegrationBlocked(
         f"baseline {baseline.value} is LLM-backed and BLOCKED_INTEGRATION: subscription-only, no "
-        "API budget; provide an operator-approved provider and budget to run it",
+        "API budget; supply an operator-approved provider "
+        + ("and note B3/B4 coordination is not wired yet" if baseline not in _PROVIDER_DRIVEN else "to run it"),
         baseline=baseline.value,
     )
