@@ -1,36 +1,25 @@
-# CNT · Engine thực thi rule — viết rule chạy được và không bị phạt
+# CNT · Viết rule chạy được: định dạng và kiểm thử
 
-Mọi rule do agent viết đều là **mã không tin cậy**: chạy trong sandbox (`src/saber/grading/execsandbox.py`),
-có timeout, giới hạn tài nguyên, giới hạn độ dài pattern. **Không parse được hoặc timeout ⇒ 0** (ở
-T0020.003 đó còn là gate `parse_ok` nhân 0 toàn bài). Không bao giờ chạy rule trên hệ thống thật.
+Rule do bạn viết luôn được **chạy thử trong sandbox** (có timeout, giới hạn tài nguyên, giới hạn độ dài
+pattern) trên corpus trước khi phát hành. Rule **không parse được** hoặc **chạy quá thời gian** coi như hỏng.
+Không bao giờ chạy rule thử nghiệm trực tiếp trên hệ thống production.
 
-## Engine nào chạy rule của bạn?
+Nếu SIEM/NSM đích có cú pháp riêng (Sigma, SPL, KQL, Suricata…) và môi trường cấp engine tương ứng, viết theo
+cú pháp đó. Ba định dạng dưới đây là định dạng mà engine kiểm thử của môi trường luôn hiểu.
 
-| Mục chấm trong đề | Fixture DEV tự động (163 subtask) | Exemplar / gold pilot (dữ liệu nghiệp vụ) | Hệ thống thật |
-|---|---|---|---|
-| `exec/corpus` (regex/SIEM rule, hunt query) | **regex** trên `corpus.lines` | regex (T0020.001) | SIEM đích — `BLOCKED_INTEGRATION` |
-| `exec/samples` (YARA) | **regex** trên corpus (cấu trúc) | **yara_subset** (gold T1406.001) | YARA thật — chưa tích hợp |
-| `exec/replay` (filter FP) | **regex** chọn dòng cần lọc (`mode: filter`) | **filter DSL** (gold T1111.002) | SIEM — `BLOCKED_INTEGRATION` |
-| `exec/pcap` (Suricata) | **regex** trên corpus (cấu trúc) | — | Suricata/NSM — `BLOCKED_INTEGRATION` |
+## 1. Rule regex trên log — `{"engine": "regex", "pattern": "...", "ignore_case": true}`
 
-⇒ Luôn đọc `manifest.output_schema` và `objective`/`mode` trong input để biết engine thực tế. Fixture
-DEV có `corpus: {lines, format: "ts event tag id"}` và `mode: detect|filter`.
-
-## 1. regex — `{"engine": "regex", "pattern": "...", "ignore_case": true}`
-
-- Rule khớp **từng dòng** (search, không cần khớp cả dòng). Dòng khớp = "bắt được".
-- `mode: detect` ⇒ khớp dòng kỹ thuật cần bắt. `mode: filter` ⇒ khớp dòng **FP cần loại** (không được
-  khớp TP).
+- Khớp **từng dòng** (tìm kiếm, không cần khớp cả dòng). Dòng khớp = rule bắt.
+- Ở chế độ **phát hiện**: khớp dòng chứa kỹ thuật cần bắt. Ở chế độ **lọc FP**: khớp dòng FP cần loại — tuyệt
+  đối không khớp TP.
 - Viết tốt:
-  - Bám **đặc điểm phân biệt bền vững** của kỹ thuật (tổ hợp token, cấu trúc), không bám giá trị đổi được
-    (IP, timestamp, ID ngẫu nhiên).
-  - Dùng ranh giới (`\b`, dấu phân cách trường) để không khớp chuỗi con lành tính.
-  - **Tránh backtracking thảm hoạ** (`(a+)+`, `(.*)*`, lồng lượng từ trên cùng một tập ký tự) — corpus
-    200.000 dòng sẽ làm timeout ⇒ 0.
-  - Không dùng `.*` mở đầu/kết thúc vô ích; không dùng pattern rỗng; giữ dưới giới hạn độ dài.
-  - Thử pattern trên **cả** dòng dương và hard negative trước khi nộp (đọc tay corpus công khai).
+  - bám **đặc điểm phân biệt bền vững** (tổ hợp token, cấu trúc), không bám IP/timestamp/ID ngẫu nhiên;
+  - dùng ranh giới (`\b`, dấu phân cách trường) để không dính chuỗi con lành tính;
+  - **tránh backtracking thảm hoạ** (`(a+)+`, `(.*)*`, lượng từ lồng nhau trên cùng tập ký tự) — corpus hàng
+    trăm nghìn dòng sẽ làm rule chạy quá giờ;
+  - không mở đầu/kết thúc bằng `.*` vô ích; không để pattern rỗng.
 
-## 2. yara_subset — rule dạng YARA rút gọn
+## 2. YARA (rút gọn)
 
 ```json
 {
@@ -44,18 +33,16 @@ DEV có `corpus: {lines, format: "ts event tag id"}` và `mode: detect|filter`.
 }
 ```
 
-- `name`: định danh `^[A-Za-z_][A-Za-z0-9_]*$`. Mỗi string bắt đầu bằng `$`; `kind` ∈ `text|hex|regex`.
+- `name`: chữ cái/số/gạch dưới, không bắt đầu bằng số. Mỗi string bắt đầu bằng `$`; `kind` ∈ `text | hex | regex`.
 - `condition`: `any of them` · `all of them` · `N of them` · biểu thức boolean trên `$tên`.
 - Viết tốt:
-  - Bám **chuỗi cấu hình/định danh họ** (marker config, mutex, đường dẫn PDB, chuỗi C2 format) — thứ
-    giữ nguyên qua biến thể. **Không bám hash** (T1406.002: nửa tập dương đã đổi hash giữ hành vi ⇒
-    luật theo hash rớt recall về 0.5).
-  - **Near-miss:** công cụ lành tính có thể mang chuỗi cùng *hình dạng* (`cfg=SynthBackup;v=3;` vs
-    `cfg=SynthBeacon;v=3;`). Phải khớp phần **phân biệt** (tên họ), không khớp khung chung (`cfg=…;v=3;`).
-  - Kết hợp 2+ chuỗi độc lập bằng `and` để giảm FP; tránh `any of them` khi có chuỗi phổ biến.
-  - Chấm F1 theo mẫu ⇒ một file sạch bị bắt cũng đắt như một mẫu bị sót.
+  - bám **chuỗi cấu hình/định danh của họ mã độc** (marker cấu hình, mutex, đường dẫn PDB, định dạng URL C2,
+    chuỗi lỗi đặc thù) — thứ giữ nguyên qua biến thể; **không bám hash**;
+  - cẩn thận **chuỗi gần giống**: công cụ lành tính có thể mang chuỗi cùng hình dạng (`cfg=SynthBackup;v=3;` so
+    với `cfg=SynthBeacon;v=3;`) — khớp phần **phân biệt** (tên họ), không khớp khung chung;
+  - kết hợp ≥2 chuỗi độc lập bằng `and`; tránh `any of them` khi có chuỗi phổ biến.
 
-## 3. filter DSL — luật lọc FP
+## 3. Bộ lọc FP (suppression filter)
 
 ```json
 {
@@ -71,21 +58,18 @@ DEV có `corpus: {lines, format: "ts event tag id"}` và `mode: detect|filter`.
 }
 ```
 
-- Một bản ghi **bị lọc** khi mọi điều kiện `all_of` đúng **và** (nếu có `any_of`) ít nhất một điều kiện
-  `any_of` đúng. Filter rỗng không lọc gì.
-- Toán tử: `eq`, `ne` (so chuỗi không phân biệt hoa thường), `in`, `not_in`, `contains`,
-  `not_contains`, `gte`, `lte` (số), `regex` (search, không phân biệt hoa thường), `exists`, `missing`.
-- `field` dùng đường dẫn chấm (`a.b.c`), ký tự `[A-Za-z0-9_.]`.
-- Tên field nộp bài theo đúng schema của đề (gold T1111.002 dùng khoá `filter`; fixture DEV dùng
-  `rule` regex ở `mode: filter`).
-- Viết tốt: **lọc theo nguyên nhân FP**, không theo triệu chứng chung với TP. Ví dụ gold T1111.002: lọc
-  thuần theo "đọc nhiều file" sẽ lọc luôn ransomware thật (TP) — phải thêm điều kiện về tiến trình/tài
-  khoản hợp lệ.
+- Một cảnh báo **bị lọc** khi mọi điều kiện `all_of` đúng **và** (nếu có `any_of`) ít nhất một điều kiện
+  `any_of` đúng. Bộ lọc rỗng không lọc gì.
+- Toán tử: `eq`, `ne` (so chuỗi không phân biệt hoa thường), `in`, `not_in`, `contains`, `not_contains`,
+  `gte`, `lte` (số), `regex` (tìm kiếm, không phân biệt hoa thường), `exists`, `missing`. `field` là đường dẫn
+  lồng nhau dạng `a.b.c`.
+- Lọc theo **nguyên nhân FP**, không theo triệu chứng chung với TP (xem `rule-tuning.md`).
 
-## Kiểm tra trước khi nộp (tự rà, không chạy grader)
+## Checklist trước khi phát hành một rule
 
-1. Rule parse được (regex compile, YARA đúng schema, filter đúng toán tử)?
-2. Khớp mọi dòng/mẫu dương bạn xác định được từ corpus công khai?
-3. Không khớp hard negative nào (SQL-word, near-miss, admin hợp lệ, file framework)?
-4. Không có pattern có nguy cơ backtracking trên input lớn?
-5. Ở bài lọc: không lọc mất **TP mức Nghiêm trọng/Cao** nào (gate T1111.003)?
+1. Parse được trên engine đích?
+2. Bắt đủ mọi mẫu dương bạn xác định được trong corpus?
+3. Không bắt mẫu âm nào (từ khoá lành tính, chuỗi gần giống, hoạt động quản trị, tệp framework)?
+4. Không có pattern nguy cơ backtracking trên dữ liệu lớn?
+5. Với bộ lọc: không lọc mất TP mức Nghiêm trọng/Cao nào?
+6. Đã ghi technique ATT&CK, nguồn log cần, phiên bản và ví dụ TP/FP vào ghi chú phát hành?

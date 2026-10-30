@@ -1,93 +1,81 @@
-# MON · Phát hiện — T1347 (tấn công/xâm nhập) · T1386 (bất thường mạng) · T1085 (mối đe doạ tới tài nguyên)
+# MON · Phát hiện tấn công, lưu lượng bất thường và mối đe doạ tới tài sản
 
----
+## Phát hiện tấn công và xâm nhập
 
-## T1347 — Phát hiện các cuộc tấn công và xâm nhập
+Các nhóm hành vi bạn phải nhận ra (cũng là danh mục giám sát để gán `behavior_group`): **dò quét cổng ·
+brute force · DoS · email phishing · mã độc · khai thác lỗ hổng web và hệ điều hành · kết nối tới IP/domain
+độc hại · chiếm quyền máy chủ · thực thi câu lệnh độc hại**. Kết quả của việc phát hiện: cảnh báo được xác
+nhận là sự cố và có ticket.
 
-Tier 1 phân tích các **nhóm cảnh báo tấn công** (đây cũng là danh mục `behavior_group`): dò quét cổng ·
-brute force · DoS · email phishing · mã độc · khai thác lỗ hổng web và hệ điều hành · kết nối tới
-IP/domain độc hại · chiếm quyền máy chủ · thực thi câu lệnh độc hại. Đầu ra: cảnh báo được xác nhận là
-sự cố + ticket. SLA: Nghiêm trọng/Cao ≤ 30′, Trung bình ≤ 1h, đúng hạn ≥ 90%.
+### Đọc log web để tìm request khai thác
 
-| Subtask | Mode | Đầu vào | Phải nộp | Chấm |
-|---|---|---|---|---|
-| **T1347.001** | file | HV-28 log web N dòng | `exploit_lines[]` | set_delta (dòng) |
-| **T1347.002** | file | HV-26, HV-28 | `exploit_lines[]`, `behavior_group` | 0.6 / 0.4 |
-| **T1347.003** | soc (SIEM, EDR, NSM/IDS) | HV-01 02 15 21 22 26 28 | `is_attack`, `behavior_group`, `vector`, `citations[]` | 0.35 / 0.25 / 0.25 / **0.15 trích dẫn** |
+Giải mã URL-encoding trước, rồi đánh giá từng request:
 
-**Đọc log web để liệt kê dòng khai thác (.001/.002)** — `exploit_lines` là ID/số dòng (chuẩn hoá về số
-nguyên), set_delta ⇒ mỗi dòng lành tính báo nhầm trừ nặng.
-- SQLi: **tổ hợp** token (`' or 1=1`, `union select`, `'--`, `sleep(`, `benchmark(`, `information_schema`)
-  — một từ SQL đơn lẻ trong ngữ cảnh bình thường (`?q=select your plan`) là **lành tính**.
-- XSS: `<script`, `onerror=`, `javascript:` trong tham số.
-- Path traversal / LFI: `../`, `%2e%2e/`, `/etc/passwd`, `php://filter`.
-- Command injection / RCE: `;`, `|`, `$(`, backtick ghép với lệnh hệ thống (`id`, `whoami`, `wget`).
-- Upload webshell: POST tới endpoint upload với tên script phía server (`.php/.aspx/.jsp`).
-- Payload không cần thành công mới tính là *dòng khai thác*; giải mã URL-encoding trước khi đánh giá.
+| Kiểu | Dấu hiệu | Không nhầm với |
+|---|---|---|
+| SQLi | **tổ hợp** token: `' or 1=1`, `union select`, `'--`, `sleep(`, `benchmark(`, `information_schema` | một từ SQL trong ngữ cảnh thường (`?q=select your plan`) |
+| XSS | `<script`, `onerror=`, `javascript:` trong tham số | nội dung HTML hợp lệ do CMS gửi |
+| Path traversal / LFI | `../`, `%2e%2e/`, `/etc/passwd`, `php://filter` | đường dẫn tĩnh hợp lệ |
+| Command injection / RCE | `;`, `\|`, `$(`, backtick ghép lệnh hệ thống (`id`, `whoami`, `wget`) | ký tự đặc biệt trong ô tìm kiếm |
+| Upload webshell | POST tới endpoint upload với script phía server (`.php .aspx .jsp`) | triển khai script được phép (`health.php`, `status.aspx`) |
 
-**.002** thêm log AD để gán `behavior_group` của cả gói (một giá trị trong danh mục giám sát ở trên).
+Một request khai thác vẫn là request khai thác dù nó thất bại (403/404) — ghi nhận nó, nhưng tác động được
+đánh giá riêng (xem nhóm `WEB_APP_EXPLOIT` trong `alert-groups.md`).
 
-**.003 — gói cảnh báo đa nguồn một khung giờ:** `is_attack` (có tấn công thật không), `behavior_group`,
-`vector` (đường vào: web, email, dịch vụ phơi ra ngoài, thông tin đăng nhập…). **Mọi khẳng định phải
-kèm trích dẫn grep được** — ở đây trích dẫn là mục có trọng số 0.15, trích ID bịa vẫn làm mất điểm mục đó.
+Khi có thêm log AD và các nguồn khác cùng khung giờ: nối các mảnh thành một nhận định — **có tấn công thật
+không** (`is_attack`), **thuộc nhóm hành vi nào** (`behavior_group`), **đường vào** (`vector`: web, email, dịch vụ
+phơi ra ngoài, thông tin đăng nhập hợp lệ…). Mỗi khẳng định kèm ID bản ghi.
 
-Live lab của SABER chấm thật `T1347.001` trên telemetry loopback (họ `web_sqli_probe`, `fs_change`,
-`persistence`, `auth_bruteforce`) — có nhiễu client lành tính và hard negative (SQL-word, file được
-phép như `health.php`, job `logrotate`).
+```json
+{"exploit_lines": [17, 42, 43], "is_attack": "yes", "behavior_group": "khai thác lỗ hổng web",
+ "vector": "web", "evidence": ["…"]}
+```
 
----
+## Phân tích bất thường lưu lượng mạng (C2, tunneling)
 
-## T1386 — Phân tích bất thường lưu lượng mạng
-
-Rà kết nối outbound tìm kết nối tới IP/domain độc hại — đặc biệt **máy chủ C2** — và dấu hiệu **network
-tunneling**. Đầu ra: danh sách kết nối C2 và kênh tunneling.
-
-| Subtask | Mode | Đầu vào | Phải nộp | Chấm |
-|---|---|---|---|---|
-| **T1386.001** | file | HV-22 conn.log | `c2_conns[]` `{ip, port}` | set_delta |
-| **T1386.002** | file | HV-17, HV-22 | `c2_conns[]` `{ip, port, process}` | F1, **sai tiến trình = 0.5 phần tử** |
-| **T1386.003** | soc (NSM, EDR, SIEM) | HV-17 22 23 27 37 38 (NetFlow 14 ngày) | `c2_conns[]` `{ip,port,process}`, `beacon_period`, `zone_violation[]` `{src,dst}` | 0.6 / 0.2 (±20%) / 0.2 |
+Rà kết nối outbound tìm kết nối tới IP/domain độc hại — đặc biệt **máy chủ C2** — và dấu hiệu **tunneling**.
 
 **Nhận diện beacon C2**
-1. Gom theo (host nguồn, IP đích, cổng). Tính khoảng thời gian giữa các kết nối liên tiếp.
-2. Beacon: **chu kỳ đều, jitter thấp**, kích thước gói nhỏ và ổn định, kéo dài, đích **hiếm** (ít host
-   khác cùng nói chuyện), tiến trình không phải trình duyệt/dịch vụ đã biết.
-3. **Mẫu âm bắt buộc ở .003: lưu lượng nền cũng có chu kỳ đều** — NTP (udp/123 tới máy chủ thời gian),
-   telemetry của hãng, health-check. Tính đều đặn **không** đủ; phải cộng đích lạ + tiến trình lạ +
-   không nằm trong danh mục dịch vụ hợp lệ.
-4. `process` ở .002/.003: lấy từ netconn endpoint (HV-17) khớp theo (ip, port, thời gian). Sai tiến
-   trình chỉ còn nửa điểm — và ngoài đời là chặn sai chỗ.
-5. `beacon_period`: chu kỳ trung vị (đơn vị theo input), dung sai ±20%.
-6. `zone_violation[]`: cặp {src, dst} vi phạm phân vùng trong sơ đồ HV-37 (vd vùng user nói thẳng ra
-   internet không qua proxy, vùng DMZ gọi vào vùng core).
+1. Gom kết nối theo (host nguồn, IP đích, cổng); tính khoảng cách thời gian giữa các kết nối liên tiếp.
+2. Beacon thường có: **chu kỳ đều, jitter thấp**; kích thước gói nhỏ, ổn định; kéo dài; đích **hiếm** (ít host
+   khác nói chuyện cùng); tiến trình không phải trình duyệt hay dịch vụ đã biết.
+3. **Lưu lượng nền cũng có chu kỳ đều**: NTP (udp/123 tới máy chủ thời gian), telemetry của hãng, health-check.
+   Đều đặn **không đủ** — cần thêm đích lạ + tiến trình lạ + không thuộc dịch vụ hợp lệ.
+4. Gắn **tiến trình** mở kết nối (netconn endpoint khớp theo ip, port, thời gian) — không biết tiến trình thì
+   chặn sai chỗ.
+5. Ước lượng **chu kỳ beacon** (trung vị khoảng cách).
+6. Kiểm **vi phạm phân vùng** theo sơ đồ mạng: vùng người dùng nói thẳng ra internet không qua proxy, DMZ gọi
+   vào vùng core.
 
----
+```json
+{"c2_conns": [{"ip": "203.0.113.9", "port": 8443, "process": "rundll32.exe"}],
+ "beacon_period": 60, "zone_violation": [{"src": "ws-hr-03", "dst": "203.0.113.9"}], "evidence": ["…"]}
+```
 
-## T1085 — Nhận diện mối đe doạ tiềm tàng tới tài nguyên mạng
+## Mối đe doạ tới tài nguyên mạng — săn liên thông
 
-Cơ chế **phản ứng liên thông**: khi phát hiện tấn công nhắm vào một khách hàng, lập tức săn IoC trên
-toàn bộ hệ sinh thái khách hàng còn lại. Đầu ra: danh sách tài sản/khách hàng khác có cùng dấu hiệu bị
-nhắm tới. Hunting liên tục 24/7, kích hoạt ngay khi có tình báo chiến dịch mới.
+Khi phát hiện tấn công nhắm vào **một** khách hàng, lập tức săn IoC đó trên **toàn bộ** hệ sinh thái khách
+hàng còn lại. Hunting chạy liên tục 24/7 và kích hoạt ngay khi có tình báo về chiến dịch mới. Đầu ra: danh
+sách tài sản/khách hàng khác đang bị nhắm tới.
 
-| Subtask | Mode | Đầu vào | Phải nộp | Chấm |
-|---|---|---|---|---|
-| **T1085.001** | file | HV-27 log firewall | `scanned_hosts[]` | set_delta (host) |
-| **T1085.002** | file | HV-27, HV-38 | `targeted[]`, `ranking[]` | 0.7·F2 + 0.3·max(0, ρ) |
-| **T1085.003** | soc (SIEM, Quản lý lỗ hổng) | HV-01 02 06 12 26 27 28 38 (7 ngày, 40 tài sản) | `targeted[]`, `ranking[]`, `campaign_link`, `citations[]` | (0.6·F2 + 0.2·ρ + 0.2·link) × CITE |
+1. **Host bị dò quét:** host **đích** nhận kết nối từ một nguồn tới nhiều cổng/nhiều lần bị chặn trong thời
+   gian ngắn. Liệt kê **nạn nhân**, không phải nguồn quét.
+2. **Xếp hạng mức đe doạ:** cường độ bị nhắm (số nguồn, số cổng, có khai thác tiếp không) × **giá trị tài sản**
+   (cấp độ, core, VIP, phơi ra internet, lỗ hổng đang mở). Xếp từ nguy cơ cao nhất xuống.
+3. **Nối cảnh báo rời rạc thành chiến dịch:** cùng hạ tầng nguồn, cùng TTP, cùng khung thời gian, chuỗi quét →
+   khai thác → đăng nhập. Kết luận có/không cùng chiến dịch (`campaign_link`).
+4. **Loại scanner nội bộ hợp lệ** (đúng nguồn, đúng lịch) khỏi danh sách bị nhắm.
 
-- **.001 host bị dò quét:** host **đích** nhận kết nối từ một nguồn tới nhiều cổng/nhiều lần bị từ chối
-  trong thời gian ngắn (log deny/SYN không hoàn tất). Liệt kê nạn nhân, không liệt kê nguồn quét.
-- **.002 xếp hạng mức đe doạ:** kết hợp cường độ bị nhắm (số nguồn, số cổng, có khai thác tiếp không)
-  với **giá trị tài sản** trong HV-38 (cấp độ, core, VIP, phơi ra internet, lỗ hổng mở trong HV-12).
-  `ranking` là danh sách host xếp từ nguy cơ cao nhất; chấm bằng Spearman ρ — liệt kê đủ.
-- **.003 nối cảnh báo rời rạc thành một chiến dịch:** cùng hạ tầng nguồn, cùng TTP, cùng khung thời
-  gian, chuỗi quét → khai thác → đăng nhập. `campaign_link` = có/không cùng chiến dịch (theo `options`).
-  **Bẫy FP: 4 tài sản bị scanner nội bộ quét hợp lệ** — đối chiếu nguồn với danh mục scanner/lịch quét,
-  loại chúng khỏi `targeted`. Gate CITE: mọi tài sản đưa vào phải có bản ghi thật chống lưng.
+```json
+{"scanned_hosts": ["web-01", "vpn-gw", "mail-01"],
+ "targeted": ["web-01", "vpn-gw"], "ranking": ["vpn-gw", "web-01"], "campaign_link": "yes",
+ "evidence": ["…"]}
+```
 
-## Bẫy hay gặp
+## Sai lầm thường gặp
 
-- Báo một từ SQL đơn lẻ là khai thác; báo cả dòng có ký tự đặc biệt hợp lệ.
+- Coi một từ SQL đơn lẻ hay ký tự đặc biệt hợp lệ là tấn công.
 - Coi mọi kết nối đều đặn là beacon (NTP, telemetry).
-- Liệt kê nguồn quét thay vì host bị quét.
-- Không loại scanner nội bộ hợp lệ khỏi danh sách bị nhắm.
+- Liệt kê nguồn quét thay vì host bị quét; quên loại scanner nội bộ hợp lệ.
+
+Nguồn nghiệp vụ: NICE T1347, T1386, T1085 (catalog SABER).

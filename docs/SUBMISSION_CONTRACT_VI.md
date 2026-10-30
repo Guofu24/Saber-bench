@@ -1,11 +1,10 @@
----
-name: saber-episode-contract
-description: Hợp đồng làm bài chung cho mọi agent SOC của SABER (MON/CNT/HUNT/IR) — đọc episode, giới hạn công cụ, schema nộp bài, chuẩn hoá phần tử, trích dẫn (CITE), gate/cap/penalty, ba mode file/soc/vm, định dạng rule thực thi. Đọc trước khi làm bất kỳ subtask T####.NNN nào.
----
+# SABER — Hợp đồng nộp bài và chấm một episode
 
-# SABER — Hợp đồng làm một episode
-
-Mọi skill nghiệp vụ (`soc-mon`, `soc-cnt`, `soc-hunt`, `soc-ir`) dựa trên hợp đồng này. Nguồn sự thật:
+Written for: người viết harness, adapter chuyển sản phẩm làm việc của agent thành bài nộp, và reviewer của
+grader. **Không phải tài liệu cho agent làm việc** — agent dùng các sổ tay tác nghiệp ở `.claude/skills/soc-*`
+và `.claude/skills/redteam-*`, vốn không nhắc tới cách chấm điểm. Tài liệu này mô tả lớp benchmark nằm giữa
+sản phẩm của agent và grader: episode được dựng thế nào, bài nộp phải có dạng gì, grader chuẩn hoá và chấm ra
+sao. Nguồn sự thật:
 `catalog/subtasks.json` (đề), `src/saber/grading/` (cách chấm), `docs/BENCHMARK_PROTOCOL.md`,
 `docs/GRADER_CONTRACT.md`, `docs/SECURITY.md`. Nếu skill này lệch với code chấm, **code chấm đúng**.
 

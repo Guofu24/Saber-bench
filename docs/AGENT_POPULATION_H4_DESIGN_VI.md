@@ -224,31 +224,28 @@ Blue **không phải một khối**: nó là cả một tổ chức SOC nhiều 
 vai = **1 skill chi tiết** (playbook: nhiệm vụ, input được/không được đọc, quy trình, output) **+ 1
 hợp đồng chấm** (chấm vs sự thật độc lập, hoặc trung thực ghi "chưa chấm"). Reverse chỉ là *một* vai.
 
-Skill viết **theo đúng 4 nghiệp vụ của catalog** (`catalog/services.json` — cũng là 4 specialist B2/B3
-trong `docs/BENCHMARK_PROTOCOL.md`), mỗi skill phủ **toàn bộ** NICE task + subtask của nghiệp vụ đó, rút
-trực tiếp từ `catalog/subtasks.json` (kịch bản, HV vào/ra, mục chấm, gate/cap/penalty, mẫu âm bắt buộc)
-và từ code chấm (`src/saber/grading/`). Các vai chuyên sâu nằm **bên trong** nghiệp vụ mà catalog xếp
-chúng vào (vd phân tích mã độc/dịch ngược và forensics thuộc IR; threat intel trải ở CNT và HUNT).
+Skill là **sổ tay tác nghiệp cho agent làm việc**, viết theo đúng 4 nghiệp vụ của catalog
+(`catalog/services.json` — cũng là 4 specialist B2/B3 trong `docs/BENCHMARK_PROTOCOL.md`). Nội dung nghiệp vụ
+(việc gì, quy trình, tiêu chí quyết định, FP kinh điển, đầu ra, bàn giao, rào chắn) rút từ 55 NICE task của
+catalog, nhưng **không** nhắc tới cách chấm điểm (mã HV, trọng số, gate, fixture): agent được dạy làm đúng
+nghề, không được dạy làm bài thi. Lớp benchmark (bài nộp, chuẩn hoá, chấm) tách riêng ở
+`docs/SUBMISSION_CONTRACT_VI.md` cho người viết harness.
 
-| Skill | Nghiệp vụ | Phủ | Vai chuyên sâu bên trong |
+| Skill | Đội | Phủ NICE task | Mảng việc bên trong |
 |---|---|---|---|
-| `saber-episode-contract` | chung | hợp đồng làm bài | đọc episode, schema nộp, chuẩn hoá, CITE, gate/cap/penalty, file/soc/vm, engine rule |
-| `soc-mon` | MON — Vận hành giám sát 24/7 | 16 task / 58 subtask | Tier 1/2, kiểm chứng cảnh báo, 10 nhóm cảnh báo, vòng đời case, phản ứng nhanh |
-| `soc-cnt` | CNT — Content Security | 5 task / 15 subtask | detection engineering, YARA/Suricata, tối ưu FP, độ phủ ATT&CK, TI → rule |
-| `soc-hunt` | HUNT — Threat Hunt / CA | 13 task / 39 subtask | săn tệp/webshell, phân tích xâm nhập, ATT&CK, rà cấu hình, TI về TTP |
-| `soc-ir` | IR — Xử lý sự cố | 21 task / 63 subtask | triage/điều phối, forensics, bộ nhớ, PCAP, **malware/reverse**, quy kết, diệt trừ, báo cáo |
-| `redteam-initial-access` | red (generator) | — | hành vi tiếp cận ban đầu + mẫu âm bắt buộc mà subtask blue cần |
-| `redteam-post-exploitation` | red (generator) | — | hành vi sau xâm nhập + mẫu âm; phần lớn cần container/VM |
+| `soc-mon` | Vận hành giám sát 24/7 | 16 | kiểm chứng cảnh báo, 10 nhóm cảnh báo, nguyên nhân & tác động, vòng đời case, phản ứng nhanh |
+| `soc-cnt` | Content Security | 5 | viết rule/chữ ký, tối ưu FP, độ phủ ATT&CK, TI → rule |
+| `soc-hunt` | Threat Hunt / CA | 13 | săn tệp/webshell, phân tích xâm nhập, ATT&CK, rà cấu hình & lỗ hổng, Technical Report |
+| `soc-ir` | Xử lý sự cố | 21 | triage/điều phối, forensics, bộ nhớ, PCAP, **malware/reverse**, quy kết, diệt trừ, báo cáo |
+| `redteam-initial-access` | red (mô phỏng đối thủ) | — | dò quét, khai thác web/dịch vụ, phishing, tấn công đăng nhập — chỉ menu allowlist trơ |
+| `redteam-post-exploitation` | red (mô phỏng đối thủ) | — | persistence, di chuyển ngang, C2, chống điều tra, exfil — phần lớn cần lab nhiều máy |
 
-Tổng: 55 task / 175 subtask — mỗi subtask thuộc đúng một skill nghiệp vụ.
+Tổng 55 NICE task — mỗi task thuộc đúng một đội. Mỗi đội có mục **bàn giao** (MON ↔ IR ↔ HUNT ↔ CNT) để các
+agent phối hợp trên cùng một case.
 
-**Nguyên tắc trung thực:** mỗi skill ghi rõ mode (`file`/`soc`/`vm`), phần nào chỉ chạy được trên fixture
-DEV (`VERIFIED_OFFLINE`) và phần nào cần hệ thống thật (`BLOCKED_INTEGRATION`); 163/175 subtask hiện dùng
-fixture **cấu trúc** DEV — điểm trên đó không chứng minh năng lực nghiệp vụ. Không bịa điểm, không claim
-`READY_BENCHMARK`.
-
-**Vị trí trong lộ trình:** skill là markdown — không cần Docker, không tốn quota. Ở H5 agent LLM của từng
-nghiệp vụ nạp skill tương ứng; red skills gắn vào driver allowlist ở H5/H7.
+**Vị trí trong lộ trình:** skill là markdown — không cần Docker, không tốn quota. Ở H5 agent LLM của từng đội
+nạp skill tương ứng; harness chuyển sản phẩm làm việc của agent thành bài nộp theo
+`docs/SUBMISSION_CONTRACT_VI.md`. Red skills gắn vào driver allowlist ở H5/H7.
 
 ## 8. Ranh giới một dòng (không đổi)
 

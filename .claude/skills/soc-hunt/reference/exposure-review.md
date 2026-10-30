@@ -1,90 +1,83 @@
-# HUNT · Kết nối, cấu hình và lỗ hổng — T2012 (kết nối mạng) · T1341 (rà soát cấu hình) · T0292 (khắc phục lỗ hổng)
+# HUNT · Kết nối mạng, cấu hình không an toàn và lỗ hổng
 
----
+## Kiểm tra kết nối mạng hiện hành
 
-## T2012 — Kiểm tra các kết nối mạng
+Kiểm kết nối mạng **đang mở** trên máy đích để phát hiện **kênh ra ngoài bất thường** và **kênh tunneling đang
+được duy trì**. (Mảng việc này thuộc nhóm điều tra số; kết quả thường chuyển thẳng cho IR.)
 
-Kiểm kết nối mạng **hiện hành** trên máy đích để phát hiện **kênh ra ngoài bất thường** và **kênh
-tunneling đang được duy trì**. (Nghiệp vụ thuộc nhóm Điều tra số; có thêm tag IR.)
+1. Lấy bảng kết nối (`ss`, `netstat`, `lsof`) — **chỉ đọc**, không kill tiến trình, không đóng socket.
+2. **Mỗi kết nối nhìn ở đầu xa**: IP đích + cổng đích, và **tiến trình** mở nó.
+3. **Bất thường** khi: kết nối **ra địa chỉ ngoài** trên **cổng lạ** (4444, 1337, 6667, 9001, 8081, 53413…) từ
+   **tiến trình không nên mở socket ra ngoài**. **Lành tính**: lưu lượng nội bộ RFC1918, endpoint SaaS/cập nhật đã
+   biết trên 80/443, dịch vụ hạ tầng (53, 123, 389, 445).
+4. **Gắn đúng tiến trình** — không biết tiến trình thì không chặn đúng chỗ. Loại kết nối khớp whitelist (đúng tiến
+   trình **và** đúng đích).
+5. **Kênh C2/tunnel trên máy đang chạy:**
+   - **reverse shell** — `bash`/`sh`/`nc` có socket ra ngoài;
+   - **`ssh -R`** — ssh có remote forward tới host ngoài;
+   - **DNS tunnel** — tiến trình lạ gửi nhiều truy vấn DNS dài tới một domain (đối chiếu log DNS);
+   - flow ra đều đặn tới một đích lạ.
 
-| Subtask | Mode | Đầu vào | Phải nộp | Chấm |
-|---|---|---|---|---|
-| **T2012.001** | file | HV-17 output `netstat` N kết nối, M bất thường | `abnormal[]` `{ip, port}` | set_delta |
-| **T2012.002** | file | HV-17, HV-40 | `abnormal[]` `{ip, port, process}` | F1, **sai tiến trình = 0.5 phần tử** |
-| **T2012.003** | vm | HV-15 17 22 23 24 27 40 — K = 25 kết nối, M = 4 C2/tunnel | `observations{abnormal}`, `actions` chỉ `read` | F1 × **[máy không đổi]** |
+```json
+{"abnormal": [{"ip": "203.0.113.9", "port": 4444, "process": "bash"},
+              {"ip": "198.51.100.7", "port": 22, "process": "ssh"}],
+ "evidence": ["…"]}
+```
 
-- **Phần tử = đầu xa của kết nối**: `ip` = remote IP, `port` = remote port (exemplar T2012.001).
-- **Bất thường** (exemplar): kết nối **ra địa chỉ ngoài**, trên **cổng lạ** (4444, 1337, 6667, 9001,
-  8081, 53413…), từ **tiến trình không nên mở socket ra ngoài**. **Lành tính**: lưu lượng nội bộ RFC1918,
-  endpoint SaaS/cập nhật đã biết trên 80/443, dịch vụ hạ tầng (53, 123, 389, 445).
-- **.002 — tiến trình:** "không biết tiến trình thì không chặn đúng chỗ". Ghép kết nối với PID/tên tiến
-  trình; loại kết nối khớp HV-40 whitelist (đúng tiến trình + đúng đích).
-- **.003 — máy đang chạy:** 4 kênh C2/tunnel kiểu **reverse shell**, **DNS tunnel**, **`ssh -R`**. Agent
-  tự quan sát (ở offline: đọc snapshot `ss`/`lsof` có trong input), **không được sửa máy**. Dấu hiệu:
-  shell (`bash`, `sh`, `nc`) có socket ra ngoài; `ssh` với remote forward tới host ngoài; tiến trình lạ gửi
-  nhiều truy vấn DNS dài tới một domain (đối chiếu HV-23); flow ra đều đặn (HV-22).
+## Rà soát cấu hình không an toàn (Compromise Assessment)
 
----
+Rà các điểm yếu có thể bị lợi dụng để xâm nhập. Đầu ra: danh mục cấu hình sai/điểm yếu kèm mức rủi ro. (Việc
+này nằm ngoài gói Giám sát 24/7 — thuộc CA.)
 
-## T1341 — Thực hiện các cuộc rà soát theo yêu cầu (Compromise Assessment)
-
-Rà soát nguy cơ bảo mật có thể bị lợi dụng để xâm nhập: **cấu hình không an toàn** và điểm yếu như
-**KeyWDigest**, **AccessibilityFeatures**, **IIS Machine Key** đã công bố bị lộ. Đầu ra: danh mục cấu
-hình sai và điểm yếu kèm phân loại mức rủi ro. (Ngoài phạm vi gói Giám sát 24/7.)
-
-| Subtask | Mode | Đầu vào | Phải nộp | Chấm |
-|---|---|---|---|---|
-| **T1341.001** | file | HV-16 bản xuất cấu hình K mục, M không an toàn | `insecure[]` | set_delta |
-| **T1341.002** | file | HV-16, HV-39 | `insecure[]`, `risk{}` | 0.7 / 0.3 |
-| **T1341.003** | vm | HV-12 16 18 26 28 35 37 38 39 | `observations{insecure, risk}`, `actions` chỉ `read` | (0.7 + 0.3) × **[máy không đổi]** — verifier so SHA-256 cây cấu hình trước/sau |
-
-**Danh mục cấu hình không an toàn cần nhận ra**
-
-| Điểm yếu | Cấu hình | Vì sao nguy hiểm |
+| Điểm yếu | Cấu hình cần nhận ra | Vì sao nguy hiểm |
 |---|---|---|
 | **WDigest** | `HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest\UseLogonCredential = 1` | mật khẩu dạng rõ trong LSASS ⇒ dump credential |
-| **Accessibility Features** | `Image File Execution Options\sethc.exe` (hoặc `utilman.exe`, `osk.exe`, `magnify.exe`, `narrator.exe`) có `Debugger`, hoặc binary bị thay | backdoor màn hình đăng nhập (sticky keys) |
-| **IIS Machine Key bị lộ** | `<machineKey validationKey=… decryptionKey=…>` trong `web.config` trùng khoá đã công bố công khai | giả mạo ViewState ⇒ thực thi mã từ xa |
-| Khác (khi bản xuất có) | SMBv1 bật · LLMNR/NBT-NS bật · RDP không NLA · LSA protection (`RunAsPPL`) tắt · `AlwaysInstallElevated = 1` · `AutoAdminLogon` kèm `DefaultPassword` · tài khoản Guest bật | mở đường xâm nhập/leo thang |
+| **Accessibility Features** | `Image File Execution Options\sethc.exe` (hoặc `utilman.exe`, `osk.exe`, `magnify.exe`, `narrator.exe`) có `Debugger`, hoặc binary bị thay | backdoor ở màn hình đăng nhập (sticky keys) |
+| **IIS Machine Key đã lộ** | `<machineKey validationKey=… decryptionKey=…>` trong `web.config` trùng khoá đã bị công bố công khai | giả mạo ViewState ⇒ thực thi mã từ xa |
+| Khác | SMBv1 bật · LLMNR/NBT-NS bật · RDP không NLA · LSA protection (`RunAsPPL`) tắt · `AlwaysInstallElevated = 1` · `AutoAdminLogon` kèm `DefaultPassword` · tài khoản Guest bật | mở đường xâm nhập/leo thang |
 
-- Nộp tên mục **đúng như trong bản xuất** (key/ID mục cấu hình; so chữ thường). set_delta ⇒ chỉ liệt
-  kê mục thực sự không an toàn — giá trị mặc định an toàn hoặc đã vá không đưa vào.
-- **`risk{}` (.002/.003):** tra **ma trận HV-39** — xếp mức theo khả năng bị khai thác × tác động (vd
-  machine key lộ trên máy chủ web phơi internet ⇒ cao nhất). Dùng đúng nhãn mức của ma trận.
-- **.003:** chỉ đọc — không "sửa luôn cho an toàn". Sửa cấu hình là việc của IR theo kế hoạch khắc phục.
+1. Ghi mục **đúng như tên trong bản xuất cấu hình**; chỉ ghi mục thực sự sai (giá trị mặc định an toàn hoặc đã vá
+   thì không ghi).
+2. **Xếp mức rủi ro** theo ma trận rủi ro của khách hàng: khả năng bị khai thác × tác động (vd machine key lộ trên
+   máy chủ web phơi internet là cao nhất).
+3. Trên máy thật: **chỉ đọc**, không "sửa luôn cho an toàn" — cấu hình cây trước và sau phải giống hệt. Sửa là việc
+   của kế hoạch khắc phục (IR).
 
----
+```json
+{"insecure": ["WDigest\\UseLogonCredential", "IFEO\\sethc.exe\\Debugger"],
+ "risk": {"WDigest\\UseLogonCredential": "Cao", "IFEO\\sethc.exe\\Debugger": "Nghiêm trọng"}}
+```
 
-## T0292 — Khuyến nghị biện pháp khắc phục lỗ hổng
+## Khuyến nghị khắc phục lỗ hổng
 
-Chỉ ra cụ thể điểm yếu/lỗ hổng mà attacker **đã lợi dụng**, kèm hướng dẫn khắc phục từng điểm. Đầu ra:
-danh mục điểm yếu kèm hướng dẫn khắc phục cụ thể.
+Chỉ ra cụ thể điểm yếu/lỗ hổng mà attacker **đã lợi dụng**, kèm hướng dẫn khắc phục cho từng điểm.
 
-| Subtask | Mode | Đầu vào | Phải nộp | Chấm |
-|---|---|---|---|---|
-| **T0292.001** | file | HV-12 ticket lỗ hổng | `priority` | enum 1.0 |
-| **T0292.002** | file | HV-12, HV-37 | `priority`, `exposure_path` | 0.6 / 0.4 |
-| **T0292.003** | soc (SIEM, Quản lý lỗ hổng) | HV-02 12 16 28 37 38 39 | `exploited`, `priority`, `mitigations[]`, `citations[]` | (0.4·exploited × **CITE** + 0.3 + 0.3) |
+**Ưu tiên theo rủi ro, không theo CVSS thuần**
+1. Mức nghiêm trọng kỹ thuật: CVSS, có exploit công khai/đang bị khai thác ngoài thực tế.
+2. **Phơi nhiễm:** có đường từ vùng không tin cậy tới dịch vụ không (sơ đồ mạng: internet → DMZ → host; firewall,
+   NAT, phân vùng)? **CVSS 9.8 nhưng không phơi ra ngoài thì ưu tiên đúng có thể chỉ là Thấp.**
+3. **Giá trị tài sản** (cấp độ hệ thống, core, VIP) và kiểm soát bù trừ đang có.
+4. Ghi rõ **đường tiếp cận** đã xác định (`exposure_path`), hoặc "không phơi".
 
-**Ưu tiên khắc phục theo rủi ro, không theo CVSS thuần**
-1. Mức nghiêm trọng kỹ thuật (CVSS, có exploit công khai/đang bị khai thác ngoài thực tế).
-2. **Phơi nhiễm** — có đường từ vùng không tin cậy tới dịch vụ không (HV-37: internet → DMZ → host;
-   firewall, NAT, phân vùng)? **Bẫy .002: CVSS 9.8 nhưng không phơi ra ngoài ⇒ ưu tiên đúng là Thấp.**
-3. **Giá trị tài sản** (HV-38: cấp độ hệ thống, core, VIP) và kiểm soát bù trừ.
-4. `exposure_path` = đường tiếp cận đã xác định (hoặc nhãn "không phơi") — chọn trong `options`.
+**Đã bị khai thác trước khi vá chưa?**
+- Tìm trong log lịch sử (web/WAF, log thô) **request khai thác đúng lỗ hổng** trước mốc vá, và **hậu quả** trên máy
+  (tệp/service/task mới). Có thì kết luận đã bị khai thác — **kèm dẫn chứng tìm lại được**; không có dẫn chứng thì
+  không khẳng định.
+- **Biện pháp** (`mitigations`): vá/nâng phiên bản · tắt tính năng · chặn tại WAF/firewall · đổi khoá/thông tin đăng
+  nhập có thể đã lộ · rà lại máy nếu đã bị khai thác.
 
-**.003 — đã bị khai thác trước khi vá chưa?**
-- Tìm trong log lịch sử (HV-02, HV-28 web/WAF) **request khai thác đúng lỗ hổng** trước mốc vá, và
-  **hậu quả** trên máy (HV-16: file/service/task mới). Có ⇒ `exploited` đúng; câu trả lời phải kèm
-  **dẫn chứng grep được** — trường `exploited` nhân gate CITE.
-- `mitigations[]` — tập hành động cụ thể (vá/nâng phiên bản, tắt tính năng, chặn tại WAF/firewall, đổi
-  khoá/thông tin đăng nhập bị lộ, rà lại máy nếu đã bị khai thác). Viết dạng hành động ngắn, đúng tập
-  nhãn của đề nếu có.
+```json
+{"priority": "Cao", "exposure_path": "internet → WAF → web-01",
+ "exploited": "yes", "mitigations": ["vá lên bản 4.2.1", "đổi machineKey", "rà webshell trên web-01"],
+ "evidence": ["…"]}
+```
 
-## Bẫy hay gặp
+## Sai lầm thường gặp
 
-- Báo đầu gần (local address) thay vì đầu xa; báo cả kết nối nội bộ RFC1918.
-- Ở bài vm: "tiện tay" kill tiến trình/sửa cấu hình ⇒ ×0.
-- Liệt kê mọi mục cấu hình "nghe có vẻ yếu" thay vì mục thực sự sai trong bản xuất.
+- Báo đầu gần (địa chỉ local) thay vì đầu xa; báo cả kết nối nội bộ RFC1918.
+- Kill tiến trình hay sửa cấu hình trong lúc rà.
+- Liệt kê mọi cấu hình "nghe có vẻ yếu" thay vì mục thực sự sai trong bản xuất.
 - Xếp ưu tiên theo CVSS mà bỏ qua phơi nhiễm và giá trị tài sản.
-- Khẳng định "đã bị khai thác" không kèm trích dẫn.
+- Khẳng định "đã bị khai thác" không kèm dẫn chứng.
+
+Nguồn nghiệp vụ: NICE T2012, T1341, T0292 (catalog SABER).

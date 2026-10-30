@@ -1,78 +1,82 @@
-# CNT · Độ phủ ATT&CK và tình báo thành rule — T1384 (intrusion set) · T1644 (chỉ dấu tác chiến)
+# CNT · Độ phủ ATT&CK, use-case hunting và tình báo thành rule
 
----
+## Độ phủ theo intrusion set và use-case hunting
 
-## T1384 — Thiết lập quy trình về tập hành vi xâm nhập (intrusion set)
+Săn theo **giả thuyết**: từ một kỹ thuật tấn công mới trong MITRE ATT&CK, xây **use-case hunting** rồi truy vấn
+event log xem hệ thống khách hàng có dấu vết tương tự không. Từ hiểu biết về một nhóm tấn công (họ dùng kỹ
+thuật gì, tool gì, hạ tầng nào), xây **các bước lặp lại được** để nhận diện và truy vết đúng nhóm đó mỗi khi nó
+xuất hiện. Đầu ra: bộ use-case hunting theo technique và kết quả kiểm chứng trên log thật.
 
-Săn tìm **theo giả thuyết**: từ một kỹ thuật tấn công mới trong MITRE ATT&CK, xây **Usecase Hunting** rồi
-truy vấn event log xem hệ thống khách hàng có dấu vết tương tự không. Nôm na: từ hiểu biết về một nhóm
-tấn công (kỹ thuật, tool, hạ tầng), xây các bước **lặp lại được** để nhận diện và truy vết đúng nhóm đó
-mỗi khi nó xuất hiện. Đầu ra: bộ use-case hunting theo technique + kết quả kiểm chứng trên log thật.
+**Một technique chỉ được coi là "đã phủ" khi đủ hai điều**
+1. Có ít nhất một rule **đang bật** trong kho rule được map **đúng technique** đó (so đúng cấp: `T1059.001` khác
+   `T1059`; rule cấp cha không tự động phủ sub-technique trừ khi mapping ghi vậy).
+2. **Nguồn log** mà rule cần **đã on-board và đang khoẻ**. Rule có mà nguồn log thiếu/hỏng thì thực tế là **không
+   phủ**.
 
-| Subtask | Mode | Đầu vào | Phải nộp | Chấm |
-|---|---|---|---|---|
-| **T1384.001** | file | HV-05 kho rule + mapping ATT&CK, 1 technique | `covered` | enum 1.0 |
-| **T1384.002** | file | HV-04, HV-05, cả intrusion set | `uncovered[]` technique chưa rule nào phủ | F1 (technique) |
-| **T1384.003** | soc (SIEM, EDR) | HV-04 05 15 26 33 35 37 38 | `uncovered[]`, `hunt_query`, `insufficient_data` | 0.5 F1 + 0.5 exec + **gate** |
+**Rà độ phủ một intrusion set:** duyệt từng technique của nhóm, áp hai điều kiện trên, ra danh sách technique
+chưa phủ — chỉ trong phạm vi intrusion set, không thêm technique ngoài.
 
-**Thế nào là "đã phủ"**
-1. Có ≥1 rule **đang bật** trong HV-05 được map **đúng technique ID** đó (so đúng cấp: `T1059.001` khác
-   `T1059`; không tự suy rule cấp cha phủ sub-technique trừ khi HV-05 ghi vậy).
-2. **Và** nguồn log mà rule cần **tồn tại và khoẻ** trong HV-04. Rule tồn tại nhưng log source chưa
-   on-board hoặc đang hỏng ⇒ trên thực tế **không phủ** — đây là lý do .002 cấp thêm HV-04.
+**Xây use-case hunting**
+1. Viết truy vấn **chạy được** bắt dấu vết của technique (hẹp như một rule phát hiện — `engines.md`).
+2. **Kiểm nguồn log trước khi kết luận.** Nếu nguồn log cần cho technique **không tồn tại**, kết luận đúng là
+   **"không đủ dữ liệu"** (`insufficient_data`) — **không phải** "không có dấu vết". Không quan sát được ≠ không
+   xảy ra.
+3. Ghi kết quả vào báo cáo TH/CA và cập nhật mapping trong kho rule.
 
-**.002 — liệt kê technique chưa phủ:** duyệt từng technique của intrusion set, áp 2 điều kiện trên.
-Technique chuẩn hoá `Txxxx(.xxx)`. F1 ⇒ không liệt kê thừa technique ngoài intrusion set.
+```json
+{"intrusion_set": "…", "uncovered": ["T1003.001", "T1021.002"],
+ "hunt_query": {"engine": "regex", "pattern": "…", "ignore_case": true},
+ "result": "insufficient_data", "missing_log_source": "Sysmon EID 10 trên nhóm máy chủ"}
+```
 
-**.003 — use-case hunting chạy được**
-- `hunt_query`: truy vấn/rule chạy được trên corpus (engine regex ở DEV — `engines.md`) bắt dấu vết của
-  technique; viết hẹp như rule phát hiện.
-- **Bẫy cố ý:** một đề **thiếu hẳn nguồn log** cần cho technique ⇒ đáp án đúng là **"không đủ dữ liệu"**
-  (`insufficient_data`), **không phải** "không có dấu vết". Kiểm HV-04 trước khi kết luận sạch: không
-  quan sát được ≠ không xảy ra. Sai gate này nhân 0.
-- Ghi kết quả vào báo cáo TH/CA (HV-33) và cập nhật mapping (HV-05) — ngoài đời, use-case mới đi vào kho
-  rule có phiên bản.
+## Chuyển tình báo thành chỉ dấu và rule
 
----
+Chuyển thông tin chiến dịch, lỗ hổng và IOC từ Threat Intelligence thành **rule giám sát khả thi**, **bộ chỉ dấu
+săn tìm** và **chữ ký YARA/Sigma**. Đầu ra là chỉ dấu tác nghiệp dạng **rule chạy được trên SIEM khách hàng**.
 
-## T1644 — Xây dựng chỉ dấu cho tác chiến mạng
+### Trích IOC từ báo cáo TI
 
-Chuyển thông tin chiến dịch, lỗ hổng và IOC từ VCS Threat Intelligence thành **bộ rule giám sát khả thi**
-(Content Security), **bộ chỉ dấu săn tìm** (Proactive Threat Hunting) và **chữ ký Yara/Sigma** (Threat
-Hunting, Compromised Assessment). Đầu ra: chỉ dấu tác nghiệp dạng **rule chạy được trên SIEM khách hàng**.
+Gom theo sáu loại: `ipv4`, `domain`, `url`, `sha256`, `email`, `cve`.
 
-| Subtask | Mode | Đầu vào | Phải nộp | Chấm |
-|---|---|---|---|---|
-| **T1644.001** | file | HV-35 báo cáo TI | `ioc{}` toàn bộ IOC | **F1 macro theo loại IOC** (chuẩn hoá defang, lowercase trước khi so) |
-| **T1644.002** | file | HV-34, HV-35 | `ioc{}`, `durability{}` | 0.7 / 0.3 |
-| **T1644.003** | soc (SIEM, EDR) | HV-04 05 15 16 18 33 34 35 | `ioc{}`, `rule` | 0.4 / **0.6** — nặng về rule vì chép bảng IOC là việc máy làm được |
+- **Refang và chuẩn hoá trước khi lưu:** `hxxp` → `http`, `[.]`/`(.)` → `.`, `[@]` → `@`; chữ thường; bỏ `/` và
+  `.` ở cuối URL.
+- **Không phải IOC:** IP private (10/8, 172.16/12, 192.168/16, 127/8); domain lành tính hoặc của chính tổ chức
+  (`example.com`, mail domain nội bộ); tên tệp (`gate.php`, `.exe`, `.dll`); đoạn path.
+- **Mỗi giá trị đúng một loại:** host của một URL đã ghi ở `url` thì không ghi lại ở `domain`; domain của email
+  cũng vậy.
+- Loại hiếm (cve, email) quan trọng ngang loại phổ biến — đừng bỏ sót.
 
-**Trích IOC (.001) — quy ước của gold pilot (T2013.001, cùng chuẩn; chờ adjudication)**
-- Dạng: `{"ioc": {"ipv4": [...], "domain": [...], "url": [...], "sha256": [...], "email": [...], "cve": [...]}}`
-  (theo đúng schema đề; fixture DEV có thể dùng list).
-- **Refang + chuẩn hoá:** `hxxp`→`http`, `[.]`/`(.)`→`.`, `[@]`→`@`; chữ thường; bỏ `/` và `.` cuối URL.
-- **Loại khỏi IOC:** IP private (10/8, 172.16/12, 192.168/16, 127/8), domain lành tính/của chính tổ
-  chức (example.com, mail domain nội bộ), tên file (`.exe .dll .php …`), đoạn path.
-- **Không đếm trùng loại:** host của URL đã nằm trong `url` thì không đưa vào `domain`; domain của email
-  cũng vậy. Mỗi giá trị thuộc đúng một loại.
-- Macro-F1 theo loại ⇒ loại hiếm (cve, email) quan trọng ngang loại phổ biến (ip) — đừng bỏ sót.
+```json
+{"ioc": {"ipv4": ["203.0.113.9"], "domain": ["upd-check.example-cdn.net"],
+         "url": ["http://198.51.100.4/gate.php"], "sha256": ["…"], "email": ["billing@fake-invoice.net"],
+         "cve": ["CVE-2023-4966"]}}
+```
 
-**Phân loại độ bền (.002) — Pyramid of Pain**
-- **hash** — đổi được tức thì (biên dịch lại, thêm byte) ⇒ độ bền thấp nhất.
-- **IP/domain** — đổi được với chi phí hạ tầng thấp ⇒ độ bền thấp/trung bình.
-- **TTP** (hành vi, chuỗi kỹ thuật, cấu trúc C2) — **khó đổi** ⇒ độ bền cao, giá trị phát hiện lâu dài.
-- Dùng đúng nhãn trong `options`/đề (vd hash đổi được / domain đổi được / TTP khó đổi).
+### Phân loại độ bền của chỉ dấu (Pyramid of Pain)
 
-**IOC → rule chạy được (.003)**
-1. Rule đáng giá nhất bám **TTP bền** (HV-34 hành vi, HV-15 tiến trình, HV-16 persistence) chứ không
-   chỉ là danh sách hash/IP.
-2. Kiểm log source cần cho rule có trong HV-04 (giống T1384) — rule chạy trên nguồn không tồn tại là vô
-   dụng.
-3. Viết theo `engines.md`; hẹp, parse được, không timeout.
+| Loại | Độ bền | Vì sao |
+|---|---|---|
+| hash | thấp nhất | biên dịch lại/thêm byte là đổi |
+| IP, domain | thấp–trung bình | đổi hạ tầng tốn ít chi phí |
+| TTP (hành vi, chuỗi kỹ thuật, cấu trúc C2) | **cao** | khó đổi; giá trị phát hiện lâu dài |
 
-## Bẫy hay gặp
+```json
+{"durability": {"4b92eb38…": "hash đổi được", "upd-check.example-cdn.net": "domain đổi được",
+                "beacon HTTPS 60s qua rundll32": "TTP khó đổi"}}
+```
 
-- Coi rule tồn tại là đã phủ mà không kiểm log source.
-- Kết luận "không có dấu vết" khi thực ra thiếu nguồn log.
-- Đưa IP private, domain nội bộ, tên file vào IOC; đếm một domain ở cả `url` lẫn `domain`.
-- Ở .003 chỉ nộp bảng IOC chép lại — 0.6 điểm nằm ở rule.
+### Từ IOC tới rule chạy được
+
+1. Rule đáng giá nhất bám **TTP bền** (hành vi trong báo cáo phân tích mã độc, chuỗi tiến trình, cơ chế
+   persistence), không chỉ là danh sách hash/IP chép lại — chép bảng IOC thì máy làm được.
+2. Kiểm nguồn log rule cần có trong danh mục log source (như phần độ phủ ở trên).
+3. Viết và kiểm thử theo `engines.md`; ghi technique ATT&CK và phiên bản.
+
+## Sai lầm thường gặp
+
+- Coi rule tồn tại là đã phủ mà không kiểm nguồn log.
+- Kết luận "không có dấu vết" khi thật ra thiếu nguồn log.
+- Đưa IP private, domain nội bộ, tên tệp vào IOC; ghi một domain ở cả `url` lẫn `domain`.
+- Chỉ nộp bảng IOC mà không có rule hành vi.
+
+Nguồn nghiệp vụ: NICE T1384, T1644 (catalog SABER).
