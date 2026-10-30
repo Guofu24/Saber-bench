@@ -18,6 +18,12 @@ server-derived truth; nothing here is a validated benchmark.
 
 from __future__ import annotations
 
+from saber.population.active_client import (
+    ActiveClientReport,
+    ActivityProfile,
+    run_active_client,
+    scripted_default_profile,
+)
 from saber.population.loop import (
     PopulationEpisode,
     run_forever,
@@ -29,12 +35,16 @@ from saber.population.office import OfficeEmitter
 
 __all__ = [
     "FAMILY_MENUS",
+    "ActiveClientReport",
+    "ActivityProfile",
     "MenuAction",
     "OfficeEmitter",
     "PopulationEpisode",
     "expand_actions",
     "menu_for",
+    "run_active_client",
     "run_forever",
     "run_population",
     "run_population_episode",
+    "scripted_default_profile",
 ]

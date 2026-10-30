@@ -864,6 +864,114 @@ def population_run(
     click.echo(f"wrote {rpath}")
 
 
+@population.command(
+    "active-client",
+    help="One always-on benign machine producing a continuous real log (scripted; --enable-paid=hybrid).",
+)
+@click.option("--seed", type=int, default=1, show_default=True)
+@click.option("--interval", "interval_s", type=float, default=20.0, show_default=True,
+              help="Base seconds between ticks (jittered 0.6x-1.4x).")
+@click.option("--intensity", type=float, default=None,
+              help="Requests/minute for the scripted profile (1-30). Default profile uses 8.")
+@click.option("--ticks", type=int, default=0, show_default=True,
+              help="Stop after N ticks; 0 = run forever (until Ctrl+C or STOP file).")
+@click.option("--rhythm", type=click.Choice(["real", "flat"]), default="real", show_default=True,
+              help="'real' shapes intensity by local hour (office hours busy, night idle).")
+@click.option("--enable-paid", is_flag=True,
+              help="Operator opt-in: use the LLM profiler (HYBRID). Off = pure scripted, no quota.")
+@click.option("--model", default="gemini-2.5-flash", show_default=True)
+@click.option("--key-pool", default="keys_pool.txt", show_default=True)
+@click.option("--budget", type=int, default=200, show_default=True,
+              help="Max billable profiler calls (hard safety valve; sparse by design).")
+@click.option("--profile-refresh", "profile_refresh_s", type=float, default=900.0, show_default=True,
+              help="Seconds between LLM profile refreshes (hybrid only).")
+@click.option("--stop-file", type=click.Path(path_type=Path), default=None,
+              help="Create this file to stop a forever run (default <out>/STOP).")
+@click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
+@click.option("--office-url", default=None,
+              help="agent-office viewer URL (else $AGENT_OFFICE_URL if set).")
+def population_active_client(
+    seed: int,
+    interval_s: float,
+    intensity: float | None,
+    ticks: int,
+    rhythm: str,
+    enable_paid: bool,
+    model: str,
+    key_pool: str,
+    budget: int,
+    profile_refresh_s: float,
+    stop_file: Path | None,
+    out_dir: Path | None,
+    office_url: str | None,
+) -> None:
+    from saber.population import OfficeEmitter, run_active_client
+
+    workdir = out_dir or (Path("runs") / "population")
+    stopf = stop_file or (workdir / "STOP")
+    emitter = OfficeEmitter(office_url)
+
+    provider: Any = None
+    pool = None
+    if enable_paid:
+        from saber.agents.gemini import GeminiProvider, KeyPool
+
+        pool = KeyPool.from_file(key_pool)
+        provider = GeminiProvider(model=model, pool=pool, enabled=True, budget_calls=budget)
+        click.echo(f"engine=HYBRID provider=gemini model={model} pool={len(pool)} keys "
+                   f"budget={budget} refresh={profile_refresh_s:.0f}s")  # fmt: skip
+    else:
+        click.echo("engine=SCRIPTED (no LLM, no quota). Add --enable-paid for the hybrid profiler.")
+    click.echo(f"seed={seed} interval={interval_s:.0f}s rhythm={rhythm} "
+               f"ticks={'forever' if ticks <= 0 else ticks}")  # fmt: skip
+    click.echo(f"agent-office viewer: {'ON @ ' + (emitter.url or '') if emitter.enabled else 'off'}")
+    if ticks <= 0:
+        click.echo(f"Running until Ctrl+C or create {stopf}.")
+    click.echo(f"{'tick':>5s} {'hour':>4s} {'phase':>5s} {'sent':>4s} {'total':>6s} "
+               f"{'profile':16s} {'int':>4s} llm")  # fmt: skip
+    click.echo("-" * 60)
+
+    def _on_tick(tick: int, st: dict[str, Any]) -> None:
+        click.echo(
+            f"{st['tick']:5d} {st['hour']:4d} {st['phase']:5.2f} {st['sent']:4d} "
+            f"{st['requests_sent']:6d} {st['profile_source']:16s} {st['intensity']:4.0f} "
+            f"{st['llm_calls']}"
+        )
+
+    try:
+        report = run_active_client(
+            provider,
+            workdir=workdir,
+            seed=seed,
+            base_interval_s=interval_s,
+            base_intensity=intensity,
+            profile_refresh_s=profile_refresh_s,
+            rhythm=rhythm,
+            max_ticks=None if ticks <= 0 else ticks,
+            stop_file=stopf,
+            emitter=emitter,
+            on_tick=_on_tick,
+        )
+    except KeyboardInterrupt:
+        click.echo("\n^C — stopping.")
+        return
+
+    click.echo("-" * 60)
+    click.echo(f"ticks={report.ticks} benign_requests={report.requests_sent} "
+               f"log_lines={report.log_lines} reset_ok={report.reset_ok}")  # fmt: skip
+    click.echo(f"by_category={report.by_category}")
+    if enable_paid and provider is not None and pool is not None:
+        click.echo(f"billable_profiler_calls={provider.calls}/{budget} "
+                   f"keys_active={pool.active()}/{len(pool)}")  # fmt: skip
+    rpath = workdir / "active_client_report.json"
+    workdir.mkdir(parents=True, exist_ok=True)
+    rpath.write_text(
+        json.dumps(report.row(), indent=2, ensure_ascii=False, default=str) + "\n", encoding="utf-8"
+    )
+    click.echo(f"label: {', '.join(report.labels)}")
+    click.echo(f"wrote {rpath}")
+
+
 def _score_summary(score: Any) -> dict[str, Any]:
     return {
         "subtask_id": score.subtask_id,
