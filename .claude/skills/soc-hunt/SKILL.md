@@ -44,6 +44,8 @@ giả thuyết (TI, TTP mới, IOC mới, sự cố ở khách hàng khác)
 - **→ IR (`soc-ir`)**: ngay khi thấy tấn công đang diễn ra hoặc máy đang bị kiểm soát — kèm phạm vi và bằng chứng.
 - **→ Content Security (`soc-cnt`)**: use-case hunting, IOC và TTP mới để thành rule.
 - **→ MON (`soc-mon`)**: IOC cần canh trên toàn hệ sinh thái khách hàng.
+- Mọi bàn giao đi qua điều phối (`soc-orchestrator`) và ghi theo mẫu case chung
+  `soc-orchestrator/reference/case-record.md`.
 
 ## Nguyên tắc nghề
 

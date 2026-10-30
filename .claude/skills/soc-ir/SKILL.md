@@ -46,6 +46,8 @@ phải dựa trên bằng chứng kỹ thuật và được kiểm chứng nội
 - **→ Content Security (`soc-cnt`)**: kỹ thuật/IOC/TTP rút ra từ sự cố ⇒ rule mới (lỗ hổng High/Critical: 24 giờ).
 - **→ HUNT (`soc-hunt`)**: phạm vi cần rà rộng hơn, giả thuyết săn mới.
 - Mọi bước ghi vào **worklog của case** — người tiếp ca phải làm tiếp được ngay.
+- Mọi bàn giao đi qua điều phối (`soc-orchestrator`) và ghi theo mẫu case chung
+  `soc-orchestrator/reference/case-record.md`; yêu cầu phê duyệt hành động phản ứng cũng chuyển qua điều phối.
 
 ## Nguyên tắc nghề
 

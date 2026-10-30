@@ -239,9 +239,12 @@ nghề, không được dạy làm bài thi. Lớp benchmark (bài nộp, chuẩ
 | `soc-ir` | Xử lý sự cố | 21 | triage/điều phối, forensics, bộ nhớ, PCAP, **malware/reverse**, quy kết, diệt trừ, báo cáo |
 | `redteam-initial-access` | red (mô phỏng đối thủ) | — | dò quét, khai thác web/dịch vụ, phishing, tấn công đăng nhập — chỉ menu allowlist trơ |
 | `redteam-post-exploitation` | red (mô phỏng đối thủ) | — | persistence, di chuyển ngang, C2, chống điều tra, exfil — phần lớn cần lab nhiều máy |
+| `soc-orchestrator` | điều phối SOC (SOC lead) | — | giao việc cho 4 đội, giữ case chung, canh SLA, xử lý bất đồng bằng bằng chứng, chuyển phê duyệt; mẫu case chung `reference/case-record.md` |
+| `client-user` | client (người dùng/máy bình thường) | — | hoạt động nền lành tính theo vai + danh mục hoạt động hợp lệ dễ bị nhầm là tấn công (`reference/benign-lookalikes.md`) |
 
-Tổng 55 NICE task — mỗi task thuộc đúng một đội. Mỗi đội có mục **bàn giao** (MON ↔ IR ↔ HUNT ↔ CNT) để các
-agent phối hợp trên cùng một case.
+Tổng 55 NICE task — mỗi task thuộc đúng một đội. Mỗi đội có mục **bàn giao** (MON ↔ IR ↔ HUNT ↔ CNT), đi qua
+agent điều phối và ghi theo mẫu case chung — đây là cấu hình "4 specialist + shared case state + orchestrator" (B3)
+của `docs/BENCHMARK_PROTOCOL.md`. Agent client sinh nền lành tính thay cho script `client_driver.py` khi được LLM-hoá.
 
 **Vị trí trong lộ trình:** skill là markdown — không cần Docker, không tốn quota. Ở H5 agent LLM của từng đội
 nạp skill tương ứng; harness chuyển sản phẩm làm việc của agent thành bài nộp theo

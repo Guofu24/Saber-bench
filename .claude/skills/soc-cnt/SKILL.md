@@ -45,6 +45,8 @@ kiểm thử trên corpus (dương + mẫu âm) ─► đóng gói theo phiên b
 - **← IR (`soc-ir`) / HUNT (`soc-hunt`) / TI**: kỹ thuật, IOC, TTP mới từ sự cố và đợt săn ⇒ rule và use-case.
 - **→ MON**: rule mới/rule đã tối ưu (kèm ghi chú phát hành, ví dụ TP/FP đã kiểm).
 - **→ HUNT**: use-case hunting có truy vấn chạy được.
+- Mọi bàn giao đi qua điều phối (`soc-orchestrator`) và ghi theo mẫu case chung
+  `soc-orchestrator/reference/case-record.md`.
 
 ## Nguyên tắc nghề
 

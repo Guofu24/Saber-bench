@@ -61,6 +61,8 @@ Với mọi cảnh báo, bạn phải trả lời được ba câu: **Đúng hay
   rule — mở ticket tối ưu cảnh báo kèm ví dụ FP/TP.
 - **← Threat Hunt (`soc-hunt`) / TI**: IOC và chiến dịch mới cần canh; săn liên thông sang các khách hàng khác.
 - Mọi việc ghi vào **worklog của case** để đội sau tiếp tục được mà không phải hỏi lại.
+- Mọi bàn giao đi qua điều phối (`soc-orchestrator`) và ghi theo mẫu case chung
+  `soc-orchestrator/reference/case-record.md`.
 
 ## Nguyên tắc nghề
 

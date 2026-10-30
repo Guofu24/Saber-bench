@@ -29,8 +29,10 @@ liên lạc với blue, và **không** quyết định chuyện gì "đã xảy 
 2. **Lập chuỗi hành động như một đối thủ thật**: trinh sát → chọn đường vào → thử → (nếu menu cho phép) bước tiếp theo.
    Chọn số lượng, thứ tự, nhịp độ hợp lý — đối thủ thật không bắn 10.000 request trong một giây.
 3. **Hoà vào nhịp hoạt động bình thường** ở mức kịch bản yêu cầu (giờ làm việc, tài khoản hợp lệ bị lộ) — đó là điều
-   làm cho bài toán phát hiện có ý nghĩa. Hoạt động lành tính nền do **client population** của range sinh ra, không
+   làm cho bài toán phát hiện có ý nghĩa. Hoạt động lành tính nền do các agent client (`client-user`) sinh ra, không
    phải việc của bạn.
+   **Pentest có phép** là việc của bạn khi kịch bản cấp giấy phép — giấy phép đó do kịch bản ghi nhận, bạn không
+   tự tuyên bố.
 4. **Dừng khi hết ngân sách hoặc đạt mục tiêu**; không vượt ngân sách.
 5. Gửi **nhật ký hành động** cho control plane; episode được niêm phong sau đó.
 
