@@ -224,29 +224,31 @@ Blue **không phải một khối**: nó là cả một tổ chức SOC nhiều 
 vai = **1 skill chi tiết** (playbook: nhiệm vụ, input được/không được đọc, quy trình, output) **+ 1
 hợp đồng chấm** (chấm vs sự thật độc lập, hoặc trung thực ghi "chưa chấm"). Reverse chỉ là *một* vai.
 
-Skill đã viết sẵn ở `.claude/skills/` (dạng playbook `DESIGN_ONLY` — agent LLM nạp chúng ở H5; hôm
-nay vai chạy ở dạng scripted):
+Skill viết **theo đúng 4 nghiệp vụ của catalog** (`catalog/services.json` — cũng là 4 specialist B2/B3
+trong `docs/BENCHMARK_PROTOCOL.md`), mỗi skill phủ **toàn bộ** NICE task + subtask của nghiệp vụ đó, rút
+trực tiếp từ `catalog/subtasks.json` (kịch bản, HV vào/ra, mục chấm, gate/cap/penalty, mẫu âm bắt buộc)
+và từ code chấm (`src/saber/grading/`). Các vai chuyên sâu nằm **bên trong** nghiệp vụ mà catalog xếp
+chúng vào (vd phân tích mã độc/dịch ngược và forensics thuộc IR; threat intel trải ở CNT và HUNT).
 
-| Vai | Skill | Chấm được? | Nguồn sự thật độc lập |
+| Skill | Nghiệp vụ | Phủ | Vai chuyên sâu bên trong |
 |---|---|---|---|
-| Trực vận hành / Tier-1 | `soc-monitoring-triage` | ✅ ngay | set-delta `T1347.001` |
-| Threat Hunting | `soc-threat-hunting` | ⚠️ artifact-only | entity set server-side (yếu tới H7) |
-| Incident Response | `soc-incident-response` | ✅ ngay | state-change filesystem thật |
-| Detection Engineering | `soc-detection-engineering` | ✅ ngay | set-delta `T0020.001` (held-out) |
-| Threat Intel | `soc-threat-intel` | ⛔ blocked | cần corpus intel độc lập (chưa có) |
-| Malware / Reverse | `soc-malware-reverse` | ✅ khi có Docker | **build-manifest** (ta tự compile) |
-| Forensics / DFIR | `soc-forensics-dfir` | ⛔ blocked | cần VM/artifact lab (CR-1) |
-| Red — initial access | `redteam-initial-access` | — (generator) | truth từ effect verifier |
-| Red — post-exploitation | `redteam-post-exploitation` | — (generator) | truth từ effect verifier |
+| `saber-episode-contract` | chung | hợp đồng làm bài | đọc episode, schema nộp, chuẩn hoá, CITE, gate/cap/penalty, file/soc/vm, engine rule |
+| `soc-mon` | MON — Vận hành giám sát 24/7 | 16 task / 58 subtask | Tier 1/2, kiểm chứng cảnh báo, 10 nhóm cảnh báo, vòng đời case, phản ứng nhanh |
+| `soc-cnt` | CNT — Content Security | 5 task / 15 subtask | detection engineering, YARA/Suricata, tối ưu FP, độ phủ ATT&CK, TI → rule |
+| `soc-hunt` | HUNT — Threat Hunt / CA | 13 task / 39 subtask | săn tệp/webshell, phân tích xâm nhập, ATT&CK, rà cấu hình, TI về TTP |
+| `soc-ir` | IR — Xử lý sự cố | 21 task / 63 subtask | triage/điều phối, forensics, bộ nhớ, PCAP, **malware/reverse**, quy kết, diệt trừ, báo cáo |
+| `redteam-initial-access` | red (generator) | — | hành vi tiếp cận ban đầu + mẫu âm bắt buộc mà subtask blue cần |
+| `redteam-post-exploitation` | red (generator) | — | hành vi sau xâm nhập + mẫu âm; phần lớn cần container/VM |
 
-**Nguyên tắc trung thực:** vai có hợp đồng + sự thật độc lập thì chấm; vai chưa có thì tạo artifact
-thật và báo "chưa chấm", **không bịa điểm** (đúng tinh thần Phase G: Hunt/IR là artifact thật, không
-claim coverage nguồn khi không có contract khớp).
+Tổng: 55 task / 175 subtask — mỗi subtask thuộc đúng một skill nghiệp vụ.
 
-**Vị trí trong lộ trình:** viết skill là markdown — **không cần Docker, không tốn quota, làm được
-ngay**. Ở H5 các vai chấm-được (Monitoring, Detection Eng, IR) + Reverse(scorer) được LLM-hóa và nạp
-skill; các vai blocked (Threat Intel, Forensics) chờ nguồn sự thật/lab tương ứng. Red skills gắn vào
-driver allowlist ở H5/H7.
+**Nguyên tắc trung thực:** mỗi skill ghi rõ mode (`file`/`soc`/`vm`), phần nào chỉ chạy được trên fixture
+DEV (`VERIFIED_OFFLINE`) và phần nào cần hệ thống thật (`BLOCKED_INTEGRATION`); 163/175 subtask hiện dùng
+fixture **cấu trúc** DEV — điểm trên đó không chứng minh năng lực nghiệp vụ. Không bịa điểm, không claim
+`READY_BENCHMARK`.
+
+**Vị trí trong lộ trình:** skill là markdown — không cần Docker, không tốn quota. Ở H5 agent LLM của từng
+nghiệp vụ nạp skill tương ứng; red skills gắn vào driver allowlist ở H5/H7.
 
 ## 8. Ranh giới một dòng (không đổi)
 
