@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -48,9 +49,16 @@ def list_profiles() -> None:
 @click.option("--out", type=click.Path(path_type=Path), required=True)
 @click.option("--name", default="saber-lab", show_default=True)
 @click.option("--clients", type=click.IntRange(1, 100), default=4, show_default=True)
-def init_profile(profile: ProfileName, out: Path, name: str, clients: int) -> None:
+@click.option("--tick-seconds", type=click.FloatRange(0.01, 3600), default=2.0, show_default=True)
+def init_profile(
+    profile: ProfileName, out: Path, name: str, clients: int, tick_seconds: float
+) -> None:
     try:
-        config = EnvironmentConfig(name=name, profile=profile, world=default_config(clients))
+        config = EnvironmentConfig(
+            name=name,
+            profile=profile,
+            world=default_config(clients).model_copy(update={"tick_seconds": tick_seconds}),
+        )
     except ValidationError:
         raise click.ClickException(
             "Name must contain lowercase letters, digits and hyphens."
@@ -87,4 +95,150 @@ def render_profile(config: Path, out: Path) -> None:
     except (OSError, ValueError):
         raise click.ClickException(
             "Could not export bundle; use a new destination and check public source files."
+        ) from None
+
+
+@env.command(
+    "run",
+    help="Run on THIS host. VM/remote profiles require --on-target in the guest/server terminal.",
+)
+@click.option("--config", type=click.Path(path_type=Path), required=True)
+@click.option("--out", type=click.Path(path_type=Path), required=True)
+@click.option("--ticks", type=click.IntRange(1), default=30, show_default=True)
+@click.option("--forever", is_flag=True)
+@click.option(
+    "--on-target",
+    is_flag=True,
+    help="Acknowledge that this command runs on the intended VM/server.",
+)
+@click.option("--resume", is_flag=True)
+@click.option("--llm", is_flag=True)
+@click.option("--call-budget", type=click.IntRange(1), default=None)
+@click.option("--key-pool", type=click.Path(path_type=Path), default=Path("keys_pool.txt"))
+@click.option("--model", default="gemini-3.5-flash-lite", show_default=True)
+@click.pass_context
+def run_profile(
+    ctx: click.Context,
+    config: Path,
+    out: Path,
+    ticks: int,
+    forever: bool,
+    on_target: bool,
+    resume: bool,
+    llm: bool,
+    call_budget: int | None,
+    key_pool: Path,
+    model: str,
+) -> None:
+    from saber.environments.lifecycle import prepare_world
+    from saber.world.cli import run_world
+
+    cfg = load(config)
+    if cfg.profile == "sandbox":
+        raise click.ClickException(
+            "Use env render + env up for sandbox; no local fallback was started."
+        )
+    if cfg.profile in ("vm", "remote") and not on_target:
+        raise click.ClickException(
+            "Run this command inside the chosen guest/server with --on-target. No remote host is provisioned."
+        )
+    if llm != (call_budget is not None):
+        raise click.ClickException("--llm and --call-budget must be supplied together.")
+    try:
+        prepare_world(cfg, out)
+    except (OSError, ValueError, RuntimeError):
+        raise click.ClickException(
+            "Cannot prepare world: check configuration compatibility and runner lock."
+        ) from None
+    click.echo(f"Profile {cfg.profile}: executing on this host; application world only.")
+    ctx.invoke(
+        run_world,
+        out=out,
+        ticks=ticks,
+        forever=forever,
+        resume=resume,
+        llm=llm,
+        call_budget=call_budget,
+        key_pool=key_pool,
+        model=model,
+    )
+
+
+@env.command(
+    "up", help="Build/start a sandbox bundle. Gemini egress/key mount requires explicit --llm."
+)
+@click.option("--bundle", type=click.Path(path_type=Path), required=True)
+@click.option("--llm", is_flag=True)
+@click.option("--call-budget", type=click.IntRange(1), default=None)
+@click.option("--key-pool", type=click.Path(path_type=Path), default=None)
+@click.option("--model", default="gemini-3.5-flash-lite", show_default=True)
+@click.option("--resume", is_flag=True)
+def up_profile(
+    bundle: Path,
+    llm: bool,
+    call_budget: int | None,
+    key_pool: Path | None,
+    model: str,
+    resume: bool,
+) -> None:
+    from saber.environments.lifecycle import sandbox_up
+
+    try:
+        sandbox_up(
+            bundle, llm=llm, call_budget=call_budget, key_pool=key_pool, model=model, resume=resume
+        )
+    except (OSError, ValueError, subprocess.SubprocessError):
+        raise click.ClickException(
+            "Sandbox start failed. Check bundle integrity, Linux engine, build access and explicit Gemini arguments. Raw diagnostics are redacted."
+        ) from None
+    emit(
+        {
+            "start_requested": True,
+            "profile": "sandbox",
+            "llm": llm,
+            "note": "Use env status/report to verify the running worker and inference; startup is not proof of successful API calls.",
+        }
+    )
+
+
+@env.command("down", help="Stop/remove this bundle's container. Preserve its named data volume.")
+@click.option("--bundle", type=click.Path(path_type=Path), required=True)
+def down_profile(bundle: Path) -> None:
+    from saber.environments.lifecycle import sandbox_down
+
+    try:
+        sandbox_down(bundle)
+    except (OSError, ValueError, subprocess.SubprocessError):
+        raise click.ClickException(
+            "Could not stop sandbox; check the bundle and Docker engine."
+        ) from None
+    emit({"stopped": True, "data_volume": "preserved", "resume": "env up --bundle PATH --resume"})
+
+
+@env.command("status", help="Read sandbox container status, including stopped containers.")
+@click.option("--bundle", type=click.Path(path_type=Path), required=True)
+def status_profile(bundle: Path) -> None:
+    from saber.environments.lifecycle import sandbox_status
+
+    try:
+        click.echo(sandbox_status(bundle) or "No containers exist for this bundle.")
+    except (OSError, ValueError, subprocess.SubprocessError):
+        raise click.ClickException(
+            "Cannot read sandbox status; check the bundle and Docker engine."
+        ) from None
+
+
+@env.command(
+    "report", help="Copy the sandbox report to a new local file before removing its container."
+)
+@click.option("--bundle", type=click.Path(path_type=Path), required=True)
+@click.option("--out", type=click.Path(path_type=Path), required=True)
+def report_profile(bundle: Path, out: Path) -> None:
+    from saber.environments.lifecycle import sandbox_report
+
+    try:
+        emit(sandbox_report(bundle, out))
+    except (OSError, ValueError, subprocess.SubprocessError):
+        raise click.ClickException(
+            "Cannot export report. Use a new output path and an existing container with a report."
         ) from None
