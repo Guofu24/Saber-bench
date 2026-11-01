@@ -60,3 +60,11 @@ def test_tampered_bundle_and_forged_privileged_compose_are_rejected(tmp_path):
     manifest_path.write_text(json.dumps(manifest))
     with pytest.raises(ValueError, match="supported sandbox"):
         verify_bundle(root)
+
+
+def test_extra_build_context_file_is_not_silently_baked_into_image(tmp_path):
+    root = tmp_path / "bundle"
+    render_bundle(EnvironmentConfig(name="example", profile="sandbox"), root)
+    (root / "source/private.txt").write_text("private-not-for-image")
+    with pytest.raises(ValueError, match="Untracked build-context"):
+        verify_bundle(root)

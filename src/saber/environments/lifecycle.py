@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import uuid
 from pathlib import Path
 from typing import Any
 
@@ -90,7 +91,8 @@ def sandbox_up(
     command = compose_command(bundle)
     if invoke([command[0], "info", "--format", "{{.OSType}}"], timeout=10) != "linux":
         raise ValueError("A running Linux Docker engine is required.")
-    environment = {"SABER_ENV_RESUME": "1" if resume else "0"}
+    # A fresh operator request is consumed once; crash restarts must not clear STOP.
+    environment = {"SABER_ENV_RESUME": uuid.uuid4().hex if resume else "0"}
     if llm:
         command[-1] = str(bundle.resolve() / "compose.gemini.yaml")
         assert key_pool is not None

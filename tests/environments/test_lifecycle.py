@@ -121,3 +121,19 @@ def test_exported_runtime_boots_without_original_repository(tmp_path):
     assert result.returncode == 0, result.stdout + result.stderr
     report = json.loads((tmp_path / "data/report.json").read_text())
     assert report["tick"] == 2 and report["metrics"]["requests"] > 0
+
+
+def test_container_resume_is_consumed_once_and_crash_cannot_clear_later_stop(tmp_path):
+    from saber.environments.worker import consume_resume
+
+    stop = tmp_path / "STOP"
+    stop.write_text("operator stop")
+    consume_resume(tmp_path, "a" * 32)
+    assert not stop.exists()
+    stop.write_text("new operator stop")
+    consume_resume(tmp_path, "a" * 32)
+    assert stop.read_text() == "new operator stop"
+    consume_resume(tmp_path, "0")
+    assert stop.exists()
+    consume_resume(tmp_path, "b" * 32)
+    assert not stop.exists()

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import signal
 from pathlib import Path
 from types import FrameType
@@ -11,6 +12,22 @@ from types import FrameType
 from saber.environments.lifecycle import prepare_world
 from saber.environments.models import read_config
 from saber.world.cli import run_world
+from saber.world.runtime import WorldLock, atomic_json
+
+
+def consume_resume(out: Path, token: str) -> None:
+    if not re.fullmatch(r"[a-f0-9]{32}", token):
+        return
+    import json
+
+    with WorldLock(out):
+        receipt = out / "resume-request.json"
+        previous = json.loads(receipt.read_text(encoding="utf-8")) if receipt.exists() else {}
+        if previous.get("token") == token:
+            return
+        # Record before clearing STOP, so a crash never grants a second clear.
+        atomic_json(receipt, {"token": token})
+        (out / "STOP").unlink(missing_ok=True)
 
 
 def main() -> None:
@@ -32,8 +49,7 @@ def main() -> None:
     previous = signal.signal(signal.SIGTERM, stop)
     argv = ["--out", str(args.out)]
     argv += ["--ticks", str(args.ticks)] if args.ticks else ["--forever"]
-    if os.environ.get("SABER_ENV_RESUME") == "1":
-        argv += ["--resume"]
+    consume_resume(args.out, os.environ.get("SABER_ENV_RESUME", "0"))
     if os.environ.get("SABER_ENV_LLM") == "1":
         argv += [
             "--llm",

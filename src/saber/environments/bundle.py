@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -207,6 +209,10 @@ def verify_bundle(root: Path) -> EnvironmentConfig:
     manifest = json.loads((root / "bundle-manifest.json").read_text(encoding="utf-8"))
     if manifest.get("schema_version") != 1 or not isinstance(manifest.get("files"), dict):
         raise ValueError("Unsupported bundle manifest.")
+    if not isinstance(manifest.get("project"), str) or not re.fullmatch(
+        r"[a-z][a-z0-9-]{0,59}", manifest["project"]
+    ):
+        raise ValueError("Invalid Compose project name.")
     required = {"environment.json", "source/pyproject.toml", "source/uv.lock", "source/Dockerfile"}
     if not required.issubset(manifest["files"]):
         raise ValueError("Incomplete bundle manifest.")
@@ -216,6 +222,14 @@ def verify_bundle(root: Path) -> EnvironmentConfig:
             raise ValueError("Invalid bundle file path.")
         if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
             raise ValueError("Bundle contents changed; render a new bundle before launch.")
+    for directory, dirs, files in os.walk(root / "source", followlinks=False):
+        if any((Path(directory) / name).is_symlink() for name in dirs):
+            raise ValueError("Symlinked source directories are unsupported.")
+        dirs[:] = [name for name in dirs if name not in (".venv", "__pycache__")]
+        for name in files:
+            path = Path(directory) / name
+            if path.relative_to(root).as_posix() not in manifest["files"]:
+                raise ValueError("Untracked build-context file; render a clean bundle.")
     config = EnvironmentConfig.model_validate_json(
         (root / "environment.json").read_text(encoding="utf-8")
     )
