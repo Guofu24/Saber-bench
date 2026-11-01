@@ -44,7 +44,7 @@ class WorldLock(AbstractContextManager["WorldLock"]):
             if os.name == "nt":
                 import msvcrt
 
-                msvcrt.locking(self.file.fileno(), msvcrt.LK_NBLCK, 1) # type: ignore[attr-defined]
+                msvcrt.locking(self.file.fileno(), msvcrt.LK_NBLCK, 1)  # type: ignore[attr-defined]
             else:
                 fcntl = importlib.import_module("fcntl")
                 fcntl.flock(self.file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -63,7 +63,7 @@ class WorldLock(AbstractContextManager["WorldLock"]):
             if os.name == "nt":
                 import msvcrt
 
-                msvcrt.locking(self.file.fileno(), msvcrt.LK_UNLCK, 1) # type: ignore[attr-defined]
+                msvcrt.locking(self.file.fileno(), msvcrt.LK_UNLCK, 1)  # type: ignore[attr-defined]
             else:
                 fcntl = importlib.import_module("fcntl")
                 fcntl.flock(self.file.fileno(), fcntl.LOCK_UN)

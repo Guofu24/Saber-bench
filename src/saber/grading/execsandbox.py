@@ -129,9 +129,9 @@ def _rlimit_preexec() -> Any:
     except ImportError:  # pragma: no cover - non-POSIX
         return None
 
-    setrlimit = resource.setrlimit  
-    rlimit_cpu = resource.RLIMIT_CPU  
-    rlimit_as = resource.RLIMIT_AS  
+    setrlimit = resource.setrlimit
+    rlimit_cpu = resource.RLIMIT_CPU
+    rlimit_as = resource.RLIMIT_AS
 
     def _apply() -> None:  # pragma: no cover - runs in the child before exec
         setrlimit(rlimit_cpu, (6, 6))
