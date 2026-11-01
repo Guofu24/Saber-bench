@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "name": "existing-services-demo",
+  "profile": "local",
+  "services": [
+    {
+      "name": "existing-siem",
+      "capability": "siem",
+      "api_base_url": "https://siem.lab.example",
+      "health_check_path": "/REPLACE_WITH_HEALTH_PATH",
+      "credential_env_name": "SABER_SIEM_TOKEN",
+      "approved_for_read_only_use": false
+    },
+    {
+      "name": "existing-soar",
+      "capability": "soar",
+      "api_base_url": "https://soar.lab.example",
+      "health_check_path": "/REPLACE_WITH_HEALTH_PATH",
+      "credential_env_name": "SABER_SOAR_TOKEN",
+      "approved_for_read_only_use": false
+    }
+  ]
+}
