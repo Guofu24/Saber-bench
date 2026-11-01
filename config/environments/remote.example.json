@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "name": "remote-demo",
+  "profile": "remote",
+  "services": []
+}

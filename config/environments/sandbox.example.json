@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "name": "sandbox-demo",
+  "profile": "sandbox",
+  "resources": {"memory_mb": 2048, "cpus": 2, "pids": 256},
+  "services": []
+}
