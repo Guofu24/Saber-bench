@@ -73,3 +73,18 @@ def init_profile(profile: ProfileName, out: Path, name: str, clients: int) -> No
 def validate_profile(config: Path) -> None:
     cfg = load(config)
     emit({"valid": True, "name": cfg.name, "services": len(cfg.services), **describe(cfg.profile)})
+
+
+@env.command("render", help="Export a portable bundle without keys, local data or host changes.")
+@click.option("--config", type=click.Path(path_type=Path), required=True)
+@click.option("--out", type=click.Path(path_type=Path), required=True)
+def render_profile(config: Path, out: Path) -> None:
+    from saber.environments.bundle import render_bundle
+
+    cfg = load(config)
+    try:
+        emit(render_bundle(cfg, out))
+    except (OSError, ValueError):
+        raise click.ClickException(
+            "Could not export bundle; use a new destination and check public source files."
+        ) from None
