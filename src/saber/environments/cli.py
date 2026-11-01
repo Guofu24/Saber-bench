@@ -99,6 +99,25 @@ def render_profile(config: Path, out: Path) -> None:
 
 
 @env.command(
+    "doctor",
+    help="Inspect this host without changes; optionally probe explicitly approved service health URLs.",
+)
+@click.option("--config", type=click.Path(path_type=Path), required=True)
+@click.option(
+    "--probe-services",
+    is_flag=True,
+    help="GET only approved health URLs; no redirects or automatic service setup.",
+)
+def doctor_profile(config: Path, probe_services: bool) -> None:
+    from saber.environments.diagnostics import doctor
+
+    report = doctor(load(config), probe_services=probe_services)
+    emit(report)
+    if report["blockers"]:
+        raise click.exceptions.Exit(1)
+
+
+@env.command(
     "run",
     help="Run on THIS host. VM/remote profiles require --on-target in the guest/server terminal.",
 )
