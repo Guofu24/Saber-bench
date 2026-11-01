@@ -648,6 +648,10 @@ class World:
                 if metrics["cases"]
                 else None,
                 "llm": self.store.get("meta", "llm_usage", {}),
+                "llm_key_layout": self.store.get("meta", "llm_key_layout", "off"),
+                "llm_pools": self.store.items("llm-pools")
+                if self.store.get("meta", "llm_key_layout") == "teams"
+                else {},
                 "mean_detection_ticks": round(
                     metrics.get("detection_delay_ticks_sum", 0) / metrics["detected_incidents"], 3
                 )

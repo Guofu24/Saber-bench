@@ -5,7 +5,9 @@
 `saber world` runs all three populations in one persistent local application lab,
 with real HTTP telemetry, durable client state, specialized SOC cases and verified
 application responses. Scripted by default; optional Gemini plans use the existing
-key pool with persistent budgets and project quota limits. See
+key pool with persistent budgets and project quota limits. Gemini runs default to
+separate key queues: first 200 for clients, next 200 for red, remaining keys for blue;
+each queue advances on quota/errors and resumes after restart. See
 [the Vietnamese operator guide](docs/CONTINUOUS_WORLD_VI.md) for scope, configuration,
 LLM activation, the 3D viewer, and limitations.
 

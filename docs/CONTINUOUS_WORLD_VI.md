@@ -81,6 +81,45 @@ toàn bộ vòng đời world, bao gồm các lần khởi động lại:
 hay đổi tier. `--call-budget` là trần lượt thử HTTP, không phải trần tiền USD và không
 khẳng định mọi project đều miễn phí. Nâng giá trị này là quyết định của người vận hành.
 
+### Ba hàng đợi key riêng cho client / red / blue
+
+Khi bật `--llm`, mặc định `--key-layout teams` chia theo thứ tự key trong file:
+
+| Đội | Vị trí key (đếm từ 1) | Số lượng với file 602 key |
+|---|---|---|
+| Client | 1–200 | 200 |
+| Red | 201–400 | 200 |
+| Blue | 401 đến cuối file | 202 |
+
+Mỗi đội giữ key đang active cho đến khi chạm giới hạn cục bộ hoặc gặp lỗi quota/API,
+rồi chọn key kế tiếp còn khả dụng trong **chính pool của đội đó**. Key bị `429` nghỉ
+theo cooldown và có thể dùng lại sau khi hồi quota. Vị trí active được lưu bằng
+fingerprint, nên restart tiếp tục đúng hàng đợi mà không lưu key thật vào database.
+Nếu cả pool của một đội hết, suy luận của đội đó chờ đợt lập kế hoạch tiếp theo;
+baseline scripted tiếp tục chạy và hai đội còn lại vẫn dùng pool của mình. Không
+mượn key chéo đội.
+
+Một yêu cầu suy luận thử tối đa 3 key khi gặp lỗi có thể chuyển tiếp; nếu vẫn thất
+bại, lần lập kế hoạch sau tiếp tục từ vị trí đã lưu. Dừng runner sẽ ngăn phát sinh
+thêm lượt thử mới. Tất cả lượt thử vẫn tính vào `--call-budget` **chung cho toàn world**:
+`200` là 200 lượt API tổng, không phải 200 lượt/key hoặc mỗi đội.
+
+Không cần đổi lệnh đã hướng dẫn để bật cách chia này. Có thể ghi rõ:
+
+```powershell
+.\.venv\Scripts\python.exe -m saber.cli.main world supervise --out runs\world-gemini --llm --key-pool keys_pool.txt --key-layout teams --call-budget 200
+```
+
+`report.json` có `llm_pools.client/red/blue` (dải key, vị trí active, trạng thái), và
+`llm.by_team` (attempts/successes/token theo đội). Chỉ hiện số thứ tự, không hiện key.
+`--client-keys` và `--red-keys` đổi kích thước hai phần đầu nếu cần; blue nhận phần còn
+lại. `--key-layout shared` chọn lại pool chung cũ, hữu ích khi chỉ có ít key.
+
+Dòng trống và comment `#` không được tính vào vị trí; hỗ trợ `NAME=key` và UTF-8 BOM.
+Ở chế độ `teams`, file phải có ít nhất 401 key duy nhất với cấu hình mặc định. Key
+trùng bị báo lỗi trước khi gọi API để không âm thầm dịch ranh giới 200/400 hoặc dùng
+chung một key giữa hai đội. File gốc không bị sửa, sao chép hay tách thành ba file.
+
 Scheduler có các trần cục bộ `--project-rpm` (mặc định 2), `--project-rpd` (20, cửa sổ
 24 giờ trượt), `--project-tpm` (100000). Đây là **giới hạn do ứng dụng đặt**, không phải
 quota Google được bảo đảm. Token được dự trữ bảo thủ theo độ dài prompt cộng output
@@ -95,7 +134,8 @@ thuộc cùng project, truyền `--project-map config/project-map.json`, nội d
 {"0": "project-a", "1": "project-a", "2": "project-b"}
 ```
 
-Index là vị trí zero-based **sau khi loại key trùng**. Mapping giúp gộp quota, không
+Index là vị trí zero-based của key sau khi bỏ dòng trống/comment (`teams` yêu cầu
+key duy nhất; `shared` loại key trùng như trước). Mapping giúp gộp quota, không
 chứa key. Giữ alias ổn định giữa các lần chạy. Key không được lưu trong DB, log, prompt,
 viewer hay filesystem của ứng dụng lab; DB chỉ giữ fingerprint và counters.
 

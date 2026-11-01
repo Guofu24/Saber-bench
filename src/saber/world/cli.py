@@ -11,10 +11,12 @@ import click
 from pydantic import ValidationError
 
 from saber.agents.gemini import KeyPool
+from saber.agents.provider import LLMProvider
 from saber.domain.errors import SaberError
 from saber.population.office import OfficeEmitter
+from saber.world.key_layout import TeamKeyLayout
 from saber.world.models import WorldConfig, default_config
-from saber.world.quota import QuotaProvider
+from saber.world.quota import QuotaProvider, TeamQuotaProvider
 from saber.world.runtime import Runner, WorldLock, atomic_json
 from saber.world.store import Store
 
@@ -71,6 +73,15 @@ def init_world(out: Path, clients: int, seed: int, tick_seconds: float) -> None:
 )
 @click.option("--model", default="gemini-2.5-flash", show_default=True)
 @click.option(
+    "--key-layout",
+    type=click.Choice(["teams", "shared"]),
+    default="teams",
+    show_default=True,
+    help="teams: first 200 keys for clients, next 200 red, rest blue; queues never borrow keys.",
+)
+@click.option("--client-keys", type=click.IntRange(1), default=200, show_default=True)
+@click.option("--red-keys", type=click.IntRange(1), default=200, show_default=True)
+@click.option(
     "--project-map",
     type=click.Path(path_type=Path, exists=True, dir_okay=False),
     default=None,
@@ -89,6 +100,9 @@ def run_world(
     call_budget: int | None,
     key_pool: Path,
     model: str,
+    key_layout: str,
+    client_keys: int,
+    red_keys: int,
     project_map: Path | None,
     project_rpm: int,
     project_rpd: int,
@@ -118,7 +132,7 @@ def run_world(
                 )
             store = Store(out)
             resources.callback(store.close)
-            provider = None
+            provider: LLMProvider | None = None
             if llm:
                 groups = json.loads(project_map.read_text(encoding="utf-8")) if project_map else {}
                 if not isinstance(groups, dict) or any(
@@ -127,16 +141,34 @@ def run_world(
                     raise ValueError(
                         "Project map must be an object of key-index strings to project alias strings."
                     )
-                provider = QuotaProvider(
-                    store,
-                    KeyPool.from_file(key_pool),
-                    model=model,
-                    call_budget=int(call_budget or 0),
-                    rpm=project_rpm,
-                    rpd=project_rpd,
-                    tpm=project_tpm,
-                    project_groups=groups,
-                )
+                if key_layout == "teams":
+                    layout = TeamKeyLayout.from_file(
+                        key_pool, client_keys=client_keys, red_keys=red_keys
+                    )
+                    provider = TeamQuotaProvider(
+                        store,
+                        layout,
+                        model=model,
+                        call_budget=int(call_budget or 0),
+                        rpm=project_rpm,
+                        rpd=project_rpd,
+                        tpm=project_tpm,
+                        project_groups=groups,
+                    )
+                    click.echo(
+                        f"Gemini key queues: {layout.counts()} (file order; independent team queues)."
+                    )
+                else:
+                    provider = QuotaProvider(
+                        store,
+                        KeyPool.from_file(key_pool),
+                        model=model,
+                        call_budget=int(call_budget or 0),
+                        rpm=project_rpm,
+                        rpd=project_rpd,
+                        tpm=project_tpm,
+                        project_groups=groups,
+                    )
             runner = Runner(store, config, provider=provider, emitter=OfficeEmitter(office_url))
             resources.callback(runner.close)
             click.echo(

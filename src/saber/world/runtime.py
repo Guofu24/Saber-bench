@@ -21,6 +21,7 @@ from saber.population.office import OfficeEmitter
 from saber.world.agents import baseline, llm_messages, parse_plan
 from saber.world.environment import World
 from saber.world.models import Action, Actor, WorldConfig
+from saber.world.quota import TeamQuotaProvider
 from saber.world.service import LabServer
 from saber.world.store import Store
 
@@ -104,7 +105,15 @@ class Planner:
             try:
                 if self.exhausted:
                     raise BudgetExceeded("Persistent LLM budget exhausted.")
-                response = self.provider.generate(llm_messages(actor, obs), max_tokens=1024)
+                if isinstance(self.provider, TeamQuotaProvider):
+                    response = self.provider.generate_for(
+                        actor.team,
+                        llm_messages(actor, obs),
+                        max_tokens=1024,
+                        should_stop=self.stopping.is_set,
+                    )
+                else:
+                    response = self.provider.generate(llm_messages(actor, obs), max_tokens=1024)
                 actions, note = parse_plan(actor, response.text)
             except BudgetExceeded:
                 self.exhausted = True
@@ -144,6 +153,15 @@ class Runner:
         self.world = World(store, config)
         with store.transaction():
             store.put("meta", "engine", "hybrid" if provider else "scripted")
+            store.put(
+                "meta",
+                "llm_key_layout",
+                "teams"
+                if isinstance(provider, TeamQuotaProvider)
+                else "shared"
+                if provider
+                else "off",
+            )
         self.server = LabServer(self.world)
         self.emitter = emitter or OfficeEmitter()
         self.planner = (
