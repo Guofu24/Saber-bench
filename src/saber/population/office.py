@@ -63,10 +63,12 @@ class OfficeEmitter:
 
     # --- event helpers ---------------------------------------------------------------------------
     def register_agents(self) -> None:
-        self._send([
-            {"type": "agent", "id": aid, "name": name, "role": role, "color": color}
-            for aid, (name, role, color) in ROLE_AGENTS.items()
-        ])
+        self._send(
+            [
+                {"type": "agent", "id": aid, "name": name, "role": role, "color": color}
+                for aid, (name, role, color) in ROLE_AGENTS.items()
+            ]
+        )
 
     def agent(self, agent_id: str, name: str, role: str, color: str | None = None) -> None:
         ev: dict[str, Any] = {"type": "agent", "id": agent_id, "name": name, "role": role}
@@ -81,7 +83,9 @@ class OfficeEmitter:
         self._send([{"type": "llm_start", "id": agent_id, "model": model}])
 
     def llm_end(self, agent_id: str, ms: int, text: str, usage: dict[str, int]) -> None:
-        self._send([{"type": "llm_end", "id": agent_id, "ms": ms, "text": text[:280], "usage": usage}])
+        self._send(
+            [{"type": "llm_end", "id": agent_id, "ms": ms, "text": text[:280], "usage": usage}]
+        )
 
     def tool(self, agent_id: str, name: str) -> None:
         self._send([{"type": "tool", "id": agent_id, "name": name}])

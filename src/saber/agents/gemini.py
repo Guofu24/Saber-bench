@@ -56,8 +56,12 @@ class KeyPool:
 
     keys: list[str] = field(default_factory=list)
     _idx: int = 0
-    _disabled: set[int] = field(default_factory=set)  # permanently out (bad key / model not available)
-    _cooldown: dict[int, float] = field(default_factory=dict)  # idx -> monotonic time it may be used again
+    _disabled: set[int] = field(
+        default_factory=set
+    )  # permanently out (bad key / model not available)
+    _cooldown: dict[int, float] = field(
+        default_factory=dict
+    )  # idx -> monotonic time it may be used again
 
     @classmethod
     def from_file(cls, path: str | Path) -> KeyPool:
@@ -111,7 +115,11 @@ class KeyPool:
     def next_cooldown_eta(self) -> float | None:
         """Seconds until the soonest cooling key is usable again (None if none are cooling)."""
         now = time.monotonic()
-        etas = [until - now for i, until in self._cooldown.items() if i not in self._disabled and until > now]
+        etas = [
+            until - now
+            for i, until in self._cooldown.items()
+            if i not in self._disabled and until > now
+        ]
         return min(etas) if etas else None
 
     def current(self) -> tuple[int, str]:
@@ -124,7 +132,9 @@ class KeyPool:
             if self._available(self._idx, now):
                 return self._idx, self.keys[self._idx]
             self._idx = (self._idx + 1) % n
-        raise IntegrationBlocked("Gemini key pool exhausted: every key is disabled or cooling down.")
+        raise IntegrationBlocked(
+            "Gemini key pool exhausted: every key is disabled or cooling down."
+        )
 
     def advance(self) -> None:
         if self.keys:
@@ -174,7 +184,9 @@ def _to_gemini_contents(messages: list[dict[str, Any]]) -> tuple[list[dict[str, 
         if role == "system":
             system.append(text)
             continue
-        contents.append({"role": "model" if role == "assistant" else "user", "parts": [{"text": text}]})
+        contents.append(
+            {"role": "model" if role == "assistant" else "user", "parts": [{"text": text}]}
+        )
     return contents, ("\n\n".join(system) if system else None)
 
 
@@ -255,7 +267,10 @@ class GeminiProvider:
             )
 
         contents, system = _to_gemini_contents(messages)
-        body: dict[str, Any] = {"contents": contents, "generationConfig": {"maxOutputTokens": max_tokens}}
+        body: dict[str, Any] = {
+            "contents": contents,
+            "generationConfig": {"maxOutputTokens": max_tokens},
+        }
         if system:
             body["systemInstruction"] = {"parts": [{"text": system}]}
         url = GEMINI_ENDPOINT.format(model=self.model)
@@ -285,7 +300,9 @@ class GeminiProvider:
             if status in _COOLDOWN_STATUSES:  # quota: rest this key, come back to it later
                 self.pool.cooldown_current(self.cooldown_s)
                 continue
-            if status in _TRANSIENT_STATUSES:  # server overloaded: keep the key, try another backend
+            if (
+                status in _TRANSIENT_STATUSES
+            ):  # server overloaded: keep the key, try another backend
                 transient += 1
                 self.pool.advance()
                 if self.backoff_s:

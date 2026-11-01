@@ -139,7 +139,9 @@ def persistence(rng: Rng) -> list[dict[str, Any]]:
     plan: list[dict[str, Any]] = []
     for _ in range(rng.randint(5, 8)):  # authorized scheduled jobs (hard negatives)
         job = rng.pick(_AUTHORIZED_JOBS)
-        plan.append({"target": f"/cron/add?name={job}&actor={rng.pick(admins)}", "intent": "benign"})
+        plan.append(
+            {"target": f"/cron/add?name={job}&actor={rng.pick(admins)}", "intent": "benign"}
+        )
     for _ in range(rng.randint(1, 2)):  # unauthorized autostart persistence
         job = rng.pick(_PERSIST_JOBS)
         actor = rng.pick([*admins, "unknown"])  # overlapping users

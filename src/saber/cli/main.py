@@ -20,6 +20,7 @@ from saber.catalog import load_catalog
 from saber.episodes import build_episode, write_episode
 from saber.episodes.runner import run_oracle, run_reference, run_stub
 from saber.subtasks import implemented_ids, load_subtask
+from saber.world.cli import world
 
 
 def _echo_json(obj: Any) -> None:
@@ -731,7 +732,9 @@ def agent_run(
         f"episodes={len(rows)} mean_score={mean} billable_calls_used={prov.calls}/{budget} "
         f"keys_active={pool.active()}/{len(pool)} tokens_in/out={prov.input_tokens}/{prov.output_tokens}"
     )
-    click.echo("label: DEV_SIMULATION_ONLY — measures that the loop runs; NOT a validated benchmark.")
+    click.echo(
+        "label: DEV_SIMULATION_ONLY — measures that the loop runs; NOT a validated benchmark."
+    )
 
 
 @cli.group("population", help="Run the live Gemini-driven agent population over the range (H5).")
@@ -753,24 +756,48 @@ def _pop_row(ep: Any) -> str:
     )
 
 
-@population.command("run", help="Red+clients+blue teams+orchestrator over live scenarios (+ --forever).")
+@population.command(
+    "run", help="Red+clients+blue teams+orchestrator over live scenarios (+ --forever)."
+)
 @click.option("--scenarios", "scenarios_s", default="all", help="Comma list or 'all'.")
 @click.option("--seeds", "seeds_s", default="1", show_default=True, help="Batch mode only.")
 @click.option("--model", default="gemini-2.5-flash", show_default=True)
 @click.option("--key-pool", default="keys_pool.txt", show_default=True)
 @click.option("--enable-paid", is_flag=True, help="Operator opt-in to the API backend. Required.")
-@click.option("--budget", type=int, default=60, show_default=True,
-              help="Max billable calls (hard safety valve; raise it for --forever).")
+@click.option(
+    "--budget",
+    type=int,
+    default=60,
+    show_default=True,
+    help="Max billable calls (hard safety valve; raise it for --forever).",
+)
 @click.option("--clients", type=int, default=1, show_default=True, help="Number of client agents.")
-@click.option("--blue-teams", "blue_teams_s", default="", help="Comma teams e.g. MON,HUNT,IR (else routed).")
-@click.option("--forever", is_flag=True, help="Run continuously until Ctrl+C, STOP file, or budget.")
-@click.option("--interval", "interval_s", type=float, default=8.0, show_default=True,
-              help="Seconds between episodes in --forever.")
-@click.option("--stop-file", type=click.Path(path_type=Path), default=None,
-              help="Create this file to stop a --forever run (default <out>/STOP).")
+@click.option(
+    "--blue-teams", "blue_teams_s", default="", help="Comma teams e.g. MON,HUNT,IR (else routed)."
+)
+@click.option(
+    "--forever", is_flag=True, help="Run continuously until Ctrl+C, STOP file, or budget."
+)
+@click.option(
+    "--interval",
+    "interval_s",
+    type=float,
+    default=8.0,
+    show_default=True,
+    help="Seconds between episodes in --forever.",
+)
+@click.option(
+    "--stop-file",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Create this file to stop a --forever run (default <out>/STOP).",
+)
 @click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
-@click.option("--office-url", default=None,
-              help="agent-office viewer URL for 3D visualization (else $AGENT_OFFICE_URL if set).")
+@click.option(
+    "--office-url",
+    default=None,
+    help="agent-office viewer URL for 3D visualization (else $AGENT_OFFICE_URL if set).",
+)
 def population_run(
     scenarios_s: str,
     seeds_s: str,
@@ -797,7 +824,11 @@ def population_run(
             "paid/free-tier LLM backend is OFF. Re-run with --enable-paid (operator opt-in) and a "
             "--budget cap. The agent never enables a billable backend by itself."
         )
-    scenarios = scenario_ids() if scenarios_s == "all" else [s.strip() for s in scenarios_s.split(",") if s.strip()]
+    scenarios = (
+        scenario_ids()
+        if scenarios_s == "all"
+        else [s.strip() for s in scenarios_s.split(",") if s.strip()]
+    )
     seeds = [int(x) for x in seeds_s.split(",") if x.strip()]
     blue_teams = [t.strip().upper() for t in blue_teams_s.split(",") if t.strip()] or None
     pool = KeyPool.from_file(key_pool)
@@ -810,9 +841,13 @@ def population_run(
         f"provider=gemini model={model} pool={len(pool)} keys budget={budget} "
         f"clients={clients} blue_teams={blue_teams or 'routed'} scenarios={scenarios}"
     )
-    click.echo(f"agent-office viewer: {'ON @ ' + (emitter.url or '') if emitter.enabled else 'off'}")
+    click.echo(
+        f"agent-office viewer: {'ON @ ' + (emitter.url or '') if emitter.enabled else 'off'}"
+    )
     if forever:
-        click.echo(f"FOREVER mode: Ctrl+C or create {stopf} to stop; budget {budget} is the safety valve.")
+        click.echo(
+            f"FOREVER mode: Ctrl+C or create {stopf} to stop; budget {budget} is the safety valve."
+        )
     click.echo(_POP_HEADER)
     click.echo("-" * 96)
 
@@ -823,9 +858,16 @@ def population_run(
     if forever:
         try:
             report = run_forever(
-                scenarios, prov, workdir=workdir, emitter=emitter, n_clients=clients,
-                blue_teams=blue_teams, interval_s=interval_s, stop_file=stopf,
-                on_episode=_print_ep, on_wait=lambda msg: click.echo(f"… {msg}"),
+                scenarios,
+                prov,
+                workdir=workdir,
+                emitter=emitter,
+                n_clients=clients,
+                blue_teams=blue_teams,
+                interval_s=interval_s,
+                stop_file=stopf,
+                on_episode=_print_ep,
+                on_wait=lambda msg: click.echo(f"… {msg}"),
             )
         except KeyboardInterrupt:
             click.echo("\n^C — stopping.")
@@ -834,8 +876,13 @@ def population_run(
             for seed in seeds:
                 try:
                     ep = run_population_episode(
-                        scenario, seed, prov, workdir=workdir, emitter=emitter,
-                        n_clients=clients, blue_teams=blue_teams,
+                        scenario,
+                        seed,
+                        prov,
+                        workdir=workdir,
+                        emitter=emitter,
+                        n_clients=clients,
+                        blue_teams=blue_teams,
                     )
                 except (IntegrationBlocked, BudgetExceeded) as exc:
                     click.echo(f"{scenario:16s} {seed:4d} BLOCKED: {str(exc)[:60]}")
@@ -853,12 +900,20 @@ def population_run(
         f"billable_calls_used={prov.calls}/{budget} keys_active={pool.active()}/{len(pool)} "
         f"keys_disabled={pool.permanently_disabled()} tokens_in/out={s['total_tokens_in']}/{s['total_tokens_out']}"
     )
-    click.echo(f"safety: all_targets_on_menu={s['all_targets_on_menu']} all_reset_ok={s['all_reset_ok']}")
+    click.echo(
+        f"safety: all_targets_on_menu={s['all_targets_on_menu']} all_reset_ok={s['all_reset_ok']}"
+    )
     rpath = workdir / "population_report.json"
     workdir.mkdir(parents=True, exist_ok=True)
     rpath.write_text(
-        json.dumps({"summary": s, "episodes": [e.row() for e in report.episodes]}, indent=2,
-                   ensure_ascii=False, default=str) + "\n", encoding="utf-8",
+        json.dumps(
+            {"summary": s, "episodes": [e.row() for e in report.episodes]},
+            indent=2,
+            ensure_ascii=False,
+            default=str,
+        )
+        + "\n",
+        encoding="utf-8",
     )
     click.echo(f"label: {', '.join(s['labels'])}")
     click.echo(f"wrote {rpath}")
@@ -869,27 +924,66 @@ def population_run(
     help="One always-on benign machine producing a continuous real log (scripted; --enable-paid=hybrid).",
 )
 @click.option("--seed", type=int, default=1, show_default=True)
-@click.option("--interval", "interval_s", type=float, default=20.0, show_default=True,
-              help="Base seconds between ticks (jittered 0.6x-1.4x).")
-@click.option("--intensity", type=float, default=None,
-              help="Requests/minute for the scripted profile (1-30). Default profile uses 8.")
-@click.option("--ticks", type=int, default=0, show_default=True,
-              help="Stop after N ticks; 0 = run forever (until Ctrl+C or STOP file).")
-@click.option("--rhythm", type=click.Choice(["real", "flat"]), default="real", show_default=True,
-              help="'real' shapes intensity by local hour (office hours busy, night idle).")
-@click.option("--enable-paid", is_flag=True,
-              help="Operator opt-in: use the LLM profiler (HYBRID). Off = pure scripted, no quota.")
+@click.option(
+    "--interval",
+    "interval_s",
+    type=float,
+    default=20.0,
+    show_default=True,
+    help="Base seconds between ticks (jittered 0.6x-1.4x).",
+)
+@click.option(
+    "--intensity",
+    type=float,
+    default=None,
+    help="Requests/minute for the scripted profile (1-30). Default profile uses 8.",
+)
+@click.option(
+    "--ticks",
+    type=int,
+    default=0,
+    show_default=True,
+    help="Stop after N ticks; 0 = run forever (until Ctrl+C or STOP file).",
+)
+@click.option(
+    "--rhythm",
+    type=click.Choice(["real", "flat"]),
+    default="real",
+    show_default=True,
+    help="'real' shapes intensity by local hour (office hours busy, night idle).",
+)
+@click.option(
+    "--enable-paid",
+    is_flag=True,
+    help="Operator opt-in: use the LLM profiler (HYBRID). Off = pure scripted, no quota.",
+)
 @click.option("--model", default="gemini-2.5-flash", show_default=True)
 @click.option("--key-pool", default="keys_pool.txt", show_default=True)
-@click.option("--budget", type=int, default=200, show_default=True,
-              help="Max billable profiler calls (hard safety valve; sparse by design).")
-@click.option("--profile-refresh", "profile_refresh_s", type=float, default=900.0, show_default=True,
-              help="Seconds between LLM profile refreshes (hybrid only).")
-@click.option("--stop-file", type=click.Path(path_type=Path), default=None,
-              help="Create this file to stop a forever run (default <out>/STOP).")
+@click.option(
+    "--budget",
+    type=int,
+    default=200,
+    show_default=True,
+    help="Max billable profiler calls (hard safety valve; sparse by design).",
+)
+@click.option(
+    "--profile-refresh",
+    "profile_refresh_s",
+    type=float,
+    default=900.0,
+    show_default=True,
+    help="Seconds between LLM profile refreshes (hybrid only).",
+)
+@click.option(
+    "--stop-file",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Create this file to stop a forever run (default <out>/STOP).",
+)
 @click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
-@click.option("--office-url", default=None,
-              help="agent-office viewer URL (else $AGENT_OFFICE_URL if set).")
+@click.option(
+    "--office-url", default=None, help="agent-office viewer URL (else $AGENT_OFFICE_URL if set)."
+)
 def population_active_client(
     seed: int,
     interval_s: float,
@@ -924,7 +1018,9 @@ def population_active_client(
         click.echo("engine=SCRIPTED (no LLM, no quota). Add --enable-paid for the hybrid profiler.")
     click.echo(f"seed={seed} interval={interval_s:.0f}s rhythm={rhythm} "
                f"ticks={'forever' if ticks <= 0 else ticks}")  # fmt: skip
-    click.echo(f"agent-office viewer: {'ON @ ' + (emitter.url or '') if emitter.enabled else 'off'}")
+    click.echo(
+        f"agent-office viewer: {'ON @ ' + (emitter.url or '') if emitter.enabled else 'off'}"
+    )
     if ticks <= 0:
         click.echo(f"Running until Ctrl+C or create {stopf}.")
     click.echo(f"{'tick':>5s} {'hour':>4s} {'phase':>5s} {'sent':>4s} {'total':>6s} "
@@ -991,6 +1087,9 @@ def _score_summary(score: Any) -> dict[str, Any]:
 
 def main() -> None:
     cli(prog_name="saber")
+
+
+cli.add_command(world)
 
 
 if __name__ == "__main__":

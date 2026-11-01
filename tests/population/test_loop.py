@@ -77,8 +77,12 @@ def test_blue_playbook_is_the_mon_skill() -> None:
 
 def test_multi_client_and_multi_blue_scales_calls(tmp_path) -> None:
     ep = run_population_episode(
-        "web_sqli_probe", 1, ScriptedProvider(), workdir=tmp_path,
-        n_clients=2, blue_teams=["MON", "HUNT"],
+        "web_sqli_probe",
+        1,
+        ScriptedProvider(),
+        workdir=tmp_path,
+        n_clients=2,
+        blue_teams=["MON", "HUNT"],
     )
     assert ep.llm_calls == 6  # 2 clients + red + orchestrator + 2 blue teams
     assert ep.n_clients == 2
@@ -95,8 +99,12 @@ def test_run_forever_honors_preexisting_stop_file(tmp_path) -> None:
     stopf.write_text("x")
     waited: list[str] = []
     rep = run_forever(
-        ["web_sqli_probe"], ScriptedProvider(), workdir=tmp_path / "w",
-        stop_file=stopf, interval_s=0, on_wait=waited.append,
+        ["web_sqli_probe"],
+        ScriptedProvider(),
+        workdir=tmp_path / "w",
+        stop_file=stopf,
+        interval_s=0,
+        on_wait=waited.append,
     )
     assert rep.episodes == []  # stop file present from the start -> no rounds run
     assert any("stop file" in m for m in waited)
@@ -112,7 +120,11 @@ def test_run_forever_runs_rounds_then_stops(tmp_path) -> None:
             stopf.write_text("x")
 
     rep = run_forever(
-        ["web_sqli_probe", "auth_bruteforce"], ScriptedProvider(), workdir=tmp_path / "w2",
-        stop_file=stopf, interval_s=0, on_episode=on_ep,
+        ["web_sqli_probe", "auth_bruteforce"],
+        ScriptedProvider(),
+        workdir=tmp_path / "w2",
+        stop_file=stopf,
+        interval_s=0,
+        on_episode=on_ep,
     )
     assert len(rep.episodes) == 2  # ran rounds 0 and 1, then the stop file halted it

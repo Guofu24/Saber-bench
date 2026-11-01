@@ -39,7 +39,9 @@ def test_every_menu_target_is_loopback_path() -> None:
 
 
 def test_expand_refuses_off_menu_ids() -> None:
-    plan = expand_actions("web_sqli_probe", [{"id": "rm -rf /", "count": 3}, {"id": "../../etc", "count": 1}])
+    plan = expand_actions(
+        "web_sqli_probe", [{"id": "rm -rf /", "count": 3}, {"id": "../../etc", "count": 1}]
+    )
     assert plan == []  # nothing off-menu is ever expanded into a request
 
 

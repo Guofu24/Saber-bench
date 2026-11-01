@@ -66,7 +66,11 @@ def test_scripted_runs_with_no_provider_and_produces_log(tmp_path: Path) -> None
 def test_benign_by_construction_no_scenario_truth_fires(tmp_path: Path) -> None:
     """The continuous log must contain NOTHING any scenario's server-side truth-derivation flags."""
     rep = _run(tmp_path, provider=None)
-    lines = [json.loads(ln) for ln in Path(rep.access_log).read_text(encoding="utf-8").splitlines() if ln.strip()]
+    lines = [
+        json.loads(ln)
+        for ln in Path(rep.access_log).read_text(encoding="utf-8").splitlines()
+        if ln.strip()
+    ]
     assert lines, "expected a non-empty access log"
     assert all(str(r.get("target", "")).startswith("/") for r in lines)  # loopback paths only
     assert all(r.get("status") != 401 for r in lines)  # logins use the valid password

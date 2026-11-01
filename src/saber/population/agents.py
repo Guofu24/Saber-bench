@@ -103,7 +103,9 @@ class RedAgent:
         chosen = (call.obj or {}).get("actions", []) if isinstance(call.obj, dict) else []
         plan = expand_actions(family, chosen if isinstance(chosen, list) else [])
         if not plan:  # safe fallback: run one of each attack action so the episode is not empty
-            plan = expand_actions(family, [{"id": a.id, "count": 4} for a in menu_for(family, kind="attack")])
+            plan = expand_actions(
+                family, [{"id": a.id, "count": 4} for a in menu_for(family, kind="attack")]
+            )
         return plan, call
 
 
@@ -128,10 +130,15 @@ class ClientAgent:
         call = _ask(self.provider, system, user)
         self.calls.append(call)
         chosen = (call.obj or {}).get("actions", []) if isinstance(call.obj, dict) else []
-        plan = [r for r in expand_actions(family, chosen if isinstance(chosen, list) else [])
-                if r["intent"] == "benign"]  # hard guard: client traffic is benign by construction
+        plan = [
+            r
+            for r in expand_actions(family, chosen if isinstance(chosen, list) else [])
+            if r["intent"] == "benign"
+        ]  # hard guard: client traffic is benign by construction
         if not plan:
-            plan = expand_actions(family, [{"id": a.id, "count": 2} for a in menu_for(family, kind="benign")])
+            plan = expand_actions(
+                family, [{"id": a.id, "count": 2} for a in menu_for(family, kind="benign")]
+            )
         return plan, call
 
 

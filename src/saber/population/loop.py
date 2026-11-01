@@ -149,7 +149,9 @@ def run_population_episode(
         c_plan, c_call = client.plan(scenario)
         all_calls.append(c_call)
         benign_plan += c_plan
-        em.llm_end(cid, int((time.monotonic() - t0) * 1000), f"{len(c_plan)} benign reqs", _usage(c_call))
+        em.llm_end(
+            cid, int((time.monotonic() - t0) * 1000), f"{len(c_plan)} benign reqs", _usage(c_call)
+        )
         em.handoff(cid, "range", "benign_traffic")
 
     rng = Rng("population", scenario, str(seed))
@@ -175,7 +177,10 @@ def run_population_episode(
     parsed = [json.loads(ln) if ln.strip() else {} for ln in raw_lines]
     truth_idx = _derive_truth(scenario, parsed, fs_root, cron_root)
     truth_ids = {f"line-{i}" for i in truth_idx}
-    em.message("range", f"{sent} requests · {len(raw_lines)} log lines · {len(truth_ids)} malicious (server-derived)")
+    em.message(
+        "range",
+        f"{sent} requests · {len(raw_lines)} log lines · {len(truth_ids)} malicious (server-derived)",
+    )
     em.status("range", "idle")
     em.handoff("range", "orchestrator", "telemetry")
 
@@ -188,7 +193,12 @@ def run_population_episode(
     routed_skill, route_call = orchestrator.route(scenario, len(raw_lines))
     all_calls.append(route_call)
     routed_team = BLUE_TEAM.get(routed_skill, "MON")
-    em.llm_end("orchestrator", int((time.monotonic() - t0) * 1000), f"route → {routed_team}", _usage(route_call))
+    em.llm_end(
+        "orchestrator",
+        int((time.monotonic() - t0) * 1000),
+        f"route → {routed_team}",
+        _usage(route_call),
+    )
     severity = str((route_call.obj or {}).get("severity", "medium")) if route_call.obj else "medium"
 
     if blue_teams:
@@ -218,10 +228,23 @@ def run_population_episode(
         t_pred = {x for x in findings["malicious_line_ids"] if x.startswith("line-")}
         union_pred |= t_pred
         t_tp, t_fp, t_fn, t_p, t_r, t_f1 = _prf(t_pred, truth_ids)
-        per_team.append({"team": team, "flagged": sorted(t_pred), "f1": t_f1, "fp": t_fp, "fn": t_fn,
-                         "verdict": findings["verdict"]})
+        per_team.append(
+            {
+                "team": team,
+                "flagged": sorted(t_pred),
+                "f1": t_f1,
+                "fp": t_fp,
+                "fn": t_fn,
+                "verdict": findings["verdict"],
+            }
+        )
         summaries.append(f"{team}: {findings['summary']}" if findings["summary"] else team)
-        em.llm_end(bid, int((time.monotonic() - t0) * 1000), findings["summary"] or f"{team} findings", _usage(b_call))
+        em.llm_end(
+            bid,
+            int((time.monotonic() - t0) * 1000),
+            findings["summary"] or f"{team} findings",
+            _usage(b_call),
+        )
         em.message(bid, f"{team} flagged {len(t_pred)} · f1={t_f1} (fp={t_fp} fn={t_fn})")
         em.handoff(bid, "orchestrator", "report")
 
@@ -232,7 +255,9 @@ def run_population_episode(
         "scenario": scenario,
         "assigned_team": team_label,
         "severity": severity,
-        "status": "CLOSED_FP" if not truth_ids else ("CONTAINED" if f1 >= 0.99 else "INVESTIGATING"),
+        "status": "CLOSED_FP"
+        if not truth_ids
+        else ("CONTAINED" if f1 >= 0.99 else "INVESTIGATING"),
         "truth_malicious_lines": sorted(truth_ids),
         "blue_flagged_lines": sorted(union_pred),
         "f1": f1,
@@ -242,7 +267,10 @@ def run_population_episode(
     (evidence_dir / "case.json").write_text(
         json.dumps(case, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
-    em.message("orchestrator", f"case {case['status']} · severity={severity} · teams={team_label} · f1={f1}")
+    em.message(
+        "orchestrator",
+        f"case {case['status']} · severity={severity} · teams={team_label} · f1={f1}",
+    )
     for aid in ("red", "orchestrator", *client_ids, *[f"blue-{t}" for t in teams], "blue"):
         em.status(aid, "idle")
 
@@ -311,8 +339,13 @@ def run_population(
         for seed in seeds:
             report.episodes.append(
                 run_population_episode(
-                    scenario, seed, provider, workdir=workdir, emitter=emitter,
-                    n_clients=n_clients, blue_teams=blue_teams,
+                    scenario,
+                    seed,
+                    provider,
+                    workdir=workdir,
+                    emitter=emitter,
+                    n_clients=n_clients,
+                    blue_teams=blue_teams,
                 )
             )
     return report
@@ -350,8 +383,13 @@ def run_forever(
         scenario = scenarios[round_i % len(scenarios)]
         try:
             ep = run_population_episode(
-                scenario, seed, provider, workdir=workdir, emitter=emitter,
-                n_clients=n_clients, blue_teams=blue_teams,
+                scenario,
+                seed,
+                provider,
+                workdir=workdir,
+                emitter=emitter,
+                n_clients=n_clients,
+                blue_teams=blue_teams,
             )
         except BudgetExceeded:
             if on_wait:

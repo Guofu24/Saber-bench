@@ -111,6 +111,10 @@ def solve_episode(
     raise IntegrationBlocked(
         f"baseline {baseline.value} is LLM-backed and BLOCKED_INTEGRATION: subscription-only, no "
         "API budget; supply an operator-approved provider "
-        + ("and note B3/B4 coordination is not wired yet" if baseline not in _PROVIDER_DRIVEN else "to run it"),
+        + (
+            "and note B3/B4 coordination is not wired yet"
+            if baseline not in _PROVIDER_DRIVEN
+            else "to run it"
+        ),
         baseline=baseline.value,
     )

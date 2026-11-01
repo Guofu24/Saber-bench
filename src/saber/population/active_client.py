@@ -91,7 +91,11 @@ class ActivityProfile:
 
 
 def scripted_default_profile(intensity: float | None = None) -> ActivityProfile:
-    i = _DEFAULT_INTENSITY if intensity is None else max(_MIN_INTENSITY, min(_MAX_INTENSITY, intensity))
+    i = (
+        _DEFAULT_INTENSITY
+        if intensity is None
+        else max(_MIN_INTENSITY, min(_MAX_INTENSITY, intensity))
+    )
     return ActivityProfile(weights=dict(_DEFAULT_WEIGHTS), intensity=i, source="scripted-default")
 
 
@@ -263,9 +267,13 @@ def run_active_client(
     em.agent("client", *ROLE_AGENTS["client"])
     em.agent("range", *ROLE_AGENTS["range"])
     model = getattr(provider, "model_id", "scripted") if provider is not None else "scripted"
-    em.message("client", f"=== Active client online (seed {seed}, {rhythm} rhythm, model={model}) ===")
+    em.message(
+        "client", f"=== Active client online (seed {seed}, {rhythm} rhythm, model={model}) ==="
+    )
 
-    lab = LiveLab(evidence_dir, fs_root=evidence_dir / "webroot", cron_root=evidence_dir / "cronroot")
+    lab = LiveLab(
+        evidence_dir, fs_root=evidence_dir / "webroot", cron_root=evidence_dir / "cronroot"
+    )
     lab.start()
     em.status("range", "idle")
 

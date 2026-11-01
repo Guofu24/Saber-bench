@@ -45,7 +45,16 @@ def test_loop_emits_full_office_event_set(tmp_path) -> None:
     run_population_episode("web_sqli_probe", 1, TrivialProvider(), workdir=tmp_path, emitter=em)
 
     types = {e["type"] for e in events}
-    assert {"agent", "task", "llm_start", "llm_end", "handoff", "message", "status", "tool"} <= types
+    assert {
+        "agent",
+        "task",
+        "llm_start",
+        "llm_end",
+        "handoff",
+        "message",
+        "status",
+        "tool",
+    } <= types
 
     referenced = (
         {e.get("id") for e in events}

@@ -26,6 +26,7 @@ def _pool_file(tmp_path, keys=FAKE_KEYS, extra: str = "") -> str:
 
 # ---- pool loading -------------------------------------------------------------------------------
 
+
 def test_pool_loads_dedupes_and_skips_comments(tmp_path) -> None:
     body = "# header comment\n\nfake-key-aaa\nfake-key-aaa\nNAME=fake-key-bbb\n  fake-key-ccc  \n"
     (tmp_path / "keys_pool.txt").write_text(body, encoding="utf-8")
@@ -46,6 +47,7 @@ def test_missing_pool_file_is_blocked(tmp_path) -> None:
 
 # ---- fail-closed gate ---------------------------------------------------------------------------
 
+
 def test_disabled_by_default_raises_before_any_network(tmp_path) -> None:
     calls: list = []
 
@@ -61,7 +63,9 @@ def test_disabled_by_default_raises_before_any_network(tmp_path) -> None:
 
 def test_enabled_but_no_budget_is_blocked(tmp_path) -> None:
     prov = GeminiProvider(
-        pool=KeyPool.from_file(_pool_file(tmp_path)), enabled=True, budget_calls=0,
+        pool=KeyPool.from_file(_pool_file(tmp_path)),
+        enabled=True,
+        budget_calls=0,
         transport=lambda u, k, b: (200, _ok_body()),
     )
     with pytest.raises(IntegrationBlocked):
@@ -69,13 +73,15 @@ def test_enabled_but_no_budget_is_blocked(tmp_path) -> None:
 
 
 def test_enabled_empty_pool_is_blocked() -> None:
-    prov = GeminiProvider(pool=KeyPool(), enabled=True, budget_calls=5,
-                          transport=lambda u, k, b: (200, _ok_body()))
+    prov = GeminiProvider(
+        pool=KeyPool(), enabled=True, budget_calls=5, transport=lambda u, k, b: (200, _ok_body())
+    )
     with pytest.raises(IntegrationBlocked):
         prov.generate([{"role": "user", "content": "x"}])
 
 
 # ---- happy path (fake transport, no spend) ------------------------------------------------------
+
 
 def test_authorised_call_returns_response_and_counts(tmp_path) -> None:
     seen = []
@@ -85,8 +91,12 @@ def test_authorised_call_returns_response_and_counts(tmp_path) -> None:
         assert "generateContent" in url
         return 200, _ok_body("answer", in_tok=11, out_tok=4)
 
-    prov = GeminiProvider(pool=KeyPool.from_file(_pool_file(tmp_path)), enabled=True,
-                          budget_calls=3, transport=transport)
+    prov = GeminiProvider(
+        pool=KeyPool.from_file(_pool_file(tmp_path)),
+        enabled=True,
+        budget_calls=3,
+        transport=transport,
+    )
     r = prov.generate([{"role": "system", "content": "be terse"}, {"role": "user", "content": "q"}])
     assert r.text == "answer" and r.input_tokens == 11 and r.output_tokens == 4
     assert prov.calls == 1 and prov.input_tokens == 11
@@ -95,9 +105,12 @@ def test_authorised_call_returns_response_and_counts(tmp_path) -> None:
 
 def test_round_robin_spreads_across_pool(tmp_path) -> None:
     seen = []
-    prov = GeminiProvider(pool=KeyPool.from_file(_pool_file(tmp_path)), enabled=True,
-                          budget_calls=5,
-                          transport=lambda u, k, b: (seen.append(k), (200, _ok_body()))[1])
+    prov = GeminiProvider(
+        pool=KeyPool.from_file(_pool_file(tmp_path)),
+        enabled=True,
+        budget_calls=5,
+        transport=lambda u, k, b: (seen.append(k), (200, _ok_body()))[1],
+    )
     for _ in range(3):
         prov.generate([{"role": "user", "content": "q"}])
     assert seen == FAKE_KEYS  # one call each, rotating
@@ -105,9 +118,14 @@ def test_round_robin_spreads_across_pool(tmp_path) -> None:
 
 # ---- budget cap ---------------------------------------------------------------------------------
 
+
 def test_budget_cap_raises_budget_exceeded(tmp_path) -> None:
-    prov = GeminiProvider(pool=KeyPool.from_file(_pool_file(tmp_path)), enabled=True,
-                          budget_calls=2, transport=lambda u, k, b: (200, _ok_body()))
+    prov = GeminiProvider(
+        pool=KeyPool.from_file(_pool_file(tmp_path)),
+        enabled=True,
+        budget_calls=2,
+        transport=lambda u, k, b: (200, _ok_body()),
+    )
     prov.generate([{"role": "user", "content": "q"}])
     prov.generate([{"role": "user", "content": "q"}])
     with pytest.raises(BudgetExceeded):
@@ -116,6 +134,7 @@ def test_budget_cap_raises_budget_exceeded(tmp_path) -> None:
 
 
 # ---- key rotation on auth/quota errors ----------------------------------------------------------
+
 
 def test_rotates_past_rate_limited_key(tmp_path) -> None:
     def transport(url, key, body):
@@ -149,8 +168,13 @@ def test_transient_503_rotates_without_disabling_keys(tmp_path) -> None:
 
 
 def test_persistent_5xx_is_blocked_not_crashed(tmp_path) -> None:
-    prov = GeminiProvider(pool=KeyPool.from_file(_pool_file(tmp_path)), enabled=True, budget_calls=5,
-                          backoff_s=0, transport=lambda u, k, b: (503, {"error": "overloaded"}))
+    prov = GeminiProvider(
+        pool=KeyPool.from_file(_pool_file(tmp_path)),
+        enabled=True,
+        budget_calls=5,
+        backoff_s=0,
+        transport=lambda u, k, b: (503, {"error": "overloaded"}),
+    )
     with pytest.raises(IntegrationBlocked):
         prov.generate([{"role": "user", "content": "q"}])
     assert prov.calls == 0 and KeyPool.from_file(_pool_file(tmp_path)).active() == 3
@@ -159,8 +183,13 @@ def test_persistent_5xx_is_blocked_not_crashed(tmp_path) -> None:
 def test_429_cools_down_not_permanently_disabled(tmp_path) -> None:
     pool = KeyPool.from_file(_pool_file(tmp_path))
     # cooldown_s large: the 429'd key rests (not usable now) but is NOT permanently disabled.
-    prov = GeminiProvider(pool=pool, enabled=True, budget_calls=5, cooldown_s=999,
-                          transport=lambda u, k, b: (429, {}) if k == "fake-key-aaa" else (200, _ok_body()))
+    prov = GeminiProvider(
+        pool=pool,
+        enabled=True,
+        budget_calls=5,
+        cooldown_s=999,
+        transport=lambda u, k, b: (429, {}) if k == "fake-key-aaa" else (200, _ok_body()),
+    )
     r = prov.generate([{"role": "user", "content": "q"}])
     assert r.text == "hi"
     assert pool.permanently_disabled() == 0  # quota is temporary, key not dropped
@@ -177,15 +206,21 @@ def test_429_key_returns_after_cooldown_expires(tmp_path) -> None:
         seen["n"] += 1
         return (429, {}) if seen["n"] == 1 else (200, _ok_body())
 
-    prov = GeminiProvider(pool=pool, enabled=True, budget_calls=5, cooldown_s=0, transport=transport)
+    prov = GeminiProvider(
+        pool=pool, enabled=True, budget_calls=5, cooldown_s=0, transport=transport
+    )
     r = prov.generate([{"role": "user", "content": "q"}])
     assert r.text == "hi"  # same single key recovered after a 0s cooldown
     assert pool.active() == 1
 
 
 def test_all_keys_failing_is_blocked(tmp_path) -> None:
-    prov = GeminiProvider(pool=KeyPool.from_file(_pool_file(tmp_path)), enabled=True,
-                          budget_calls=5, transport=lambda u, k, b: (401, {"error": "bad key"}))
+    prov = GeminiProvider(
+        pool=KeyPool.from_file(_pool_file(tmp_path)),
+        enabled=True,
+        budget_calls=5,
+        transport=lambda u, k, b: (401, {"error": "bad key"}),
+    )
     with pytest.raises(IntegrationBlocked):
         prov.generate([{"role": "user", "content": "q"}])
     assert prov.calls == 0
@@ -197,13 +232,18 @@ def test_transport_exception_rotates_and_does_not_leak(tmp_path) -> None:
             raise ConnectionError("boom")
         return 200, _ok_body("recovered")
 
-    prov = GeminiProvider(pool=KeyPool.from_file(_pool_file(tmp_path)), enabled=True,
-                          budget_calls=5, transport=transport)
+    prov = GeminiProvider(
+        pool=KeyPool.from_file(_pool_file(tmp_path)),
+        enabled=True,
+        budget_calls=5,
+        transport=transport,
+    )
     r = prov.generate([{"role": "user", "content": "q"}])
     assert r.text == "recovered"
 
 
 # ---- from_env stays fail-closed -----------------------------------------------------------------
+
 
 def test_from_env_defaults_to_blocked(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("SABER_GEMINI_KEY_POOL", _pool_file(tmp_path))

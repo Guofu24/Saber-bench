@@ -31,9 +31,13 @@ class MenuAction:
     repeatable: bool = False  # bruteforce bursts repeat the same failed login to cross a threshold
 
 
-def _a(id_: str, kind: str, family: str, label: str, target: str, repeatable: bool = False) -> MenuAction:
+def _a(
+    id_: str, kind: str, family: str, label: str, target: str, repeatable: bool = False
+) -> MenuAction:
     assert target.startswith("/"), f"menu target must be loopback path: {target!r}"
-    return MenuAction(id=id_, kind=kind, family=family, label=label, target=target, repeatable=repeatable)
+    return MenuAction(
+        id=id_, kind=kind, family=family, label=label, target=target, repeatable=repeatable
+    )
 
 
 # --- web_sqli_probe ------------------------------------------------------------------------------
@@ -74,43 +78,106 @@ def _build_menus() -> dict[str, list[MenuAction]]:
 
     sqli: list[MenuAction] = []
     for aid, probe in _SQLI_PROBES.items():
-        sqli.append(_a(aid, "attack", "web_sqli_probe", f"Inert SQLi probe: {probe}",
-                       f"/search?q={quote(probe)}"))
+        sqli.append(
+            _a(
+                aid,
+                "attack",
+                "web_sqli_probe",
+                f"Inert SQLi probe: {probe}",
+                f"/search?q={quote(probe)}",
+            )
+        )
     for aid, tgt in _SQLI_BENIGN.items():
         sqli.append(_a(aid, "benign", "web_sqli_probe", f"Benign browse/search: {tgt}", tgt))
     menus["web_sqli_probe"] = sqli
 
     bf: list[MenuAction] = []
     for u in _BF_ATTACK_USERS:
-        bf.append(_a(f"bf-fail-{u}", "attack", "auth_bruteforce",
-                     f"Failed login burst for user {u} (repeat >= {BRUTEFORCE_THRESHOLD} to count)",
-                     f"/login?user={u}&pass={quote('wrong-pw')}", repeatable=True))
+        bf.append(
+            _a(
+                f"bf-fail-{u}",
+                "attack",
+                "auth_bruteforce",
+                f"Failed login burst for user {u} (repeat >= {BRUTEFORCE_THRESHOLD} to count)",
+                f"/login?user={u}&pass={quote('wrong-pw')}",
+                repeatable=True,
+            )
+        )
     for u in _BF_BENIGN_USERS:
-        bf.append(_a(f"login-ok-{u}", "benign", "auth_bruteforce", f"Successful login for {u}",
-                     f"/login?user={u}&pass={quote(_GOOD_PASSWORD)}"))
-    bf.append(_a("login-typo", "benign", "auth_bruteforce", "A single benign password typo (one 401)",
-                f"/login?user=alice&pass={quote('typo42')}"))
+        bf.append(
+            _a(
+                f"login-ok-{u}",
+                "benign",
+                "auth_bruteforce",
+                f"Successful login for {u}",
+                f"/login?user={u}&pass={quote(_GOOD_PASSWORD)}",
+            )
+        )
+    bf.append(
+        _a(
+            "login-typo",
+            "benign",
+            "auth_bruteforce",
+            "A single benign password typo (one 401)",
+            f"/login?user=alice&pass={quote('typo42')}",
+        )
+    )
     menus["auth_bruteforce"] = bf
 
     fs: list[MenuAction] = []
     for name in _FS_SUSPECT:
-        fs.append(_a(f"fs-shell-{name}", "attack", "fs_change",
-                     f"Upload webshell-named script {name}", f"/fs/put?name={name}&actor=unknown"))
+        fs.append(
+            _a(
+                f"fs-shell-{name}",
+                "attack",
+                "fs_change",
+                f"Upload webshell-named script {name}",
+                f"/fs/put?name={name}&actor=unknown",
+            )
+        )
     for name in _FS_AUTHORIZED:
-        fs.append(_a(f"fs-script-{name}", "benign", "fs_change",
-                     f"Authorized script deploy {name} (hard neg)", f"/fs/put?name={name}&actor=adm.an"))
+        fs.append(
+            _a(
+                f"fs-script-{name}",
+                "benign",
+                "fs_change",
+                f"Authorized script deploy {name} (hard neg)",
+                f"/fs/put?name={name}&actor=adm.an",
+            )
+        )
     for name in _FS_BENIGN:
-        fs.append(_a(f"fs-file-{name}", "benign", "fs_change", f"Benign upload {name}",
-                     f"/fs/put?name={name}&actor=adm.huy"))
+        fs.append(
+            _a(
+                f"fs-file-{name}",
+                "benign",
+                "fs_change",
+                f"Benign upload {name}",
+                f"/fs/put?name={name}&actor=adm.huy",
+            )
+        )
     menus["fs_change"] = fs
 
     pr: list[MenuAction] = []
     for name in _PERSIST_JOBS:
-        pr.append(_a(f"cron-abuse-{name}", "attack", "persistence",
-                     f"Register unauthorized autostart {name}", f"/cron/add?name={name}&actor=unknown"))
+        pr.append(
+            _a(
+                f"cron-abuse-{name}",
+                "attack",
+                "persistence",
+                f"Register unauthorized autostart {name}",
+                f"/cron/add?name={name}&actor=unknown",
+            )
+        )
     for name in _PERSIST_AUTHORIZED:
-        pr.append(_a(f"cron-ok-{name}", "benign", "persistence",
-                     f"Authorized scheduled job {name} (hard neg)", f"/cron/add?name={name}&actor=adm.an"))
+        pr.append(
+            _a(
+                f"cron-ok-{name}",
+                "benign",
+                "persistence",
+                f"Authorized scheduled job {name} (hard neg)",
+                f"/cron/add?name={name}&actor=adm.an",
+            )
+        )
     menus["persistence"] = pr
 
     return menus
@@ -150,7 +217,12 @@ def expand_actions(
         if not action.repeatable:
             count = 1
         for _ in range(count):
-            plan.append({"target": action.target, "intent": "probe" if action.kind == "attack" else "benign"})
+            plan.append(
+                {
+                    "target": action.target,
+                    "intent": "probe" if action.kind == "attack" else "benign",
+                }
+            )
             if len(plan) >= max_requests:
                 return plan
     return plan
