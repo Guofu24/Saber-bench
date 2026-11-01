@@ -71,7 +71,7 @@ def init_world(out: Path, clients: int, seed: int, tick_seconds: float) -> None:
 @click.option(
     "--key-pool", type=click.Path(path_type=Path, dir_okay=False), default=Path("keys_pool.txt")
 )
-@click.option("--model", default="gemini-2.5-flash", show_default=True)
+@click.option("--model", default="gemini-3.5-flash-lite", show_default=True)
 @click.option(
     "--key-layout",
     type=click.Choice(["teams", "shared"]),

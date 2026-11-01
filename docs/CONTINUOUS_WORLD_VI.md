@@ -81,6 +81,31 @@ toàn bộ vòng đời world, bao gồm các lần khởi động lại:
 hay đổi tier. `--call-budget` là trần lượt thử HTTP, không phải trần tiền USD và không
 khẳng định mọi project đều miễn phí. Nâng giá trị này là quyết định của người vận hành.
 
+Model mặc định của `world` là `gemini-3.5-flash-lite`; có thể chọn model khác qua `--model`.
+Kiểm tra API thật ngày 2026-11-01 phát hiện một số project trong pool trả 404 với
+`gemini-2.5-flash`: model này chỉ còn phục vụ người dùng đã sử dụng trước đó, không
+mở cho người dùng mới. Đây không phải lỗi hết quota và không tự chứng minh key hỏng.
+Xem [chính sách model của Google](https://ai.google.dev/gemini-api/docs/deprecations).
+
+Để kiểm tra API thật với ba agent và chỉ in số thứ tự key/mã HTTP/counters:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/smoke_world_gemini.py --live --out runs\gemini-live-check --call-budget 12
+```
+
+Lệnh yêu cầu thư mục mới, giới hạn tối đa 12 lượt gọi và tự dừng. Hai vòng chạy kiểm
+tra restart và chuyển key bằng trần cục bộ **riêng cho bài thử** là 1 lượt/key/ngày;
+không cố làm cạn quota Google. `--rounds 1` chỉ chạy một vòng. Bằng chứng lưu trong
+`live-check.json`, cùng report và telemetry lab. HTTP 200 và agent thực thi kế hoạch
+là hai điều kiện riêng; `engine=hybrid` hay việc liệt kê được model chưa đủ xác nhận.
+
+Kết quả kiểm tra thật ngày 2026-11-01: `gemini-3.5-flash-lite` trả HTTP 200 cho cả
+6/6 lượt, 9 hành động do LLM chọn được thực thi thành công qua HTTP trong lab.
+Sau restart, key chuyển client 1→2, red 201→202, blue 401→402. Bằng chứng cục bộ:
+`runs/live-gemini-35-lite-check-20261101/live-check.json`. Bài thử `gemini-3.8-flash`
+trước đó gặp 503/lỗi transport, nên không dùng làm mặc định. Đây là kết quả mẫu,
+không phải kiểm tra toàn bộ 602 key hoặc bằng chứng quota Google đã cạn.
+
 ### Ba hàng đợi key riêng cho client / red / blue
 
 Khi bật `--llm`, mặc định `--key-layout teams` chia theo thứ tự key trong file:
