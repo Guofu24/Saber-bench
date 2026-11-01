@@ -136,6 +136,30 @@ Phase G changes no tier: automated-lab ground truth stays a distinct, lower tier
 bound subtasks (full bespoke coverage remains the offline VERIFIED path), and nothing is
 `READY_BENCHMARK`. `DEV_SIMULATION_ONLY` preserved.
 
+## Phase H — scripted client/attacker/blue agent populations (capabilities, not a tier change)
+
+Phase H (branch `feat/agent-population-h1`, not yet merged) turns the live lab's three implicit roles
+into explicit, scripted agent populations and scores them together, keeping the non-negotiable that
+blue is the scored contestant while client + attacker are environment generators with agent-
+independent, server-side-derived labels.
+
+- **H1 — client population**: a benign background-noise driver (browse/search/successful login),
+  benign by construction, overlaid on any family via `run_episode(noise_clients=N)` without changing
+  the attack truth. `saber range noise`.
+- **H2 — `persistence` family**: a new autostart/scheduled-task attack family parallel to
+  `fs_change`, truth derived from an inert on-disk marker; conventional detector precise, naive
+  over-flags the authorized-job hard negatives.
+- **H3 — allowlist registry + Track A/B**: `attack_registry` binds every runnable family to its
+  independent verifier (a test enforces exact coverage). `saber soc detect-bench` (Track A) and
+  `saber soc response-bench` (Track B) **discriminate** detector quality — conventional recall 1.0 /
+  precision 1.0 / 0 FP / 0 false-containment vs naive precision 0.385 / 73 FP / 17 false-containment.
+  Not ceiling-saturated, unlike Phase G.
+
+Phase H changes no tier: scripted and non-LLM, inert markers throughout, network-isolated lab
+launched only by the operator, no real host mutated; automated-lab ground truth is still a lower
+tier than expert-validated gold (ED-1 open), so nothing is `READY_BENCHMARK`. `DEV_SIMULATION_ONLY`
+preserved. See `docs/PHASE_H_REPORT.md` and `docs/AGENT_POPULATION_DESIGN_VI.md`.
+
 ## Three readiness tiers
 
 ### Tier 1 — Implemented software, tested offline

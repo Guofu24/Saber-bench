@@ -8,6 +8,7 @@ offline. Nothing here claims model quality.
 """
 
 from saber.agents.baselines import BASELINES, Baseline, BaselineId, solve_episode
+from saber.agents.gemini import GeminiProvider, KeyPool
 from saber.agents.provider import (
     BlockedAnthropicProvider,
     LLMProvider,
@@ -21,6 +22,8 @@ __all__ = [
     "Baseline",
     "BaselineId",
     "BlockedAnthropicProvider",
+    "GeminiProvider",
+    "KeyPool",
     "LLMProvider",
     "LLMResponse",
     "SpecialistRouter",

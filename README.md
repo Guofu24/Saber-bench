@@ -1,5 +1,27 @@
 # SABER — Claude Code One-Shot v3.2
 
+## Continuous client / red / blue world (2026-11-01)
+
+`saber world` runs all three populations in one persistent local application lab,
+with real HTTP telemetry, durable client state, specialized SOC cases and verified
+application responses. Scripted by default; optional Gemini plans use the existing
+key pool with persistent budgets and project quota limits. Gemini runs default to
+separate key queues: first 200 for clients, next 200 for red, remaining keys for blue;
+each queue advances on quota/errors and resumes after restart. See
+[the Vietnamese operator guide](docs/CONTINUOUS_WORLD_VI.md) for scope, configuration,
+LLM activation, the 3D viewer, and limitations.
+
+```bash
+uv run saber world init --out runs/world --clients 12
+uv run saber world run --out runs/world --ticks 60
+uv run saber world supervise --out runs/world  # continuous, with bounded crash restarts
+uv run saber world stop --out runs/world      # from another terminal
+```
+
+This is a `DEV_SIMULATION_ONLY` local application backend; VM/OS exploitation and
+external web browsing are not implemented by this command. The legacy planning kit
+and benchmark instructions follow below.
+
 One **user command** launches a checkpointed development supervisor that automatically calls Claude Code sequentially for **218 work items**: 38 engineering tasks, 5 bridge tasks, and 175 genuine SOC benchmark subtasks from the supplied HTML. It favors **existing infrastructure and tools** over installing a predetermined stack. It does not include an already completed SABER application or 175 real validated datasets.
 
 ## Setup once (only prerequisites that are not already present)

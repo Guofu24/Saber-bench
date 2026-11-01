@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-10-28T16:56:49+00:00",
+  "track": "B_RESPONSE_ENABLED",
+  "family": "fs_change",
+  "seeds": [
+    1,
+    2,
+    3
+  ],
+  "detectors": [
+    "conventional",
+    "naive"
+  ],
+  "labels": [
+    "LIVE_LAB_EXECUTION",
+    "AUTOMATED_LAB_GROUND_TRUTH",
+    "DEV_SIMULATION_ONLY"
+  ],
+  "summary": {
+    "conventional": {
+      "containment_recall_mean": 1.0,
+      "false_containment_total": 0,
+      "episodes_with_false_containment": 0,
+      "all_verified_rate": 1.0,
+      "n_episodes": 3
+    },
+    "naive": {
+      "containment_recall_mean": 1.0,
+      "false_containment_total": 17,
+      "episodes_with_false_containment": 3,
+      "all_verified_rate": 1.0,
+      "n_episodes": 3
+    }
+  },
+  "caveat": "Reversible, operator-approved, lab-only containment verified from real fs state. Benign impact (false containment) is measured, not hidden. NOT READY_BENCHMARK."
+}

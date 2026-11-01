@@ -93,6 +93,8 @@ def _entities(episode: LiveEpisode, line_ids: set[str]) -> list[str]:
             ents.add("user:" + (q.get("user") or ["?"])[0])
         elif episode.scenario == "fs_change":
             ents.add("file:" + (q.get("name") or ["?"])[0])
+        elif episode.scenario == "persistence":
+            ents.add("job:" + (q.get("name") or ["?"])[0])
         else:
             ents.add("client:" + str(rec.get("client", "?")))
     return sorted(ents)
@@ -217,11 +219,10 @@ def _incident_response(
         resp["collateral"] = sorted({c for a in resp["actions"] for c in a.get("collateral", [])})
         resp["note"] = "executed approved reversible quarantine; effect verified from real fs state"
     else:
-        resp["proposed_containment"] = (
-            "rate-limit/block the offending source"
-            if episode.scenario == "auth_bruteforce"
-            else "deploy the detection rule inline"
-        )
+        resp["proposed_containment"] = {
+            "auth_bruteforce": "rate-limit/block the offending source",
+            "persistence": "remove the unauthorized autostart entry",
+        }.get(episode.scenario, "deploy the detection rule inline")
         resp["verified"] = False
         resp["note"] = (
             "containment PROPOSED only (no reversible lab action available for this scenario)"

@@ -1,0 +1,7 @@
+{
+  "agents": [
+    { "match": "orchestrator", "name": "Mindy", "role": "Điều phối", "color": "#ff7eb6" },
+    { "regex": "research|search the web", "name": "Hermes", "role": "Nghiên cứu", "color": "#ffd36b" },
+    { "match": "note summarizer", "name": "Thợ tóm tắt", "role": "Dây chuyền", "color": "#59d1c8" }
+  ]
+}

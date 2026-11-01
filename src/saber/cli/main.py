@@ -20,6 +20,7 @@ from saber.catalog import load_catalog
 from saber.episodes import build_episode, write_episode
 from saber.episodes.runner import run_oracle, run_reference, run_stub
 from saber.subtasks import implemented_ids, load_subtask
+from saber.world.cli import world
 
 
 def _echo_json(obj: Any) -> None:
@@ -412,14 +413,20 @@ def range_scenarios() -> None:
 @range_.command("run", help="Execute one genuine live episode (real loopback service + traffic).")
 @click.option("--scenario", "scenario", default="web_sqli_probe")
 @click.option("--seed", type=int, default=1)
+@click.option(
+    "--noise-clients",
+    type=int,
+    default=0,
+    help="Overlay benign background traffic from N client identities (0 = none).",
+)
 @click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
-def range_run(scenario: str, seed: int, out_dir: Path | None) -> None:
+def range_run(scenario: str, seed: int, noise_clients: int, out_dir: Path | None) -> None:
     import json as _json
 
     from saber.range.live import run_episode
 
     workdir = out_dir or (Path("runs") / "live")
-    ep = run_episode(scenario, seed, workdir=workdir)
+    ep = run_episode(scenario, seed, workdir=workdir, noise_clients=noise_clients)
     # Write only the TRUTH-FREE public receipt into the evidence dir (safe to upload/publish); the
     # sealed control-plane truth (which lines are malicious) is never persisted here.
     ep_path = Path(ep.evidence_dir) / "episode_public.json"
@@ -429,9 +436,26 @@ def range_run(scenario: str, seed: int, out_dir: Path | None) -> None:
         f"requests_sent={ep.network['requests_sent']} log_lines={len(ep.access_log_lines)} "
         f"malicious={ep.gold_truth['m']}\n"
         f"cross_check_ok={ep.cross_check_ok} reset_ok={ep.lab_state['reset_ok']} "
+        f"client_noise={ep.network.get('client_noise_requests', 0)} "
         f"access_log_sha256={ep.access_log_sha256[:16]}\n"
         f"wrote {ep_path}"
     )
+
+
+@range_.command("noise", help="Preview the benign client-population noise plan (no service run).")
+@click.option("--scenario", "scenario", default="web_sqli_probe")
+@click.option("--seed", type=int, default=1)
+@click.option("--clients", type=int, default=3)
+def range_noise(scenario: str, seed: int, clients: int) -> None:
+    from saber.range.live import client_noise
+    from saber.subtasks._hv.common import Rng
+
+    plan = client_noise(Rng("live-noise", scenario, str(seed)), clients=clients)
+    click.echo(f"scenario={scenario} seed={seed} clients={clients} benign_requests={len(plan)}")
+    for req in plan[:12]:
+        click.echo(f"  {req['intent']:7s} {req['target']}")
+    if len(plan) > 12:
+        click.echo(f"  ... (+{len(plan) - 12} more)")
 
 
 @range_.command(
@@ -471,7 +495,7 @@ def soc() -> None:
 
 
 @soc.command("run", help="Run the four-service workflow across scenario families; emit coverage.")
-@click.option("--scenarios", default="web_sqli_probe,auth_bruteforce,fs_change")
+@click.option("--scenarios", default="web_sqli_probe,auth_bruteforce,fs_change,persistence")
 @click.option("--seeds", default="1,2")
 @click.option("--detector", default="conventional", type=click.Choice(["conventional", "naive"]))
 @click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
@@ -490,6 +514,57 @@ def soc_run(scenarios: str, seeds: str, detector: str, out_dir: Path | None) -> 
             f"hunt_f1={row['hunting_entity_f1']} ir_exec={row['ir_executed']} ir_verified={row['ir_verified']}"
         )
     path = write_soc_suite(report, out_dir)
+    click.echo(f"wrote {path}")
+
+
+@soc.command(
+    "detect-bench",
+    help="Track A detection benchmark: detectors over families x seeds x benign client noise.",
+)
+@click.option("--seeds", default="1,2,3")
+@click.option("--noise-clients", type=int, default=3)
+@click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
+def soc_detect_bench(seeds: str, noise_clients: int, out_dir: Path | None) -> None:
+    from saber.soc import run_detection_bench, write_detection_bench
+
+    report = run_detection_bench(
+        seeds=[int(x) for x in seeds.split(",") if x.strip()],
+        noise_clients=noise_clients,
+    )
+    click.echo(
+        f"families={len(report['families'])} seeds={report['seeds']} noise={report['noise_clients']} "
+        f"allowlist_ok={report['allowlist_covers_scenarios']} cross_checks_ok={report['all_cross_checks_ok']}"
+    )
+    for d, a in report["summary"].items():
+        rec, prec = a["recall"], a["precision"]
+        click.echo(
+            f"  {d:12s} recall={rec['mean']} CI{rec['ci95_cluster']} "
+            f"precision={prec['mean']} CI{prec['ci95_cluster']} "
+            f"fp_total={a['fp_total']} fn_total={a['fn_total']} eps_with_fp={a['episodes_with_fp']}"
+        )
+    path = write_detection_bench(report, out_dir)
+    click.echo(f"wrote {path}")
+
+
+@soc.command(
+    "response-bench",
+    help="Track B response benchmark: detection quality -> verified containment vs benign impact.",
+)
+@click.option("--seeds", default="1,2,3")
+@click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
+def soc_response_bench(seeds: str, out_dir: Path | None) -> None:
+    from saber.soc import run_response_bench, write_response_bench
+
+    report = run_response_bench(seeds=[int(x) for x in seeds.split(",") if x.strip()])
+    click.echo(f"family={report['family']} seeds={report['seeds']}")
+    for d, a in report["summary"].items():
+        click.echo(
+            f"  {d:12s} containment_recall={a['containment_recall_mean']} "
+            f"false_containment={a['false_containment_total']} "
+            f"eps_with_false_containment={a['episodes_with_false_containment']} "
+            f"verified_rate={a['all_verified_rate']}"
+        )
+    path = write_response_bench(report, out_dir)
     click.echo(f"wrote {path}")
 
 
@@ -528,7 +603,7 @@ def soc_eval(model: str, use_llm: bool, seeds: str, timeout_s: float, out_dir: P
 
 
 @soc.command("adjudicate", help="Build the gold-label adjudication package (NOT auto-approved).")
-@click.option("--scenarios", default="web_sqli_probe,auth_bruteforce,fs_change")
+@click.option("--scenarios", default="web_sqli_probe,auth_bruteforce,fs_change,persistence")
 @click.option("--seed", type=int, default=9001)
 @click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
 def soc_adjudicate(scenarios: str, seed: int, out_dir: Path | None) -> None:
@@ -567,6 +642,432 @@ def split() -> None:
     )
 
 
+# A small, gradeable smoke set: one subtask per service with a variant that materialises a case.
+_SMOKE_SET: tuple[tuple[str, str], ...] = (
+    ("T1112.001", "tp"),  # MON  — alert TP/FP verdict
+    ("T0020.001", "default"),  # CNT  — write a regex rule
+    ("T0167.001", "default"),  # HUNT — match files against IOCs
+    ("T0173.001", "default"),  # IR   — reorder events across timezones
+)
+
+
+@cli.group("agent", help="Run LLM-backed specialist agents (B1/B2) over episodes.")
+def agent() -> None:
+    """Agent commands. Paid backends are OFF unless explicitly enabled on the command."""
+
+
+@agent.command("run", help="Solve episodes with an LLM specialist and grade honestly (DEV).")
+@click.option("--provider", type=click.Choice(["gemini"]), default="gemini", show_default=True)
+@click.option(
+    "--baseline",
+    type=click.Choice(["b1", "b2"]),
+    default="b2",
+    show_default=True,
+    help="b1 = generic single agent; b2 = service specialist (loads .claude/skills).",
+)
+@click.option(
+    "--subtask",
+    "subtasks",
+    multiple=True,
+    help="SUBTASK_ID or SUBTASK_ID:variant. Repeatable. Default: the 4-service smoke set.",
+)
+@click.option("--seed", type=int, default=1, show_default=True)
+@click.option("--model", default="gemini-2.5-flash", show_default=True)
+@click.option("--key-pool", default="keys_pool.txt", show_default=True, help="Gitignored key file.")
+@click.option(
+    "--enable-paid",
+    is_flag=True,
+    help="Operator opt-in to the paid/free-tier API backend. Required to make any call.",
+)
+@click.option("--budget", type=int, default=8, show_default=True, help="Max billable calls (cap).")
+def agent_run(
+    provider: str,
+    baseline: str,
+    subtasks: tuple[str, ...],
+    seed: int,
+    model: str,
+    key_pool: str,
+    enable_paid: bool,
+    budget: int,
+) -> None:
+    from saber.agents.baselines import BaselineId, solve_episode
+    from saber.agents.gemini import GeminiProvider, KeyPool
+    from saber.episodes.runner import run_oracle
+
+    if not enable_paid:
+        raise click.ClickException(
+            "paid/free-tier LLM backend is OFF. Re-run with --enable-paid (operator opt-in) and a "
+            "--budget cap. The agent never enables a billable backend by itself."
+        )
+    if provider != "gemini":  # pragma: no cover - only choice today
+        raise click.ClickException(f"unknown provider {provider!r}")
+    pool = KeyPool.from_file(key_pool)
+    prov = GeminiProvider(model=model, pool=pool, enabled=True, budget_calls=budget)
+    base = BaselineId.B1_SINGLE_AGENT if baseline == "b1" else BaselineId.B2_SPECIALISTS
+
+    targets = [tuple(s.split(":", 1)) if ":" in s else (s, "default") for s in subtasks] or list(
+        _SMOKE_SET
+    )
+    click.echo(
+        f"provider=gemini model={model} baseline={base.value} pool={len(pool)} keys "
+        f"budget={budget} seed={seed}"
+    )
+    click.echo(f"{'subtask':12s} {'svc':4s} {'score':>6s} {'oracle':>6s} {'validity':10s} note")
+    click.echo("-" * 72)
+    rows: list[dict[str, Any]] = []
+    for sid, variant in targets:
+        ep = build_episode(sid, seed, variant)
+        oracle = run_oracle(ep).score.score
+        res = solve_episode(base, ep, provider=prov)
+        svc = ep.manifest.service
+        note = next((t for t in res.score.trace if "invalid" in t.lower()), "")[:28]
+        click.echo(
+            f"{sid:12s} {svc:4s} {res.score.score:6.3f} {oracle:6.3f} "
+            f"{res.score.validity.value:10s} {note}"
+        )
+        rows.append({"subtask_id": sid, "service": svc, "score": res.score.score, "oracle": oracle})
+    mean = round(sum(r["score"] for r in rows) / len(rows), 4) if rows else 0.0
+    click.echo("-" * 72)
+    click.echo(
+        f"episodes={len(rows)} mean_score={mean} billable_calls_used={prov.calls}/{budget} "
+        f"keys_active={pool.active()}/{len(pool)} tokens_in/out={prov.input_tokens}/{prov.output_tokens}"
+    )
+    click.echo(
+        "label: DEV_SIMULATION_ONLY — measures that the loop runs; NOT a validated benchmark."
+    )
+
+
+@cli.group("population", help="Run the live Gemini-driven agent population over the range (H5).")
+def population() -> None:
+    """Agent-population commands. Paid backends are OFF unless explicitly enabled."""
+
+
+_POP_HEADER = (
+    f"{'scenario':16s} {'seed':>4s} {'teams':14s} {'reqs':>4s} {'truth':>5s} "
+    f"{'f1':>5s} {'prec':>5s} {'rec':>5s} {'status':12s} onmenu"
+)
+
+
+def _pop_row(ep: Any) -> str:
+    return (
+        f"{ep.scenario:16s} {ep.seed:4d} {ep.blue_team:14s} {ep.requests_sent:4d} "
+        f"{ep.truth_malicious:5d} {ep.f1:5.2f} {ep.precision:5.2f} {ep.recall:5.2f} "
+        f"{ep.case['status']:12s} {'yes' if ep.all_targets_on_menu else 'NO!'}"
+    )
+
+
+@population.command(
+    "run", help="Red+clients+blue teams+orchestrator over live scenarios (+ --forever)."
+)
+@click.option("--scenarios", "scenarios_s", default="all", help="Comma list or 'all'.")
+@click.option("--seeds", "seeds_s", default="1", show_default=True, help="Batch mode only.")
+@click.option("--model", default="gemini-2.5-flash", show_default=True)
+@click.option("--key-pool", default="keys_pool.txt", show_default=True)
+@click.option("--enable-paid", is_flag=True, help="Operator opt-in to the API backend. Required.")
+@click.option(
+    "--budget",
+    type=int,
+    default=60,
+    show_default=True,
+    help="Max billable calls (hard safety valve; raise it for --forever).",
+)
+@click.option("--clients", type=int, default=1, show_default=True, help="Number of client agents.")
+@click.option(
+    "--blue-teams", "blue_teams_s", default="", help="Comma teams e.g. MON,HUNT,IR (else routed)."
+)
+@click.option(
+    "--forever", is_flag=True, help="Run continuously until Ctrl+C, STOP file, or budget."
+)
+@click.option(
+    "--interval",
+    "interval_s",
+    type=float,
+    default=8.0,
+    show_default=True,
+    help="Seconds between episodes in --forever.",
+)
+@click.option(
+    "--stop-file",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Create this file to stop a --forever run (default <out>/STOP).",
+)
+@click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
+@click.option(
+    "--office-url",
+    default=None,
+    help="agent-office viewer URL for 3D visualization (else $AGENT_OFFICE_URL if set).",
+)
+def population_run(
+    scenarios_s: str,
+    seeds_s: str,
+    model: str,
+    key_pool: str,
+    enable_paid: bool,
+    budget: int,
+    clients: int,
+    blue_teams_s: str,
+    forever: bool,
+    interval_s: float,
+    stop_file: Path | None,
+    out_dir: Path | None,
+    office_url: str | None,
+) -> None:
+    from saber.agents.gemini import GeminiProvider, KeyPool
+    from saber.domain.errors import BudgetExceeded, IntegrationBlocked
+    from saber.population import OfficeEmitter, run_forever, run_population_episode
+    from saber.population.loop import PopulationReport
+    from saber.range.live import scenario_ids
+
+    if not enable_paid:
+        raise click.ClickException(
+            "paid/free-tier LLM backend is OFF. Re-run with --enable-paid (operator opt-in) and a "
+            "--budget cap. The agent never enables a billable backend by itself."
+        )
+    scenarios = (
+        scenario_ids()
+        if scenarios_s == "all"
+        else [s.strip() for s in scenarios_s.split(",") if s.strip()]
+    )
+    seeds = [int(x) for x in seeds_s.split(",") if x.strip()]
+    blue_teams = [t.strip().upper() for t in blue_teams_s.split(",") if t.strip()] or None
+    pool = KeyPool.from_file(key_pool)
+    prov = GeminiProvider(model=model, pool=pool, enabled=True, budget_calls=budget)
+    workdir = out_dir or (Path("runs") / "population")
+    emitter = OfficeEmitter(office_url)
+    stopf = stop_file or (workdir / "STOP")
+
+    click.echo(
+        f"provider=gemini model={model} pool={len(pool)} keys budget={budget} "
+        f"clients={clients} blue_teams={blue_teams or 'routed'} scenarios={scenarios}"
+    )
+    click.echo(
+        f"agent-office viewer: {'ON @ ' + (emitter.url or '') if emitter.enabled else 'off'}"
+    )
+    if forever:
+        click.echo(
+            f"FOREVER mode: Ctrl+C or create {stopf} to stop; budget {budget} is the safety valve."
+        )
+    click.echo(_POP_HEADER)
+    click.echo("-" * 96)
+
+    def _print_ep(ep: Any, round_i: int = 0) -> None:
+        click.echo(_pop_row(ep))
+
+    report = PopulationReport()
+    if forever:
+        try:
+            report = run_forever(
+                scenarios,
+                prov,
+                workdir=workdir,
+                emitter=emitter,
+                n_clients=clients,
+                blue_teams=blue_teams,
+                interval_s=interval_s,
+                stop_file=stopf,
+                on_episode=_print_ep,
+                on_wait=lambda msg: click.echo(f"… {msg}"),
+            )
+        except KeyboardInterrupt:
+            click.echo("\n^C — stopping.")
+    else:
+        for scenario in scenarios:
+            for seed in seeds:
+                try:
+                    ep = run_population_episode(
+                        scenario,
+                        seed,
+                        prov,
+                        workdir=workdir,
+                        emitter=emitter,
+                        n_clients=clients,
+                        blue_teams=blue_teams,
+                    )
+                except (IntegrationBlocked, BudgetExceeded) as exc:
+                    click.echo(f"{scenario:16s} {seed:4d} BLOCKED: {str(exc)[:60]}")
+                    continue
+                report.episodes.append(ep)
+                _print_ep(ep)
+
+    s = report.summary()
+    click.echo("-" * 96)
+    click.echo(
+        f"episodes={s['n_episodes']} blue_f1_mean={s['blue_f1_mean']} "
+        f"recall_mean={s['blue_recall_mean']} precision_mean={s['blue_precision_mean']}"
+    )
+    click.echo(
+        f"billable_calls_used={prov.calls}/{budget} keys_active={pool.active()}/{len(pool)} "
+        f"keys_disabled={pool.permanently_disabled()} tokens_in/out={s['total_tokens_in']}/{s['total_tokens_out']}"
+    )
+    click.echo(
+        f"safety: all_targets_on_menu={s['all_targets_on_menu']} all_reset_ok={s['all_reset_ok']}"
+    )
+    rpath = workdir / "population_report.json"
+    workdir.mkdir(parents=True, exist_ok=True)
+    rpath.write_text(
+        json.dumps(
+            {"summary": s, "episodes": [e.row() for e in report.episodes]},
+            indent=2,
+            ensure_ascii=False,
+            default=str,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    click.echo(f"label: {', '.join(s['labels'])}")
+    click.echo(f"wrote {rpath}")
+
+
+@population.command(
+    "active-client",
+    help="One always-on benign machine producing a continuous real log (scripted; --enable-paid=hybrid).",
+)
+@click.option("--seed", type=int, default=1, show_default=True)
+@click.option(
+    "--interval",
+    "interval_s",
+    type=float,
+    default=20.0,
+    show_default=True,
+    help="Base seconds between ticks (jittered 0.6x-1.4x).",
+)
+@click.option(
+    "--intensity",
+    type=float,
+    default=None,
+    help="Requests/minute for the scripted profile (1-30). Default profile uses 8.",
+)
+@click.option(
+    "--ticks",
+    type=int,
+    default=0,
+    show_default=True,
+    help="Stop after N ticks; 0 = run forever (until Ctrl+C or STOP file).",
+)
+@click.option(
+    "--rhythm",
+    type=click.Choice(["real", "flat"]),
+    default="real",
+    show_default=True,
+    help="'real' shapes intensity by local hour (office hours busy, night idle).",
+)
+@click.option(
+    "--enable-paid",
+    is_flag=True,
+    help="Operator opt-in: use the LLM profiler (HYBRID). Off = pure scripted, no quota.",
+)
+@click.option("--model", default="gemini-2.5-flash", show_default=True)
+@click.option("--key-pool", default="keys_pool.txt", show_default=True)
+@click.option(
+    "--budget",
+    type=int,
+    default=200,
+    show_default=True,
+    help="Max billable profiler calls (hard safety valve; sparse by design).",
+)
+@click.option(
+    "--profile-refresh",
+    "profile_refresh_s",
+    type=float,
+    default=900.0,
+    show_default=True,
+    help="Seconds between LLM profile refreshes (hybrid only).",
+)
+@click.option(
+    "--stop-file",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Create this file to stop a forever run (default <out>/STOP).",
+)
+@click.option("--out", "out_dir", type=click.Path(path_type=Path), default=None)
+@click.option(
+    "--office-url", default=None, help="agent-office viewer URL (else $AGENT_OFFICE_URL if set)."
+)
+def population_active_client(
+    seed: int,
+    interval_s: float,
+    intensity: float | None,
+    ticks: int,
+    rhythm: str,
+    enable_paid: bool,
+    model: str,
+    key_pool: str,
+    budget: int,
+    profile_refresh_s: float,
+    stop_file: Path | None,
+    out_dir: Path | None,
+    office_url: str | None,
+) -> None:
+    from saber.population import OfficeEmitter, run_active_client
+
+    workdir = out_dir or (Path("runs") / "population")
+    stopf = stop_file or (workdir / "STOP")
+    emitter = OfficeEmitter(office_url)
+
+    provider: Any = None
+    pool = None
+    if enable_paid:
+        from saber.agents.gemini import GeminiProvider, KeyPool
+
+        pool = KeyPool.from_file(key_pool)
+        provider = GeminiProvider(model=model, pool=pool, enabled=True, budget_calls=budget)
+        click.echo(f"engine=HYBRID provider=gemini model={model} pool={len(pool)} keys "
+                   f"budget={budget} refresh={profile_refresh_s:.0f}s")  # fmt: skip
+    else:
+        click.echo("engine=SCRIPTED (no LLM, no quota). Add --enable-paid for the hybrid profiler.")
+    click.echo(f"seed={seed} interval={interval_s:.0f}s rhythm={rhythm} "
+               f"ticks={'forever' if ticks <= 0 else ticks}")  # fmt: skip
+    click.echo(
+        f"agent-office viewer: {'ON @ ' + (emitter.url or '') if emitter.enabled else 'off'}"
+    )
+    if ticks <= 0:
+        click.echo(f"Running until Ctrl+C or create {stopf}.")
+    click.echo(f"{'tick':>5s} {'hour':>4s} {'phase':>5s} {'sent':>4s} {'total':>6s} "
+               f"{'profile':16s} {'int':>4s} llm")  # fmt: skip
+    click.echo("-" * 60)
+
+    def _on_tick(tick: int, st: dict[str, Any]) -> None:
+        click.echo(
+            f"{st['tick']:5d} {st['hour']:4d} {st['phase']:5.2f} {st['sent']:4d} "
+            f"{st['requests_sent']:6d} {st['profile_source']:16s} {st['intensity']:4.0f} "
+            f"{st['llm_calls']}"
+        )
+
+    try:
+        report = run_active_client(
+            provider,
+            workdir=workdir,
+            seed=seed,
+            base_interval_s=interval_s,
+            base_intensity=intensity,
+            profile_refresh_s=profile_refresh_s,
+            rhythm=rhythm,
+            max_ticks=None if ticks <= 0 else ticks,
+            stop_file=stopf,
+            emitter=emitter,
+            on_tick=_on_tick,
+        )
+    except KeyboardInterrupt:
+        click.echo("\n^C — stopping.")
+        return
+
+    click.echo("-" * 60)
+    click.echo(f"ticks={report.ticks} benign_requests={report.requests_sent} "
+               f"log_lines={report.log_lines} reset_ok={report.reset_ok}")  # fmt: skip
+    click.echo(f"by_category={report.by_category}")
+    if enable_paid and provider is not None and pool is not None:
+        click.echo(f"billable_profiler_calls={provider.calls}/{budget} "
+                   f"keys_active={pool.active()}/{len(pool)}")  # fmt: skip
+    rpath = workdir / "active_client_report.json"
+    workdir.mkdir(parents=True, exist_ok=True)
+    rpath.write_text(
+        json.dumps(report.row(), indent=2, ensure_ascii=False, default=str) + "\n", encoding="utf-8"
+    )
+    click.echo(f"label: {', '.join(report.labels)}")
+    click.echo(f"wrote {rpath}")
+
+
 def _score_summary(score: Any) -> dict[str, Any]:
     return {
         "subtask_id": score.subtask_id,
@@ -586,6 +1087,9 @@ def _score_summary(score: Any) -> dict[str, Any]:
 
 def main() -> None:
     cli(prog_name="saber")
+
+
+cli.add_command(world)
 
 
 if __name__ == "__main__":

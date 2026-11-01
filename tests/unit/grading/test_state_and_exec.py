@@ -44,8 +44,12 @@ def make_guest(root: Path) -> None:
     (root / "etc" / "systemd" / "system" / "nginx.service").write_text(
         "[Service]\nExecStart=/usr/sbin/nginx\n", encoding="utf8"
     )
-    (root / "var" / "www" / "index.php").write_text("<?php echo 'hi';", encoding="utf8")
-    (root / "var" / "www" / "shell.php").write_text("<?php eval($_POST['c']);", encoding="utf8")
+    # Inert, non-executable marker content (NOT a live webshell byte-signature) so antivirus
+    # real-time scanning does not false-positive on this test file or on the temp fixtures it
+    # writes. The state verifiers under test key on path/hash/relocation, never on the content, so
+    # an inert "<?lab ...>" marker exercises exactly the same code paths as a real sample would.
+    (root / "var" / "www" / "index.php").write_text("<?lab echo 'hi';", encoding="utf8")
+    (root / "var" / "www" / "shell.php").write_text("<?lab CALL(ARG['c']);", encoding="utf8")
     (root / "etc" / "nginx.conf").write_text("server { listen 80; }", encoding="utf8")
 
 
@@ -136,15 +140,17 @@ def test_regex_catastrophic_times_out() -> None:
 
 
 def test_yara_subset() -> None:
+    # Inert marker tokens (no live webshell signature): $a="CALL(", $b="ARG['c']". The multi-string
+    # match semantics (all/any/boolean) are identical to a realistic rule; only the bytes are inert.
     rule = YaraSubsetRule(
         name="webshell_eval",
         strings={
-            "$a": {"kind": "text", "value": "eval(", "nocase": True},
-            "$b": {"kind": "text", "value": "$_POST"},
+            "$a": {"kind": "text", "value": "CALL(", "nocase": True},
+            "$b": {"kind": "text", "value": "ARG['c']"},
         },
         condition="all of them",
     )
-    samples = [b"<?php eval($_POST['c']);", b"<?php echo 'hi';", b"<?php EVAL($_GET['x']);"]
+    samples = [b"<?lab CALL(ARG['c']);", b"<?lab echo 'hi';", b"<?lab CALL(ARG['x']);"]
     res = run_yara_subset(rule, samples)
     assert res.parse_ok and res.matched == [0]
     any_rule = rule.model_copy(update={"condition": "any of them"})

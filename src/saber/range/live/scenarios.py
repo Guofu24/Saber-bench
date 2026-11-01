@@ -119,10 +119,41 @@ def fs_change(rng: Rng) -> list[dict[str, Any]]:
     return rng.shuffle(plan)
 
 
+# Authorized scheduled jobs (benign HARD NEGATIVES): legitimate administration that a naive "any new
+# cron/autostart entry is bad" rule false-positives on.
+_AUTHORIZED_JOBS = ("backup", "logrotate", "updatecheck", "healthprobe", "certrenew")
+# Unauthorized persistence: job names carrying a known autostart-abuse token. INERT — the server
+# stores a non-executable marker; nothing is scheduled or run.
+_PERSIST_JOBS = ("autorun-svc", "beacon-task", "implant-run", "persist-hook")
+
+
+def persistence(rng: Rng) -> list[dict[str, Any]]:
+    """Authorized scheduled-task registrations + a bounded unauthorized autostart entry.
+
+    Suspiciousness inheres in the resulting STORED ENTRY (a job whose server-side file carries the
+    inert autostart marker), never a request label. Authorized jobs (backup/logrotate/...) are
+    benign hard negatives, so flagging any new scheduled task false-positives. Overlapping admin
+    actors appear on benign and (rarely) the unauthorized change.
+    """
+    admins = [f"adm.{n}" for n in ("an", "huy", "binh")]
+    plan: list[dict[str, Any]] = []
+    for _ in range(rng.randint(5, 8)):  # authorized scheduled jobs (hard negatives)
+        job = rng.pick(_AUTHORIZED_JOBS)
+        plan.append(
+            {"target": f"/cron/add?name={job}&actor={rng.pick(admins)}", "intent": "benign"}
+        )
+    for _ in range(rng.randint(1, 2)):  # unauthorized autostart persistence
+        job = rng.pick(_PERSIST_JOBS)
+        actor = rng.pick([*admins, "unknown"])  # overlapping users
+        plan.append({"target": f"/cron/add?name={job}&actor={actor}", "intent": "probe"})
+    return rng.shuffle(plan)
+
+
 SCENARIOS: dict[str, Callable[[Rng], list[dict[str, Any]]]] = {
     "web_sqli_probe": web_sqli_probe,
     "auth_bruteforce": auth_bruteforce,
     "fs_change": fs_change,
+    "persistence": persistence,
 }
 
 
