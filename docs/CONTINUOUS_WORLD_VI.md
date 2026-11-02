@@ -172,13 +172,28 @@ Không được gọi kết quả HYBRID là kết quả LLM thuần.
 
 ## Quan sát bằng agent-office
 
-Runtime phát sự kiện agent/tool/status/LLM trực tiếp tới viewer hiện có:
+Runtime ghi snapshot `office.json` mỗi tick, lúc khởi động và lúc dừng. Xem world
+đang chạy hoặc đã dừng từ một terminal riêng (Node.js 18+, không cần npm install):
+
+```powershell
+node agent-office/bin/agent-office.js watch --world runs/world --open
+```
+
+Hoặc khởi động world qua viewer để nhận snapshot trực tiếp:
 
 ```powershell
 node agent-office/bin/agent-office.js run -- .venv/Scripts/python.exe -m saber.cli.main world run --out runs/world --forever
 ```
 
-Hoặc chạy viewer riêng rồi thêm `--office-url http://127.0.0.1:7788` vào `world run`.
+Hoặc chạy `agent-office serve` rồi thêm `--office-url http://127.0.0.1:7788` vào
+`world run`. Không suy ra API calls từ số lần agent xin plan: usage lấy từ ledger
+provider. Roster có lọc đội/phân trang; từng agent hiển thị nguồn hành động, HTTP
+status và tick cuối. Quota chỉ hiển thị số thứ tự key, không raw key hay prompt.
+
+Sandbox dùng `watch --bundle PATH_TO_BUNDLE` trên Docker host, không mở network
+container. VM/server dùng `watch --world` tại máy đích và SSH forward cổng viewer.
+Chi tiết trạng thái heartbeat, STOP/resume và cách đọc counter ở
+[Agent Office README](../agent-office/README.md).
 Viewer không được cấp quyền đọc database hay ground truth.
 
 ## Dữ liệu và đánh giá
@@ -189,6 +204,7 @@ Viewer không được cấp quyền đọc database hay ground truth.
 | `world.sqlite3` | Trạng thái kiểm soát, case, telemetry, memory riêng và ledger evaluator |
 | `access.jsonl`, `.1`–`.3` | Telemetry công khai từ thao tác đã thực thi, tối đa khoảng 20 MB |
 | `report.json` | Báo cáo cho operator; không đưa vào observation của agent |
+| `office.json` | Snapshot operator cho Agent Office; roster, counter và chỉ số quota |
 | `runtime.json` | Trạng thái process và địa chỉ loopback, không chứa bearer token |
 | `sealed-archives/` | Các cặp event/effect nén, có hash trong DB, chỉ cho evaluator/operator |
 

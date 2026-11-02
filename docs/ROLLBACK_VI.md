@@ -11,6 +11,11 @@ Các checkpoint trên branch `feat/environment-profiles`:
 | `e8bd92c` | Lifecycle local/guest/container, report, STOP/resume |
 | `5a38514` | Doctor và health check chỉ đọc cho dịch vụ được khai báo |
 | `ab4bbe5` | Resume dùng một lần và chặn file ngoài manifest trong build context |
+| `4ef4087` | README và hướng dẫn các môi trường, checkpoint rollback |
+| `fb1f693` | Snapshot world cho office, counter runtime, không xuất dữ liệu riêng |
+| `51dbb37` | Watch local/sandbox, validate snapshot và SSE replay |
+| `c3e475d` | UI world, lọc đội, phân trang, quota và kiểm thử trình duyệt |
+| `2367ee0` | Đóng gói viewer độc lập cho local/VM/server và host sandbox |
 
 Các commit tài liệu/kiểm thử tiếp theo xem bằng:
 

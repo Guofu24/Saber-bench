@@ -139,13 +139,27 @@ Xem `llm.successes`, `llm.by_team`, `llm_pools` và nguồn hành động `llm` 
 |---|---|
 | `config.json` | Cấu hình giữ ổn định cho world |
 | `report.json` | Tick, kết quả, usage và trạng thái pool |
+| `office.json` | Snapshot cho viewer: roster, nguồn hành động, counter, chỉ số quota |
 | `access.jsonl` | Log thao tác ứng dụng, có rotation |
 | `world.sqlite3` | Trạng thái, case, journal và ledger đánh giá |
 | `STOP` | Yêu cầu dừng; tiếp tục bằng resume rõ ràng |
 
 Thư mục world là đường dẫn `--out`; sandbox dùng `/data` trong named volume. Không
-cấp database/ground truth cho agents. `agent-office` là viewer tùy chọn cho runtime
-trực tiếp; xem [hướng dẫn world](docs/CONTINUOUS_WORLD_VI.md).
+cấp database/ground truth cho agents. Xem world từ terminal thứ hai (Node.js 18+,
+không cần cài npm dependencies):
+
+```powershell
+node agent-office/bin/agent-office.js watch --world runs/world --open
+# Sandbox: thay bằng đường dẫn bundle đã env up
+node agent-office/bin/agent-office.js watch --bundle runs/my-sandbox --open
+```
+
+Thay `runs/world` bằng thư mục `--out` thực tế. Viewer hiển thị Client/Red/Blue,
+profile, scripted/Gemini, nguồn hành động và quota theo đội; chỉ đọc chỉ số key.
+Màn hình phân trang 20 agent, hỗ trợ roster 200 agent. Sandbox giữ mạng cô lập;
+VM/server chạy viewer tại máy đích rồi forward cổng loopback. Xem
+[hướng dẫn Agent Office](agent-office/README.md) và
+[hướng dẫn world](docs/CONTINUOUS_WORLD_VI.md).
 `env doctor --probe-services` chỉ gọi GET health của dịch vụ đã được cho phép trong
 inventory. Một HTTP 200 không xác nhận SIEM/SOAR adapter hoạt động.
 
