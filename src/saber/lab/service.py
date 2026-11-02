@@ -16,6 +16,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from saber.lab.analysis_service import AnalysisQueue, create_analysis
 from saber.lab.application import create_application
 from saber.lab.collector import create_collector, flush_index
 from saber.lab.controller import Controller
@@ -30,7 +31,7 @@ from saber.lab.worker import create_worker
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--role", choices=["app", "collector", "worker", "controller"], required=True
+        "--role", choices=["app", "collector", "worker", "controller", "analysis"], required=True
     )
     parser.add_argument("--data", type=Path, required=True)
     parser.add_argument("--spec", type=Path, required=True)
@@ -56,6 +57,7 @@ def main() -> None:
     )
     sensor = PollSensor(emitter, args.data / ("documents" if args.role == "app" else "workspace"))
     controller: Controller | None = None
+    analysis_queue: AnalysisQueue | None = None
 
     def retention_loop() -> None:
         while not stop.wait(60):
@@ -80,6 +82,16 @@ def main() -> None:
                     continue
 
         threads.append(threading.Thread(target=index_loop, daemon=True))
+    elif args.role == "analysis":
+        analysis_queue = AnalysisQueue(
+            ledger,
+            credentials,
+            spec.analysis,
+            Path(os.environ.get("SABER_ANALYSIS_ASSETS", "/config/analysis")),
+            emitter,
+        )
+        app = create_analysis(analysis_queue)
+        threads.append(analysis_queue.thread)
     elif args.role == "worker":
         app = create_worker(
             ledger,
@@ -128,19 +140,24 @@ def main() -> None:
     async def lifespan(_: FastAPI) -> Any:
         for thread in threads:
             thread.start()
-        if args.role in ("app", "worker"):
+        if args.role in ("app", "worker", "analysis"):
             emitter.start()
-            sensor.start()
+            if args.role != "analysis":
+                sensor.start()
         yield
         stop.set()
         if controller:
             controller.stop.set()
+        if analysis_queue:
+            analysis_queue.stop.set()
         for thread in threads:
             thread.join(timeout=45)
         sensor.close()
         emitter.close()
         if controller:
             controller.close()
+        if analysis_queue:
+            analysis_queue.close()
         ledger.close()
 
     app.router.lifespan_context = lifespan

@@ -132,6 +132,7 @@ def create_worker(
                 "read_token": credentials.get("read_token", ""),
                 "response_token": credentials.get("response_token", ""),
                 "actor_token": credentials.get("actor_capabilities", {}).get(job.actor, ""),
+                "analysis": credentials.get("analysis_url", ""),
                 "browser": browser,
                 "browser_executable": browser_executable,
             }

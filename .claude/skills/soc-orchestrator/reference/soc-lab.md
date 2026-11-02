@@ -48,6 +48,15 @@ It does not silently deploy a vendor SIEM rule. DFIR exports verify raw hashes a
 case-evidence.json/case-timeline.json, not a disk image. `share` takes text/evidence_ids;
 `read_messages` reads only the actor's own team. Reports distinguish observed facts from inference.
 
+The optional analysis service exposes `list_samples`, `tool_status`, `analysis_status`
+(`job_id`) to blue. DFIR/malware/network can `analyze_sample` with a registered `sample_id`
+(SHA-256), `engine` (builtin/ghidra/ida/volatility/yara/tshark/suricata) and optional `profile`.
+Volatility profiles are windows-processes, windows-network or linux-processes. Only operators
+upload samples. No paths, scripts, shell arguments or URLs can be supplied by an agent.
+QUEUED/RUNNING is pending; require a completed report/evidence ID. Missing dependencies and
+invalid images are failures, never evidence of a clean sample. The bundled YARA/Suricata rules
+detect synthetic markers only. Analysis receipts and result previews appear in Office.
+
 Failures are retained as job receipts and private experience episodes. The background learner
 uses the same team's provider pool and budget to propose evidence-cited lessons. A trusted
 operator-owned range replay suite must demonstrate repair and no regression before a new

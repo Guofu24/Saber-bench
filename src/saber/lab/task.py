@@ -22,6 +22,36 @@ def execute(job: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("Tool not available to this team")
     app, collector, token = job["app"], job["collector"], job["token"]
     args = job["args"]
+    if tool in ("list_samples", "tool_status", "analyze_sample", "analysis_status"):
+        import re
+
+        endpoint = job.get("analysis", "")
+        if not endpoint:
+            return {"status": 503, "error": "Analysis service not configured"}
+        if tool == "analyze_sample":
+            from saber.lab.analyzers import AnalysisJob
+
+            payload = AnalysisJob(id=job["job_id"], **args)
+            status, result = request(
+                endpoint + "/jobs", token=job["actor_token"], body=payload.model_dump()
+            )
+        elif tool == "analysis_status":
+            job_id = str(args.get("job_id", ""))
+            if not re.fullmatch(r"[a-f0-9-]{32,36}", job_id):
+                raise ValueError("Invalid analysis job ID")
+            status, result = request(endpoint + "/jobs/" + job_id, token=job["actor_token"])
+        else:
+            status, result = request(
+                endpoint + ("/samples" if tool == "list_samples" else "/tools"),
+                token=job["actor_token"],
+            )
+        if tool in ("analyze_sample", "analysis_status") and status == 200:
+            return {
+                "status": 202 if result["state"] in ("QUEUED", "RUNNING") else 200,
+                "analysis_job": result,
+                "evidence_id": result.get("evidence_id"),
+            }
+        return {"status": status, **result}
     if tool in WORK_TEAMS:
         status, result = request(
             collector + "/guest/work",

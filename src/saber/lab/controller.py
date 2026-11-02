@@ -93,6 +93,9 @@ class Controller:
         if not self.spec.windows:
             allowed = {t for t in allowed if not t.startswith("windows_")}
         previous = obs.get("result", {}).get("guest_work", {})
+        analysis = obs.get("result", {}).get("analysis_job", {})
+        if analysis.get("state") in ("QUEUED", "RUNNING"):
+            return "analysis_status", {"job_id": analysis["id"]}, "scripted"
         if previous.get("state") in ("QUEUED", "DISPATCHED") or (
             previous.get("state") == "INDETERMINATE" and not previous.get("resolution")
         ):
@@ -130,6 +133,28 @@ class Controller:
                 pass  # errors never leak provider credentials; fallback is labeled below
         source = "scripted-fallback" if self.provider else "scripted"
         turn, last = obs["turn"], obs.get("result", {})
+        if (
+            actor.team == "blue"
+            and actor.role in ("dfir", "malware", "network")
+            and self.spec.analysis.enabled
+        ):
+            if last.get("samples") and turn % 5 != 0:
+                candidate = next(
+                    (
+                        s
+                        for s in last["samples"]
+                        if s["kind"] == ("pcap" if actor.role == "network" else "binary")
+                    ),
+                    None,
+                )
+                if candidate:
+                    return (
+                        "analyze_sample",
+                        {"sample_id": candidate["id"], "engine": "builtin"},
+                        source,
+                    )
+            if turn % 5 == 0:
+                return "list_samples", {}, source
         workstations = [n.name for n in self.spec.windows if n.role == "workstation"]
         if workstations and turn > 0 and turn % 5 == 0:
             if actor.team == "client":

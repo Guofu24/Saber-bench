@@ -109,6 +109,16 @@ def compose(spec: LabSpec) -> dict[str, Any]:
             "SABER_COLLECTOR": "http://collector:8080",
         }
     )
+    if spec.analysis.enabled:
+        analysis = service("analysis", "analysis", ["analysis", "telemetry"], "2g")
+        analysis["build"]["dockerfile"] = "Dockerfile.analysis"
+        analysis["secrets"] = ["analysis"]
+        analysis["ports"] = ["127.0.0.1:7792:8080"]
+        analysis["volumes"] += ["./analysis:/config/analysis:ro", "./tools:/opt/tools:ro"]
+        analysis["environment"]["SABER_COLLECTOR"] = "http://collector:8080"
+        services["blue"]["networks"].append("analysis")
+        services["blue"]["depends_on"]["analysis"] = {"condition": "service_healthy"}
+        secret_names.append("analysis")
     services["indexer"] = {
         "image": f"opensearchproject/opensearch:{spec.opensearch_version}",
         "environment": {
@@ -214,7 +224,9 @@ def compose(spec: LabSpec) -> dict[str, Any]:
         "name": spec.name,
         "services": services,
         "volumes": volumes,
-        "networks": {n: {"internal": True} for n in ("business", "telemetry", "control", "soc")},
+        "networks": {
+            n: {"internal": True} for n in ("business", "telemetry", "control", "soc", "analysis")
+        },
         "secrets": {n: {"file": f"./.secrets/{n}.json"} for n in secret_names},
     }
 
@@ -248,6 +260,7 @@ def initialize_secrets(bundle: Path, spec: LabSpec) -> None:
             "blue",
             "network",
             "linux-audit",
+            "analysis",
             *[w.name for w in spec.windows],
         )
     }
@@ -277,6 +290,20 @@ def initialize_secrets(bundle: Path, spec: LabSpec) -> None:
             "relay_token": relay_token,
             "sources": {w.name: ingestion[w.name] for w in spec.windows},
         },
+        "analysis": {
+            "upload_token": secrets.token_urlsafe(32),
+            "ingest_token": ingestion["analysis"],
+            "actor_capabilities": {
+                actor_tokens[a.id]: {
+                    "actor": a.id,
+                    "team": a.team,
+                    "role": a.role,
+                    "specialties": list(a.specialties),
+                }
+                for a in spec.actors
+                if a.team == "blue"
+            },
+        },
     }
     for team in ("client", "red", "blue"):
         configs[team] = {
@@ -287,6 +314,9 @@ def initialize_secrets(bundle: Path, spec: LabSpec) -> None:
             "rpc_token": rpc_tokens[team],
             "ingest_token": ingestion[team],
             "response_token": response_token if team == "blue" else "",
+            "analysis_url": "http://analysis:8080"
+            if team == "blue" and spec.analysis.enabled
+            else "",
         }
     for name, value in configs.items():
         path = folder / f"{name}.json"
@@ -306,6 +336,7 @@ def render(spec: LabSpec, out: Path) -> dict[str, Any]:
     ):
         raise ValueError("Bundle output cannot be inside its own source inputs")
     out.mkdir(parents=True)
+    (out / "tools").mkdir()
     source = out / "source"
     for name in ("pyproject.toml", "uv.lock", "README.md", "catalog/subtasks.json"):
         dest = source / name

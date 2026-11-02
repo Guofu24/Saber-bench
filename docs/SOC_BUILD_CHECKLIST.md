@@ -5,7 +5,7 @@ explicit job on a sufficiently sized isolated target. Existing benchmark gates r
 
 - [x] Connect private learning episodes, reflection, operator replay, immutable publication,
   safe activation and rollback to the range controller and its existing team API budgets.
-- [ ] Execute binary/memory/PCAP analysis through bounded optional tool adapters; register
+- [x] Execute binary/memory/PCAP analysis through bounded optional tool adapters; register
   evidence by hash, report unavailable tools and retain execution receipts.
 - [ ] Connect lab-owned case/response playbooks to an authenticated external SOAR bridge,
   including durable dispatch, verification and uncertain-result reconciliation.

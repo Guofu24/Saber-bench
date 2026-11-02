@@ -135,6 +135,7 @@ def record(
         "exit_code",
         "executor_host",
         "guest_work",
+        "analysis_job",
         "analysis",
         "case_id",
         "verified",
