@@ -23,6 +23,10 @@ async function main() {
     await page.waitForTimeout(1500);
     assert.equal(await page.locator('#sAgents').textContent(), String(source.actors.length));
     assert.match(await page.locator('#worldStatus').textContent(), /Đã dừng/);
+    assert.equal(await page.locator('[data-team-zone]').count(), 3);
+    assert(await page.evaluate(() => window.__office.agents.every(a => a.slot && a.slot.team === a.worldActor.team)));
+    const actualSeats = await page.evaluate(() => window.__office.agents.map(a => a.slot.label));
+    assert.equal(new Set(actualSeats).size, actualSeats.length);
     await page.screenshot({ path: path.join(out, 'actual-world.png') });
     const red = source.actors.find(a => a.id === 'red-impact');
     if (source.trace && red) {
@@ -72,15 +76,27 @@ async function main() {
     await page.locator('#worldSelect option[value="ui-test-200"]').waitFor({ state: 'attached' });
     await page.selectOption('#worldSelect', 'ui-test-200');
     await page.selectOption('#teamFilter', 'all');
-    assert.equal(await page.locator('#cards .card').count(), 20);
-    assert.match(await page.locator('#pageInfo').textContent(), /1\/10/);
+    assert.equal(await page.locator('#cards .card').count(), 36);
+    assert.match(await page.locator('#pageInfo').textContent(), /1\/8.*36\/200/);
+    assert.deepEqual(await page.evaluate(() => ['client', 'red', 'blue'].map(t => window.__office.agents.filter(a => a.team === t).length)), [12, 12, 12]);
+    await page.selectOption('#seatCapacity', '24');
+    assert.equal(await page.locator('#cards .card').count(), 72);
+    assert.match(await page.locator('#pageInfo').textContent(), /1\/4.*72\/200/);
+    const expandedSeats = await page.evaluate(() => window.__office.agents.map(a => ({ id: a.worldActor.id, team: a.team, slot: a.slot.team, label: a.slot.label, x: a.seat.x, z: a.seat.z })));
+    assert(expandedSeats.every(a => a.team === a.slot));
+    assert.equal(new Set(expandedSeats.map(a => a.label)).size, 72);
+    await page.screenshot({ path: path.join(out, 'synthetic-72-seats.png') });
     await page.click('#nextPage');
-    assert.match(await page.locator('#pageInfo').textContent(), /2\/10/);
+    assert.match(await page.locator('#pageInfo').textContent(), /2\/4/);
     await page.selectOption('#teamFilter', 'blue');
-    assert.match(await page.locator('#pageInfo').textContent(), /1\/3.*50 agent/);
+    assert.match(await page.locator('#pageInfo').textContent(), /1\/3.*24\/50 agent/);
     assert(await page.evaluate(() => window.__office.agents.every(a => a.worldActor.team === 'blue')));
+    const blueSeat = await page.evaluate(() => { const a = window.__office.agents[0]; return { id: a.worldActor.id, team: a.team, slot: a.slot.team, label: a.slot.label, x: a.seat.x, z: a.seat.z }; });
+    assert.deepEqual(blueSeat, expandedSeats.find(a => a.id === blueSeat.id));
+    assert.equal(await page.locator('[data-office-focus="blue"]').getAttribute('aria-pressed'), 'true');
+    await page.screenshot({ path: path.join(out, 'blue-zone.png') });
     await page.click('#nextPage'); await page.click('#nextPage');
-    assert.equal(await page.locator('#cards .card').count(), 10);
+    assert.equal(await page.locator('#cards .card').count(), 2);
     assert.equal(await page.locator('#nextPage').isDisabled(), true);
     await page.reload();
     await page.waitForFunction(() => window.__office?.currentWorld());
@@ -117,11 +133,15 @@ async function main() {
       await page.getByRole('button', { name: `Xem hoạt động ${red.id}`, exact: true }).click();
       await page.locator('#inspector').waitFor({ state: 'visible' });
       await page.screenshot({ path: path.join(out, 'mobile-inspector.png') });
+      await page.keyboard.press('Escape');
+      await page.click('#toggleTeam');
+      await page.click('[data-office-focus="red"]');
+      await page.screenshot({ path: path.join(out, 'mobile-team-zone.png') });
     }
     assert.deepEqual(errors, []);
     const result = { passed: true, actual_world: source.world_id, actual_actors: source.actors.length,
-      synthetic_pagination_actors: 200, actual_inspector_checked: !!(source.trace && red),
-      checks: ['roster', 'team filter', 'pagination', 'SSE replay', 'stale', 'stopped', 'resume', 'quota indices', 'usage counters', 'budget fallback', 'mobile', 'legacy trace empty state', 'no browser errors'] };
+      synthetic_pagination_actors: 200, synthetic_visible_seats: 72, actual_inspector_checked: !!(source.trace && red),
+      checks: ['three team zones', 'seat capacity 36/72', 'team seat identity across filters', 'camera focus', 'roster', 'team filter', 'pagination', 'SSE replay', 'stale', 'stopped', 'resume', 'quota indices', 'usage counters', 'budget fallback', 'mobile', 'legacy trace empty state', 'no browser errors'] };
     await fs.writeFile(path.join(out, 'verification.json'), JSON.stringify(result, null, 2));
     console.log(JSON.stringify(result));
   } finally {

@@ -17,6 +17,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#050817;color:var(--te
 @keyframes pop{from{opacity:0}to{opacity:1}}
 .zone{font:600 12px/1 system-ui,sans-serif;color:#e8fbff;background:rgba(6,18,40,.82);border:1px solid rgba(110,255,240,.5);padding:6px 12px;border-radius:999px;white-space:nowrap}
 .zone.gold{border-color:rgba(255,211,107,.7);color:#fff3cf}
+.zone.team-zone{border-color:var(--zone-color);color:var(--zone-color);border-radius:9px;padding:7px 12px;text-align:center;background:rgba(6,12,28,.94);box-shadow:0 5px 20px #0005}
+.team-zone b{font-size:12px;letter-spacing:1px}.team-zone small{display:block;font-size:10px;color:#c7d4ed;font-weight:400;letter-spacing:0;margin-top:5px}
 .glass{position:fixed;background:rgba(9,13,32,.72);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
 #left{top:16px;left:16px;bottom:16px;width:256px;overflow:auto;padding:16px}
 #right{top:16px;right:16px;bottom:16px;width:316px;display:flex;flex-direction:column;overflow:hidden}
@@ -94,6 +96,11 @@ code{font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:#ffe3a3}
 #worldPanel{margin-bottom:12px;font-size:11.5px}
 #worldPanel label{display:block;color:var(--muted);margin-top:8px}
 #worldPanel select{width:100%;padding:6px;background:#111a32;color:var(--text);border:1px solid var(--line);border-radius:7px;font:inherit}
+#officeViews{position:fixed;z-index:4;top:16px;left:288px;right:348px;display:flex;justify-content:center;gap:5px;flex-wrap:wrap}
+#officeViews button{background:rgba(9,18,38,.9);color:var(--view-color,#cdd9ed);padding:7px 10px;border:1px solid #35425d;border-radius:8px;font-size:11px;backdrop-filter:blur(10px)}
+#officeViews button[aria-pressed=true]{border-color:var(--view-color,#ffd36b);background:#1b2946}
+#seatInfo{margin-top:7px;font-size:11px;line-height:1.5}
+@media(max-width:899px){#officeViews{top:55px;left:8px;right:8px}#officeViews button{padding:6px 9px}}
 #worldStatus{margin-top:7px}.muted{color:var(--muted)}
 #worldUsage,#actionSources{margin-top:6px;line-height:1.6}
 .pager{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:8px}
@@ -151,8 +158,10 @@ code{font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:#ffe3a3}
     <div id="worldStatus"></div><div id="worldUsage"></div><div id="actionSources"></div>
     <label for="teamFilter">Đội agent</label>
     <select id="teamFilter"><option value="all">Tất cả</option><option value="client">Clients</option><option value="red">Red Team</option><option value="blue">Blue Team</option></select>
+    <label for="seatCapacity">Số bàn mỗi đội</label>
+    <select id="seatCapacity"><option value="12">12 bàn/đội · 36 slots</option><option value="24">24 bàn/đội · 72 slots</option></select>
     <div class="pager"><button id="prevPage" aria-label="Trang trước">←</button><span id="pageInfo"></span><button id="nextPage" aria-label="Trang sau">→</button></div>
-    <div class="muted">20 agent/trang · tổng số liệu của cả world</div>
+    <div id="seatInfo" class="muted">12 bàn/đội · tối đa 36 agent/lượt xem</div>
   </div>
   <div class="sec">Đội agent</div>
   <div id="empty" class="empty">Chưa có agent trong trang này. Dùng watch để xem world có sẵn, hoặc run để nhận sự kiện runtime.</div>
@@ -175,6 +184,12 @@ code{font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:#ffe3a3}
   <div id="traceCases"></div>
 </aside>
 <button id="toggleTeam">Đội agent</button>
+<nav id="officeViews" aria-label="Góc nhìn văn phòng">
+  <button data-office-focus="all" aria-pressed="true">Toàn cảnh</button>
+  <button data-office-focus="client" aria-pressed="false" style="--view-color:#57dfc4">Clients</button>
+  <button data-office-focus="red" aria-pressed="false" style="--view-color:#ff6b79">Red Team</button>
+  <button data-office-focus="blue" aria-pressed="false" style="--view-color:#6ea9ff">Blue Team</button>
+</nav>
 <div id="hint">Kéo để xoay · cuộn để zoom · bấm robot, màn hình trên bàn hoặc thẻ agent để xem thao tác</div>
 <script>/*BUNDLE*/</script>
 </body>

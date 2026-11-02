@@ -2,7 +2,8 @@ import { worldHealth, rosterPage, actorActivity, actorStatus } from './world-sta
 
 const worlds = new Map();
 let worldId = null, teamFilter = 'all', worldPage = 0, viewKey = '';
-const teamColors = { client: '#4fd8ff', red: '#ff5c5c', blue: '#6bf29b' };
+let seatsPerTeam = DEFAULT_TEAM_SEATS;
+const teamColors = Object.fromEntries(TEAM_ORDER.map(team => [team, TEAM_ZONES[team].color]));
 const teamNames = { client: 'Clients', red: 'Red Team', blue: 'Blue Team' };
 const $worldSelect = document.getElementById('worldSelect');
 const $teamFilter = document.getElementById('teamFilter');
@@ -21,7 +22,10 @@ function clearOfficeActors() {
     const materials = new Set();
     a.robot.traverse(o => { if (o.isMesh) { o.geometry.dispose(); materials.add(o.material); } });
     for (const m of materials) if (![white, jointM, visorM].includes(m)) m.dispose();
-    if (a.slot) { a.slot.used = null; a.desk.g.visible = false; }
+    if (a.slot) {
+      a.slot.used = null; a.desk.on = false; a.desk.g.visible = false;
+      a.desk.g.traverse(o => { delete o.userData.agent; });
+    }
     if (a.floor) a.floor.used = null;
     if (a.sofa) a.sofa.used = null;
     a.card.remove();
@@ -51,13 +55,16 @@ function receiveWorld(ev) {
 function renderWorld() {
   const w = currentWorld(); if (!w) return;
   $worldPanel.hidden = false; $teamMetrics.hidden = false;
-  const page = rosterPage(w, teamFilter, worldPage); worldPage = page.page;
-  const key = JSON.stringify([w.world_id, w.run_id, page.items.map(a => a.id)]);
+  const page = rosterPage(w, teamFilter, worldPage, seatsPerTeam); worldPage = page.page;
+  const key = JSON.stringify([w.world_id, w.run_id, seatsPerTeam, page.items.map(a => a.id)]);
   if (viewKey !== key) {
     clearOfficeActors(); viewKey = key;
-    for (const a of page.items) createAgent({ id: `${w.world_id}/${a.id}`, name: a.id, role: `${teamNames[a.team]} / ${(a.specialties?.length ? a.specialties : [a.role]).join(', ')}`, color: teamColors[a.team], replay: true });
+    setOfficeCapacity(seatsPerTeam);
+    for (const a of page.items) createAgent({ id: `${w.world_id}/${a.id}`, team: a.team, name: a.id, role: `${teamNames[a.team]} / ${(a.specialties?.length ? a.specialties : [a.role]).join(', ')}`, color: teamColors[a.team], replay: true });
   }
-  document.getElementById('pageInfo').textContent = `${page.page + 1}/${page.pages} · ${page.count} agent`;
+  document.getElementById('pageInfo').textContent = `${page.page + 1}/${page.pages} · ${page.items.length}/${page.count} agent`;
+  document.getElementById('seatInfo').textContent = `${seatsPerTeam} bàn/đội · tối đa ${seatsPerTeam * 3} agent/lượt xem`;
+  updateOfficeZones(w);
   document.getElementById('prevPage').disabled = page.page === 0;
   document.getElementById('nextPage').disabled = page.page === page.pages - 1;
   document.getElementById('empty').style.display = page.count ? 'none' : 'block';
@@ -100,7 +107,10 @@ function updateWorldUI() {
   return true;
 }
 
-$worldSelect.addEventListener('change', () => { worldId = $worldSelect.value; worldPage = 0; renderWorld(); });
-$teamFilter.addEventListener('change', () => { teamFilter = $teamFilter.value; worldPage = 0; renderWorld(); });
+$worldSelect.addEventListener('change', () => { worldId = $worldSelect.value; worldPage = 0; renderWorld(); focusOffice(teamFilter); });
+$teamFilter.addEventListener('change', () => { teamFilter = $teamFilter.value; worldPage = 0; renderWorld(); focusOffice(teamFilter); });
+document.getElementById('seatCapacity').addEventListener('change', event => {
+  seatsPerTeam = Number(event.target.value); worldPage = 0; renderWorld();
+});
 document.getElementById('prevPage').addEventListener('click', () => { worldPage--; renderWorld(); });
 document.getElementById('nextPage').addEventListener('click', () => { worldPage++; renderWorld(); });
