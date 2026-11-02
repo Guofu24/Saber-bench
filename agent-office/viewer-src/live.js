@@ -1,23 +1,45 @@
 
 // ================= live office (driven by agent-office events) =================
-const SLOTS = [];
-[[-7.0, -7.3], [-4.3, -7.3], [-7.0, -4.7], [-4.3, -4.7]].forEach(([x, z]) => SLOTS.push({ x, z, w: 1.5, sideX: -1.7, hub: [-2.4, 0.6] }));
-for (const z of [-7.8, -5.8, -3.8, -1.8]) for (const x of [2.7, 4.5, 6.3, 8.05]) SLOTS.push({ x, z, w: 1.25, sideX: 1.15, hub: [0.9, 3.0] });
-const FLOOR = []; for (const z of [3.4, 5.0, 6.6]) for (const x of [3.2, 4.6, 6.0, 7.4]) FLOOR.push({ x, z, used: null });
+const SLOTS = TEAM_ORDER.flatMap(team => Array.from({ length: MAX_TEAM_SEATS }, (_, i) => ({ ...teamSeat(team, i), used: null })));
+const FLOOR = []; for (const z of [4, 6, 13, 15]) for (const x of [8, 10, 12, 14]) FLOOR.push({ x, z, used: null });
 const PALETTE = ['#ff7eb6', '#4fd8ff', '#ffd36b', '#6bf29b', '#b892ff', '#ff9f5a', '#59d1c8', '#f2f28a'];
 const IDLE_BREAK_MS = 20000;
 const agents = [], byId = new Map();
 const totals = { calls: 0, tools: 0, tokens: 0, handoffs: 0 };
 let selected = null, hovered = null;
 
-label('Phòng điều phối', 'zone', scene, 0.2, -5.4, -2.0);
-label('Khu làm việc', 'zone', scene, 0.2, 5.3, 0.9);
-label('Trạm Sức Khỏe', 'zone', scene, 0.2, -6.2, 7.6);
+const zoneLabels = Object.fromEntries(TEAM_ORDER.map(team => {
+  const zone = TEAM_ZONES[team];
+  const marker = label(`<b>${zone.name}</b><small>Chờ world</small>`, 'zone team-zone', scene, 0.5, zone.x, 1.6);
+  marker.element.style.setProperty('--zone-color', zone.color); marker.element.dataset.teamZone = team;
+  return [team, marker];
+}));
+function setOfficeCapacity(capacity) {
+  for (const slot of SLOTS) {
+    if (slot.index < capacity) {
+      slot.desk ||= makeDesk(slot.x, slot.z, slot.w, TEAM_ZONES[slot.team].color);
+      slot.desk.g.visible = true;
+      if (!slot.used) { slot.desk.on = false; slot.desk.scr.color.setScalar(0.18); }
+    } else if (slot.desk) slot.desk.g.visible = false;
+  }
+}
+function updateOfficeZones(world) {
+  for (const team of TEAM_ORDER) {
+    const count = world.actors.filter(a => a.team === team).length;
+    const shown = agents.filter(a => a.team === team).length;
+    const hidden = teamFilter !== 'all' && teamFilter !== team;
+    zoneLabels[team].element.querySelector('small').textContent = hidden
+      ? `${count} agent · ẩn theo bộ lọc` : `${shown}/${count} agent · ${seatsPerTeam} bàn`;
+    zoneLabels[team].element.style.opacity = hidden ? '0.5' : '1';
+  }
+}
+setOfficeCapacity(DEFAULT_TEAM_SEATS);
+label('Khu nghỉ', 'zone', scene, 0.2, -11.2, 13.2);
 label('Lõi LLM', 'zone gold', scene, 2.35, CORE.x, CORE.z);
 const waitL = label('Đang chờ world hoặc sự kiện agent…', 'tool say', scene, 2.9, CORE.x, CORE.z);
 
 const boss = makeRobot('#ffd36b', { suit: true });
-boss.position.set(2.0, 0, 3.6); boss.rotation.y = Math.atan2(2.0 - CORE.x, 3.6 - CORE.z);
+boss.position.set(4.0, 0, 10.6); boss.rotation.y = Math.atan2(4.0 - CORE.x, 10.6 - CORE.z);
 scene.add(boss); boss.traverse(o => { if (o.isMesh) o.castShadow = true; });
 const bossName = label('Sếp', 'nm', boss, 2.05); bossName.element.style.setProperty('--c', '#ffd36b');
 const bossSay = label('', 'tool say', boss, 2.45); bossSay.visible = false;
@@ -29,17 +51,20 @@ function goTo(a, pts) {
   return new Promise(res => { a.mode = 'walk'; a.path = pts.map(([x, z]) => ({ x, z })); a.arrive = res; });
 }
 const headPos = a => () => a.robot.localToWorld(new THREE.Vector3(0, 1.5, 0));
-const SOFA = [[-6.9, 3.25, Math.PI], [-6.1, 3.25, Math.PI], [-5.3, 3.25, Math.PI], [-8.0, 4.6, -Math.PI / 2]].map(([x, z, r]) => ({ x, z, r, used: null }));
-const sofaFront = s => (s.r === Math.PI ? [s.x, 4.05] : [-7.1, s.z]);
+const SOFA = [[-11.9, 8.25, Math.PI], [-11.1, 8.25, Math.PI], [-10.3, 8.25, Math.PI], [-13.0, 9.6, -Math.PI / 2]].map(([x, z, r]) => ({ x, z, r, used: null }));
+const sofaFront = s => (s.r === Math.PI ? [s.x, 9.05] : [-12.1, s.z]);
 
 function createAgent(ev) {
   const color = ev.color || PALETTE[agents.length % PALETTE.length];
-  const a = { id: ev.id, name: ev.name, role: ev.role || '', color, activity: 'idle', mode: 'stand', path: [], faceTo: 0, where: 'spawn',
+  const a = { id: ev.id, name: ev.name, role: ev.role || '', team: ev.team || null, color, activity: 'idle', mode: 'stand', path: [], faceTo: 0, where: 'spawn',
     calls: 0, tools: 0, tokens: 0, lastActive: performance.now(), status: 'Vừa vào văn phòng', task: '' };
-  const slot = SLOTS.find(s => !s.used);
+  const capacity = currentWorld() ? seatsPerTeam : DEFAULT_TEAM_SEATS;
+  const slot = SLOTS.find(s => !s.used && s.index < capacity && (!ev.team || s.team === ev.team));
+  if (ev.team && !slot) throw new Error('World roster exceeds team seating capacity');
   if (slot) {
     slot.used = a; a.slot = slot;
-    a.desk = slot.desk || (slot.desk = makeDesk(slot.x, slot.z, slot.w)); a.desk.g.visible = true;
+    a.desk = slot.desk || (slot.desk = makeDesk(slot.x, slot.z, slot.w, TEAM_ZONES[slot.team].color)); a.desk.g.visible = true;
+    a.desk.g.traverse(o => { o.userData.agent = a; });
     a.seat = { x: slot.x, z: slot.z + 0.78 }; a.behind = { x: slot.x, z: slot.z + 1.32 }; a.side = { x: slot.sideX, z: slot.z + 1.32 };
   } else {
     const f = FLOOR.find(s => !s.used) || FLOOR[agents.length % FLOOR.length]; f.used = a; a.floor = f;
@@ -162,6 +187,17 @@ function onEvent(ev) {
 }
 
 // ================= boards =================
+for (const team of TEAM_ORDER) {
+  const zone = TEAM_ZONES[team];
+  board(zone.x, 2.8, -HALF - 0.27, 0, 5.2, 1.9, (g, w, h) => {
+    const world = currentWorld(), roster = world?.actors.filter(a => a.team === team) || [];
+    g.fillStyle = '#081225'; g.fillRect(0, 0, w, h);
+    g.fillStyle = zone.color; g.fillRect(0, 0, 8, h); g.font = '700 46px system-ui'; g.fillText(zone.name, 30, 65);
+    g.font = '600 60px system-ui'; g.fillText(`${roster.length} AGENTS`, 30, 150);
+    g.fillStyle = '#a9b9d9'; g.font = '24px system-ui';
+    g.fillText(world ? `LLM attempts: ${world.llm_by_team[team].attempts}  /  tick: ${world.tick}` : 'WAITING FOR WORLD', 30, 220);
+  });
+}
 const kpi = board(4.6, 2.8, -HALF - 0.27, 0, 3.4, 1.7, (g, w, h) => {
   g.fillStyle = '#060c1f'; g.fillRect(0, 0, w, h);
   g.fillStyle = '#7f8bc4'; g.font = '600 22px system-ui'; g.fillText('AGENT OFFICE · LIVE', 22, 36);
@@ -175,10 +211,10 @@ const kpi = board(4.6, 2.8, -HALF - 0.27, 0, 3.4, 1.7, (g, w, h) => {
 });
 const barsBoard = board(-HALF - 0.27, 3.0, -5.6, Math.PI / 2, 3.2, 1.5, (g, w, h) => {
   g.fillStyle = '#060c1f'; g.fillRect(0, 0, w, h);
-  const list = agents.slice(0, 20), value = a => currentWorld() ? a.tools : a.calls, max = Math.max(1, ...list.map(value));
+  const list = agents, value = a => currentWorld() ? a.tools : a.calls, max = Math.max(1, ...list.map(value));
   g.fillStyle = '#7f8bc4'; g.font = '600 18px system-ui'; g.fillText(currentWorld() ? 'Actions / agent (page)' : 'LLM calls / agent', 16, 26);
   list.forEach((a, i) => { const bw = (w - 32) / Math.max(8, list.length), v = value(a) / max;
-    g.fillStyle = a.color; g.fillRect(16 + i * bw + 3, h - 14 - v * (h - 56), bw - 8, Math.max(3, v * (h - 56))); });
+    g.fillStyle = a.color; g.fillRect(16 + i * bw + 1, h - 14 - v * (h - 56), Math.max(1, bw - 2), Math.max(3, v * (h - 56))); });
 });
 const rate = Array.from({ length: 48 }, () => 0);
 let lastCalls = 0, rateT = 0;
@@ -203,7 +239,13 @@ const $log = document.getElementById('log'), $cards = document.getElementById('c
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 let proc = null;
 const shortCmd = c => String(c || '').replace(/(?:[A-Za-z]:)?[^\s]*[\/\\]([^\s\/\\]+)/g, '$1');
-window.__office = { agents, byId, onEvent, currentWorld, worldHealth };
+window.__office = { agents, byId, onEvent, currentWorld, worldHealth, selectAgent, focusOffice,
+  deskScreenPoint(id) {
+    const a = byId.get(id); if (!a?.desk) return null;
+    const p = a.desk.g.localToWorld(new THREE.Vector3(0, 1.12, -0.196)).project(camera);
+    const r = renderer.domElement.getBoundingClientRect();
+    return { x: r.left + (p.x + 1) * r.width / 2, y: r.top + (1 - p.y) * r.height / 2 };
+  } };
 function feed(who, color, html, cls = '') {
   const d = document.createElement('div'); d.className = 'msg ' + cls;
   const tm = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -217,13 +259,16 @@ function addCard(a) {
   const c = document.createElement('div'); c.className = 'card';
   c.innerHTML = `<div class="top"><span class="dot" style="background:${a.color};box-shadow:0 0 8px ${a.color}"></span><b></b><span class="rl"></span></div><div class="st"></div><div class="meta"></div>`;
   c.querySelector('b').textContent = a.name; c.querySelector('.rl').textContent = a.role;
-  c.addEventListener('click', () => { selected = selected === a ? null : a; });
+  c.tabIndex = 0; c.setAttribute('role', 'button'); c.setAttribute('aria-label', `Xem hoạt động ${a.name}`);
+  c.addEventListener('click', () => selectAgent(a));
+  c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectAgent(a); } });
   a.card = c; $cards.appendChild(c); document.getElementById('empty').style.display = 'none';
 }
 function ui() {
+  renderActorDetail();
   for (const a of agents) {
     const c = a.card; c.querySelector('.st').textContent = a.status;
-    c.querySelector('.meta').textContent = a.worldActor ? `${a.tools} hành động · tick ${a.worldActor.last_tick ?? '—'}` : `${a.calls} call · ${a.tools} tool · ${a.tokens >= 1000 ? (a.tokens / 1000).toFixed(1) + 'k' : a.tokens} tok`;
+    c.querySelector('.meta').textContent = a.worldActor ? `Bàn ${a.slot.label} · ${a.tools} hành động · tick ${a.worldActor.last_tick ?? '—'}` : `${a.calls} call · ${a.tools} tool · ${a.tokens >= 1000 ? (a.tokens / 1000).toFixed(1) + 'k' : a.tokens} tok`;
     c.classList.toggle('on', a.activity !== 'idle'); c.classList.toggle('sel', selected === a); c.classList.toggle('rest', a.where === 'lounge');
   }
   if (updateWorldUI()) return;
@@ -259,12 +304,12 @@ function pickAgent(e) {
   const r = renderer.domElement.getBoundingClientRect();
   mp.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   ray.setFromCamera(mp, camera);
-  const hit = ray.intersectObjects(agents.map(a => a.robot), true)[0];
+  const hit = ray.intersectObjects(agents.flatMap(a => a.desk ? [a.robot, a.desk.g] : [a.robot]), true)[0];
   return hit ? hit.object.userData.agent : null;
 }
 let down = null;
 renderer.domElement.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; });
-renderer.domElement.addEventListener('pointerup', e => { if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 5) { const a = pickAgent(e); selected = a && selected !== a ? a : null; if (selected && selected.card) selected.card.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } down = null; });
+renderer.domElement.addEventListener('pointerup', e => { if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 5) { selectAgent(pickAgent(e)); if (selected && selected.card) selected.card.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } down = null; });
 let hoverT = 0;
 renderer.domElement.addEventListener('pointermove', e => { if (performance.now() - hoverT < 60) return; hoverT = performance.now(); hovered = pickAgent(e); renderer.domElement.style.cursor = hovered ? 'pointer' : 'grab'; });
 document.getElementById('toggleTeam').addEventListener('click', () => document.body.classList.toggle('team'));
@@ -284,7 +329,7 @@ function frame() {
     animateRobot(r, a.mode, T, dt);
     const seated = a.mode === 'sit' || a.mode === 'type' || a.mode === 'lounge';
     a.nameL.position.y = seated ? 1.85 : 2.0; a.toolL.position.y = seated ? 2.4 : 2.55;
-    if (a.slot && a.slot.sideX > 0) a.nameL.visible = selected === a || hovered === a;
+    a.nameL.visible = agents.length <= 12 || selected === a || hovered === a;
     if (a.desk) {
       const on = a.desk.on;
       a.desk.scr.color.setScalar(THREE.MathUtils.lerp(a.desk.scr.color.r, on ? 1.5 : 0.28, 1 - Math.exp(-dt * 6)));

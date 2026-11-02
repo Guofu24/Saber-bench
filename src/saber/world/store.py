@@ -41,6 +41,10 @@ class Store:
                 target TEXT NOT NULL, status INTEGER NOT NULL, detail TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS effects (
                 event_id INTEGER PRIMARY KEY, data TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS native_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT, tick INTEGER NOT NULL,
+                actor_id TEXT NOT NULL, data TEXT NOT NULL);
+            CREATE INDEX IF NOT EXISTS native_actor ON native_events(actor_id,id);
         """)
         self.db.commit()
 

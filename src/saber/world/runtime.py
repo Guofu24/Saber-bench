@@ -21,10 +21,12 @@ from saber.agents.skills import load_playbook
 from saber.agents.specialties import BLUE_SKILLS
 from saber.domain.errors import BudgetExceeded, IntegrationBlocked
 from saber.population.office import OfficeEmitter
-from saber.world import work
+from saber.world import learning, work
 from saber.world.agents import PLAYBOOKS, baseline, llm_messages, parse_plan
 from saber.world.environment import World
+from saber.world.learning_worker import Learner
 from saber.world.models import Action, Actor, WorldConfig, specialties_for
+from saber.world.native import NativeExecutor
 from saber.world.office import deployment_profile, snapshot
 from saber.world.quota import TeamQuotaProvider
 from saber.world.service import LabServer
@@ -47,9 +49,9 @@ class WorldLock(AbstractContextManager["WorldLock"]):
                 self.file.flush()
             self.file.seek(0)
             if os.name == "nt":
-                import msvcrt
+                msvcrt = importlib.import_module("msvcrt")
 
-                msvcrt.locking(self.file.fileno(), msvcrt.LK_NBLCK, 1)  # type: ignore[attr-defined]
+                msvcrt.locking(self.file.fileno(), msvcrt.LK_NBLCK, 1)
             else:
                 fcntl = importlib.import_module("fcntl")
                 fcntl.flock(self.file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -66,9 +68,9 @@ class WorldLock(AbstractContextManager["WorldLock"]):
         try:
             self.file.seek(0)
             if os.name == "nt":
-                import msvcrt
+                msvcrt = importlib.import_module("msvcrt")
 
-                msvcrt.locking(self.file.fileno(), msvcrt.LK_UNLCK, 1)  # type: ignore[attr-defined]
+                msvcrt.locking(self.file.fileno(), msvcrt.LK_UNLCK, 1)
             else:
                 fcntl = importlib.import_module("fcntl")
                 fcntl.flock(self.file.fileno(), fcntl.LOCK_UN)
@@ -81,7 +83,9 @@ class Planner:
 
     def __init__(self, provider: LLMProvider, actors: int, workers: int = 4) -> None:
         self.provider = provider
-        self.requests: queue.Queue[tuple[Actor, dict[str, Any]]] = queue.Queue(maxsize=actors)
+        self.requests: queue.Queue[tuple[Actor, dict[str, Any], dict[str, Any] | None]] = (
+            queue.Queue(maxsize=actors)
+        )
         self.results: queue.Queue[tuple[str, list[Action], str, int, int]] = queue.Queue(
             maxsize=actors
         )
@@ -95,16 +99,18 @@ class Planner:
         for thread in self.threads:
             thread.start()
 
-    def request(self, actor: Actor, obs: dict[str, Any]) -> None:
+    def request(
+        self, actor: Actor, obs: dict[str, Any], pinned: dict[str, Any] | None = None
+    ) -> None:
         if actor.id in self.pending or self.exhausted or self.stopping.is_set():
             return
         self.pending.add(actor.id)
-        self.requests.put_nowait((actor, obs))
+        self.requests.put_nowait((actor, obs, pinned))
 
     def _work(self) -> None:
         while not self.stopping.is_set():
             try:
-                actor, obs = self.requests.get(timeout=0.1)
+                actor, obs, pinned = self.requests.get(timeout=0.1)
             except queue.Empty:
                 continue
             if self.stopping.is_set():
@@ -115,12 +121,14 @@ class Planner:
                 if isinstance(self.provider, TeamQuotaProvider):
                     response = self.provider.generate_for(
                         actor.team,
-                        llm_messages(actor, obs),
+                        llm_messages(actor, obs, pinned=pinned),
                         max_tokens=1024,
                         should_stop=self.stopping.is_set,
                     )
                 else:
-                    response = self.provider.generate(llm_messages(actor, obs), max_tokens=1024)
+                    response = self.provider.generate(
+                        llm_messages(actor, obs, pinned=pinned), max_tokens=1024
+                    )
                 actions, note = parse_plan(actor, response.text)
             except BudgetExceeded:
                 self.exhausted = True
@@ -165,12 +173,24 @@ class Runner:
         emitter: OfficeEmitter | None = None,
     ) -> None:
         self.store, self.config = store, config
+        if config.execution_mode == "range":
+            raise ValueError("SOC range execution uses 'saber lab' deployments, not 'world run'.")
         if provider is not None:
             for skill in {
                 PLAYBOOKS[a.team if a.team == "client" else a.role] for a in config.actors
             } | {BLUE_SKILLS[s] for a in config.actors for s in specialties_for(a)}:
                 load_playbook(skill, mode="world")
         self.world = World(store, config)
+        learning.initialize(
+            self.world,
+            {
+                skill: load_playbook(skill, mode="world")
+                for skill in {
+                    PLAYBOOKS[a.team if a.team == "client" else a.role] for a in config.actors
+                }
+                | {BLUE_SKILLS[s] for a in config.actors for s in specialties_for(a)}
+            },
+        )
         with store.transaction():
             store.put("meta", "engine", "hybrid" if provider else "scripted")
             store.put(
@@ -196,6 +216,7 @@ class Runner:
             store.root / "access.jsonl", maxBytes=5_000_000, backupCount=3, encoding="utf-8"
         )
         self.server.start()
+        self.native = NativeExecutor(store) if config.execution_mode == "native" else None
         self.clients = {a.id: self.server.client(a.id) for a in config.actors}
         atomic_json(
             store.root / "runtime.json",
@@ -207,8 +228,21 @@ class Runner:
             },
         )
         self._publish_office(self.world.report())
+        self.learner = (
+            Learner(self.world, provider) if provider and config.learning_enabled else None
+        )
 
     def _publish_office(self, report: dict[str, Any]) -> None:
+        atomic_json(
+            self.store.root / "learning.json",
+            learning.summary(self.store)
+            | {
+                "tick": self.world.tick,
+                "released_versions": self.store.items("skill-heads"),
+                "active_epoch": self.store.get("learning-meta", "epoch", {}),
+                "enabled": self.config.learning_enabled,
+            },
+        )
         event = snapshot(
             self.store,
             self.config,
@@ -256,6 +290,8 @@ class Runner:
     def step(self) -> dict[str, Any]:
         self._plans()
         tick = self.world.advance()
+        with self.store.transaction():
+            learning.activate(self.world)
         # Rotate start order so fixed role ordering does not give one team permanent advantage.
         actors = self.config.actors
         offset = (tick + self.config.seed) % len(actors)
@@ -276,14 +312,22 @@ class Runner:
             memory = self.store.get("memory", actor.id, {})
             turns = int(memory.get("turns", 0))
             if self.planner is not None and tick >= int(memory.get("next_plan", 0)):
-                self.planner.request(actor, obs)
+                self.planner.request(
+                    actor,
+                    obs,
+                    learning.prompt_version(self.store, learning.actor_skill(self.world, actor)),
+                )
                 memory["next_plan"] = tick + self.config.profile_refresh_ticks
                 with self.store.transaction():
                     self.store.put("memory", actor.id, memory)
             plan = self.store.get("plans", actor.id, [])
             source = "llm" if plan else ("scripted-fallback" if self.planner else "scripted")
             chosen = Action.model_validate(plan.pop(0)) if plan else baseline(actor, obs, turns)
-            result = client.act(chosen)
+            result = (
+                self.server.native_act(self.native, actor.id, tick, chosen)
+                if self.native
+                else client.act(chosen)
+            )
             # Persist a bounded private agent journal; never expose other teams' plans.
             with self.store.transaction():
                 if work.control(self.world, actor.id)["generation"] != control["generation"]:
@@ -311,6 +355,8 @@ class Runner:
                 )
                 self.store.put("journals", actor.id, journal[-100:])
                 self.world._metric("actions_" + source.replace("-", "_"), 1)
+        if self.learner:
+            self.learner.poll()
         report = self.world.report()
         cursor = int(self.store.get("meta", "telemetry_cursor", 0))
         events = self.store.events(after=cursor, through_tick=tick, limit=2000)
@@ -363,12 +409,21 @@ class Runner:
         except KeyboardInterrupt:
             reason = "interrupted"
         except Exception:
+            reason = "error"
             atomic_json(
                 self.store.root / "report.json", self.world.report() | {"stop_reason": "error"}
             )
             raise
         finally:
-            self.close()
+            try:
+                with self.store.transaction():
+                    for actor in self.config.actors:
+                        learning.seal(self.world, actor, "run_end")
+                # Only a normal finite run drains work. STOP/Ctrl+C do not start more calls.
+                if reason == "tick_limit" and self.learner:
+                    self.learner.flush()
+            finally:
+                self.close()
         report = self.world.report() | {"stop_reason": reason}
         atomic_json(self.store.root / "report.json", report)
         return report
@@ -377,9 +432,15 @@ class Runner:
         if self._closed:
             return
         self._closed = True
+        if self.learner:
+            self.learner.stopping.set()
         if self.planner:
             self.planner.close()
+        if self.learner:
+            self.learner.close()
         self.server.close()
+        if self.native:
+            self.native.close()
         self.telemetry.close()
         self.store.checkpoint()
         atomic_json(self.store.root / "runtime.json", {"status": "stopped", "pid": os.getpid()})

@@ -1,0 +1,4 @@
+# Install only on a dedicated Linux lab VM, never the operator workstation.
+# The guest installer creates /var/lib/saber/workspace before loading these rules.
+-a always,exit -F arch=b64 -S execve,execveat -F auid>=1000 -F auid!=4294967295 -k saber-process
+-w /var/lib/saber/workspace -p rwxa -k saber-workspace

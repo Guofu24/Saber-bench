@@ -9,12 +9,15 @@ import threading
 import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from pydantic import ValidationError
 
 from saber.world.environment import World
 from saber.world.models import Action
+
+if TYPE_CHECKING:
+    from saber.world.native import NativeExecutor
 
 
 class LabServer:
@@ -87,6 +90,11 @@ class LabServer:
 
     def start(self) -> None:
         self.thread.start()
+
+    def native_act(
+        self, executor: NativeExecutor, actor_id: str, tick: int, action: Action
+    ) -> dict[str, Any]:
+        return executor.act(actor_id, tick, self.http.server_port, self._by_actor[actor_id], action)
 
     def close(self) -> None:
         if self.thread.is_alive():

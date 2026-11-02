@@ -1,0 +1,17 @@
+%YAML 1.1
+---
+vars:
+  address-groups:
+    HOME_NET: "any"
+    EXTERNAL_NET: "any"
+outputs:
+  - eve-log:
+      enabled: yes
+      filetype: regular
+      filename: eve.json
+      types: [alert, flow, dns, http]
+logging:
+  default-log-level: warning
+  outputs:
+    - console:
+        enabled: yes

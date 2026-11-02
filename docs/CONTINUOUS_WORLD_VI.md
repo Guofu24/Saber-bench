@@ -6,6 +6,10 @@ nguyên hợp đồng. Trạng thái nghiên cứu vẫn là `DEV_SIMULATION_ONL
 
 ## Đã có gì
 
+- Tùy chọn `world init --execution native`: mỗi thao tác chạy trong process con thật,
+  có log PID/command line, file receipt, DNS nội bộ và socket TCP. Cửa sổ Office 100
+  bản ghi riêng từng agent; [phạm vi sensor, bằng chứng và lệnh chạy](NATIVE_TELEMETRY_VI.md).
+
 - Một ứng dụng lab HTTP thật, chỉ bind `127.0.0.1`, với danh tính và bearer capability
   riêng cho từng agent. Tài khoản, tài liệu, phiên đăng nhập, job và trạng thái dịch vụ
   nằm trong SQLite; các nhóm sử dụng cùng một môi trường.
@@ -75,6 +79,11 @@ Không xóa STOP tự động khi crash restart. Ctrl+C dừng có kiểm soát.
 LLM, shutdown chờ request đang chạy kết thúc (transport timeout 60 giây).
 
 ## Kết nối pool Gemini
+
+Từ bản bổ sung [agent learning](AGENT_LEARNING_VI.md), world có journal kết quả riêng,
+worker reflection và replay gate cho skill extension. Worker học dùng chung provider,
+pool theo đội và budget tích lũy; ledger LLM bao gồm các lượt gọi đó. Skill epoch được
+giữ bền qua restart và không đổi khi còn case/task đang mở.
 
 Mặc định là **SCRIPTED**: không đọc key, không gọi model. Bật **HYBRID** bằng lệnh
 explicit có giới hạn số lượt HTTP. Ví dụ dưới đây cho phép tối đa 200 lượt trong
@@ -201,12 +210,20 @@ Hoặc chạy `agent-office serve` rồi thêm `--office-url http://127.0.0.1:77
 `world run`. Không suy ra API calls từ số lần agent xin plan: usage lấy từ ledger
 provider. Roster có lọc đội/phân trang; từng agent hiển thị nguồn hành động, HTTP
 status và tick cuối. Quota chỉ hiển thị số thứ tự key, không raw key hay prompt.
+Office có ba khu client/red/blue riêng; chọn 12 hoặc 24 bàn mỗi đội để hiển thị
+tối đa 36/72 agents một lượt. Phân trang lấy một nhóm từ từng đội, hỗ trợ roster
+200 agents; thay số bàn không đổi cấu hình hay số agents của world.
 
 Sandbox dùng `watch --bundle PATH_TO_BUNDLE` trên Docker host, không mở network
 container. VM/server dùng `watch --world` tại máy đích và SSH forward cổng viewer.
 Chi tiết trạng thái heartbeat, STOP/resume và cách đọc counter ở
 [Agent Office README](../agent-office/README.md).
 Viewer không được cấp quyền đọc database hay ground truth.
+Runtime xuất thêm trace đã lọc vào `office.json`: bấm robot/màn hình/thẻ agent để xem
+200 event gần nhất toàn world và case/phản ứng có liên kết bằng chứng. Trace không
+chứa raw arguments, nội dung response, notebook hay nhãn evaluator; phản ứng được
+xác minh tại tick thực thi, không cam kết hiệu lực kéo dài. Chi tiết và demo ở
+[Agent Office](../agent-office/README.md).
 
 ## Dữ liệu và đánh giá
 

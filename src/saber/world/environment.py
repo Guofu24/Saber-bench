@@ -13,7 +13,7 @@ import json
 import uuid
 from typing import Any
 
-from saber.world import lab_tools, operations, work
+from saber.world import lab_tools, learning, operations, work
 from saber.world.models import Action, Actor, WorldConfig, safe_name, specialties_for, tools_for
 from saber.world.store import Store, utc_now
 
@@ -159,6 +159,19 @@ class World:
                 ],
             }
             if actor.team == "blue":
+                if self.config.execution_mode == "native":
+                    from saber.world.native import read_events
+
+                    obs["native_telemetry"] = {
+                        "sensor": "saber-native-v1",
+                        "coverage": "Fixed workload measurements; not host-wide/kernel capture. "
+                        "event_id links to application evidence; PID is not an attack verdict.",
+                        "events": [
+                            {k: v for k, v in row.items() if k != "actor_id"}
+                            | {"principal": self.principals[row["actor_id"]]}
+                            for row in read_events(self.store, through_tick=self.tick, limit=35)
+                        ],
+                    }
                 obs["events"] = self.store.events(
                     through_tick=self.tick, limit=self.config.telemetry_window
                 )
@@ -213,6 +226,7 @@ class World:
 
     def act(self, actor: Actor, action: Action) -> dict[str, Any]:
         with self.store.transaction():
+            skill = learning.actor_skill(self, actor)
             principal = self.principals[actor.id]
             effect: dict[str, Any] = {
                 "unauthorized_access": False,
@@ -267,6 +281,7 @@ class World:
             result = {"status": status, "event_id": eid, "tool": action.tool, **data}
             self.store.put("results", actor.id, result)
             self._apply_rules(eid, action.tool, status)
+            learning.capture(self, actor, result, target, skill)
             return result
 
     def _execute(
@@ -748,6 +763,7 @@ class World:
             return {
                 "world_id": self.store.get("meta", "world_id"),
                 "engine": self.store.get("meta", "engine", "scripted"),
+                "execution_mode": self.config.execution_mode,
                 "labels": ["CONTINUOUS_WORLD", "LOCAL_APPLICATION_LAB", "DEV_SIMULATION_ONLY"],
                 "tick": self.tick,
                 "actors": len(self.actors),

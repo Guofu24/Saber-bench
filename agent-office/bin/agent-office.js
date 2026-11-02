@@ -38,6 +38,7 @@ function parse(argv) {
   for (let i = 1; i < head.length; i++) {
     const a = head[i], v = head[i + 1];
     if (a === '--port') { o.port = +v; i++; }
+    else if (a === '--listen') { o.listen = v; i++; }
     else if (a === '--openai-upstream') { o.openai = v; i++; }
     else if (a === '--anthropic-upstream') { o.anthropic = v; i++; }
     else if (a === '--config') { o.config = v; i++; }
@@ -51,11 +52,11 @@ function parse(argv) {
   return o;
 }
 
-function listen(server, port) {
+function listen(server, port, host = '127.0.0.1') {
   return new Promise((resolve, reject) => {
     const tryPort = p => {
       server.once('error', e => (e.code === 'EADDRINUSE' && p < port + 20 ? tryPort(p + 1) : reject(e)));
-      server.listen(p, '127.0.0.1', () => resolve(p));
+      server.listen(p, host, () => resolve(p));
     };
     tryPort(port);
   });
@@ -63,6 +64,7 @@ function listen(server, port) {
 
 async function main() {
   const o = parse(process.argv.slice(2));
+  if (o.listen && (o.mode !== 'watch' || !['127.0.0.1', '0.0.0.0', '::1'].includes(o.listen))) throw new Error('--listen is restricted to the read-only watch viewer');
   if (!['run', 'serve', 'watch'].includes(o.mode) || (o.mode === 'run' && !o.cmd.length)) { process.stdout.write(HELP); process.exit(o.mode ? 1 : 0); }
   const say = (...a) => { if (!o.quiet) console.error('\x1b[33m[agent-office]\x1b[0m', ...a); };
 
@@ -74,9 +76,9 @@ async function main() {
     openai: o.openai || process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1',
     anthropic: o.anthropic || process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com',
   };
-  const { server, emit } = createOffice({ upstreams, config, log: say, readOnly: o.mode === 'watch' });
   const readSnapshot = o.mode === 'watch' ? await snapshotSource(o) : null;
-  const port = await listen(server, o.port);
+  const { server, emit } = createOffice({ upstreams, config, log: say, readOnly: o.mode === 'watch', readNative: readSnapshot?.native, readRange: readSnapshot?.range });
+  const port = await listen(server, o.port, o.listen);
   const base = `http://127.0.0.1:${port}`;
   const env = {
     OPENAI_BASE_URL: `${base}/openai`,

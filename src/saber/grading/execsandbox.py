@@ -11,6 +11,7 @@ Real YARA / Suricata / vendor SIEM compilers are BLOCKED_INTEGRATION adapters.
 
 from __future__ import annotations
 
+import importlib
 import json
 import subprocess
 import sys
@@ -125,7 +126,7 @@ def _rlimit_preexec() -> Any:
     if os.name != "posix":
         return None
     try:
-        import resource
+        resource = importlib.import_module("resource")
     except ImportError:  # pragma: no cover - non-POSIX
         return None
 

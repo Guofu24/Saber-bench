@@ -5,6 +5,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { TEAM_ORDER, TEAM_ZONES, DEFAULT_TEAM_SEATS, MAX_TEAM_SEATS, teamSeat } from './office-layout.js';
 
 // ================= renderer / camera =================
 const stage = document.getElementById('stage');
@@ -21,11 +22,11 @@ stage.appendChild(labelR.domElement);
 
 const scene = new THREE.Scene();
 const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 600);
-camera.position.set(30, 25.5, 30);
+camera.position.set(38, 36, 44);
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 0.8, 0);
+controls.target.set(0, 0.8, -1);
 controls.enableDamping = true; controls.dampingFactor = 0.08;
-controls.minZoom = 0.7; controls.maxZoom = 3.2;
+controls.minZoom = 0.65; controls.maxZoom = 4.5;
 controls.minPolarAngle = 0.7; controls.maxPolarAngle = 1.22;
 controls.minAzimuthAngle = Math.PI / 4 - 0.75; controls.maxAzimuthAngle = Math.PI / 4 + 0.75;
 controls.update();
@@ -40,7 +41,7 @@ function layout() {
   const W = innerWidth, H = innerHeight, mobile = W < 900;
   let fx = 0, fw = W, fy = 0, fh = H;
   if (mobile) { fh = H * 0.58; } else { fx = 288; fw = W - 288 - 348; }
-  const V = Math.max(10.2 * H / fh, 13.4 * H / fw);
+  const V = Math.max(20.4 * H / fh, 26.8 * H / fw);
   const asp = W / H;
   camera.left = -V * asp; camera.right = V * asp; camera.top = V; camera.bottom = -V;
   camera.setViewOffset(W, H, -(fx + fw / 2 - W / 2), -(fy + fh / 2 - H / 2), W, H);
@@ -48,6 +49,20 @@ function layout() {
   renderer.setSize(W, H); labelR.setSize(W, H); composer.setSize(W, H);
 }
 addEventListener('resize', layout);
+
+function focusOffice(team = 'all') {
+  const zone = TEAM_ZONES[team];
+  const target = new THREE.Vector3(zone ? zone.x : 0, 0.8, zone ? -7 : -1);
+  const delta = target.clone().sub(controls.target);
+  camera.position.add(delta); controls.target.copy(target);
+  camera.zoom = zone ? 2.45 : 1; camera.updateProjectionMatrix(); controls.update();
+  document.querySelectorAll('[data-office-focus]').forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.officeFocus === team));
+  });
+}
+document.querySelectorAll('[data-office-focus]').forEach(button => {
+  button.addEventListener('click', () => focusOffice(button.dataset.officeFocus));
+});
 
 // ================= helpers =================
 const mat = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.6, metalness: 0.1, ...o });
@@ -115,15 +130,15 @@ for (const [x, y, z, s] of [[6, -8, 10, 18], [-8, -9, 7, 16], [11, -10, -3, 15],
 // ================= lights =================
 scene.add(new THREE.HemisphereLight('#a9bcff', '#1c2238', 1.15));
 const sun = new THREE.DirectionalLight('#fff1dc', 2.1);
-sun.position.set(9, 18, 7); sun.castShadow = true;
+sun.position.set(16, 30, 18); sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
-Object.assign(sun.shadow.camera, { left: -15, right: 15, top: 15, bottom: -15, near: 1, far: 50 });
+Object.assign(sun.shadow.camera, { left: -28, right: 28, top: 28, bottom: -28, near: 1, far: 90 });
 sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.02;
 scene.add(sun);
 const fill = new THREE.DirectionalLight('#6f8cff', 0.6); fill.position.set(-10, 8, -4); scene.add(fill);
 
 // ================= platform / walls =================
-const N = 18, HALF = 9;
+const N = 36, HALF = 18;
 add(scene, box(N + 0.6, 0.9, N + 0.6, mat('#121830', { roughness: 0.8 })), 0, -0.45, 0);
 {
   const tiles = new THREE.InstancedMesh(new THREE.BoxGeometry(0.965, 0.06, 0.965), mat('#ffffff', { roughness: 0.5, metalness: 0.2 }), N * N);
@@ -156,17 +171,34 @@ add(scene, box(N + 0.6, 0.06, 0.06, gold), 0, 5.22, -HALF - 0.3, false);
 add(scene, box(0.06, 0.06, N + 0.6, gold), -HALF - 0.3, 5.22, 0, false);
 add(scene, box(0.06, 5.2, 0.06, gold), -HALF - 0.3, 2.6, -HALF - 0.3, false);
 
-function carpet(x0, z0, x1, z1, color = '#14797e') {
+function carpet(x0, z0, x1, z1, color = '#14797e', trim = '#ffc94a') {
   const w = x1 - x0, d = z1 - z0, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  const edge = glowMat(trim, 1.25);
   add(scene, box(w, 0.03, d, mat(color, { roughness: 0.95 })), cx, 0.075, cz, false);
-  add(scene, box(w, 0.025, 0.05, goldDim), cx, 0.09, z0, false);
-  add(scene, box(w, 0.025, 0.05, goldDim), cx, 0.09, z1, false);
-  add(scene, box(0.05, 0.025, d, goldDim), x0, 0.09, cz, false);
-  add(scene, box(0.05, 0.025, d, goldDim), x1, 0.09, cz, false);
+  add(scene, box(w, 0.025, 0.05, edge), cx, 0.09, z0, false);
+  add(scene, box(w, 0.025, 0.05, edge), cx, 0.09, z1, false);
+  add(scene, box(0.05, 0.025, d, edge), x0, 0.09, cz, false);
+  add(scene, box(0.05, 0.025, d, edge), x1, 0.09, cz, false);
 }
-carpet(-8.6, -8.6, -2.2, -2.2);
-carpet(1.8, -8.7, 8.85, 0.5);
-carpet(-8.7, 2.1, -3.7, 7.3, '#167a80');
+for (const zone of Object.values(TEAM_ZONES)) {
+  carpet(zone.x - 5, -16.2, zone.x + 5, 0.6, zone.floor, zone.color);
+  // Low partitions keep sightlines open while making the three wings distinct.
+  const frame = mat('#26334a', { metalness: 0.5 });
+  const glass = mat(zone.color, { transparent: true, opacity: 0.12, roughness: 0.15, depthWrite: false });
+  for (const x of [zone.x - 5, zone.x + 5]) {
+    add(scene, box(0.07, 0.65, 16.6, glass), x, 0.48, -7.8, false);
+    add(scene, box(0.1, 0.06, 16.6, frame), x, 0.83, -7.8, false);
+  }
+  // Storage and equipment along the back; seats expand towards this wall.
+  for (const offset of [-3.3, -1.1, 1.1, 3.3]) {
+    add(scene, box(1.65, 1.05, 0.65, mat('#1a2335')), zone.x + offset, 0.6, -17.05);
+    add(scene, box(1.5, 0.025, 0.03, glowMat(zone.color, 1.2)), zone.x + offset, 1.05, -16.71, false);
+  }
+}
+carpet(-15, 6.8, -8, 12.5, '#173a3d', '#57dfc4');
+carpet(-3, 5, 5, 11, '#24243c', '#ffc94a');
+// Shared corridor in front of all three wings.
+add(scene, box(32, 0.02, 0.045, glowMat('#799abb', 0.8)), 0, 0.08, 2.6, false);
 
 // ================= furniture =================
 const codeTex = canvasTex(256, 512, (g, w, h) => {
@@ -180,9 +212,10 @@ const codeTex = canvasTex(256, 512, (g, w, h) => {
 codeTex.wrapS = codeTex.wrapT = THREE.RepeatWrapping; codeTex.repeat.set(1, 0.42);
 const deskTop = mat('#222839', { roughness: 0.35, metalness: 0.35 }), deskSide = mat('#161b29', { roughness: 0.5 });
 const chairM = mat('#2b3042', { roughness: 0.6 }), metal = mat('#7c859c', { roughness: 0.3, metalness: 0.8 });
-function makeDesk(x, z, w = 1.5) {
+function makeDesk(x, z, w = 1.5, accent = '#ffd36b') {
   const g = new THREE.Group(); g.position.set(x, 0, z); scene.add(g);
   add(g, box(w, 0.07, 0.75, deskTop), 0, 0.74, 0);
+  add(g, box(w - 0.12, 0.025, 0.025, glowMat(accent, 1.2)), 0, 0.755, 0.38, false);
   add(g, box(0.06, 0.72, 0.68, deskSide), -w / 2 + 0.05, 0.36, 0);
   add(g, box(0.06, 0.72, 0.68, deskSide), w / 2 - 0.05, 0.36, 0);
   add(g, box(w - 0.1, 0.35, 0.04, deskSide), 0, 0.5, -0.3);
@@ -214,37 +247,38 @@ function plant(x, z, s = 1) {
     l.castShadow = true; g.add(l);
   }
 }
-[[-8.5, -1.4], [1.0, -8.6], [-1.6, -8.6], [8.6, 1.3], [-8.5, 8.4], [3.6, 7.6], [-2.6, 4.2], [8.5, 8.4], [-2.9, -1.6]].forEach(([x, z]) => plant(x, z));
+[[-16.5, 1.5], [-5.5, 1.5], [5.5, 1.5], [16.5, 1.5], [-16.5, 15.5], [16.5, 15.5], [-7, 8], [7, 8]].forEach(([x, z]) => plant(x, z, 1.3));
 // lounge: L sofa
 {
+  const lounge = new THREE.Group(); lounge.position.set(-5, 0, 5); scene.add(lounge);
   const W = mat('#eef1f7', { roughness: 0.7 }), cush = mat('#59d1c8', { roughness: 0.8 });
-  add(scene, box(3.0, 0.4, 0.85, W), -6.1, 0.22, 3.15);
-  add(scene, box(3.0, 0.62, 0.22, W), -6.1, 0.55, 2.65);
-  add(scene, box(0.22, 0.55, 0.85, W), -4.5, 0.32, 3.15);
-  add(scene, box(0.85, 0.4, 2.6, W), -8.0, 0.22, 4.3);
-  add(scene, box(0.22, 0.62, 3.45, W), -8.5, 0.55, 3.9);
-  add(scene, box(0.45, 0.3, 0.12, cush), -7.3, 0.6, 2.82).rotation.x = -0.2;
-  add(scene, box(0.45, 0.3, 0.12, cush), -5.0, 0.6, 2.82).rotation.x = -0.2;
-  add(scene, box(0.12, 0.3, 0.45, cush), -8.32, 0.6, 5.0).rotation.z = 0.2;
-  add(scene, box(1.3, 0.06, 0.75, mat('#1c2133', { roughness: 0.3, metalness: 0.4 })), -6.2, 0.4, 5.0);
-  add(scene, box(1.1, 0.37, 0.55, mat('#151a29')), -6.2, 0.19, 5.0);
-  add(scene, cyl(0.06, 0.05, 0.12, mat('#ffffff')), -6.0, 0.49, 4.9);
-  add(scene, sph(0.1, glowMat('#ffd27a', 1.6)), -6.5, 0.5, 5.1);
+  add(lounge, box(3.0, 0.4, 0.85, W), -6.1, 0.22, 3.15);
+  add(lounge, box(3.0, 0.62, 0.22, W), -6.1, 0.55, 2.65);
+  add(lounge, box(0.22, 0.55, 0.85, W), -4.5, 0.32, 3.15);
+  add(lounge, box(0.85, 0.4, 2.6, W), -8.0, 0.22, 4.3);
+  add(lounge, box(0.22, 0.62, 3.45, W), -8.5, 0.55, 3.9);
+  add(lounge, box(0.45, 0.3, 0.12, cush), -7.3, 0.6, 2.82).rotation.x = -0.2;
+  add(lounge, box(0.45, 0.3, 0.12, cush), -5.0, 0.6, 2.82).rotation.x = -0.2;
+  add(lounge, box(0.12, 0.3, 0.45, cush), -8.32, 0.6, 5.0).rotation.z = 0.2;
+  add(lounge, box(1.3, 0.06, 0.75, mat('#1c2133', { roughness: 0.3, metalness: 0.4 })), -6.2, 0.4, 5.0);
+  add(lounge, box(1.1, 0.37, 0.55, mat('#151a29')), -6.2, 0.19, 5.0);
+  add(lounge, cyl(0.06, 0.05, 0.12, mat('#ffffff')), -6.0, 0.49, 4.9);
+  add(lounge, sph(0.1, glowMat('#ffd27a', 1.6)), -6.5, 0.5, 5.1);
 }
 // reception desk with lamps
 {
-  add(scene, box(3.0, 0.85, 0.65, mat('#1b2031', { roughness: 0.35, metalness: 0.4 })), -0.6, 0.43, 7.0);
-  add(scene, box(3.05, 0.05, 0.7, mat('#2c3349', { roughness: 0.3, metalness: 0.5 })), -0.6, 0.88, 7.0);
-  add(scene, box(2.9, 0.04, 0.02, gold), -0.6, 0.6, 7.34, false);
+  add(scene, box(3.0, 0.85, 0.65, mat('#1b2031', { roughness: 0.35, metalness: 0.4 })), -0.6, 0.43, 14.0);
+  add(scene, box(3.05, 0.05, 0.7, mat('#2c3349', { roughness: 0.3, metalness: 0.5 })), -0.6, 0.88, 14.0);
+  add(scene, box(2.9, 0.04, 0.02, gold), -0.6, 0.6, 14.34, false);
   for (const x of [-1.8, 0.6]) {
-    add(scene, cyl(0.03, 0.08, 0.45, metal, 10), x, 1.12, 7.0);
-    add(scene, sph(0.15, glowMat('#ffd27a', 2.6)), x, 1.42, 7.0, false);
-    const L = new THREE.PointLight('#ffc879', 6, 4, 1.8); L.position.set(x, 1.5, 7.2); scene.add(L);
+    add(scene, cyl(0.03, 0.08, 0.45, metal, 10), x, 1.12, 14.0);
+    add(scene, sph(0.15, glowMat('#ffd27a', 2.6)), x, 1.42, 14.0, false);
+    const L = new THREE.PointLight('#ffc879', 6, 4, 1.8); L.position.set(x, 1.5, 14.2); scene.add(L);
   }
 }
 // bookshelf
 {
-  const g = new THREE.Group(); g.position.set(-0.4, 0, -8.95); scene.add(g);
+  const g = new THREE.Group(); g.position.set(9.0, 0, 10); scene.add(g);
   const fr = mat('#1a1f30', { roughness: 0.5 });
   add(g, box(1.9, 2.6, 0.08, fr), 0, 1.3, -0.18);
   add(g, box(0.07, 2.6, 0.42, fr), -0.92, 1.3, 0); add(g, box(0.07, 2.6, 0.42, fr), 0.92, 1.3, 0);
@@ -266,7 +300,7 @@ function board(x, y, z, rotY, w, h, draw) {
 }
 
 // ================= core =================
-const CORE = new THREE.Vector3(-1.0, 0, 1.2);
+const CORE = new THREE.Vector3(1.0, 0, 8);
 const core = new THREE.Group(); core.position.copy(CORE); scene.add(core);
 {
   const dm = mat('#1b2246', { roughness: 0.3, metalness: 0.7 });

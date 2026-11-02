@@ -1,0 +1,1 @@
+alert http any any -> any any (msg:"SABER synthetic lab marker"; flow:established,to_server; http.uri; content:"saber-lab-marker"; sid:1000001; rev:1;)

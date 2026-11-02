@@ -51,14 +51,17 @@ def list_profiles() -> None:
 @click.option("--name", default="saber-lab", show_default=True)
 @click.option("--clients", type=click.IntRange(1, 100), default=4, show_default=True)
 @click.option("--tick-seconds", type=click.FloatRange(0.01, 3600), default=2.0, show_default=True)
+@click.option("--execution", type=click.Choice(["application", "native"]), default="application")
 def init_profile(
-    profile: ProfileName, out: Path, name: str, clients: int, tick_seconds: float
+    profile: ProfileName, out: Path, name: str, clients: int, tick_seconds: float, execution: str
 ) -> None:
     try:
         config = EnvironmentConfig(
             name=name,
             profile=profile,
-            world=default_config(clients).model_copy(update={"tick_seconds": tick_seconds}),
+            world=default_config(clients).model_copy(
+                update={"tick_seconds": tick_seconds, "execution_mode": execution}
+            ),
         )
     except ValidationError:
         raise click.ClickException(

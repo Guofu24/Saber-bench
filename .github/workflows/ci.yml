@@ -13,12 +13,19 @@ jobs:
       SABER_ENV: dev
     steps:
       - uses: actions/checkout@v4
+      - name: Record tested merge and PR revisions
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git log -1 --format='tested=%H%nparents=%P'
+          printf 'pr_head=%s\npr_base=%s\n' "$PR_HEAD_SHA" "$PR_BASE_SHA"
       - uses: astral-sh/setup-uv@v5
         with:
           version: "0.9.13"
           enable-cache: true
       - name: Install Python from .python-version and locked deps
-        run: uv sync --locked
+        run: uv sync --locked --extra analysis
       - name: Validate frozen catalog
         run: uv run python scripts/validate_catalog.py
       - name: Validate operational skills and runtime references (offline)
@@ -26,9 +33,11 @@ jobs:
       - name: Lint
         run: uv run ruff check src tests scripts
       - name: Format check
-        run: uv run ruff format --check src tests
-      - name: Typecheck
-        run: uv run mypy
+        run: uv run ruff format --check src tests scripts
+      - name: Typecheck Linux and Windows APIs
+        run: |
+          uv run mypy --platform linux
+          uv run mypy --platform win32
       - name: Tests (offline only; no lab, no provider keys)
         run: uv run pytest
       - name: Smoke episode (DEV fixture, deterministic)

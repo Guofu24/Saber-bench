@@ -59,9 +59,12 @@ chỉ nạp entrypoint. Giới hạn tính bằng **ký tự**, không phải to
 thiếu file, sai frontmatter, tham chiếu thoát phạm vi hoặc symlink sẽ báo lỗi rõ;
 không cắt đuôi hướng dẫn hay tự đổi specialist thành generic. B1 vẫn là generic theo
 thiết kế. Lỗi skill lúc khởi động world có model được phát hiện trước khi mở HTTP
-lab/khởi chạy planner. File được đọc lại khi tạo prompt, không giữ cache cũ suốt process.
+lab/khởi chạy planner. Loader trực tiếp/case vẫn đọc source; continuous world chụp bản
+gốc và giữ epoch bền qua restart, thay vì đổi prompt giữa case khi file source thay đổi.
 World nạp skill theo `active_specialty` của task đã nhận, trong tập chuyên môn operator
 đã cấu hình cho actor; task/message không thể tự cấp thêm skill hoặc quyền tool.
+Phần [agent learning](AGENT_LEARNING_VI.md) thêm bài học có kiểm thử vào phiên bản skill
+cục bộ, giữ history/rollback. Release mới đợi epoch không còn case/task đang mở.
 
 Scripted world dùng policy Python và không gọi model, nên skill không quyết định
 hành động của scripted agent. Các test offline có thể kiểm tra nạp prompt và quyền

@@ -1,0 +1,264 @@
+{
+  "schema_version": 1,
+  "name": "soc-expanded",
+  "preset": "expanded",
+  "actors": [
+    {
+      "id": "client-1",
+      "team": "client",
+      "role": "person",
+      "goal": "Carry out ordinary work and react to errors or security notifications.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "client-2",
+      "team": "client",
+      "role": "employee",
+      "goal": "Carry out ordinary work and react to errors or security notifications.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "client-3",
+      "team": "client",
+      "role": "developer",
+      "goal": "Carry out ordinary work and react to errors or security notifications.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "client-4",
+      "team": "client",
+      "role": "administrator",
+      "goal": "Carry out ordinary work and react to errors or security notifications.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "client-5",
+      "team": "client",
+      "role": "person",
+      "goal": "Carry out ordinary work and react to errors or security notifications.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "client-6",
+      "team": "client",
+      "role": "employee",
+      "goal": "Carry out ordinary work and react to errors or security notifications.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "client-7",
+      "team": "client",
+      "role": "developer",
+      "goal": "Carry out ordinary work and react to errors or security notifications.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "client-8",
+      "team": "client",
+      "role": "administrator",
+      "goal": "Carry out ordinary work and react to errors or security notifications.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "client-9",
+      "team": "client",
+      "role": "person",
+      "goal": "Carry out ordinary work and react to errors or security notifications.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "client-10",
+      "team": "client",
+      "role": "employee",
+      "goal": "Carry out ordinary work and react to errors or security notifications.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "client-11",
+      "team": "client",
+      "role": "developer",
+      "goal": "Carry out ordinary work and react to errors or security notifications.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "client-12",
+      "team": "client",
+      "role": "administrator",
+      "goal": "Carry out ordinary work and react to errors or security notifications.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "red-recon",
+      "team": "red",
+      "role": "recon",
+      "goal": "Discover and test weaknesses in this local application only.",
+      "interval_ticks": 2,
+      "specialties": []
+    },
+    {
+      "id": "red-access",
+      "team": "red",
+      "role": "access",
+      "goal": "Discover and test weaknesses in this local application only.",
+      "interval_ticks": 2,
+      "specialties": []
+    },
+    {
+      "id": "red-impact",
+      "team": "red",
+      "role": "impact",
+      "goal": "Discover and test weaknesses in this local application only.",
+      "interval_ticks": 2,
+      "specialties": []
+    },
+    {
+      "id": "blue-lead",
+      "team": "blue",
+      "role": "lead",
+      "goal": "Protect users, investigate evidence and minimize disruption.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "blue-monitor",
+      "team": "blue",
+      "role": "monitor",
+      "goal": "Protect users, investigate evidence and minimize disruption.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "blue-hunter",
+      "team": "blue",
+      "role": "hunter",
+      "goal": "Protect users, investigate evidence and minimize disruption.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "blue-dfir",
+      "team": "blue",
+      "role": "dfir",
+      "goal": "Protect users, investigate evidence and minimize disruption.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "blue-content",
+      "team": "blue",
+      "role": "content",
+      "goal": "Protect users, investigate evidence and minimize disruption.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "blue-ir",
+      "team": "blue",
+      "role": "ir",
+      "goal": "Protect users, investigate evidence and minimize disruption.",
+      "interval_ticks": 1,
+      "specialties": []
+    }
+  ],
+  "host_ram_gb": 128,
+  "host_cpus": 16,
+  "disk_gb": 1000,
+  "workers_per_team": 3,
+  "tick_seconds": 5.0,
+  "retention_days": 7,
+  "evidence_budget_mb": 4096,
+  "learning_enabled": true,
+  "learning_interval_ticks": 30,
+  "analysis": {
+    "enabled": true,
+    "memory_gb": 2,
+    "timeout_seconds": 180,
+    "max_sample_mb": 512,
+    "ghidra": "/opt/tools/ghidra/support/analyzeHeadless",
+    "ida": "/opt/tools/ida/idat",
+    "symbols": "/opt/tools/symbols"
+  },
+  "soar": {
+    "enabled": true,
+    "backend": "builtin",
+    "endpoint": "",
+    "external_network": "",
+    "callback_base": "http://soar:8080",
+    "workflows": {},
+    "timeout_seconds": 300
+  },
+  "domain": "saber.test",
+  "windows_subnet": "172.28.80.0/24",
+  "windows": [
+    {
+      "name": "soc-dc",
+      "address": "172.28.80.10",
+      "role": "dc",
+      "memory_gb": 4,
+      "cpus": 2
+    },
+    {
+      "name": "soc-ws-1",
+      "address": "172.28.80.20",
+      "role": "workstation",
+      "memory_gb": 8,
+      "cpus": 2
+    },
+    {
+      "name": "soc-ws-2",
+      "address": "172.28.80.21",
+      "role": "workstation",
+      "memory_gb": 8,
+      "cpus": 2
+    },
+    {
+      "name": "soc-ws-3",
+      "address": "172.28.80.22",
+      "role": "workstation",
+      "memory_gb": 8,
+      "cpus": 2
+    },
+    {
+      "name": "soc-ws-4",
+      "address": "172.28.80.23",
+      "role": "workstation",
+      "memory_gb": 8,
+      "cpus": 2
+    },
+    {
+      "name": "soc-ws-5",
+      "address": "172.28.80.24",
+      "role": "workstation",
+      "memory_gb": 8,
+      "cpus": 2
+    },
+    {
+      "name": "soc-ws-6",
+      "address": "172.28.80.25",
+      "role": "workstation",
+      "memory_gb": 8,
+      "cpus": 2
+    },
+    {
+      "name": "soc-files",
+      "address": "172.28.80.40",
+      "role": "member-server",
+      "memory_gb": 4,
+      "cpus": 2
+    }
+  ],
+  "opensearch_version": "3.3.2",
+  "playwright_version": "1.56.0"
+}

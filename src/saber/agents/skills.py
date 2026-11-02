@@ -26,6 +26,7 @@ RUNTIME_SKILLS = frozenset(
     }
 )
 WORLD_REFERENCE = Path("soc-orchestrator/reference/continuous-world.md")
+RANGE_REFERENCE = Path("soc-orchestrator/reference/soc-lab.md")
 MAX_CASE_CHARS = 64000
 MAX_WORLD_CHARS = 18000
 MD_REFERENCE = re.compile(
@@ -120,7 +121,7 @@ def skill_resources(name: str, *, root: Path | None = None) -> tuple[Path, ...]:
 
 
 def load_playbook(
-    name: str, *, mode: Literal["case", "world"] = "case", root: Path | None = None
+    name: str, *, mode: Literal["case", "world", "range"] = "case", root: Path | None = None
 ) -> str:
     """Fail explicitly rather than silently substituting a generic or truncated playbook."""
     root = (root or repo_root()).resolve()
@@ -129,7 +130,10 @@ def load_playbook(
     _, body = read_skill(name, root)
     base = root / ".claude/skills"
     paths: tuple[Path, ...]
-    if mode == "world":
+    if mode == "range":
+        paths = (base / RANGE_REFERENCE,)
+        limit = MAX_WORLD_CHARS
+    elif mode == "world":
         paths = (base / WORLD_REFERENCE,)
         limit = MAX_WORLD_CHARS
     elif mode == "case":

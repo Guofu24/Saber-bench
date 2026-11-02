@@ -51,7 +51,38 @@ thuộc lệnh SABER sau `--`; xem [hướng dẫn world](../docs/CONTINUOUS_WOR
 
 ## Đọc giao diện world
 
-- Chọn world, lọc Clients/Red Team/Blue Team; tối đa 200 agent, 20 agent mỗi trang.
+World tạo bằng `--execution native` có thêm **Process · File · DNS · Network** khi
+bấm agent. Viewer `watch` đọc 100 bản ghi riêng từ `native-office/<actor>.json`,
+local hoặc `docker cp` từ sandbox; không đọc key hay DB evaluator. Mở từng dòng để
+xem PID/command line, DNS, socket, file hash và exit code. Bỏ checkbox lịch sử riêng
+để lọc theo application event đang chọn. Các mục đã mở được giữ khi cập nhật live.
+Sensor chỉ đo workload cố định, chưa giám sát toàn OS. [Hướng dẫn native](../docs/NATIVE_TELEMETRY_VI.md).
+
+Nếu đồng bộ snapshot từ VM, cần thêm thư mục `native-office/` cùng world để xem mục
+này. `run`/`serve` hiện chỉ nhận snapshot, chưa tự tải cửa sổ native. Backend Node cũ
+cần restart sau cập nhật code; refresh trình duyệt chỉ nạp lại phần giao diện.
+
+Đầu trang, danh sách world và tên tab ghi **Native workload**, **Application lab**
+hoặc **Chưa rõ chế độ**. Trường hợp chưa rõ có thể do snapshot/backend cũ thiếu
+metadata, không chứng minh rằng log native không tồn tại. Nếu mở nhiều viewer,
+đối chiếu cổng trên URL và world ID; mỗi viewer `watch` trỏ vào thư mục riêng.
+
+- Chọn world, lọc Clients/Red Team/Blue Team; hỗ trợ roster tối đa 200 agent.
+  Ba đội ngồi trong ba khu riêng: Clients xanh ngọc, Red Team đỏ, Blue Team xanh dương.
+  Bàn có mã C01…C24 / R01…R24 / B01…B24, hiển thị trên thẻ agent.
+- Chọn **Số bàn mỗi đội**: 12 (36 slots, mặc định) hoặc 24 (72 slots). Mỗi lượt xem
+  lấy tối đa số bàn đã chọn **từ từng đội**, nên client đông không đẩy red/blue ra
+  khỏi trang đầu. Mũi tên chuyển nhóm tiếp theo của từng đội; đội đã hết người ở trang
+  đó có thể trống. `72/200` nghĩa là 72 agent đang hiển thị trong roster 200.
+- Các nút **Toàn cảnh / Clients / Red Team / Blue Team** phía trên đổi góc nhìn camera.
+  Bộ lọc đội trong sidebar đổi các agent đang hiển thị và nhìn gần khu đó. Lọc đội
+  vẫn giữ agent trong đúng khu; không chuyển blue sang bàn client. Biển khu ghi số
+  đang thấy/tổng số hoặc “ẩn theo bộ lọc”. Bàn trống không đại diện cho một agent.
+- Thêm slots chỉ đổi bố cục viewer; không tăng số agent, worker hay budget của runtime.
+  Để thay roster, chỉnh cấu hình world trước lần chạy đầu theo [notes](../notes.md).
+- Dòng “học” cho biết số lượt tổng kết / đề xuất / bản phát hành của actor. Phát hành
+  không đồng nghĩa đã đổi bản trong case đang chạy; xem epoch ở `world learning status`.
+  Không xuất nội dung notebook, bài học hay đáp án replay lên viewer.
 - Mỗi actor hiện chuyên môn đã cấu hình, chuyên môn/task đang xử lý và số task
   offered/active/blocked/done. `WAITING` hiện tick thức dậy; `DONE` giữ idle dù request
   suy luận cũ chưa về. Đây là trạng thái actor, khác trạng thái dừng của cả world.
@@ -68,16 +99,61 @@ thuộc lệnh SABER sau `--`; xem [hướng dẫn world](../docs/CONTINUOUS_WOR
 - Mỗi agent có tool cuối, HTTP status, tick và nguồn `llm`, `scripted` hoặc
   `scripted-fallback`. “Hoạt động tick” gồm agent vừa có hành động hoặc chờ suy luận;
   hoạt ảnh 3D chỉ minh họa. Log bên phải theo trang đang xem, giữ tối đa 200 dòng.
+- Bấm **robot, màn hình/bàn hoặc thẻ agent** để mở bảng chi tiết. Có thể dùng Tab +
+  Enter trên thẻ; Escape hoặc nút Đóng để quay lại. Bảng áp dụng cho cả client/red/blue.
 - `viewer online` chỉ xác nhận trình duyệt nối được viewer. Runtime có trạng thái
   riêng: đang chạy, đã dừng, hoặc mất cập nhật/chưa rõ. Mất heartbeat quá
   `max(30 giây, 3 × tick_seconds + 5 giây)` được đánh dấu cũ. Watch đọc mỗi 2 giây.
 
 `office.json` được ghi nguyên tử khi khởi động, sau mỗi tick và lúc dừng; chứa roster,
-counter và chỉ số quota. Không chứa raw key, bearer, prompt, nội dung tài liệu hay
+counter, chỉ số quota và trace thao tác đã lọc. Không chứa raw key, bearer, prompt, nội dung tài liệu hay
 plan riêng. Đây là màn hình **operator**, không cấp endpoint này cho agent. `watch`
 chỉ đọc, tắt proxy/ingest; không điều khiển world, SIEM/SOAR hay desktop máy thật.
 Nếu xem world cũ không có snapshot, chạy/resume bằng code mới. Khi render bundle mới,
 giữ nguyên dữ liệu cũ và làm theo [hướng dẫn môi trường](../docs/ENVIRONMENTS_VI.md).
+
+## Bấm vào red team để xem tấn công và phản ứng blue
+
+1. Chọn đúng world, lọc **Red Team**, bấm agent như `red-access` hoặc `red-impact`.
+2. Bấm một dòng trong **Diễn biến** để xem event ID, tick, nguồn quyết định và sơ đồ
+   **agent → công cụ → mục tiêu**, kèm HTTP status. Nút **Mới nhất** theo thao tác mới
+   nhất của agent; chọn một event cụ thể sẽ giữ lựa chọn khi snapshot tiếp theo tới.
+3. Checkbox **Kèm sự kiện liên quan qua case / mục tiêu** bật các sự kiện có liên kết
+   bằng chứng, cùng case hoặc nhắm trực tiếp tài khoản của agent. Không ghép sự kiện
+   chỉ vì cùng tick hoặc cùng tên dịch vụ.
+4. **Case và phản ứng phòng thủ** hiển thị event bằng chứng và các phản ứng đã ghi nhận
+   trong case, ví dụ `quarantine`, `contain`, `restore`. Bấm số event để xem chi tiết.
+
+HTTP 200/201 chỉ xác nhận yêu cầu thành công; không tự kết luận xâm nhập thành công.
+Dòng “Thay đổi đã được xác minh lúc thực thi” lấy từ kết quả phản ứng của runtime,
+không khẳng định biện pháp vẫn có hiệu lực ở tick hiện tại. Trạng thái case là ghi
+nhận của blue, không xuất ground truth của evaluator. Trace không có raw arguments,
+response body, notebook hay nội dung trao đổi riêng. Nguồn `unknown` nghĩa là không
+có journal xác nhận nguồn quyết định; không tự gán direct HTTP cho LLM.
+
+Cửa sổ chứa tối đa **200 event gần nhất toàn world**, **12 case liên quan**,
+**50 evidence IDs đang có trong cửa sổ/case** và **8 phản ứng cuối/case**. Bảng ghi rõ
+số dữ liệu đang xem; event bị xoay khỏi cửa sổ sẽ báo không còn thay vì thay bằng event
+khác. Xem toàn bộ lịch sử bằng log/database/archive của world theo quyền operator.
+Snapshot cũ vẫn xem được roster và báo chưa có trace; cần chạy/resume với code mới
+để sinh trace. Watch không sửa database hay tự chạy world.
+
+Demo scripted có sẵn trên máy phát triển trong `runs/office-inspector-demo`:
+
+```powershell
+node agent-office/bin/agent-office.js watch --world runs/office-inspector-demo --open
+```
+
+Nếu chưa có demo, tạo thư mục mới và chạy 18 tick, không cần Gemini:
+
+```powershell
+uv run saber world init --out runs/my-inspector-demo --clients 2 --tick-seconds 0.1
+uv run saber world run --out runs/my-inspector-demo --ticks 18
+node agent-office/bin/agent-office.js watch --world runs/my-inspector-demo --open
+```
+
+Đây là thao tác HTTP và thay đổi trạng thái trong application lab. Bảng không stream
+desktop/terminal của VM, và không dựng lại màn hình tấn công hệ điều hành chưa chạy.
 
 ## Proxy cho repo khác / population cũ
 
@@ -196,7 +272,8 @@ curl -X POST $AGENT_OFFICE_URL/ingest -H 'content-type: application/json' -d '[
 - Repo hardcode URL API, hoặc SDK không đọc `*_BASE_URL`, sẽ đi thẳng ra ngoài mà không qua proxy. Trường hợp này cần thêm cấu hình hoặc chế độ HTTPS proxy, chưa làm.
 - Proxy hỗ trợ định dạng API của OpenAI và Anthropic. Gemini native và Ollama `/api/chat` không qua proxy này; **SABER Gemini vẫn hiển thị bằng snapshot runtime**.
 - Tên agent và giao việc là suy đoán. Dùng `agent-office.json` hoặc header `X-Agent-Name` để chính xác hơn.
-- Proxy legacy có 20 bàn và khu đứng. World dùng phân trang 20 agent để xem đủ roster.
+- Proxy legacy dùng chỗ trống chung và khu đứng; không tự suy ra đội từ tên agent.
+  Phân khu client/red/blue và chia trang theo đội dùng trường `team` trong snapshot world.
 
 ## Cấu trúc
 
@@ -208,6 +285,8 @@ lib/snapshot.js         schema snapshot đã lọc, giới hạn 200 actor
 lib/watch.js            đọc file local hoặc snapshot container
 viewer/index.html       văn phòng 3D đã build (three.js inline, chạy offline)
 viewer-src/             mã nguồn viewer; world-state.js chứa selector có kiểm thử
+viewer-src/inspector.js bảng chi tiết agent; trace-view.js chọn sự kiện theo bằng chứng
+viewer-src/office-layout.js tọa độ ba khu, 72 bàn và phân trang theo từng đội
 test/                   test protocol, watcher, trạng thái và browser smoke tùy chọn
 examples/               mock LLM + repo demo multi-agent
 ```
@@ -238,3 +317,22 @@ node agent-office/test/browser-smoke.cjs runs/world/office.json runs/office-brow
 Đầu vào cần snapshot của world **đã dừng**. Test kiểm tra roster đó rồi dùng dữ liệu
 thử để kiểm tra 200 agent, filter, quota, stale, resume và mobile; lưu ảnh cùng
 `verification.json`. Dữ liệu thử không phải bằng chứng 200 agent đã chạy workload.
+Nếu snapshot có trace và actor `red-impact` đã thực thi `register_job`, test kiểm thêm
+bảng chi tiết, liên kết case/phản ứng, lọc thao tác riêng và cú bấm vào bàn 3D thật.
+Một snapshot thử riêng kiểm việc hiển thị target như văn bản, không thực thi HTML.
+Dùng demo 18 tick ở trên cho nhánh kiểm tra này.
+
+Kiểm chứng lượt inspector ngày 2026-11-02: **121 test Python** (`tests/world`, `tests/environments`,
+`tests/population/test_office.py`), **11 test JavaScript**, build viewer và Chrome smoke
+đều qua; Ruff và mypy trên module Python thay đổi cũng qua. Demo scripted có 11 agent,
+162 thao tác, 3 case và 5 phản ứng xác minh. Không gọi Gemini cho lượt kiểm tra UI này.
+Artifact local: `runs/office-inspector-check/verification.json`, `red-agent-inspector.png`,
+`mobile-inspector.png`; snapshot demo ở `runs/office-inspector-demo/office.json`.
+
+Lượt phối lại ba khu: **12 test JavaScript**, build và Chrome smoke qua. Kiểm tra cả
+36/72 slots, không trùng bàn, không lẫn khu, giữ chỗ khi lọc, phân trang đủ 200 agent,
+camera, inspector và mobile. Roster 200 / ảnh 72 agent là dữ liệu UI thử nghiệm;
+không phải 200 agents đã chạy workload. Artifact local:
+`runs/office-team-zones-check/verification.json`, `actual-world.png`,
+`synthetic-72-seats.png`, `blue-zone.png`, `mobile-team-zone.png`. Lượt này chỉ đổi
+viewer, không chạy lại Gemini hay thay đổi runtime world.

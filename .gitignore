@@ -24,6 +24,8 @@ scenarios/**/truth/*.sealed.json
 infra/**/secrets*
 infra/**/*.tfvars
 lab_private_inventory*
+.secrets/
+*.vhdx
 
 # Local run artefacts (episodes, reports, sqlite)
 runs/

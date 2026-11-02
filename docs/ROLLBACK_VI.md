@@ -30,6 +30,23 @@ Các checkpoint trên branch `feat/environment-profiles`:
 | `2786a5f` | Yêu cầu đánh giá lại kết luận khi case có chứng cứ mới |
 | `266219f` | Office hiện chuyên môn/task/lifecycle; baseline dùng chuyên môn đang nhận việc |
 | `a268bc1` | Kiểm HTTP đầu cuối SOC/client recovery, smoke 12 chuyên môn và hướng dẫn phối hợp |
+| `f12c211` | Hướng dẫn dùng 12 chuyên môn, kiểm chứng và rollback |
+| `38384cb` | Nhật ký trải nghiệm riêng, skill version bất biến và epoch tồn tại qua restart |
+| `7c67814` | Worker reflection dùng chung quota, replay gate và phát hành lesson |
+| `4cc90a1` | Đổi epoch vô hiệu hóa kế hoạch cũ, giữ trạng thái WAITING/DONE |
+| `729546f` | Snapshot notebook khi đóng episode, chặn note viết muộn cùng tick |
+| `cb1db65` | CLI inspect/export/retry/rollback, suite mẫu, learning-only và office counters |
+| `5ef203d` | Báo cáo usage sau learning batch và tránh cắt mất counters trên UI |
+| `646c1aa` | Hướng dẫn luồng học, replay gate và vòng đời phiên bản |
+| `2fa2123` | Harness Gemini thật có budget, lập kế hoạch/reflection/replay và log chỉ có metadata |
+| `725740d` | Probe replay có nguồn operator, giữ nguyên NO_LESSON và budget tích lũy |
+| `ef33025` | Notes tra nhanh các lệnh vận hành client/red/blue |
+| `8b20bc4` | Trace thao tác có giới hạn và phản ứng case đã lọc cho Agent Office |
+| `008576a` | Bấm robot/màn hình/thẻ để xem thao tác, mục tiêu và phản ứng phòng thủ |
+| `3fbf4fd` | Định nghĩa ba khu, kiểm tra 72 chỗ ngồi và phân trang theo từng đội |
+| `ed3aaf3` | Cảnh office ba khu riêng, chọn 36/72 slots và camera nhìn từng khu |
+| `9e59031` | Native executor, process/file/DNS/TCP thật, lịch sử và phân trang CLI |
+| `23944f7` | Agent Office xem native theo actor/event, kiểm thử Chrome và lỗi sau thực thi |
 
 Các commit tài liệu/kiểm thử tiếp theo xem bằng:
 
@@ -80,3 +97,14 @@ Bản mở rộng SOC lưu thêm task, notebook, artifact, rule version và acto
 world database. Code trước mở rộng không hiểu các trạng thái này; không dùng nó để tiếp
 tục world có actor WAITING/DONE hay task đang mở. Giữ bản sao dữ liệu đã dừng và thử bản
 cũ trên world riêng. Revert code không tự hoàn tác một rule, response hoặc task đã chạy.
+
+Phần học lưu thêm journal/episode, proposal, suite, evaluation, skill version/release và
+epoch. `world learning rollback` đổi release head cho epoch tiếp theo, không sửa lịch sử
+và không đổi pin của case đang mở. Git revert không rollback các bản skill lưu trong DB.
+Xem [AGENT_LEARNING_VI](AGENT_LEARNING_VI.md) để phân biệt rollback code, dữ liệu và skill.
+
+Native mode bổ sung `execution_mode` trong config/checkpoint, bảng `native_events`,
+log xuất và thư mục `workloads/`, `native-office/`. Code trước `9e59031` không hiểu
+config native. Muốn quay lại application mode hãy dùng world mới hoặc bản sao world
+application đã dừng; không xóa trường config để ép resume checkpoint native. Revert
+viewer không xóa bằng chứng, nhưng viewer cũ sẽ không hiện cửa sổ native.

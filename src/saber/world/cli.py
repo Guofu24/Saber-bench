@@ -16,6 +16,7 @@ from saber.domain.errors import SaberError
 from saber.population.office import OfficeEmitter
 from saber.world.environment import World
 from saber.world.key_layout import TeamKeyLayout
+from saber.world.learning_cli import learning_cli
 from saber.world.models import BLUE_ROLES, Actor, WorldConfig, default_config
 from saber.world.quota import QuotaProvider, TeamQuotaProvider
 from saber.world.runtime import Runner, WorldLock, atomic_json
@@ -30,6 +31,9 @@ def world() -> None:
     pass
 
 
+world.add_command(learning_cli)
+
+
 @world.command("init", help="Create an editable actor roster and world configuration.")
 @click.option(
     "--out", type=click.Path(path_type=Path), default=Path("runs/world"), show_default=True
@@ -38,18 +42,26 @@ def world() -> None:
 @click.option("--seed", type=int, default=42, show_default=True)
 @click.option("--tick-seconds", type=click.FloatRange(0.01, 3600), default=2.0, show_default=True)
 @click.option(
+    "--execution",
+    type=click.Choice(["application", "native"]),
+    default="application",
+    help="native: execute each action in a measured, fixed Python child process.",
+)
+@click.option(
     "--blue-specialists",
     is_flag=True,
     help="Include all 12 blue specialties; default keeps the six-role roster.",
 )
 def init_world(
-    out: Path, clients: int, seed: int, tick_seconds: float, blue_specialists: bool
+    out: Path, clients: int, seed: int, tick_seconds: float, blue_specialists: bool, execution: str
 ) -> None:
     if (out / "config.json").exists() or (out / "world.sqlite3").exists():
         raise click.ClickException(
             "World already exists. Edit its config before first run, or choose a new directory."
         )
-    config = default_config(clients, seed).model_copy(update={"tick_seconds": tick_seconds})
+    config = default_config(clients, seed).model_copy(
+        update={"tick_seconds": tick_seconds, "execution_mode": execution}
+    )
     if blue_specialists:
         existing = {a.role for a in config.actors if a.team == "blue"}
         config = config.model_copy(
@@ -143,6 +155,12 @@ def actor_resume(out: Path, actor_id: str) -> None:
 @click.option("--project-rpd", type=click.IntRange(1), default=20, show_default=True)
 @click.option("--project-tpm", type=click.IntRange(1), default=100000, show_default=True)
 @click.option("--office-url", default=None, help="Optional existing agent-office viewer URL.")
+@click.option(
+    "--learning-only",
+    is_flag=True,
+    help="Process saved learning work without advancing actors; requires --llm and a saved world.",
+)
+@click.option("--learning-jobs", type=click.IntRange(1, 100), default=4, show_default=True)
 def run_world(
     out: Path,
     ticks: int,
@@ -160,7 +178,11 @@ def run_world(
     project_rpd: int,
     project_tpm: int,
     office_url: str | None,
+    learning_only: bool,
+    learning_jobs: int,
 ) -> None:
+    if learning_only and (not llm or not (out / "world.sqlite3").is_file()):
+        raise click.ClickException("--learning-only requires --llm and an existing saved world.")
     if llm and call_budget is None:
         raise click.ClickException("--llm requires an explicit --call-budget. No API calls made.")
     if not llm and call_budget is not None:
@@ -176,9 +198,9 @@ def run_world(
             )
             if not path.exists():
                 atomic_json(path, config.model_dump(mode="json"))
-            if resume:
+            if resume and not learning_only:
                 (out / "STOP").unlink(missing_ok=True)
-            elif (out / "STOP").exists():
+            elif (out / "STOP").exists() and not learning_only:
                 raise click.ClickException(
                     "STOP exists. Use --resume when you want this world to continue."
                 )
@@ -223,8 +245,18 @@ def run_world(
                     )
             runner = Runner(store, config, provider=provider, emitter=OfficeEmitter(office_url))
             resources.callback(runner.close)
+            if learning_only:
+                if runner.learner is None:
+                    raise click.ClickException("Learning is disabled in this world's config.")
+                runner.learner.flush(limit=learning_jobs)
+                runner.close()
+                atomic_json(
+                    out / "report.json", runner.world.report() | {"stop_reason": "learning_batch"}
+                )
+                click.echo("Learning batch finished or deferred; actor tick was not advanced.")
+                return
             click.echo(
-                f"World: {out.resolve()} | actors={len(config.actors)} | engine={'HYBRID' if llm else 'SCRIPTED'}"
+                f"World: {out.resolve()} | actors={len(config.actors)} | engine={'HYBRID' if llm else 'SCRIPTED'} | execution={config.execution_mode}"
             )
             click.echo(
                 f'Local tool service: {runner.server.url} (authenticated). Stop: saber world stop --out "{out}"'
@@ -253,6 +285,39 @@ def status_world(out: Path) -> None:
     if not path.exists():
         raise click.ClickException("No world report yet.")
     click.echo(path.read_text(encoding="utf-8"))
+
+
+@world.command("native-logs", help="Read retained native evidence, with per-actor pagination.")
+@click.option("--out", type=click.Path(path_type=Path), required=True)
+@click.option("--actor", default=None)
+@click.option("--before", type=click.IntRange(1), default=None)
+@click.option("--limit", type=click.IntRange(1, 100), default=100)
+def native_logs(out: Path, actor: str | None, before: int | None, limit: int) -> None:
+    import sqlite3
+
+    path = (out / "world.sqlite3").resolve()
+    if not path.is_file():
+        raise click.ClickException("No world database at this path.")
+    # Truly read-only: viewing must not migrate, checkpoint or create a world.
+    sql = "SELECT id,data FROM native_events WHERE 1=1"
+    args: list[Any] = []
+    if actor:
+        sql += " AND actor_id=?"
+        args.append(actor)
+    if before is not None:
+        sql += " AND id<?"
+        args.append(before)
+    sql += " ORDER BY id DESC LIMIT ?"
+    args.append(limit)
+    db = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True)
+    try:
+        rows = list(db.execute(sql, args))
+    except sqlite3.OperationalError:
+        raise click.ClickException("Native telemetry is not available in this world.") from None
+    finally:
+        db.close()
+    for eid, data in reversed(rows):
+        click.echo(json.dumps(json.loads(data) | {"id": eid}, ensure_ascii=False))
 
 
 @world.command("stop", help="Request a graceful stop. Data and checkpoints are preserved.")

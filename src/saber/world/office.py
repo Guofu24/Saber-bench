@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from saber.world.models import WorldConfig, specialties_for
+from saber.world.office_trace import trace
 from saber.world.store import Store
 
 USAGE_FIELDS = ("attempts", "successes", "input_tokens", "output_tokens")
@@ -39,7 +40,9 @@ def snapshot(
     teams = ("client", "red", "blue")
     roster = []
     with store.lock:
+        activity_trace = trace(store, config, report["tick"])
         all_tasks = list(store.items("tasks").values())
+        all_proposals = list(store.items("learning-proposals").values())
         for actor in config.actors:
             memory = store.get("memory", actor.id, {})
             control = store.get("actor-control", actor.id, {"status": "ACTIVE"})
@@ -61,6 +64,14 @@ def snapshot(
                         s.lower(): sum(t["status"] == s for t in tasks)
                         for s in ("OFFERED", "ACTIVE", "BLOCKED", "DONE")
                     },
+                    "learning_counts": {
+                        "episodes": store.get("learning-counts", actor.id, {}).get("episodes", 0),
+                        "proposals": sum(p["actor_id"] == actor.id for p in all_proposals),
+                        "published": sum(
+                            p["actor_id"] == actor.id and p["status"] == "PUBLISHED"
+                            for p in all_proposals
+                        ),
+                    },
                     "activity": "idle"
                     if stopped
                     else "planning"
@@ -71,6 +82,20 @@ def snapshot(
                     "last_tool": memory.get("last_tool"),
                     "last_status": memory.get("last_status"),
                     "source": memory.get("source", "none"),
+                    **(
+                        {
+                            "executor": {
+                                "host": memory.get("host"),
+                                "pid": memory.get("pid"),
+                                "job_id": memory.get("job_id"),
+                                "exit_code": memory.get("exit_code"),
+                                "artifacts": memory.get("artifacts", []),
+                                "pending": actor.id in pending,
+                            }
+                        }
+                        if config.execution_mode == "range"
+                        else {}
+                    ),
                 }
             )
     return {
@@ -80,11 +105,13 @@ def snapshot(
         "run_id": run_id,
         "profile": profile,
         "engine": report["engine"],
+        "execution_mode": config.execution_mode,
         "status": "stopped" if stopped else "running",
         "updated_at": time.time(),
         "tick_seconds": config.tick_seconds,
         "tick": report["tick"],
         "actors": roster,
+        "trace": activity_trace,
         "actions": {name: report["metrics"].get(name, 0) for name in ACTION_FIELDS},
         "llm": {name: usage.get(name, 0) for name in USAGE_FIELDS},
         "llm_by_team": {

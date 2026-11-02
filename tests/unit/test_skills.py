@@ -57,6 +57,15 @@ def test_all_world_roles_load_their_skill_and_only_the_world_reference():
     assert PLAYBOOKS["access"] == "redteam-initial-access"
 
 
+def test_range_playbooks_bind_the_real_executor_contract_without_world_tools():
+    for name in RUNTIME_SKILLS:
+        text = load_playbook(name, mode="range")
+        assert "--- Reference: soc-orchestrator/reference/soc-lab.md ---" in text
+        assert "--- Reference: soc-orchestrator/reference/continuous-world.md ---" not in text
+        assert "HTTP 202 means queued, not applied" in text
+        assert len(text) <= skills.MAX_WORLD_CHARS
+
+
 def test_benchmark_specialists_use_the_same_reference_loader():
     assert load_skill_playbook("IR") == load_playbook("soc-ir")
     with pytest.raises(IntegrationBlocked, match="Unknown specialist"):
@@ -164,7 +173,7 @@ def test_audit_cli_checks_the_repository_and_fails_for_missing_skills(tmp_path):
     assert good.returncode == 0, good.stderr
     report = json.loads(output.read_text())
     assert report["status"] == "PASS" and report["skill_count"] == len(RUNTIME_SKILLS) + 3
-    assert report["reference_count"] == 25
+    assert report["reference_count"] == 26
     assert {r["name"] for r in report["skills"] if r["manual_only"]} == {
         "gate-review",
         "implement-task",

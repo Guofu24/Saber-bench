@@ -1,12 +1,41 @@
 # SABER — Client / Red Team / Blue Team Lab
 
+**Mới: bộ SOC lab nhiều dịch vụ và VM** đã có mã triển khai cho ba preset
+`linux-small`, `windows-ad`, `expanded`. Bắt đầu ở [SOC Lab — triển khai và nghiệm thu](docs/SOC_LAB_VI.md).
+Nhóm lệnh là **`saber lab`**: business app, worker từng đội, Chromium, collector, OpenSearch,
+Zeek, agent-office; bản AD có script Hyper-V/domain/Sysmon và phản ứng có rollback.
+Đã kiểm thử local bằng HTTP, subprocess và Chromium thật. **Chưa chạy nghiệm thu toàn bộ Docker/AD
+trên máy phát triển này**; `lab verify` phải đạt trên máy đích mới xác nhận runtime.
+Office đã có bằng chứng từng job và ảnh Chromium kiểm hash; blue có hunt/DFIR và handoff,
+Windows có queue tác vụ do agent điều phối. Range đã nối **learning có replay/pin/rollback,
+vault phân tích Ghidra/IDA/Volatility/YARA/PCAP, SOAR có xác minh hiệu ứng và backup/restore**.
+Xem [phạm vi hoàn thiện và bằng chứng kiểm thử](docs/SOC_COMPLETION.md).
+
+| Nhu cầu trên máy lớn | Hướng dẫn |
+|---|---|
+| Dựng ba cỡ lab, chỉnh agents, mở Office | [Triển khai SOC](docs/SOC_LAB_VI.md) |
+| Phân tích binary/memory/PCAP, kiểm tra công cụ | [Analysis](docs/SOC_ANALYSIS_VI.md) |
+| Playbook và tích hợp Shuffle/webhook | [SOAR](docs/SOC_SOAR_VI.md) |
+| Agent học từ lỗi và rollback skill | [Learning](docs/SOC_LEARNING_VI.md) |
+| Sao lưu, chuyển máy, khôi phục | [Recovery](docs/SOC_RECOVERY_VI.md) |
+
+Ghidra/IDA và symbols do operator đặt vào `tools/`; IDA cần bản có quyền headless.
+Mặc định SOAR dùng backend tích hợp; adapter Shuffle dành cho instance riêng của lab.
+Bundle có 13 service definitions, không tự cài mọi sản phẩm SOC thương mại.
+
+`saber world` / `saber env` dưới đây vẫn là chế độ nhẹ. Chọn profile `vm` trong `env`
+không đồng nghĩa đã dựng SOC lab hoặc domain; muốn các bộ mới hãy dùng `saber lab`.
+
 SABER chạy một thế giới ứng dụng liên tục: client làm việc, red team thử điểm yếu
 trong lab, blue team quan sát log và xử lý case. Có thể dùng baseline scripted hoặc
 bật Gemini cho các agent lập kế hoạch. Project còn có bộ lõi benchmark SOC riêng.
 
-**Trạng thái hiện tại:** HTTP và thay đổi trạng thái ứng dụng được thực thi thật;
+**Phạm vi chế độ world/env:** HTTP và thay đổi trạng thái ứng dụng được thực thi thật;
 tài khoản, dữ liệu và kỹ thuật trong world là mô phỏng. Các actor chia sẻ một runtime
-Python, chưa phải desktop/VM riêng. Kết quả mang nhãn `DEV_SIMULATION_ONLY`.
+Python, chưa phải desktop/VM riêng. Chế độ **`--execution native`** bổ sung process
+con cho mỗi thao tác cùng bằng chứng PID/command line, file, DNS và TCP thật của
+workload. Sensor chưa giám sát toàn OS; xem [phạm vi và lệnh chạy](docs/NATIVE_TELEMETRY_VI.md).
+Kết quả mang nhãn `DEV_SIMULATION_ONLY`.
 
 ## Chọn môi trường
 
@@ -23,6 +52,8 @@ Cấu hình SIEM/SOAR có sẵn hiện hỗ trợ **inventory và kiểm tra HTT
 kết nối luồng log hay hành động phòng thủ với sản phẩm bên ngoài.
 
 - [Hướng dẫn đầy đủ từng môi trường](docs/ENVIRONMENTS_VI.md)
+- [Notes — tra nhanh các lệnh chạy](notes.md)
+- [Log native và xem riêng từng agent](docs/NATIVE_TELEMETRY_VI.md)
 - [Cấu hình mẫu](config/environments/)
 - [Commit và rollback](docs/ROLLBACK_VI.md)
 
@@ -138,6 +169,14 @@ Ghidra/IDA/EDR/SIEM ngoài lab vẫn cần adapter và dữ liệu thực. Xem
 
 ## Bật Gemini
 
+Agent có [luồng rút kinh nghiệm](docs/AGENT_LEARNING_VI.md): ghi kết quả riêng → tổng kết
+theo task/case/chu kỳ → đề xuất bài học → replay so bản cũ/mới → phát hành phiên bản skill
+cục bộ khi qua gate. Worker dùng chung budget/pool của đội. Mặc định scripted chỉ ghi
+nhận; reflection cần model. Cần suite do operator cấp để tự đánh giá/phát hành; có
+[mẫu phát triển cho client](config/learning/client-session.json). Agent-office hiển thị
+counters học; case đang chạy giữ phiên bản skill ổn định. Đây chưa phải bằng chứng
+Gemini tự cải thiện chất lượng SOC đầu cuối.
+
 Mọi profile mặc định scripted, không gọi API. Model mặc định: `gemini-3.5-flash-lite`.
 File key do chương trình nạp; không đưa vào Git/bundle.
 
@@ -168,6 +207,7 @@ Xem `llm.successes`, `llm.by_team`, `llm_pools` và nguồn hành động `llm` 
 | `config.json` | Cấu hình giữ ổn định cho world |
 | `report.json` | Tick, kết quả, usage và trạng thái pool |
 | `office.json` | Snapshot cho viewer: roster, nguồn hành động, counter, chỉ số quota |
+| `learning.json` | Trạng thái học, version IDs và epoch; không có nội dung notebook/lesson |
 | `access.jsonl` | Log thao tác ứng dụng, có rotation |
 | `world.sqlite3` | Trạng thái, case, journal và ledger đánh giá |
 | `STOP` | Yêu cầu dừng; tiếp tục bằng resume rõ ràng |
@@ -184,7 +224,12 @@ node agent-office/bin/agent-office.js watch --bundle runs/my-sandbox --open
 
 Thay `runs/world` bằng thư mục `--out` thực tế. Viewer hiển thị Client/Red/Blue,
 profile, scripted/Gemini, nguồn hành động và quota theo đội; chỉ đọc chỉ số key.
-Màn hình phân trang 20 agent, hỗ trợ roster 200 agent. Sandbox giữ mạng cô lập;
+Bấm robot, màn hình/bàn hoặc thẻ agent để xem timeline thao tác, mục tiêu, HTTP status
+và phản ứng blue gắn với bằng chứng của case. Lịch sử trên viewer là cửa sổ có giới hạn;
+HTTP thành công không tự chứng minh tấn công thành công. Xem [notes](notes.md) để chạy demo.
+Office chia ba khu Clients/Red/Blue, chọn 12 hoặc 24 bàn mỗi đội (36/72 slots).
+Phân trang theo từng đội để xem đủ roster 200 agent; nút phía trên zoom từng khu.
+Thêm slots không tạo thêm agent. Sandbox giữ mạng cô lập;
 VM/server chạy viewer tại máy đích rồi forward cổng loopback. Xem
 [hướng dẫn Agent Office](agent-office/README.md) và
 [hướng dẫn world](docs/CONTINUOUS_WORLD_VI.md).
