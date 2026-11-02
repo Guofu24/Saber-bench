@@ -30,7 +30,7 @@ là service origin không chứa credential, `external_network` là Docker netwo
 kiểm tra isolation trước khi start. Không dùng public SaaS cho topology này.
 
 Với Shuffle, khai báo `soar.workflows` ánh xạ tên playbook sang workflow UUID.
-Sau `init-secrets`, đặt API credential của Shuffle vào `external_token` trong
+Sau `lab credentials`, đặt API credential của Shuffle vào `external_token` trong
 `.secrets/soar.json` bằng editor riêng. Cấu hình credential callback của workflow
 bằng `callback_token` trong cùng file, không đưa nó vào prompt, script commit hoặc log.
 

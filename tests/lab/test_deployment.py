@@ -59,6 +59,18 @@ def test_invalid_guest_network_and_resource_budget_rejected():
     data["windows"][0]["address"] = "8.8.8.8"
     with pytest.raises(ValueError):
         LabSpec.model_validate(data)
+
+
+def test_analysis_memory_and_replica_limits_must_fit_the_declared_host():
+    data = preset_spec("linux-small").model_dump()
+    data["analysis"]["memory_gb"] = 32
+    with pytest.raises(ValueError, match="Host RAM"):
+        LabSpec.model_validate(data)
+    data["host_ram_gb"] = 64
+    assert compose(LabSpec.model_validate(data))["services"]["analysis"]["mem_limit"] == "32g"
+    data["workers_per_team"] = 16
+    with pytest.raises(ValueError, match="Host RAM"):
+        LabSpec.model_validate(data)
     data = preset_spec("expanded").model_dump()
     data["host_ram_gb"] = 16
     with pytest.raises(ValueError):

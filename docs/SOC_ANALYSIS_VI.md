@@ -7,13 +7,22 @@ credential hoặc network analysis. Mẫu được phân tích tĩnh, không ch�
 Image có Volatility, YARA, tshark, Suricata và Java 21. Đặt Ghidra tương thích Java 21
 tại `BUNDLE/tools/ghidra`, IDA Linux có license/IDAPython tại `BUNDLE/tools/ida`, symbols
 tại `BUNDLE/tools/symbols`. Chúng được mount chỉ đọc. Không chép license vào source/Git.
+Đặt license IDA offline theo hướng dẫn của bản IDA đang dùng trong thư mục cài đặt;
+profile/cache của mỗi job nằm riêng trong volume, không dùng profile người dùng host.
 Đường dẫn, timeout và giới hạn mẫu nằm trong `lab.json.analysis`. IDA Free không mặc nhiên
 hỗ trợ mọi tính năng batch. Công cụ thiếu trả unavailable, không trả kết quả giả.
+
+Mặc định analysis có 2 GB RAM, giới hạn mẫu 512 MB và timeout 180 giây. Với dump RAM
+8 GB, chỉnh spec **trước render**: `analysis.max_sample_mb=8192`,
+`analysis.memory_gb=8`, `analysis.timeout_seconds=1800`, `evidence_budget_mb=16384`
+hoặc lớn hơn tùy số mẫu lưu. Bộ kiểm tra spec tính lại RAM theo số worker và guest.
+Giới hạn này là ngân sách vận hành, không bảo đảm mọi memory plugin hoàn tất trong đó.
 
 Trong `BUNDLE/source`, sau khi khởi động lab:
 
 ```powershell
 uv run --no-sync saber lab analysis tools --bundle ..
+uv run --no-sync saber lab analysis self-test --bundle ..
 uv run --no-sync saber lab analysis import --bundle .. --file PATH_TO_LAB_SAMPLE --kind binary
 uv run --no-sync saber lab analysis samples --bundle ..
 uv run --no-sync saber lab analysis run --bundle .. --sample SHA256 --engine builtin
@@ -37,6 +46,10 @@ entropy và chuỗi có giới hạn; Ghidra/IDA trả function metadata; Volati
 API operator bind localhost `7792`; xem từ xa qua SSH tunnel. Report đầy đủ ở volume
 `analysis`, đường dẫn `analysis/<job-id>/analysis.json`; Office có preview giới hạn.
 Không có shell/path/script tùy ý trong args của agent. Output, timeout và disk budget áp dụng.
+
+`self-test` nạp hai marker tổng hợp, chạy builtin và YARA positive/negative, ghi receipt
+theo job/evidence ID. `lab verify` đối chiếu các ID/hash với collector; chạy bước này sau
+khởi động hoặc restore. Nó không kiểm thay cho memory image/IDA/Ghidra tùy chọn.
 
 Đã kiểm thử YARA thật với marker/đối chứng và Volatility thật với ảnh không hợp lệ.
 Positive acceptance cho memory image, Ghidra, IDA, tshark và Suricata cần máy đích có

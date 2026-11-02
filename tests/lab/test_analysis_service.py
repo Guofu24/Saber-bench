@@ -13,7 +13,7 @@ from saber.lab.ledger import Ledger
 ASSETS = Path(__file__).resolve().parents[2] / "infra/soc/analysis"
 
 
-def test_sample_vault_authorization_integrity_jobs_and_restart(tmp_path):
+def test_sample_vault_authorization_integrity_jobs_and_restart(tmp_path, monkeypatch):
     store = Ledger(tmp_path)
     credentials = {
         "upload_token": "operator",
@@ -66,6 +66,17 @@ def test_sample_vault_authorization_integrity_jobs_and_restart(tmp_path):
     store.put("analysis-job:" + uncertain["id"], record)
     AnalysisQueue(store, credentials, AnalysisSettings(), ASSETS, queue.emitter)
     assert store.get("analysis-job:" + uncertain["id"])["state"] == "INDETERMINATE"
+    blocked = job | {"id": str(uuid.uuid4())}
+    client.post("/jobs", headers=auth("dfir"), json=blocked)
+
+    def full_disk(*args, **kwargs):
+        raise OSError("Evidence budget reached")
+
+    monkeypatch.setattr(queue.emitter, "emit", full_disk)
+    assert queue.process_one()
+    recorded = store.get("analysis-job:" + blocked["id"])
+    assert recorded["state"] == "INDETERMINATE" and recorded["result"]["state"] == "SUCCEEDED"
+    assert not queue.process_one()
     store.close()
 
 
@@ -129,3 +140,37 @@ def test_fixed_native_tool_arguments_and_sample_mutation_rejected(tmp_path):
             ASSETS,
             AnalysisSettings(),
         )
+
+
+@pytest.mark.integration
+def test_operator_self_test_uses_real_queue_and_native_positive_negative_controls(
+    tmp_path, monkeypatch
+):
+    import json
+
+    from saber.lab.analysis_cli import self_test
+    from saber.lab.deployment import initialize_secrets, render
+    from saber.lab.models import preset_spec
+
+    from .test_services import served
+
+    pytest.importorskip("yara")
+    bundle = tmp_path / "bundle"
+    spec = preset_spec("linux-small")
+    render(spec, bundle)
+    initialize_secrets(bundle, spec)
+    creds = json.loads((bundle / ".secrets/analysis.json").read_text())
+    store = Ledger(tmp_path / "vault")
+    monkeypatch.chdir(bundle)
+    queue = AnalysisQueue(
+        store, creds, spec.analysis, Path("analysis"), Emitter(store, "analysis-test", "", "")
+    )
+    queue.thread.start()
+    try:
+        with served(create_analysis(queue)) as endpoint:
+            receipt = self_test(bundle, endpoint, timeout=20)
+            assert receipt["passed"] and len(receipt["jobs"]) == 3
+            assert len([e for e in store.events() if e["kind"] == "analysis.completed"]) == 3
+    finally:
+        queue.close()
+        store.close()

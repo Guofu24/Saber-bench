@@ -99,6 +99,26 @@
   "tick_seconds": 5.0,
   "retention_days": 7,
   "evidence_budget_mb": 4096,
+  "learning_enabled": true,
+  "learning_interval_ticks": 30,
+  "analysis": {
+    "enabled": true,
+    "memory_gb": 2,
+    "timeout_seconds": 180,
+    "max_sample_mb": 512,
+    "ghidra": "/opt/tools/ghidra/support/analyzeHeadless",
+    "ida": "/opt/tools/ida/idat",
+    "symbols": "/opt/tools/symbols"
+  },
+  "soar": {
+    "enabled": true,
+    "backend": "builtin",
+    "endpoint": "",
+    "external_network": "",
+    "callback_base": "http://soar:8080",
+    "workflows": {},
+    "timeout_seconds": 300
+  },
   "domain": "saber.test",
   "windows_subnet": "172.28.80.0/24",
   "windows": [],

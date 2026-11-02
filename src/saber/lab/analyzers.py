@@ -34,6 +34,7 @@ PLUGIN = {
 class AnalysisSettings(BaseModel):
     model_config = ConfigDict(extra="forbid")
     enabled: bool = True
+    memory_gb: int = Field(default=2, ge=1, le=64)
     timeout_seconds: int = Field(default=180, ge=5, le=1800)
     max_sample_mb: int = Field(default=512, ge=1, le=16384)
     ghidra: str = "/opt/tools/ghidra/support/analyzeHeadless"
@@ -222,10 +223,22 @@ def execute(
         argv = argv_for(job, sample, directory, assets, settings)
         env = {
             k: os.environ[k]
-            for k in ("PATH", "SystemRoot", "WINDIR", "TEMP", "TMP", "JAVA_HOME", "IDAUSR")
+            for k in ("PATH", "SystemRoot", "WINDIR", "TEMP", "TMP", "JAVA_HOME")
             if k in os.environ
         }
         env.update(PYTHONNOUSERSITE="1", TVHEADLESS="1")
+        home = directory / "home"
+        home.mkdir()
+        (home / "ida").mkdir()
+        env.update(
+            HOME=str(home),
+            USERPROFILE=str(home),
+            IDAUSR=str(home / "ida"),
+            XDG_CACHE_HOME=str(home / "cache"),
+        )
+        # Ghidra's launcher also uses Java's home property; UID 10001 has no passwd entry.
+        if job.engine == "ghidra":
+            env["JAVA_TOOL_OPTIONS"] = '-Duser.home="' + str(home) + '"'
         env["PYTHONPATH"] = str(Path(__file__).resolve().parents[2])
         log = directory / "stdout.log"
         error_log = directory / "stderr.log"
@@ -312,7 +325,7 @@ def execute(
         "result": redact(result),
     }
     encoded = json.dumps(value, sort_keys=True, ensure_ascii=True).encode()
-    if len(encoded) > 2_000_000:
+    if len(encoded) > 1_500_000:
         raise ValueError("Normalized analysis exceeds budget")
     (directory / "analysis.json").write_bytes(encoded)
     return value | {"report_sha256": hashlib.sha256(encoded).hexdigest()}

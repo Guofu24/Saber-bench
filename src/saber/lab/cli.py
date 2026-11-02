@@ -155,7 +155,7 @@ def compose_command(bundle: Path, args: list[str], settings: dict[str, Any] | No
                 }
             )
         result = subprocess.run(
-            [exe, "compose", *files, *args],
+            [exe, "compose", "--env-file", os.devnull, *files, *args],
             capture_output=True,
             timeout=1800,
             check=False,

@@ -38,12 +38,20 @@ def private_directory(path: Path) -> None:
         )
 
 
-def guest_proof(folder: Path, spec: Any) -> dict[str, Any]:
+def guest_proof(folder: Path, spec: Any, lab_sha256: str) -> dict[str, Any]:
     proof = json.loads((folder / "windows-manifest.json").read_text(encoding="utf-8-sig"))
-    if proof["lab_sha256"] != hashlib_spec(spec) or proof.get("all_off") is not True:
+    if proof["lab_sha256"] != lab_sha256 or proof.get("all_off") is not True:
         raise ValueError("Guest backup belongs to another lab or was not stopped")
     if set(proof["vms"]) != {spec.name + "-" + n.name for n in spec.windows}:
         raise ValueError("Incomplete guest backup roster")
+    if folder.is_symlink() or set(proof.get("configs", {})) != set(proof["vms"]):
+        raise ValueError("Incomplete guest configurations")
+    for vm in proof["vms"]:
+        if proof["configs"][vm] not in proof["files"] or not any(
+            name.startswith(vm + "/") and name.lower().endswith((".vhdx", ".avhdx"))
+            for name in proof["files"]
+        ):
+            raise ValueError("Guest export lacks configuration or disk")
     for name, checksum in proof["files"].items():
         path = folder / name
         if (
@@ -53,17 +61,6 @@ def guest_proof(folder: Path, spec: Any) -> dict[str, Any]:
         ):
             raise ValueError("Guest export integrity mismatch")
     return dict(proof)
-
-
-def hashlib_spec(spec: Any) -> str:
-    import hashlib
-
-    # Windows hashes the exact rendered lab.json, supplied separately by callers.
-    return (
-        str(spec)
-        if isinstance(spec, str)
-        else hashlib.sha256(spec.model_dump_json(indent=2).encode()).hexdigest()
-    )
 
 
 def verify_backup(folder: Path, bundle: Path, windows_backup: Path | None = None) -> dict[str, Any]:
@@ -90,7 +87,8 @@ def verify_backup(folder: Path, bundle: Path, windows_backup: Path | None = None
         if inspect_archive(path) != {k: record[k] for k in ("members", "unpacked_bytes")}:
             raise ValueError("Backup archive structure mismatch")
     if spec.windows and (
-        windows_backup is None or guest_proof(windows_backup, spec) != manifest.get("windows")
+        windows_backup is None
+        or guest_proof(windows_backup, spec, digest(bundle / "lab.json")) != manifest.get("windows")
     ):
         raise ValueError("Matching complete Windows export required")
     return dict(manifest)
@@ -115,7 +113,11 @@ def create(bundle: Path, out: Path, windows_backup: Path | None, on_target: bool
         if not on_target or out.exists():
             raise ValueError("Use --on-target and a new private backup directory")
         spec = verify_bundle(bundle)
-        guests = guest_proof(windows_backup, spec) if windows_backup else None
+        guests = (
+            guest_proof(windows_backup, spec, digest(bundle / "lab.json"))
+            if windows_backup
+            else None
+        )
         if spec.windows and guests is None:
             raise ValueError("Export and stop all Windows guests first")
         if not (bundle / ".secrets").is_dir():

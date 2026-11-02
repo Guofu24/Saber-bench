@@ -347,7 +347,11 @@ def create_soar(runner: SoarRunner) -> FastAPI:
 
     @app.get("/health")
     def health() -> dict[str, Any]:
-        return {"ok": True, "service": "soar", "backend": runner.settings.backend}
+        return {
+            "ok": runner.thread.is_alive(),
+            "service": "soar",
+            "backend": runner.settings.backend,
+        }
 
     @app.post("/jobs")
     def submit(body: PlaybookJob, authorization: str = Header(default="")) -> dict[str, Any]:
@@ -367,6 +371,11 @@ def create_soar(runner: SoarRunner) -> FastAPI:
                 if old["request"] != payload or old["actor"] != who["actor"]:
                     raise HTTPException(409, "Job ID operation cannot change")
                 return dict(old)
+            pending = ledger.db.execute(
+                "SELECT count(*) FROM state WHERE k LIKE 'soar-job:%' AND json_extract(v,'$.state') IN ('QUEUED','DISPATCHING','RUNNING','VERIFYING')"
+            ).fetchone()[0]
+            if pending >= 50:
+                raise HTTPException(429, "SOAR queue full")
             for row in ledger.db.execute("SELECT v FROM state WHERE k LIKE 'soar-job:%'"):
                 other = json.loads(row[0])
                 if (

@@ -7,8 +7,21 @@ Zeek, agent-office; bản AD có script Hyper-V/domain/Sysmon và phản ứng c
 Đã kiểm thử local bằng HTTP, subprocess và Chromium thật. **Chưa chạy nghiệm thu toàn bộ Docker/AD
 trên máy phát triển này**; `lab verify` phải đạt trên máy đích mới xác nhận runtime.
 Office đã có bằng chứng từng job và ảnh Chromium kiểm hash; blue có hunt/DFIR và handoff,
-Windows có queue tác vụ do agent điều phối. **Còn thiếu tích hợp learning của range,
-Ghidra/IDA và SOAR bên ngoài**; xem [bảng hoàn thiện có phân biệt code/test](docs/SOC_COMPLETION.md).
+Windows có queue tác vụ do agent điều phối. Range đã nối **learning có replay/pin/rollback,
+vault phân tích Ghidra/IDA/Volatility/YARA/PCAP, SOAR có xác minh hiệu ứng và backup/restore**.
+Xem [phạm vi hoàn thiện và bằng chứng kiểm thử](docs/SOC_COMPLETION.md).
+
+| Nhu cầu trên máy lớn | Hướng dẫn |
+|---|---|
+| Dựng ba cỡ lab, chỉnh agents, mở Office | [Triển khai SOC](docs/SOC_LAB_VI.md) |
+| Phân tích binary/memory/PCAP, kiểm tra công cụ | [Analysis](docs/SOC_ANALYSIS_VI.md) |
+| Playbook và tích hợp Shuffle/webhook | [SOAR](docs/SOC_SOAR_VI.md) |
+| Agent học từ lỗi và rollback skill | [Learning](docs/SOC_LEARNING_VI.md) |
+| Sao lưu, chuyển máy, khôi phục | [Recovery](docs/SOC_RECOVERY_VI.md) |
+
+Ghidra/IDA và symbols do operator đặt vào `tools/`; IDA cần bản có quyền headless.
+Mặc định SOAR dùng backend tích hợp; adapter Shuffle dành cho instance riêng của lab.
+Bundle có 13 service definitions, không tự cài mọi sản phẩm SOC thương mại.
 
 `saber world` / `saber env` dưới đây vẫn là chế độ nhẹ. Chọn profile `vm` trong `env`
 không đồng nghĩa đã dựng SOC lab hoặc domain; muốn các bộ mới hãy dùng `saber lab`.

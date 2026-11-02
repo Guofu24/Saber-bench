@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ipaddress
+import math
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -73,7 +74,13 @@ class LabSpec(BaseModel):
             raise ValueError("linux-small does not provision Windows")
         if self.preset != "linux-small" and sum(n.role == "dc" for n in self.windows) != 1:
             raise ValueError("Exactly one forest-root domain controller is required")
-        if sum(n.memory_gb for n in self.windows) + 16 > self.host_ram_gb:
+        containers_and_host = math.ceil(
+            13.25
+            + 6 * self.workers_per_team
+            + (self.analysis.memory_gb if self.analysis.enabled else 0)
+            + (0.5 if self.soar.enabled else 0)
+        )
+        if sum(n.memory_gb for n in self.windows) + containers_and_host > self.host_ram_gb:
             raise ValueError("Host RAM cannot fit guests plus control/SOC services")
         return self
 

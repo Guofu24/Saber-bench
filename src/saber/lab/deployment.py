@@ -99,6 +99,7 @@ def compose(spec: LabSpec) -> dict[str, Any]:
         }
     controller = service("controller", "controller", ["control", "telemetry"], "1g")
     controller["secrets"] = ["controller"]
+    controller["volumes"].append("./learning:/config/learning:ro")
     controller["depends_on"] = {
         team: {"condition": "service_healthy"} for team in ("client", "red", "blue")
     }
@@ -120,7 +121,9 @@ def compose(spec: LabSpec) -> dict[str, Any]:
         services["blue"]["depends_on"]["soar"] = {"condition": "service_healthy"}
         secret_names.append("soar")
     if spec.analysis.enabled:
-        analysis = service("analysis", "analysis", ["analysis", "telemetry"], "2g")
+        analysis = service(
+            "analysis", "analysis", ["analysis", "telemetry"], f"{spec.analysis.memory_gb}g"
+        )
         analysis["build"]["dockerfile"] = "Dockerfile.analysis"
         analysis["secrets"] = ["analysis"]
         analysis["ports"] = ["127.0.0.1:7792:8080"]
@@ -372,7 +375,7 @@ def render(spec: LabSpec, out: Path) -> dict[str, Any]:
     out.mkdir(parents=True)
     (out / "tools").mkdir()
     source = out / "source"
-    for name in ("pyproject.toml", "uv.lock", "README.md", "catalog/subtasks.json"):
+    for name in ("pyproject.toml", "uv.lock", "README.md", "notes.md", "catalog/subtasks.json"):
         dest = source / name
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(root / name, dest)
@@ -403,7 +406,15 @@ def render(spec: LabSpec, out: Path) -> dict[str, Any]:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, dest)
     (out / "lab.json").write_text(spec.model_dump_json(indent=2), encoding="utf-8")
-    for name in ("SOC_LAB_VI.md", "SOC_COMPLETION.md"):
+    for name in (
+        "SOC_LAB_VI.md",
+        "SOC_COMPLETION.md",
+        "SOC_ANALYSIS_VI.md",
+        "SOC_SOAR_VI.md",
+        "SOC_RECOVERY_VI.md",
+        "SOC_LEARNING_VI.md",
+        "SOC_BUILD_CHECKLIST.md",
+    ):
         shutil.copyfile(root / "docs" / name, out / name)
         (source / "docs").mkdir(exist_ok=True)
         shutil.copyfile(root / "docs" / name, source / "docs" / name)

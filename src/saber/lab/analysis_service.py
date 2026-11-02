@@ -32,7 +32,7 @@ class AnalysisQueue:
             ledger,
             credentials,
             settings,
-            assets,
+            assets.resolve(),
             emitter,
         )
         self.stop = threading.Event()
@@ -87,19 +87,24 @@ class AnalysisQueue:
                     "error": "Analyzer failed; diagnostics remain in the private analysis workspace",
                 }
             record.update(state=result["state"], result=result, completed_at=now())
-            eid = self.emitter.emit(
-                "analysis.completed",
-                {
-                    "job_id": job.id,
-                    "actor": record["actor"],
-                    "sample_id": job.sample_id,
-                    "engine": job.engine,
-                    "state": result["state"],
-                    "pid": result.get("pid"),
-                    "report_sha256": result.get("report_sha256"),
-                },
-            )
-            record["evidence_id"] = eid
+            try:
+                record["evidence_id"] = self.emitter.emit(
+                    "analysis.completed",
+                    {
+                        "job_id": job.id,
+                        "actor": record["actor"],
+                        "sample_id": job.sample_id,
+                        "engine": job.engine,
+                        "state": result["state"],
+                        "pid": result.get("pid"),
+                        "report_sha256": result.get("report_sha256"),
+                    },
+                )
+            except OSError:
+                record.update(
+                    state="INDETERMINATE",
+                    error="Result recorded but evidence emission failed; inspect storage budget",
+                )
             self.ledger.put(row[0], record)
             return True
         finally:
@@ -130,7 +135,7 @@ def create_analysis(queue: AnalysisQueue) -> FastAPI:
 
     @app.get("/health")
     def health() -> dict[str, Any]:
-        return {"ok": True, "service": "analysis"}
+        return {"ok": queue.thread.is_alive(), "service": "analysis"}
 
     @app.get("/tools")
     def tools(authorization: str = Header(default="")) -> dict[str, Any]:

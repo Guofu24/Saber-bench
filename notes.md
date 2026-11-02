@@ -497,6 +497,7 @@ uv run --no-sync saber lab doctor --config ../lab.json --storage ..
 uv run --no-sync saber lab credentials --bundle ..
 uv run --no-sync saber lab up --bundle .. --on-target
 uv run --no-sync saber lab status --bundle ..
+uv run --no-sync saber lab analysis self-test --bundle ..
 uv run --no-sync saber lab verify --bundle ..
 uv run --no-sync saber lab logs --bundle .. --limit 100
 uv run --no-sync saber lab stop --bundle ..
@@ -526,4 +527,35 @@ uv run --no-sync saber lab reconcile-guest --bundle .. --job-id JOB_UUID --reaso
 ```
 
 Lệnh không đổi kết quả chưa rõ thành thành công. Không tạo job mới để né trạng thái chưa rõ.
-Các thiếu sót còn lại được ghi ở [bảng hoàn thiện SOC](docs/SOC_COMPLETION.md).
+Phạm vi đã triển khai và phần nghiệm thu máy đích ở [bảng hoàn thiện SOC](docs/SOC_COMPLETION.md).
+
+### Analysis, SOAR, learning và backup của SOC range
+
+Chạy tại `BUNDLE/source`:
+
+```powershell
+uv run --no-sync saber lab analysis tools --bundle ..
+uv run --no-sync saber lab analysis import --bundle .. --file PATH_TO_SAMPLE --kind binary
+uv run --no-sync saber lab analysis run --bundle .. --sample SHA256 --engine yara
+uv run --no-sync saber lab analysis status --bundle .. --job-id JOB_UUID
+uv run --no-sync saber lab soar status --bundle .. --job-id JOB_UUID
+uv run --no-sync saber lab soar reconcile --bundle .. --job-id JOB_UUID --reason "Inspected target and receipts; no pending effect remains."
+uv run --no-sync saber lab backup create --bundle .. --out D:/PrivateBackups/soc-001 --on-target
+uv run --no-sync saber lab backup verify --bundle .. --backup D:/PrivateBackups/soc-001
+```
+
+Restore trên bản bundle sạch, chưa tạo credential/volume:
+
+```powershell
+uv run --no-sync saber lab backup restore --bundle .. --backup D:/PrivateBackups/soc-001 --on-target
+uv run --no-sync saber lab up --bundle .. --on-target
+uv run --no-sync saber lab analysis self-test --bundle ..
+uv run --no-sync saber lab verify --bundle ..
+```
+
+AD cần export toàn bộ guest bằng `windows/Backup-Lab.ps1` và truyền
+`--windows-backup PATH` vào cả create/verify/restore. Không bỏ bước phối hợp dừng relay/guest:
+[Recovery runbook](docs/SOC_RECOVERY_VI.md). Gemini key pool không nằm trong backup.
+
+Hướng dẫn [learning trong volume controller](docs/SOC_LEARNING_VI.md),
+[Ghidra/IDA/Volatility/PCAP](docs/SOC_ANALYSIS_VI.md), [Shuffle/webhook](docs/SOC_SOAR_VI.md).

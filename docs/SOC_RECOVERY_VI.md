@@ -5,6 +5,8 @@ workspace, browser artifacts, phiên bản skill, mẫu phân tích và SOAR rec
 Nó cũng lưu **credential dịch vụ** trong archive riêng; lưu backup trên vùng lưu trữ
 riêng có kiểm soát truy cập/mã hóa. Không xuất Gemini key pool hoặc cấu hình bật API.
 Giữ một bản nguyên vẹn của bundle đã render; restore yêu cầu đúng manifest/code/spec.
+Các bộ cài/symbols/license tùy chọn trong `tools/` cần copy hoặc cài riêng; chúng không
+nằm trong named-volume backup. Giữ Gemini key pool riêng ngoài `.secrets/`.
 
 ## Linux/container
 

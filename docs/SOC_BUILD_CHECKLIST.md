@@ -9,8 +9,8 @@ explicit job on a sufficiently sized isolated target. Existing benchmark gates r
   evidence by hash, report unavailable tools and retain execution receipts.
 - [x] Connect lab-owned case/response playbooks to an authenticated external SOAR bridge,
   including durable dispatch, verification and uncertain-result reconciliation.
-- [ ] Supply coordinated backup, integrity checks, restore and expanded target acceptance.
-- [ ] Update preset configs, runtime tool contracts, Office, operator notes and release bundles;
+- [x] Supply coordinated backup, integrity checks, restore and expanded target acceptance.
+- [x] Update preset configs, runtime tool contracts, Office, operator notes and release bundles;
   run the complete offline checks and separate real local smoke tests.
 
 Progress is committed on `feat/environment-profiles` at each tested implementation milestone.

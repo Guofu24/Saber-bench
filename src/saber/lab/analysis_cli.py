@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
 import http.client
 import json
+import time
 import uuid
 from pathlib import Path
 from typing import Any
@@ -115,3 +117,91 @@ def status(bundle: Path, job_id: str) -> None:
     if not re.fullmatch(r"[a-f0-9-]{32,36}", job_id):
         raise click.ClickException("Invalid job ID")
     call(bundle, "/jobs/" + job_id)
+
+
+def self_test(
+    bundle: Path, endpoint: str = "http://127.0.0.1:7792", timeout: float = 180
+) -> dict[str, Any]:
+    """Positive/negative controls through the real vault and native analyzer queue."""
+    from urllib.parse import urlsplit
+
+    from saber.lab.ledger import now
+
+    auth = token(bundle)
+    host = urlsplit(endpoint)
+    if host.scheme != "http" or not host.hostname or host.username or host.password:
+        raise ValueError("Expected a credential-free local service endpoint")
+    jobs = []
+    for data, engine, expected in [
+        (b"SABER_LAB_SAMPLE", "builtin", None),
+        (b"SABER_LAB_SAMPLE", "yara", ["saber_synthetic_marker"]),
+        (b"ORDINARY_SYNTHETIC_CONTROL", "yara", []),
+    ]:
+        checksum = hashlib.sha256(data).hexdigest()
+        connection = http.client.HTTPConnection(host.hostname, host.port, timeout=30)
+        try:
+            connection.request(
+                "POST",
+                "/samples/" + checksum,
+                body=data,
+                headers={
+                    "Authorization": "Bearer " + auth,
+                    "X-Saber-Kind": "binary",
+                    "Content-Type": "application/octet-stream",
+                },
+            )
+            reply = connection.getresponse()
+            raw = reply.read(65537)
+            if reply.status != 200 or len(raw) > 65536:
+                raise ValueError("Self-test sample registration failed")
+        finally:
+            connection.close()
+        job_id = str(uuid.uuid4())
+        code, result = request(
+            endpoint + "/jobs",
+            token=auth,
+            body={"id": job_id, "sample_id": checksum, "engine": engine},
+        )
+        deadline = time.monotonic() + timeout
+        while (
+            code == 200 and result["state"] in ("QUEUED", "RUNNING") and time.monotonic() < deadline
+        ):
+            time.sleep(0.25)
+            code, result = request(endpoint + "/jobs/" + job_id, token=auth)
+        if code != 200 or result["state"] != "SUCCEEDED":
+            raise ValueError("Self-test analyzer did not succeed")
+        measured = result["result"]
+        if expected is not None and (
+            measured["result"].get("matches") != expected
+            or not measured.get("pid")
+            or measured.get("exit_code") != 0
+        ):
+            raise ValueError("Native positive/negative control mismatch")
+        jobs.append(
+            {
+                "id": job_id,
+                "engine": engine,
+                "evidence_id": result["evidence_id"],
+                "report_sha256": measured["report_sha256"],
+                "sample_id": checksum,
+            }
+        )
+    receipt = {
+        "passed": True,
+        "checked_at": now(),
+        "scope": "builtin and native YARA positive/negative controls",
+        "jobs": jobs,
+    }
+    (bundle / "analysis-self-test.receipt.json").write_text(json.dumps(receipt, indent=2))
+    return receipt
+
+
+@analysis_cli.command("self-test")
+@click.option("--bundle", type=click.Path(path_type=Path, exists=True), required=True)
+def self_test_cli(bundle: Path) -> None:
+    try:
+        click.echo(json.dumps(self_test(bundle), indent=2))
+    except (OSError, ValueError, KeyError, http.client.HTTPException):
+        raise click.ClickException(
+            "Analysis self-test failed; inspect analyzer availability and queue receipts"
+        ) from None

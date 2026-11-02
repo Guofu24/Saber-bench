@@ -18,7 +18,7 @@ jobs:
           version: "0.9.13"
           enable-cache: true
       - name: Install Python from .python-version and locked deps
-        run: uv sync --locked
+        run: uv sync --locked --extra analysis
       - name: Validate frozen catalog
         run: uv run python scripts/validate_catalog.py
       - name: Validate operational skills and runtime references (offline)

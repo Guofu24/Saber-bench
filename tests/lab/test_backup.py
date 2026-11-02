@@ -7,7 +7,7 @@ import uuid
 import pytest
 
 from saber.lab.backup import digest, pack, restore
-from saber.lab.backup_cli import verify_backup
+from saber.lab.backup_cli import guest_proof, verify_backup
 from saber.lab.deployment import compose, initialize_secrets, render
 from saber.lab.ledger import Ledger, now
 from saber.lab.models import preset_spec
@@ -102,3 +102,34 @@ def test_complete_backup_manifest_detects_missing_or_changed_volume(tmp_path):
     (folder / "backup.json").write_text(json.dumps(manifest))
     with pytest.raises(ValueError):
         verify_backup(folder, bundle)
+
+
+def test_guest_backup_hash_uses_actual_spec_bytes_and_requires_complete_export(tmp_path):
+    spec = preset_spec("windows-ad")
+    lab_file = tmp_path / "lab.json"
+    lab_file.write_bytes(spec.model_dump_json(indent=2).replace("\n", "\r\n").encode())
+    folder = tmp_path / "guests"
+    folder.mkdir()
+    names = [spec.name + "-" + n.name for n in spec.windows]
+    files, configs = {}, {}
+    for name in names:
+        for relative in (name + "/Virtual Machines/vm.vmcx", name + "/Disks/disk.vhdx"):
+            file = folder / relative
+            file.parent.mkdir(parents=True, exist_ok=True)
+            file.write_bytes(b"SYNTHETIC EXPORT STRUCTURE FIXTURE")
+            files[relative] = digest(file)
+        configs[name] = name + "/Virtual Machines/vm.vmcx"
+    proof = {
+        "lab_sha256": digest(lab_file),
+        "all_off": True,
+        "vms": names,
+        "files": files,
+        "configs": configs,
+    }
+    manifest = folder / "windows-manifest.json"
+    manifest.write_text(json.dumps(proof), encoding="utf-8-sig")
+    assert guest_proof(folder, spec, digest(lab_file)) == proof
+    del proof["files"][names[0] + "/Disks/disk.vhdx"]
+    manifest.write_text(json.dumps(proof), encoding="utf-8-sig")
+    with pytest.raises(ValueError, match="lacks"):
+        guest_proof(folder, spec, digest(lab_file))

@@ -39,6 +39,7 @@ jobs:
         run: uv run saber lab up --bundle "runs/target-${GITHUB_RUN_ID}" --on-target
       - name: Require live evidence, indexing, browser and defense
         run: |
+          uv run saber lab analysis self-test --bundle "runs/target-${GITHUB_RUN_ID}"
           for attempt in $(seq 1 20); do
             if uv run saber lab verify --bundle "runs/target-${GITHUB_RUN_ID}"; then exit 0; fi
             sleep 15

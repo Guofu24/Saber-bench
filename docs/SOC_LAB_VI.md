@@ -86,6 +86,7 @@ uv run --no-sync saber lab doctor --config ../lab.json --storage ..
 uv run --no-sync saber lab credentials --bundle ..
 uv run --no-sync saber lab up --bundle .. --on-target
 uv run --no-sync saber lab status --bundle ..
+uv run --no-sync saber lab analysis self-test --bundle ..
 uv run --no-sync saber lab verify --bundle ..
 ```
 
@@ -100,6 +101,7 @@ client → red → case → blue → bằng chứng chặn và để indexer nh�
   process launch/exit, bằng chứng ứng dụng và hash artifact; client có ảnh Chromium thật.
 - OpenSearch Dashboards: `http://127.0.0.1:5601` — tạo index pattern `saber-<name>`, time field `ts`.
 - Collector: `127.0.0.1:7789`; endpoint đọc/ghi có capability token, chỉ health công khai.
+- Analysis vault: `127.0.0.1:7792`; SOAR gateway: `127.0.0.1:7793`, đều cần capability.
 - Máy khác xem qua SSH tunnel tới localhost của máy đích. Không đổi các port thành public.
 
 Office hiển thị ảnh trình duyệt chụp tại job được ghi tick/ID, không truyền RDP/VNC desktop guest.
@@ -114,8 +116,13 @@ command line, PID, IP, domain, hash, path, event code, job ID; hunt mạng/ident
 case timeline/export có kiểm hash, kiểm health sensor và đối chiếu phản ứng/recovery.
 Lead có thể giao case; mỗi đội có hộp trao đổi riêng. `publish_rule` lưu rule replay trong
 lab sau khi tái hiện bằng chứng, chưa triển khai rule liên tục vào một SIEM bên ngoài.
-Vai trò malware hiện phân tích telemetry, chưa gọi Ghidra/IDA hay phân tích memory image.
-Theo dõi phần đã làm và còn thiếu ở [SOC_COMPLETION](SOC_COMPLETION.md).
+DFIR/malware/network có vault mẫu theo hash và adapter binary/memory/PCAP:
+[analysis và cài công cụ](SOC_ANALYSIS_VI.md). Blue IR/content mặc định dùng
+[SOAR playbook](SOC_SOAR_VI.md), có backend tích hợp hoặc Shuffle/webhook riêng.
+[Learning](SOC_LEARNING_VI.md) ghi episode riêng, replay bằng suite của operator,
+publish phiên bản bất biến và giữ pin trong case/job đang chạy.
+[Backup/restore](SOC_RECOVERY_VI.md) lưu volume, credential dịch vụ và export guest cùng mốc.
+Theo dõi phạm vi code và nghiệm thu ở [SOC_COMPLETION](SOC_COMPLETION.md).
 
 ## Bật Gemini, giữ các pool 200 / 200 / còn lại
 
@@ -248,17 +255,22 @@ Job không có receipt hoàn tất cần operator điều tra dữ liệu trư�
 | AD/Hyper-V/Sysmon | Parse PowerShell/XML + kiểm tra giao thức queue/receipt | Provision, domain join, event capture, rollback thật |
 | Zeek/audit | Parser/checkpoint/partial line/redaction tests | Capture trên namespace/guest thật |
 | Viewer | Protocol tests + Chrome mở bằng chứng cả ba đội, kiểm ảnh chụp thật từ worker | Snapshot từ controller container |
+| Learning | Capture/reflection/replay/publish/pin/rollback với provider fixture | Đánh giá chất lượng lesson bằng Gemini thật |
+| Analysis | YARA positive/negative thật, Volatility từ chối ảnh không hợp lệ | `analysis self-test`; mẫu phù hợp cho các adapter tùy chọn |
+| SOAR | HTTP thật, mất phản hồi, callback, xác minh hiệu ứng; external protocol fixtures | Playbook trong container; instance Shuffle riêng nếu chọn |
+| Recovery | Restore SQLite/outbox/artifact, hash, chống ghi đè/path traversal; parse Hyper-V | Khôi phục Docker volumes/OpenSearch và toàn bộ guest thật |
 
 `verification.receipt.json` chỉ ghi `runtime_verified=true` khi các check live đạt. File được
 render, unit test pass hoặc HTTP health đơn lẻ không đủ. Chưa tự nhận toàn bộ ba lab đã boot
 trên phần cứng hiện tại. Workflow `soc-lab-target` chỉ chạy khi được gọi thủ công trên runner
 có nhãn `saber-lab`; không khởi động hạ tầng trong CI thông thường.
 
-Bộ này cung cấp SIEM bằng OpenSearch và response/case gateway của SABER. Không tự cài mọi
-sản phẩm SOC, Wazuh/TheHive/Shuffle, IDA/Ghidra hay malware sandbox. Tool chuyên dụng/giấy phép
-cần tích hợp theo môi trường đích. Phạm vi red hiện có là app ACL/collection và AD emulation
-có giới hạn; không phải thư viện exploit cho mọi kỹ thuật. Skills có mô tả nghiệp vụ rộng hơn
-tool đang thực thi. Range giữ receipt/journal, chưa tự promote bài học vào skill đang chạy.
+Bộ này cung cấp SIEM bằng OpenSearch, SOAR/case gateway của SABER và analysis service.
+Không tự cài mọi sản phẩm SOC, Wazuh/TheHive/Shuffle hay giấy phép IDA. Ghidra/IDA/symbols
+được mount vào adapter đã có; Shuffle riêng dùng cấu hình kết nối và workflow của operator.
+Phạm vi red hiện có là app ACL/collection và AD emulation có giới hạn; không phải thư viện
+exploit cho mọi kỹ thuật. Skills mô tả nghiệp vụ rộng hơn danh sách tool đang thực thi.
+Learning chỉ promote sau replay đạt gate, không tự sửa source skill từ kết quả thất bại.
 Benchmark 175 subtasks, sealed truth và các gate đánh giá giữ nguyên; lab boot thành công
 không làm các benchmark task chưa nghiệm thu trở thành READY.
 

@@ -73,6 +73,37 @@ def verify_live(bundle: Path, endpoint: str = "http://127.0.0.1:7789") -> dict[s
     )
     raw_ids = {e["id"] for e in events}
     checks["indexed_raw_match"] = any(e["id"] in raw_ids for e in indexed.get("events", []))
+    if spec.soar.enabled:
+        code, playbooks = request(
+            endpoint + "/search", token=token, body={"kind": "soar.completed", "limit": 100}
+        )
+        checks["verified_soar_playbook"] = code == 200 and any(
+            e["host"].startswith("soar-")
+            and e["data"].get("verified") is True
+            and e["data"].get("playbook") in ("contain_session", "enforce_acl")
+            for e in playbooks.get("events", [])
+        )
+    if spec.analysis.enabled:
+        checks["native_analysis_controls"] = False
+        try:
+            from saber.lab.soar import checked_proof
+
+            control = json.loads((bundle / "analysis-self-test.receipt.json").read_text())
+            verified = []
+            for job in control["jobs"]:
+                event = checked_proof(endpoint, token, job["evidence_id"])["event"]
+                verified.append(
+                    event["kind"] == "analysis.completed"
+                    and event["host"].startswith("analysis-")
+                    and event["data"].get("state") == "SUCCEEDED"
+                    and event["data"].get("job_id") == job["id"]
+                    and event["data"].get("report_sha256") == job["report_sha256"]
+                )
+            checks["native_analysis_controls"] = (
+                control["passed"] is True and len(verified) == 3 and all(verified)
+            )
+        except (OSError, ValueError, KeyError, ConnectionError):
+            pass
     for node in spec.windows:
         code, data = request(
             endpoint + "/search", token=token, body={"host": node.name, "limit": 1000}
