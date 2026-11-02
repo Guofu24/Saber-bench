@@ -13,6 +13,11 @@ not additional executable tools. Return one JSON object `{"tool":"name","args":{
   evidence). Search args: `host`, `kind`, `before`, `cursor`, `limit` up to 1000.
 - Blue IR/content/lead may call `contain`, `release`, `patch`, `unpatch` with `case_id`.
   Containment expires after 60 seconds; ACL patches persist until explicitly reverted.
+- Blue may use `run_playbook` with `case_id` and `playbook`: `triage`,
+  `contain_session`, `release_session`, `enforce_acl`, `revert_acl`. Effects require
+  the same role permissions as direct response tools. Poll `soar_status` with
+  `job_id`; queued/running/verifying is not success. An unresolved INDETERMINATE
+  job requires operator inspection, never submit another job to repeat the effect.
 - Blue IR/lead may call `contain_domain_user` with a Windows logon `case_id`.
   This queues a response against **only** the synthetic `saber-red` account in the SABER OU.
   HTTP 202 means queued, not applied. The Hyper-V relay independently observes AD state and

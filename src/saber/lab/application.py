@@ -7,12 +7,14 @@ blue changes enforced service policy and sessions, with before/after evidence.
 from __future__ import annotations
 
 import hashlib
+import secrets
 from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
+from saber.lab.capabilities import allowed
 from saber.lab.events import Emitter
 from saber.lab.ledger import Ledger
 
@@ -153,10 +155,30 @@ def create_application(ledger: Ledger, credentials: dict[str, Any], emitter: Emi
             },
         }
 
+    def responder(auth: str) -> tuple[str, dict[str, Any]]:
+        scoped = credentials.get("soar_response_token", "")
+        if scoped and secrets.compare_digest(auth, "Bearer " + scoped):
+            return "soar-service", {"team": "blue", "role": "lead"}
+        return identity(auth)
+
+    @app.get("/response-state/{principal}")
+    def response_state(principal: str, authorization: str = Header(default="")) -> dict[str, Any]:
+        _, account = responder(authorization)
+        if account["team"] != "blue":
+            raise HTTPException(403, "Blue capability required")
+        if principal not in accounts or accounts[principal]["team"] == "blue":
+            raise HTTPException(400, "Invalid lab principal")
+        return {
+            "blocked": ledger.get("blocked:" + principal, 0) > time.time(),
+            "enforce_acl": bool(ledger.get("enforce_acl", False)),
+        }
+
     @app.post("/respond")
     def respond(body: ResponseAction, authorization: str = Header(default="")) -> dict[str, Any]:
-        user, account = identity(authorization)
-        if account["team"] != "blue" or account["role"] not in ("ir", "content", "lead"):
+        user, account = responder(authorization)
+        if account["team"] != "blue" or body.action not in allowed(
+            account["team"], account["role"], tuple(account.get("specialties", []))
+        ):
             raise HTTPException(403, "Response role required")
         if body.principal not in accounts or accounts[body.principal]["team"] == "blue":
             raise HTTPException(400, "Invalid lab response target")

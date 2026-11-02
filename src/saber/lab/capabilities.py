@@ -31,6 +31,8 @@ READ = {
     "list_samples",
     "tool_status",
     "analysis_status",
+    "soar_status",
+    "run_playbook",
 }
 SPECIALIST = {
     "lead": {"assign_case", "review_cases"},

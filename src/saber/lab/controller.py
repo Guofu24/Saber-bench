@@ -92,7 +92,16 @@ class Controller:
         allowed = role_tools(actor.team, actor.role, actor.specialties)
         if not self.spec.windows:
             allowed = {t for t in allowed if not t.startswith("windows_")}
+        if not self.spec.analysis.enabled:
+            allowed -= {"list_samples", "tool_status", "analyze_sample", "analysis_status"}
+        if not self.spec.soar.enabled:
+            allowed -= {"run_playbook", "soar_status"}
         previous = obs.get("result", {}).get("guest_work", {})
+        soar = obs.get("result", {}).get("soar_job", {})
+        if soar.get("state") in ("QUEUED", "DISPATCHING", "RUNNING", "VERIFYING") or (
+            soar.get("state") == "INDETERMINATE" and not soar.get("resolution")
+        ):
+            return "soar_status", {"job_id": soar["id"]}, "scripted"
         analysis = obs.get("result", {}).get("analysis_job", {})
         if analysis.get("state") in ("QUEUED", "RUNNING"):
             return "analysis_status", {"job_id": analysis["id"]}, "scripted"
@@ -117,6 +126,7 @@ class Controller:
                                 for n in self.spec.windows
                                 if actor.team == "blue" or n.role == "workstation"
                             ],
+                            allowed,
                         ),
                         max_tokens=512,
                     )
@@ -179,8 +189,17 @@ class Controller:
                         return "contain_domain_user", {"case_id": cases[0]["id"]}, source
                     return "evaluate_rule", {"query": {"kind": "windows.event"}}, source
                 return (
-                    ("contain" if actor.role == "ir" else "patch"),
-                    {"case_id": cases[0]["id"]},
+                    "run_playbook"
+                    if self.spec.soar.enabled
+                    else ("contain" if actor.role == "ir" else "patch"),
+                    {
+                        "case_id": cases[0]["id"],
+                        **(
+                            {"playbook": "contain_session" if actor.role == "ir" else "enforce_acl"}
+                            if self.spec.soar.enabled
+                            else {}
+                        ),
+                    },
                     source,
                 )
             all_cases = obs.get("cases", [])
@@ -367,12 +386,17 @@ class Controller:
             self.learner.poll()
         if any(self.store.items("lab-pending").values()):
             return
-        if any(
-            m.get("result", {}).get("guest_work", {}).get("state")
-            in ("QUEUED", "DISPATCHED", "INDETERMINATE")
-            for m in self.store.items("lab-memory").values()
-        ):
-            return
+        for memory in self.store.items("lab-memory").values():
+            for name in ("guest_work", "analysis_job", "soar_job"):
+                job = memory.get("result", {}).get(name, {})
+                if job.get("state") in (
+                    "QUEUED",
+                    "DISPATCHED",
+                    "DISPATCHING",
+                    "RUNNING",
+                    "VERIFYING",
+                ) or (job.get("state") == "INDETERMINATE" and not job.get("resolution")):
+                    return
         try:
             code, data = request(
                 self.collector + "/cases", token=self.credentials["read_token"], timeout=2

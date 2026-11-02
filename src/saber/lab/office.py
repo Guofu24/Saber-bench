@@ -136,6 +136,7 @@ def record(
         "executor_host",
         "guest_work",
         "analysis_job",
+        "soar_job",
         "analysis",
         "case_id",
         "verified",

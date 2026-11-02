@@ -133,6 +133,7 @@ def create_worker(
                 "response_token": credentials.get("response_token", ""),
                 "actor_token": credentials.get("actor_capabilities", {}).get(job.actor, ""),
                 "analysis": credentials.get("analysis_url", ""),
+                "soar": credentials.get("soar_url", ""),
                 "browser": browser,
                 "browser_executable": browser_executable,
             }

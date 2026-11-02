@@ -25,13 +25,16 @@ from saber.lab.ledger import Ledger
 from saber.lab.models import LabSpec
 from saber.lab.retention import archive
 from saber.lab.sensor import PollSensor
+from saber.lab.soar import SoarRunner, create_soar
 from saber.lab.worker import create_worker
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--role", choices=["app", "collector", "worker", "controller", "analysis"], required=True
+        "--role",
+        choices=["app", "collector", "worker", "controller", "analysis", "soar"],
+        required=True,
     )
     parser.add_argument("--data", type=Path, required=True)
     parser.add_argument("--spec", type=Path, required=True)
@@ -58,6 +61,7 @@ def main() -> None:
     sensor = PollSensor(emitter, args.data / ("documents" if args.role == "app" else "workspace"))
     controller: Controller | None = None
     analysis_queue: AnalysisQueue | None = None
+    soar_runner: SoarRunner | None = None
 
     def retention_loop() -> None:
         while not stop.wait(60):
@@ -82,6 +86,17 @@ def main() -> None:
                     continue
 
         threads.append(threading.Thread(target=index_loop, daemon=True))
+    elif args.role == "soar":
+        soar_runner = SoarRunner(
+            ledger,
+            credentials,
+            spec.soar,
+            collector_url,
+            os.environ.get("SABER_APP", "http://app:8080"),
+            emitter,
+        )
+        app = create_soar(soar_runner)
+        threads.append(soar_runner.thread)
     elif args.role == "analysis":
         analysis_queue = AnalysisQueue(
             ledger,
@@ -140,9 +155,9 @@ def main() -> None:
     async def lifespan(_: FastAPI) -> Any:
         for thread in threads:
             thread.start()
-        if args.role in ("app", "worker", "analysis"):
+        if args.role in ("app", "worker", "analysis", "soar"):
             emitter.start()
-            if args.role != "analysis":
+            if args.role in ("app", "worker"):
                 sensor.start()
         yield
         stop.set()
@@ -150,6 +165,8 @@ def main() -> None:
             controller.stop.set()
         if analysis_queue:
             analysis_queue.stop.set()
+        if soar_runner:
+            soar_runner.stop.set()
         for thread in threads:
             thread.join(timeout=45)
         sensor.close()

@@ -109,6 +109,15 @@ def compose(spec: LabSpec) -> dict[str, Any]:
             "SABER_COLLECTOR": "http://collector:8080",
         }
     )
+    if spec.soar.enabled:
+        gateway = service("soar", "soar", ["business", "telemetry", "soar"])
+        gateway["secrets"] = ["soar"]
+        gateway["ports"] = ["127.0.0.1:7793:8080"]
+        if spec.soar.backend != "builtin":
+            gateway["networks"].append("integration")
+        services["blue"]["networks"].append("soar")
+        services["blue"]["depends_on"]["soar"] = {"condition": "service_healthy"}
+        secret_names.append("soar")
     if spec.analysis.enabled:
         analysis = service("analysis", "analysis", ["analysis", "telemetry"], "2g")
         analysis["build"]["dockerfile"] = "Dockerfile.analysis"
@@ -225,7 +234,15 @@ def compose(spec: LabSpec) -> dict[str, Any]:
         "services": services,
         "volumes": volumes,
         "networks": {
-            n: {"internal": True} for n in ("business", "telemetry", "control", "soc", "analysis")
+            **{
+                n: {"internal": True}
+                for n in ("business", "telemetry", "control", "soc", "analysis", "soar")
+            },
+            **(
+                {"integration": {"external": True, "name": spec.soar.external_network}}
+                if spec.soar.enabled and spec.soar.backend != "builtin"
+                else {}
+            ),
         },
         "secrets": {n: {"file": f"./.secrets/{n}.json"} for n in secret_names},
     }
@@ -248,6 +265,7 @@ def initialize_secrets(bundle: Path, spec: LabSpec) -> None:
     }
     read_token = secrets.token_urlsafe(32)
     response_token = secrets.token_urlsafe(32)
+    soar_app_token = secrets.token_urlsafe(32)
     relay_token = secrets.token_urlsafe(32)
     rpc_tokens = {t: secrets.token_urlsafe(32) for t in ("client", "red", "blue")}
     actor_tokens = {a.id: secrets.token_urlsafe(32) for a in spec.actors}
@@ -261,13 +279,18 @@ def initialize_secrets(bundle: Path, spec: LabSpec) -> None:
             "network",
             "linux-audit",
             "analysis",
+            "soar",
             *[w.name for w in spec.windows],
         )
     }
-    configs = {
+    configs: dict[str, Any] = {
         "network": {"ingest_token": ingestion["network"]},
         "linux-audit": {"ingest_token": ingestion["linux-audit"]},
-        "app": {"accounts": accounts, "ingest_token": ingestion["app"]},
+        "app": {
+            "accounts": accounts,
+            "ingest_token": ingestion["app"],
+            "soar_response_token": soar_app_token,
+        },
         "controller": {"workers": rpc_tokens, "read_token": read_token},
         "collector": {
             "sources": ingestion,
@@ -305,6 +328,15 @@ def initialize_secrets(bundle: Path, spec: LabSpec) -> None:
             },
         },
     }
+    configs["soar"] = {
+        "operator_token": secrets.token_urlsafe(32),
+        "callback_token": secrets.token_urlsafe(32),
+        "external_token": "",
+        "app_token": soar_app_token,
+        "read_token": read_token,
+        "ingest_token": ingestion["soar"],
+        "actor_capabilities": configs["analysis"]["actor_capabilities"],
+    }
     for team in ("client", "red", "blue"):
         configs[team] = {
             "windows_nodes": [w.model_dump() for w in spec.windows],
@@ -314,6 +346,7 @@ def initialize_secrets(bundle: Path, spec: LabSpec) -> None:
             "rpc_token": rpc_tokens[team],
             "ingest_token": ingestion[team],
             "response_token": response_token if team == "blue" else "",
+            "soar_url": "http://soar:8080" if team == "blue" and spec.soar.enabled else "",
             "analysis_url": "http://analysis:8080"
             if team == "blue" and spec.analysis.enabled
             else "",

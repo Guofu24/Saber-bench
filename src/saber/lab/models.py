@@ -8,6 +8,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from saber.lab.analyzers import AnalysisSettings
+from saber.lab.soar import SoarSettings
 from saber.world.models import Actor, default_config
 
 Preset = Literal["linux-small", "windows-ad", "expanded"]
@@ -38,6 +39,7 @@ class LabSpec(BaseModel):
     learning_enabled: bool = True
     learning_interval_ticks: int = Field(default=30, ge=1, le=100000)
     analysis: AnalysisSettings = Field(default_factory=AnalysisSettings)
+    soar: SoarSettings = Field(default_factory=SoarSettings)
     domain: str = Field(default="saber.test", pattern=r"^[a-z][a-z0-9-]{0,30}\.test$")
     windows_subnet: str = "172.28.80.0/24"
     windows: list[WindowsNode] = Field(default_factory=list, max_length=24)

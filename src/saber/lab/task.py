@@ -22,6 +22,33 @@ def execute(job: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("Tool not available to this team")
     app, collector, token = job["app"], job["collector"], job["token"]
     args = job["args"]
+    if tool in ("run_playbook", "soar_status"):
+        import re
+
+        from saber.lab.soar import PlaybookJob
+
+        endpoint = job.get("soar", "")
+        if not endpoint:
+            return {"status": 503, "error": "SOAR service not configured"}
+        if tool == "run_playbook":
+            payload = PlaybookJob(id=job["job_id"], **args)
+            status, result = request(
+                endpoint + "/jobs", token=job["actor_token"], body=payload.model_dump()
+            )
+        else:
+            job_id = str(args.get("job_id", ""))
+            if not re.fullmatch(r"[a-f0-9-]{32,36}", job_id):
+                raise ValueError("Invalid SOAR job ID")
+            status, result = request(endpoint + "/jobs/" + job_id, token=job["actor_token"])
+        if status == 200:
+            return {
+                "status": 200
+                if result["state"] in ("SUCCEEDED", "FAILED", "INDETERMINATE")
+                else 202,
+                "soar_job": result,
+                "evidence_id": result.get("evidence_id"),
+            }
+        return {"status": status, **result}
     if tool in ("list_samples", "tool_status", "analyze_sample", "analysis_status"):
         import re
 
@@ -31,9 +58,9 @@ def execute(job: dict[str, Any]) -> dict[str, Any]:
         if tool == "analyze_sample":
             from saber.lab.analyzers import AnalysisJob
 
-            payload = AnalysisJob(id=job["job_id"], **args)
+            analysis_payload = AnalysisJob(id=job["job_id"], **args)
             status, result = request(
-                endpoint + "/jobs", token=job["actor_token"], body=payload.model_dump()
+                endpoint + "/jobs", token=job["actor_token"], body=analysis_payload.model_dump()
             )
         elif tool == "analysis_status":
             job_id = str(args.get("job_id", ""))

@@ -7,7 +7,7 @@ explicit job on a sufficiently sized isolated target. Existing benchmark gates r
   safe activation and rollback to the range controller and its existing team API budgets.
 - [x] Execute binary/memory/PCAP analysis through bounded optional tool adapters; register
   evidence by hash, report unavailable tools and retain execution receipts.
-- [ ] Connect lab-owned case/response playbooks to an authenticated external SOAR bridge,
+- [x] Connect lab-owned case/response playbooks to an authenticated external SOAR bridge,
   including durable dispatch, verification and uncertain-result reconciliation.
 - [ ] Supply coordinated backup, integrity checks, restore and expanded target acceptance.
 - [ ] Update preset configs, runtime tool contracts, Office, operator notes and release bundles;

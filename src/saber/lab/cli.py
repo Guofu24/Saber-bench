@@ -14,6 +14,7 @@ import click
 from saber.lab.analysis_cli import analysis_cli
 from saber.lab.deployment import initialize_secrets, render, verify_bundle
 from saber.lab.models import LabSpec, preset_spec
+from saber.lab.soar_cli import soar_cli
 from saber.world.learning_cli import learning_cli
 
 
@@ -28,6 +29,7 @@ def lab() -> None:
 
 lab.add_command(learning_cli)
 lab.add_command(analysis_cli)
+lab.add_command(soar_cli)
 
 
 @lab.command("list")
@@ -199,6 +201,24 @@ def up(
         "call_budget": call_budget,
         "model": model,
     }
+    spec = verify_bundle(bundle)
+    if spec.soar.enabled and spec.soar.backend != "builtin":
+        try:
+            inspected = subprocess.run(
+                ["docker", "network", "inspect", spec.soar.external_network],
+                capture_output=True,
+                check=True,
+                timeout=15,
+            )
+            if not json.loads(inspected.stdout)[0].get("Internal"):
+                raise ValueError("Network must be internal")
+            credentials = json.loads((bundle / ".secrets/soar.json").read_text())
+            if not credentials.get("external_token"):
+                raise ValueError("SOAR service credential required")
+        except (OSError, ValueError, subprocess.SubprocessError):
+            raise click.ClickException(
+                "External SOAR requires an existing Docker internal network and a configured private service credential"
+            ) from None
     compose_command(bundle, ["config", "--quiet"], settings)
     # Save the selected topology before launching, so cleanup works after partial startup.
     (bundle / "active.receipt.json").write_text(json.dumps(settings), encoding="utf-8")
