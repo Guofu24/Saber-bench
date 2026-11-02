@@ -30,6 +30,7 @@ class Ledger:
         CREATE INDEX IF NOT EXISTS event_time ON events(ts,id);
         CREATE TABLE IF NOT EXISTS state(k TEXT PRIMARY KEY,v TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY, digest TEXT NOT NULL, result TEXT);
+        CREATE TABLE IF NOT EXISTS archived_events(id TEXT PRIMARY KEY, file TEXT NOT NULL, sha256 TEXT NOT NULL);
         """)
         self.db.commit()
 
@@ -49,7 +50,10 @@ class Ledger:
         raw = json.dumps(event, sort_keys=True, ensure_ascii=True, separators=(",", ":"))
         digest = hashlib.sha256(raw.encode()).hexdigest()
         with self.lock, self.db:
-            old = self.db.execute("SELECT sha256 FROM events WHERE id=?", (event["id"],)).fetchone()
+            old = self.db.execute(
+                "SELECT sha256 FROM events WHERE id=? UNION ALL SELECT sha256 FROM archived_events WHERE id=? LIMIT 1",
+                (event["id"], event["id"]),
+            ).fetchone()
             if old:
                 if old[0] != digest:
                     raise ValueError("Evidence ID reused with different content")

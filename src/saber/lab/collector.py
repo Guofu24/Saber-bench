@@ -319,7 +319,17 @@ def create_collector(
                 "SELECT data,sha256 FROM events WHERE id=?", (event_id,)
             ).fetchone()
         if row is None:
-            raise HTTPException(404, "Unknown evidence")
+            from saber.lab.retention import evidence as archived_evidence
+
+            try:
+                proof = archived_evidence(ledger, event_id)
+            except (OSError, ValueError):
+                raise HTTPException(
+                    503, "Archived evidence unavailable or integrity check failed"
+                ) from None
+            if proof is None:
+                raise HTTPException(404, "Unknown evidence")
+            return proof
         return {"event": json.loads(row[0]), "sha256": row[1]}
 
     return app

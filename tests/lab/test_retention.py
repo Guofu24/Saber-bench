@@ -3,8 +3,12 @@ import json
 import uuid
 from datetime import UTC, datetime, timedelta
 
+import pytest
+from fastapi.testclient import TestClient
+
+from saber.lab.collector import create_collector
 from saber.lab.ledger import Ledger
-from saber.lab.retention import archive
+from saber.lab.retention import archive, evidence
 
 
 def test_archive_is_verified_and_never_prunes_undelivered_events(tmp_path):
@@ -24,4 +28,18 @@ def test_archive_is_verified_and_never_prunes_undelivered_events(tmp_path):
     assert archived["event"]["id"] == ids[0]
     assert ledger.events()[0]["id"] == ids[1]
     assert archive(ledger, 7) is None
+    assert evidence(ledger, ids[0]) == archived
+    client = TestClient(create_collector(ledger, {"sources": {}, "read_token": "reader"}))
+    assert (
+        client.get("/evidence/" + ids[0], headers={"Authorization": "Bearer reader"}).json()
+        == archived
+    )
+    assert ledger.append(archived["event"]) is False
+    with pytest.raises(ValueError):
+        ledger.append(archived["event"] | {"kind": "file.changed"})
+    (tmp_path / "archives" / receipt["file"]).write_bytes(b"corrupted")
+    assert (
+        client.get("/evidence/" + ids[0], headers={"Authorization": "Bearer reader"}).status_code
+        == 503
+    )
     ledger.close()

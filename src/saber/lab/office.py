@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import time
 from typing import Any
 
 from saber.lab.events import redact
@@ -14,19 +15,37 @@ from saber.world.store import Store
 
 
 def publish_actor(
-    store: Store, actor: Any, collector: str, read_token: str, worker: str, worker_token: str
+    store: Store,
+    actor: Any,
+    collector: str,
+    read_token: str,
+    worker: str,
+    worker_token: str,
+    budget: float = 2.0,
 ) -> None:
     history = store.get("lab-office", actor.id, [])
+    deadline = time.monotonic() + budget
+
+    def fetch(url: str, **kwargs: Any) -> tuple[int, Any]:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise ConnectionError("Office evidence refresh budget reached")
+        return request(url, timeout=min(0.5, remaining), **kwargs)
+
     # Revisit incomplete exports: the collector can receive process events after the receipt.
-    for entry in history:
+    for entry in reversed(history):
+        if time.monotonic() >= deadline:
+            break
         if entry.get("evidence_complete"):
             continue
         try:
-            status, page = request(
+            status, page = fetch(
                 collector + "/search",
                 token=read_token,
                 body={"limit": 8, "filters": [{"field": "job_id", "value": entry["job_id"]}]},
             )
+            if status != 200:
+                break
             ids = list(
                 dict.fromkeys(
                     entry["evidence_ids"]
@@ -35,7 +54,7 @@ def publish_actor(
             )[:10]
             proofs = []
             for eid in ids:
-                code, proof = request(collector + "/evidence/" + eid, token=read_token)
+                code, proof = fetch(collector + "/evidence/" + eid, token=read_token)
                 if code != 200:
                     continue
                 raw = json.dumps(proof["event"], sort_keys=True, separators=(",", ":")).encode()
@@ -55,7 +74,7 @@ def publish_actor(
                 eid in {p["event"]["id"] for p in proofs} for eid in entry["evidence_ids"]
             )
         except (OSError, ValueError, ConnectionError):
-            pass
+            break
     screen = store.get("lab-screen", actor.id)
     latest = next(
         (e for e in reversed(history) if any(a["name"] == "browser.png" for a in e["artifacts"])),
@@ -64,9 +83,7 @@ def publish_actor(
     if latest and (not screen or screen["job_id"] != latest["job_id"]):
         digest = next(a["sha256"] for a in latest["artifacts"] if a["name"] == "browser.png")
         try:
-            code, result = request(
-                worker + "/screens/" + actor.id + "/" + digest, token=worker_token
-            )
+            code, result = fetch(worker + "/screens/" + actor.id + "/" + digest, token=worker_token)
             data = base64.b64decode(result.get("png", ""), validate=True)
             if (
                 code == 200

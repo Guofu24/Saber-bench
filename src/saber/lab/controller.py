@@ -6,6 +6,7 @@ import concurrent.futures
 import hashlib
 import json
 import threading
+import time
 import uuid
 from pathlib import Path
 from typing import Any
@@ -317,6 +318,7 @@ class Controller:
             record(self.store, actor, tick, eid, tool, source, job["id"], result)
 
     def publish(self, stopped: bool = False) -> None:
+        deadline = time.monotonic() + 10
         for actor in self.spec.actors:
             publish_actor(
                 self.store,
@@ -325,6 +327,7 @@ class Controller:
                 self.credentials["read_token"],
                 self.workers.get(actor.team, ""),
                 self.credentials["workers"][actor.team],
+                budget=max(0, min(2, deadline - time.monotonic())),
             )
         report = {
             "world_id": self.store.get("meta", "world_id"),
