@@ -22,6 +22,14 @@ Các checkpoint trên branch `feat/environment-profiles`:
 | `960d9a0` | Ghi kết quả audit cấu trúc và hợp đồng nạp skills |
 | `4d4479b` | Sửa suy luận SOC thiếu căn cứ, chuẩn hoá IOC và ngữ cảnh pháp y |
 | `ca0f898` | Quy trình client/red/blue qua nhiều lượt, bàn giao và kiểm chứng rule/parser |
+| `32cfddd` | Báo cáo rà nội dung theo yêu cầu và 55 nhóm NICE / 175 subtask |
+| `c49a109` | Query phân trang/cutoff, case evidence/finding có revision, đóng FP và mở lại |
+| `9cabb54` | 12 chuyên môn blue, 7 skill mới và actor kiêm nhiệm có kiểm quyền |
+| `2997ba4` | Task có nhận việc/bàn giao, notebook bền, wait/finish/resume và vô hiệu plan cũ |
+| `dafe196` | Artifact có hash, builtin analysis, test/version/rollback rule, telemetry/recovery |
+| `2786a5f` | Yêu cầu đánh giá lại kết luận khi case có chứng cứ mới |
+| `266219f` | Office hiện chuyên môn/task/lifecycle; baseline dùng chuyên môn đang nhận việc |
+| `a268bc1` | Kiểm HTTP đầu cuối SOC/client recovery, smoke 12 chuyên môn và hướng dẫn phối hợp |
 
 Các commit tài liệu/kiểm thử tiếp theo xem bằng:
 
@@ -67,3 +75,8 @@ dữ liệu. VM snapshot được quản lý ở hypervisor. Git revert không t
 đang chạy, không revert database và không phục hồi quota Google đã dùng. Nếu restore
 database cũ, counters cục bộ cũng có thể lùi: phải đối chiếu usage thực của nhà cung cấp
 và giữ bản counters mới nhất trước khi bật lại Gemini.
+
+Bản mở rộng SOC lưu thêm task, notebook, artifact, rule version và actor-control trong
+world database. Code trước mở rộng không hiểu các trạng thái này; không dùng nó để tiếp
+tục world có actor WAITING/DONE hay task đang mở. Giữ bản sao dữ liệu đã dừng và thử bản
+cũ trên world riêng. Revert code không tự hoàn tác một rule, response hoặc task đã chạy.

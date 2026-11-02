@@ -15,10 +15,12 @@ nguyên hợp đồng. Trạng thái nghiên cứu vẫn là `DEV_SIMULATION_ONL
 - Red có các vai recon/access/impact: khám phá liên kết, thử quyền đọc tài liệu, lưu bản
   sao dữ liệu đã thực sự đọc vào kho trong lab, đăng ký automation và gây lỗi dịch vụ
   có thời hạn. Các agent trao đổi phát hiện qua kênh riêng của đội.
-- Blue gồm lead/monitor/hunter/DFIR/content/IR. Có case chung, giao việc, timeline từ
+- Blue mặc định gồm lead/monitor/hunter/DFIR/content/IR; `world init --blue-specialists`
+  bổ sung malware/network/intel/platform/identity/recovery. Có case chung, giao việc, timeline từ
   evidence ID, rule có schema giới hạn, sửa kiểm soát truy cập, containment theo bằng
   chứng, quarantine/rollback job, khôi phục dịch vụ, cảnh báo người dùng và đóng case.
-- Đóng case yêu cầu kết quả thực thi đã xác minh và biện pháp vẫn có hiệu lực. Điểm
+- Đóng case resolved yêu cầu kết quả thực thi đã xác minh và biện pháp vẫn có hiệu lực;
+  đóng FP cần finding có dẫn chứng. Không đóng khi còn task chưa giải quyết. Điểm
   phát hiện không được dùng thay cho bằng chứng containment. Chặn nhầm client làm
   request của client bị từ chối thật và được tính vào tác động vận hành.
 - Chạy theo tick với thứ tự actor luân phiên; mỗi actor có nhịp riêng. LLM chạy trong
@@ -26,6 +28,11 @@ nguyên hợp đồng. Trạng thái nghiên cứu vẫn là `DEV_SIMULATION_ONL
   thực thi xen kẽ trên ứng dụng chung, không phải mỗi agent là một VM/OS riêng.
 - Checkpoint, STOP, khóa một writer, JSONL xoay vòng, archive bằng chứng, ngân sách đĩa,
   giới hạn LLM lưu bền và supervisor khởi động lại worker khi lỗi.
+
+[Hướng dẫn SOC specialists](SOC_SPECIALISTS_VI.md) mô tả actor kiêm nhiệm, truy vấn log
+phân trang, task nhận việc/bàn giao, notebook bền, `wait`/`finish`, artifact, rule testing
+và kiểm tra phục hồi. `world actor-resume` cho phép operator tiếp tục actor đã dừng;
+lệnh này yêu cầu world không đang chạy. Resume process không tự resume actor đã finish.
 
 ## Chạy nhanh trên máy này
 

@@ -108,6 +108,34 @@ sẽ từ chối cấu hình khác. Dùng thư mục mới để thử cấu hì
 Các lệnh `world init/run/supervise/status/stop` vẫn được giữ nguyên; `world supervise`
 có thể restart process lỗi với số lần giới hạn.
 
+## Đội blue có 12 chuyên môn
+
+Tạo world mới có đủ chuyên môn (mặc định cũ vẫn là 6 vai blue):
+
+```powershell
+uv run saber world init --out runs/soc-specialists --clients 4 --blue-specialists
+uv run saber world run --out runs/soc-specialists --ticks 30
+# Chạy liên tục sau khi xem kết quả:
+uv run saber world run --out runs/soc-specialists --forever
+```
+
+| Nhóm | Chuyên môn |
+|---|---|
+| Điều phối / phát hiện | Lead, monitoring, threat hunting |
+| Điều tra | DFIR, malware/RE, network, threat intelligence, identity |
+| Phòng thủ / vận hành | Incident response, detection engineering, SOC platform, recovery |
+
+Có thể tạo nhiều actor cùng chuyên môn hoặc cấu hình `specialties` để một actor kiêm nhiệm.
+Blue có query log phân trang, case/finding có dẫn chứng, task có nhận việc/bàn giao,
+notebook riêng, snapshot chứng cứ có hash, kiểm thử/version/rollback rule và kiểm tra
+client phục hồi. `wait`/`finish` thực sự ngừng hành động của actor. Agent-office hiển thị
+chuyên môn, task và trạng thái này.
+
+Baseline scripted thu thập/xử lý theo policy có sẵn; nhiệm vụ chuyên môn có mục tiêu tự do
+cần planner hoặc operator đánh giá và kết luận. Công cụ chạy trên application lab;
+Ghidra/IDA/EDR/SIEM ngoài lab vẫn cần adapter và dữ liệu thực. Xem
+[cách dùng, quyền công cụ và giới hạn](docs/SOC_SPECIALISTS_VI.md).
+
 ## Bật Gemini
 
 Mọi profile mặc định scripted, không gọi API. Model mặc định: `gemini-3.5-flash-lite`.
@@ -176,7 +204,7 @@ start container hoặc triển khai trong guest/server riêng. Không có `READY
 
 ## Kiểm thử và rollback
 
-Skills có kiểm tra riêng: 11 skills, 8 sổ tay nghiệp vụ và 25 tài liệu tham chiếu.
+Skills có kiểm tra riêng: 18 skills, 15 sổ tay nghiệp vụ và 25 tài liệu tham chiếu.
 World nạp hướng dẫn application lab; population/benchmark nạp tài liệu theo case.
 Bundle mang theo các reference cần thiết. Xem [hướng dẫn skills](docs/SKILLS_VI.md).
 Đã có [rà soát nội dung theo yêu cầu và catalog](docs/SKILLS_REVIEW_VI.md): sửa các quy tắc kết luận thiếu bằng

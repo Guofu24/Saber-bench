@@ -1,6 +1,6 @@
 # Skills: phạm vi, cách nạp và kiểm tra
 
-Repo có **11 skills** trong `.claude/skills`: **8 sổ tay nghiệp vụ** cho agent và
+Repo có **18 skills** trong `.claude/skills`: **15 sổ tay nghiệp vụ** cho agent và
 **3 workflow phát triển**. Có **25 tài liệu tham chiếu** được liên kết từ các skills
 nghiệp vụ. Skill là hướng dẫn cho model; quyền thực thi do runtime/tool server kiểm
 soát, không do nội dung Markdown cấp.
@@ -8,6 +8,8 @@ soát, không do nội dung Markdown cấp.
 Rà cấu trúc không đủ để xác nhận nghiệp vụ. [Báo cáo rà nội dung](SKILLS_REVIEW_VI.md) đối chiếu yêu cầu client/red/blue
 và 55 nhóm NICE / 175 subtask, ghi các suy luận sai đã sửa, quy trình phối hợp còn thiếu đã bổ sung, cùng những
 khả năng runtime/model chưa kiểm chứng. Không coi audit PASS là SOC đã hoàn chỉnh.
+Đợt mở rộng tiếp theo bổ sung [12 chuyên môn blue và công cụ runtime](SOC_SPECIALISTS_VI.md),
+gồm task có nhận việc, chứng cứ, notebook, vòng đời actor, rule và phục hồi.
 
 ## Vai nào dùng skill nào
 
@@ -18,9 +20,16 @@ khả năng runtime/model chưa kiểm chứng. Không coi audit PASS là SOC đ
 | Red impact | `redteam-post-exploitation` |
 | Blue monitor | `soc-mon` |
 | Blue hunter | `soc-hunt` |
-| Blue DFIR / IR | `soc-ir` — runtime cấp hai bộ tool khác nhau |
+| Blue DFIR | `soc-dfir` |
+| Blue IR | `soc-ir` |
 | Blue content | `soc-cnt` |
 | Blue lead | `soc-orchestrator` |
+| Blue malware / reverse engineering | `soc-malware` |
+| Blue network | `soc-network` |
+| Blue threat intelligence | `soc-intel` |
+| Blue SOC platform | `soc-platform` |
+| Blue identity | `soc-identity` |
+| Blue recovery | `soc-recovery` |
 
 `implement-task`, `implement-benchmark-subtask`, `gate-review` phục vụ phát triển và
 review repo; không nạp vào prompt của client/red/blue. Hai workflow `implement-task`
@@ -51,6 +60,8 @@ thiếu file, sai frontmatter, tham chiếu thoát phạm vi hoặc symlink sẽ
 không cắt đuôi hướng dẫn hay tự đổi specialist thành generic. B1 vẫn là generic theo
 thiết kế. Lỗi skill lúc khởi động world có model được phát hiện trước khi mở HTTP
 lab/khởi chạy planner. File được đọc lại khi tạo prompt, không giữ cache cũ suốt process.
+World nạp skill theo `active_specialty` của task đã nhận, trong tập chuyên môn operator
+đã cấu hình cho actor; task/message không thể tự cấp thêm skill hoặc quyền tool.
 
 Scripted world dùng policy Python và không gọi model, nên skill không quyết định
 hành động của scripted agent. Các test offline có thể kiểm tra nạp prompt và quyền
@@ -58,7 +69,7 @@ tool; chúng không chứng minh model hiểu hoặc làm theo skill một cách
 
 ## Bundle local / sandbox / VM / remote
 
-`env render` xuất 8 entrypoint và toàn bộ tài liệu tham chiếu nghiệp vụ được khai
+`env render` xuất 15 entrypoint và toàn bộ 25 tài liệu tham chiếu nghiệp vụ được khai
 báo, theo đường dẫn tương đối. Hash được ghi vào manifest. File Markdown không được
 tham chiếu, workflow phát triển, key pool và dữ liệu run không được tự động đóng gói.
 Thiếu tài liệu bắt buộc thì export thất bại thay vì sinh bundle thiếu chuyên môn.
@@ -75,7 +86,7 @@ Từ root repo:
 uv run python scripts/check_skills.py --out runs/skills-check/audit.json
 ```
 
-Lệnh kiểm tra frontmatter của 11 skills, các file tham chiếu, tài liệu nghiệp vụ bị
+Lệnh kiểm tra frontmatter của 18 skills, các file tham chiếu, tài liệu nghiệp vụ bị
 bỏ rơi, giới hạn ngữ cảnh, coverage role → skill và chính sách manual-only hiện tại.
 Không đọc key pool, gọi provider, chạy hành động red/blue hay thay đổi dịch vụ ngoài.
 CI chạy cùng lệnh kiểm tra này trước các kiểm tra code.
@@ -90,7 +101,10 @@ uv run mypy
 uv run python scripts/validate_catalog.py
 ```
 
-## Kết quả kiểm tra cấu trúc ngày 2026-11-01
+## Kiểm tra và lịch sử
+
+Kết quả bản mở rộng hiện tại và lệnh tái lập nằm trong [SOC_SPECIALISTS_VI](SOC_SPECIALISTS_VI.md).
+Các số dưới đây thuộc checkpoint cũ trước khi bổ sung 7 skill; giữ để đối chiếu lịch sử:
 
 - Đã sửa: reference không được đưa vào prompt case; bundle bỏ sót reference;
   thiếu skill bị thay bằng chuỗi rỗng; tham chiếu chéo không tương đối đúng;

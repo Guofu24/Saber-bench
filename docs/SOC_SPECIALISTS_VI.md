@@ -12,7 +12,30 @@ cũ, catalog 175 subtask và dữ liệu run hiện có. Không coi tên skill l
 | 2 | 12 chuyên môn blue, cấu hình agent kiêm nhiệm, nạp skill theo nhiệm vụ | Đã có registry, skill, phân quyền và test |
 | 3 | Nhiệm vụ có nhận việc/bàn giao/kết quả, memory, wait và hoàn tất có hiệu lực | Đã kiểm HTTP, restart và plan trả về muộn |
 | 4 | Artifact, kiểm rule, sức khoẻ telemetry và xác nhận phục hồi trong lab | Đã có công cụ và test HTTP/trạng thái |
-| 5 | Agent-office, README, smoke đầu cuối và kiểm tra hồi quy | Đang triển khai |
+| 5 | Agent-office, README, smoke đầu cuối và kiểm tra hồi quy | Đã qua 165 test Python, 9 test JS và các kiểm tra tĩnh |
+
+## Chạy và quan sát
+
+Từ root repo, tạo thư mục world mới (chọn tên khác nếu đường dẫn đã tồn tại):
+
+```powershell
+uv run saber world init --out runs/world-specialists --clients 4 --blue-specialists
+uv run saber world run --out runs/world-specialists --ticks 30
+node agent-office/bin/agent-office.js watch --world runs/world-specialists --open
+```
+
+Tiếp tục dài hạn bằng `world run --out runs/world-specialists --forever`; dừng từ terminal
+khác bằng `world stop --out runs/world-specialists`. Sau STOP cần thêm `--resume` khi chạy lại.
+Các lệnh trên mặc định scripted, không đọc key. Muốn planner Gemini dùng hướng dẫn budget/pool
+trong [CONTINUOUS_WORLD_VI](CONTINUOUS_WORLD_VI.md); lượt bổ sung này không gọi API thật.
+
+Với environment profiles, cấu hình actor ở `world.actors` của environment JSON trước khi
+render/chạy lần đầu; cùng schema `role`/`specialties`. Bundle cũ cần render/rebuild từ source
+mới. Không tự chuyển roster của world đã có: tạo world mới nếu muốn thay danh tính/chuyên môn.
+
+Office hiển thị chuyên môn đã cấp, chuyên môn/task ACTIVE, số task theo trạng thái,
+WAITING và tick thức dậy, DONE. Notebook, nội dung task và lý do kết thúc không được đưa
+lên snapshot. Viewer dùng snapshot cũ vẫn tương thích.
 
 ## Chứng cứ và case
 
@@ -25,6 +48,9 @@ event có thật; `record_finding` ghi claim/citation/severity/việc tiếp the
 cần `expected_revision` để tránh ghi đè quyết định mới hơn. Finding là kết luận analyst,
 không thay ground truth của evaluator. Lead có thể đóng FP có dẫn chứng và mở lại case;
 case có tác động vẫn phải qua kiểm chứng phản ứng khi đóng theo trạng thái resolved.
+Thêm evidence mới giữ lịch sử findings nhưng đưa classification về UNDETERMINED, yêu cầu
+đánh giá lại trước khi đóng FP. Kiểm recovery là công cụ hỗ trợ quyết định; hiện không phải
+điều kiện bắt buộc bổ sung của API đóng resolved, vốn kiểm phản ứng và mitigation.
 
 Quyền giới hạn trong một world được xác thực bởi HTTP capability. Một world hiện là một
 lab dùng chung; đây chưa phải giải pháp SOC nhiều khách hàng có phân quyền tenant riêng.
@@ -35,6 +61,23 @@ Blue có 12 chuyên môn: `lead`, `monitor`, `hunter`, `dfir`, `ir`, `content`, 
 `network`, `intel`, `platform`, `identity`, `recovery`. Sáu vai mặc định giữ nguyên;
 DFIR dùng `soc-dfir` riêng. Bảy skill mới đưa tổng repo lên 18 skills (15 nghiệp vụ,
 3 phát triển), vẫn dùng 25 reference có sẵn để không sao chép handbook.
+Catalog benchmark giữ bốn nhóm NICE `MON/CNT/HUNT/IR` với 175 subtask; 12 chuyên môn
+ở đây là roster của continuous world. Không đổi schema/catalog benchmark để tăng số vai.
+
+| Role | Skill | Công cụ riêng nổi bật ngoài query/case/task/notebook chung |
+|---|---|---|
+| `lead` | `soc-orchestrator` | create/cancel task, assign, close/reopen case, resume blue, notify, verify_recovery |
+| `monitor` | `soc-mon` | open_case |
+| `hunter` | `soc-hunt` | open_case |
+| `dfir` | `soc-dfir` | investigate, capture/read/analyze artifact |
+| `ir` | `soc-ir` | contain/release, quarantine/unquarantine, restore, notify, verify_recovery |
+| `content` | `soc-cnt` | patch, test/publish/rollback rule; deploy_rule legacy |
+| `malware` | `soc-malware` | capture/read/analyze artifact |
+| `network` | `soc-network` | investigate, capture/read/analyze artifact |
+| `intel` | `soc-intel` | capture/read/analyze artifact |
+| `platform` | `soc-platform` | telemetry_health (mọi blue đều có), query/finding về sức khỏe nguồn |
+| `identity` | `soc-identity` | investigate, capture/read/analyze artifact |
+| `recovery` | `soc-recovery` | verify_recovery |
 
 Operator cấu hình kiêm nhiệm trong world config, ví dụ:
 
@@ -45,6 +88,13 @@ Operator cấu hình kiêm nhiệm trong world config, ví dụ:
 Tool của actor là hợp quyền của các chuyên môn được cấu hình. Message/model không tự
 thêm chuyên môn hay quyền. Skill đang dùng chuyển theo chuyên môn nhiệm vụ trong phạm
 vi đó; toàn bộ skill đã cấu hình được preflight trước khi mở lab có model.
+
+Baseline scripted nhận task được giao và dùng chuyên môn ACTIVE; DFIR/network/identity
+thu timeline, malware/intel thu/phân tích metadata artifact, platform kiểm telemetry,
+recovery kiểm phục hồi. Nó không tự giải quyết mọi mục tiêu free-text, không tự lập
+chiến dịch hay đóng task bằng kết luận giả. Planner/operator dùng công cụ để đánh giá,
+ghi finding và complete/block/handoff theo chứng cứ. Task DONE là lời báo cáo có citation,
+không phải chứng nhận độc lập rằng phán đoán analyst đúng.
 
 ## Nhiệm vụ và vòng đời actor
 
@@ -87,3 +137,37 @@ uv run saber world actor-resume --out runs/world --actor red-impact
 
 Mọi kết quả là trong application lab. Không gọi API Gemini hoặc native engine trong
 các test offline này; không có chứng nhận benchmark/chất lượng model từ test công cụ.
+
+## Kiểm chứng ngày 2026-11-01
+
+- **165 test Python qua**: world, loader/solver, population và environment profiles.
+  Hai test `tests/world/test_soc_workflow.py` kiểm luồng HTTP có điều phối theo kịch bản
+  và smoke scripted 17 actor (2 client, 3 red, 12 blue) trong 12 tick; kiểm CLI resume
+  từ chối writer đang chạy và giữ dữ liệu. Test kịch bản chọn hành động sẵn, không đánh giá
+  khả năng model tự lập kế hoạch hay tự nhận diện đúng sự cố.
+- **9 test JavaScript qua**, viewer build thành công; kiểm trạng thái actor và tương thích
+  snapshot. Không có notebook/task text bị xuất lên office.
+- Audit **PASS: 18 skills / 15 nghiệp vụ / 25 reference**, không thiếu file/link/role;
+  prompt trong giới hạn. Ruff lint/format, mypy (158 source files), frozen catalog
+  (**55 nhóm / 175 subtask / 40 HV**) đều qua.
+- Artifact local: `runs/soc-specialists/audit.json`, `runs/soc-specialists/regression.xml`.
+  Không đưa dữ liệu run vào Git. Không triển khai Docker/VM, SIEM/SOAR/EDR hay native
+  malware engine trong lượt kiểm chứng này. Trạng thái vẫn `DEV_SIMULATION_ONLY`.
+
+Tái lập từ root repo:
+
+```powershell
+uv run pytest -o addopts= tests/world tests/unit/test_skills.py tests/unit/test_llm_solver.py tests/environments tests/population -q
+uv run python scripts/check_skills.py --out runs/soc-specialists/audit.json
+uv run ruff check src tests scripts
+uv run ruff format --check src tests
+uv run mypy
+uv run python scripts/validate_catalog.py
+npm --prefix agent-office test
+npm --prefix agent-office run build:viewer
+```
+
+Checkpoint code đã push liên tục: `c49a109` evidence/case, `9cabb54` skills/roles,
+`2997ba4` tasks/notebook/lifecycle, `dafe196` artifact/rule/recovery, `2786a5f` vô hiệu
+kết luận cũ khi thêm evidence, `266219f` office/baseline, `a268bc1` workflow test và
+hợp đồng chuyên môn. Xem [ROLLBACK_VI](ROLLBACK_VI.md) để quay lại từng bước.

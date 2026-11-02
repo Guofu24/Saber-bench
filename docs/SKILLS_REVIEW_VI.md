@@ -1,5 +1,11 @@
 # Rà soát nội dung skills — 2026-11-01
 
+> Báo cáo lịch sử tại checkpoint `32cfddd` (11 skills). Đợt bổ sung sau báo cáo đã nâng lên
+> 18 skills / 12 chuyên môn blue và triển khai evidence query, task/handoff, notebook,
+> wait/finish, artifact, rule testing và recovery. Xem [trạng thái hiện tại](SOC_SPECIALISTS_VI.md).
+> Mục thiếu sót điều phối bên dưới mô tả tình trạng trước bổ sung; lịch làm việc/campaign
+> phức tạp, native adapter và đánh giá chất lượng model vẫn là việc tiếp theo.
+
 ## Kết luận
 
 **Trước lượt rà này, skills có khung vai trò và độ phủ chủ đề, nhưng chưa đúng và đủ về cách ra quyết định.**

@@ -52,6 +52,10 @@ thuộc lệnh SABER sau `--`; xem [hướng dẫn world](../docs/CONTINUOUS_WOR
 ## Đọc giao diện world
 
 - Chọn world, lọc Clients/Red Team/Blue Team; tối đa 200 agent, 20 agent mỗi trang.
+- Mỗi actor hiện chuyên môn đã cấu hình, chuyên môn/task đang xử lý và số task
+  offered/active/blocked/done. `WAITING` hiện tick thức dậy; `DONE` giữ idle dù request
+  suy luận cũ chưa về. Đây là trạng thái actor, khác trạng thái dừng của cả world.
+  Snapshot cũ thiếu các trường này vẫn hiển thị được với giá trị mặc định.
 - Profile `local/sandbox/vm/remote` là nơi triển khai được khai báo. `Scripted` dùng
   hành vi có sẵn; `Gemini + fallback` có suy luận bất đồng bộ và fallback scripted.
 - Tổng LLM attempts, successes và token lấy từ ledger provider của world, cộng dồn
