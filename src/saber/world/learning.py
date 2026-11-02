@@ -55,7 +55,7 @@ class Lesson(BaseModel):
     limitations: str = Field(min_length=5, max_length=500)
 
 
-def initialize(world: World, playbooks: dict[str, str]) -> None:
+def initialize(world: World, playbooks: dict[str, str], *, activate_now: bool = True) -> None:
     """Keep the original base even when checkout files change across a restart."""
     with world.store.transaction():
         for skill, base in playbooks.items():
@@ -65,7 +65,8 @@ def initialize(world: World, playbooks: dict[str, str]) -> None:
             vid = digest(version)
             world.store.put("skill-versions", vid, version | {"id": vid})
             world.store.put("skill-heads", skill, vid)
-        activate(world)
+        if activate_now:
+            activate(world)
 
 
 def quiescent(world: World) -> bool:

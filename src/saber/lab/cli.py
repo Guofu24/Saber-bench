@@ -13,6 +13,7 @@ import click
 
 from saber.lab.deployment import initialize_secrets, render, verify_bundle
 from saber.lab.models import LabSpec, preset_spec
+from saber.world.learning_cli import learning_cli
 
 
 def emit(value: Any) -> None:
@@ -22,6 +23,9 @@ def emit(value: Any) -> None:
 @click.group(help="SOC lab presets, provisioning bundles and integration verification.")
 def lab() -> None:
     pass
+
+
+lab.add_command(learning_cli)
 
 
 @lab.command("list")

@@ -20,14 +20,23 @@ from saber.world.store import Store
 
 @contextmanager
 def saved_world(out: Path) -> Iterator[World]:
-    if not (out / "world.sqlite3").is_file() or not (out / "config.json").is_file():
+    if not (out / "world.sqlite3").is_file():
         raise click.ClickException("No saved world at this directory.")
     try:
         with WorldLock(out):
-            cfg = WorldConfig.model_validate_json((out / "config.json").read_text(encoding="utf-8"))
             store = Store(out)
             try:
-                yield World(store, cfg)
+                spec = store.get("lab", "spec")
+                if spec:
+                    from saber.lab.learning import LearningWorld
+                    from saber.lab.models import LabSpec
+
+                    yield LearningWorld(store, LabSpec.model_validate(spec))
+                else:
+                    cfg = WorldConfig.model_validate_json(
+                        (out / "config.json").read_text(encoding="utf-8")
+                    )
+                    yield World(store, cfg)
             finally:
                 store.close()
     except (OSError, ValueError, RuntimeError) as exc:

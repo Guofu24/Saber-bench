@@ -34,6 +34,8 @@ class LabSpec(BaseModel):
     tick_seconds: float = Field(default=5, ge=0.1, le=3600)
     retention_days: int = Field(default=7, ge=1, le=365)
     evidence_budget_mb: int = Field(default=4096, ge=64, le=1048576)
+    learning_enabled: bool = True
+    learning_interval_ticks: int = Field(default=30, ge=1, le=100000)
     domain: str = Field(default="saber.test", pattern=r"^[a-z][a-z0-9-]{0,30}\.test$")
     windows_subnet: str = "172.28.80.0/24"
     windows: list[WindowsNode] = Field(default_factory=list, max_length=24)

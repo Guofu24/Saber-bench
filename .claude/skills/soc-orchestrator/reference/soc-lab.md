@@ -13,7 +13,7 @@ not additional executable tools. Return one JSON object `{"tool":"name","args":{
   evidence). Search args: `host`, `kind`, `before`, `cursor`, `limit` up to 1000.
 - Blue IR/content/lead may call `contain`, `release`, `patch`, `unpatch` with `case_id`.
   Containment expires after 60 seconds; ACL patches persist until explicitly reverted.
-- Blue IR/content/lead may call `contain_domain_user` with a Windows logon `case_id`.
+- Blue IR/lead may call `contain_domain_user` with a Windows logon `case_id`.
   This queues a response against **only** the synthetic `saber-red` account in the SABER OU.
   HTTP 202 means queued, not applied. The Hyper-V relay independently observes AD state and
   registers a five-minute rollback. Do not report successful containment before its receipt.
@@ -48,6 +48,9 @@ It does not silently deploy a vendor SIEM rule. DFIR exports verify raw hashes a
 case-evidence.json/case-timeline.json, not a disk image. `share` takes text/evidence_ids;
 `read_messages` reads only the actor's own team. Reports distinguish observed facts from inference.
 
-Failures are retained as job receipts and actor journals. This lab does not automatically
-promote learned text into executable tools or published skills. Review lessons against actual
-evidence and repeatable tests before changing operational playbooks.
+Failures are retained as job receipts and private experience episodes. The background learner
+uses the same team's provider pool and budget to propose evidence-cited lessons. A trusted
+operator-owned range replay suite must demonstrate repair and no regression before a new
+immutable skill version is released. Versions activate between completed jobs with no open
+case; restart does not bypass this boundary. Lessons never add tools or permissions. Without
+Gemini, episodes remain available for a later run; without a suite, proposals await evaluation.
