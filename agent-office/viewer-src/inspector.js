@@ -6,6 +6,19 @@ let detailEventId = null, detailSignature = '';
 let nativeRequest = null;
 let nativePanelKey = '';
 
+function rangeJobProgress(result) {
+  const job = result?.analysis_job || result?.soar_job;
+  if (!job) return '';
+  const labels = { QUEUED: 'Chờ thực thi', DISPATCHING: 'Đang gửi tác vụ', RUNNING: 'Đang chạy',
+    VERIFYING: 'Đang đối chiếu bằng chứng', SUCCEEDED: 'Đã hoàn tất', FAILED: 'Thất bại',
+    INDETERMINATE: 'Chưa xác định — cần kiểm tra receipt', UNAVAILABLE: 'Công cụ chưa sẵn sàng' };
+  const operation = job.request?.engine || job.request?.playbook || '';
+  const note = job.state === 'SUCCEEDED'
+    ? (result.soar_job ? 'Phản ứng đã được đối chiếu với log và trạng thái dịch vụ.' : 'Phân tích đã chạy; kết quả không tự xác nhận mẫu là mã độc.')
+    : 'HTTP của worker không xác nhận job bên dưới đã thành công.';
+  return `<p><b>${esc(operation)} · ${esc(labels[job.state] || job.state)}</b></p><p class="muted">${note}</p>`;
+}
+
 async function renderNative(world, actor, event) {
   nativeRequest?.abort();
   const request = nativeRequest = new AbortController();
@@ -32,7 +45,7 @@ async function renderNative(world, actor, event) {
       const rows = all ? page.entries : page.entries.filter(e => e.event_id === event?.id);
       const screen = page.screen ? `<details class="trace-case range-screen"${screenOpen ? ' open' : ''}><summary>Ảnh trình duyệt thật · tick ${page.screen.tick}</summary><p>Job ${esc(page.screen.job_id)}</p><img alt="Ảnh trình duyệt của ${esc(actor.id)} tại tick ${page.screen.tick}" style="max-width:100%;height:auto" src="data:image/png;base64,${page.screen.png}"><p style="overflow-wrap:anywhere">SHA-256 ${esc(page.screen.sha256)}</p></details>` : '<p class="muted">Chưa có ảnh trình duyệt được xác minh cho agent này. Tác vụ dòng lệnh xem qua bằng chứng bên dưới.</p>';
       const json = value => `<pre style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(JSON.stringify(value, null, 2))}</pre>`;
-      panel.innerHTML = screen + (rows.length ? [...rows].reverse().map(entry => `<details class="trace-case range-job" data-job="${entry.job_id}"${expanded.has(entry.job_id) || !all ? ' open' : ''}><summary><b>${esc(entry.tool)}</b> · tick ${entry.tick} · ${esc(entry.source)}</summary><p>Job ${esc(entry.job_id)}</p>${json(entry.result)}<p>${entry.evidence_complete ? 'Đã nhận và kiểm hash log khởi chạy/kết thúc cùng bằng chứng được dẫn chiếu.' : 'Bằng chứng chưa đầy đủ trong cửa sổ này; không suy ra thao tác thành công.'}</p>${entry.evidence.map(p => `<details><summary>${esc(p.event.kind)} · ${esc(p.event.host)} · ${esc(p.event.ts)}</summary>${json(p.event.data)}<p>${esc(p.event.sensor)} · ${esc(p.event.id)}</p><p style="overflow-wrap:anywhere">Hash bản gốc ${esc(p.sha256)} · ${p.hash_verified ? 'đã đối chiếu' : 'chưa đối chiếu'}</p></details>`).join('')}<p>Artifacts</p>${json(entry.artifacts)}</details>`).join('') : '<p class="muted">Thao tác chưa có trong cửa sổ bằng chứng. Bật lịch sử riêng để xem các job còn lưu trong cửa sổ.</p>');
+      panel.innerHTML = screen + (rows.length ? [...rows].reverse().map(entry => `<details class="trace-case range-job" data-job="${entry.job_id}"${expanded.has(entry.job_id) || !all ? ' open' : ''}><summary><b>${esc(entry.tool)}</b> · tick ${entry.tick} · ${esc(entry.source)}</summary><p>Job ${esc(entry.job_id)}</p>${rangeJobProgress(entry.result)}${json(entry.result)}<p>${entry.evidence_complete ? 'Đã nhận và kiểm hash log khởi chạy/kết thúc cùng bằng chứng được dẫn chiếu.' : 'Bằng chứng chưa đầy đủ trong cửa sổ này; không suy ra thao tác thành công.'}</p>${entry.evidence.map(p => `<details><summary>${esc(p.event.kind)} · ${esc(p.event.host)} · ${esc(p.event.ts)}</summary>${json(p.event.data)}<p>${esc(p.event.sensor)} · ${esc(p.event.id)}</p><p style="overflow-wrap:anywhere">Hash bản gốc ${esc(p.sha256)} · ${p.hash_verified ? 'đã đối chiếu' : 'chưa đối chiếu'}</p></details>`).join('')}<p>Artifacts</p>${json(entry.artifacts)}</details>`).join('') : '<p class="muted">Thao tác chưa có trong cửa sổ bằng chứng. Bật lịch sử riêng để xem các job còn lưu trong cửa sổ.</p>');
       panel.scrollTop = scroll;
     } catch (error) {
       if (error.name !== 'AbortError' && nativeRequest === request) hint.textContent += ' Chưa đọc được export chi tiết; đang hiển thị receipt gần nhất.';

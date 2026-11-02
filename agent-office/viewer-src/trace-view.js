@@ -35,14 +35,33 @@ const descriptions = {
   notify: 'Gửi cảnh báo cho client.',
   verify_recovery: 'Kiểm tra trạng thái phục hồi của client.',
   close_case: 'Yêu cầu đóng case theo điều kiện của runtime.',
+  list_samples: 'Liệt kê mẫu được operator đăng ký trong vault, định danh bằng SHA-256.',
+  tool_status: 'Kiểm tra engine phân tích nào có sẵn trong môi trường thực thi.',
+  analyze_sample: 'Đưa mẫu vào hàng đợi phân tích tĩnh. Xem receipt và report sau khi job hoàn tất.',
+  analysis_status: 'Đọc trạng thái và kết quả của job phân tích đã gửi.',
+  run_playbook: 'Chạy playbook gắn với case; kiểm bằng chứng và trạng thái dịch vụ sau phản ứng.',
+  soar_status: 'Đối soát job SOAR cũ; không tự gửi lại hiệu ứng chưa rõ kết quả.',
+  query_siem: 'Truy vấn event đã được index trong OpenSearch.',
+  export_case: 'Xuất bằng chứng case sau khi đối chiếu hash với collector.',
+  timeline: 'Sắp xếp bằng chứng đã xác minh theo thời gian.',
+  hunt: 'Tìm dấu hiệu theo các trường của telemetry được cấp quyền.',
+  network_hunt: 'Truy vấn các kết nối, địa chỉ, DNS và bằng chứng mạng được thu thập.',
+  identity_hunt: 'Truy vấn sự kiện xác thực và tài khoản trong lab.',
+  windows_work: 'Xếp tác vụ người dùng cố định vào queue của guest Windows.',
+  windows_recon: 'Xếp tác vụ inventory giới hạn trong guest Windows của lab.',
+  windows_failed_logon: 'Tạo thử nghiệm đăng nhập thất bại có giới hạn với tài khoản tổng hợp.',
+  windows_job_status: 'Đọc receipt của tác vụ guest; queued chưa phải đã thực thi.',
+  windows_collect_evidence: 'Yêu cầu guest thu thập bằng chứng hệ thống được phép.',
+  windows_inventory: 'Yêu cầu inventory cố định trên guest đã cấu hình.',
+  contain_domain_user: 'Yêu cầu khóa tài khoản thử nghiệm; chờ xác minh AD và lịch rollback.',
 };
-function describeTool(tool) { return descriptions[tool] || 'Thực thi công cụ trong ứng dụng lab.'; }
+function describeTool(tool) { return descriptions[tool] || 'Thực thi công cụ được cấp quyền trong môi trường lab; xem bằng chứng bên dưới.'; }
 function httpOutcome(status) {
   if (status === 403) return 'Yêu cầu bị từ chối';
   if (status === 401) return 'Chưa xác thực thành công';
   if (status >= 500) return 'Dịch vụ báo lỗi';
   if (status >= 400) return 'Yêu cầu không thành công';
-  if (status === 202) return 'Yêu cầu được chấp nhận';
+  if (status === 202) return 'Đã nhận yêu cầu; đang chờ thực thi hoặc kết quả';
   return 'Yêu cầu thành công';
 }
 module.exports = { actorTrace, describeTool, httpOutcome };
