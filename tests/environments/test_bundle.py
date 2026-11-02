@@ -3,6 +3,9 @@ import json
 import pytest
 import yaml
 
+from saber.agents.skills import RUNTIME_SKILLS, WORLD_REFERENCE, load_playbook, skill_resources
+from saber.catalog.loader import repo_root
+from saber.domain.errors import IntegrationBlocked
 from saber.environments.bundle import OFFICE_FILES, compose_config, render_bundle, verify_bundle
 from saber.environments.models import EnvironmentConfig
 
@@ -16,6 +19,15 @@ def test_bundle_is_portable_and_contains_only_allowlisted_inputs(tmp_path, profi
     (root / "catalog/subtasks.json").write_text("{}")
     (root / "pyproject.toml").write_text("")
     (root / "uv.lock").write_text("")
+    for name in RUNTIME_SKILLS:
+        skill = root / ".claude/skills" / name / "SKILL.md"
+        skill.parent.mkdir(parents=True, exist_ok=True)
+        skill.write_text(
+            f"---\nname: {name}\ndescription: Test.\n---\nRead `reference/public.md`.\n"
+        )
+        (skill.parent / "reference").mkdir()
+        (skill.parent / "reference/public.md").write_text("Public reference guidance.")
+        (skill.parent / "reference/private.md").write_text("DO-NOT-EXPORT")
     for name in OFFICE_FILES:
         path = root / "agent-office" / name
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -33,8 +45,47 @@ def test_bundle_is_portable_and_contains_only_allowlisted_inputs(tmp_path, profi
     assert (out / "compose.yaml").exists() == (profile == "sandbox")
     assert (out / "agent-office/viewer/index.html").read_text() == "public viewer"
     assert not (out / "source/agent-office").exists()
+    assert (out / "source/.claude/skills/soc-ir/reference/public.md").is_file()
     with pytest.raises(ValueError, match="already exists"):
         render_bundle(config, out, source_root=root)
+
+
+def test_exported_playbooks_match_checkout_including_transitive_references(tmp_path):
+    root = repo_root()
+    out = tmp_path / "bundle"
+    render_bundle(EnvironmentConfig(name="skills-check", profile="sandbox"), out)
+    verify_bundle(out)
+    for name in RUNTIME_SKILLS:
+        for resource in skill_resources(name):
+            exported = out / "source" / resource.relative_to(root)
+            assert exported.read_bytes() == resource.read_bytes()
+        assert load_playbook(name, root=out / "source") == load_playbook(name)
+        assert load_playbook(name, mode="world", root=out / "source") == load_playbook(
+            name, mode="world"
+        )
+    assert (out / "source/.claude/skills" / WORLD_REFERENCE).is_file()
+
+
+def test_missing_required_skill_refuses_export(tmp_path, monkeypatch):
+    from click.testing import CliRunner
+
+    from saber.cli.main import cli
+    from saber.environments import bundle
+
+    def missing(*args, **kwargs):
+        raise IntegrationBlocked("Missing required skill.")
+
+    monkeypatch.setattr(bundle, "skill_resources", missing)
+    out = tmp_path / "bundle"
+    with pytest.raises(IntegrationBlocked, match="Missing required skill"):
+        render_bundle(EnvironmentConfig(name="missing", profile="sandbox"), out)
+    assert not out.exists()
+    config = tmp_path / "profile.json"
+    config.write_text(EnvironmentConfig(name="missing", profile="sandbox").model_dump_json())
+    result = CliRunner().invoke(cli, ["env", "render", "--config", str(config), "--out", str(out)])
+    assert result.exit_code == 1
+    assert "Error: Missing required skill." in result.output
+    assert not out.exists()
 
 
 def test_sandbox_defaults_are_isolated_and_gemini_is_explicit():

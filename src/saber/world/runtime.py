@@ -17,9 +17,10 @@ from pathlib import Path
 from typing import Any, BinaryIO
 
 from saber.agents.provider import LLMProvider
+from saber.agents.skills import load_playbook
 from saber.domain.errors import BudgetExceeded, IntegrationBlocked
 from saber.population.office import OfficeEmitter
-from saber.world.agents import baseline, llm_messages, parse_plan
+from saber.world.agents import PLAYBOOKS, baseline, llm_messages, parse_plan
 from saber.world.environment import World
 from saber.world.models import Action, Actor, WorldConfig
 from saber.world.office import deployment_profile, snapshot
@@ -152,6 +153,11 @@ class Runner:
         emitter: OfficeEmitter | None = None,
     ) -> None:
         self.store, self.config = store, config
+        if provider is not None:
+            for skill in {
+                PLAYBOOKS[a.team if a.team == "client" else a.role] for a in config.actors
+            }:
+                load_playbook(skill, mode="world")
         self.world = World(store, config)
         with store.transaction():
             store.put("meta", "engine", "hybrid" if provider else "scripted")

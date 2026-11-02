@@ -21,6 +21,8 @@ jobs:
         run: uv sync --locked
       - name: Validate frozen catalog
         run: uv run python scripts/validate_catalog.py
+      - name: Validate operational skills and runtime references (offline)
+        run: uv run python scripts/check_skills.py
       - name: Lint
         run: uv run ruff check src tests scripts
       - name: Format check

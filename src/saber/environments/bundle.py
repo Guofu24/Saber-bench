@@ -15,6 +15,7 @@ from typing import Any
 
 import yaml
 
+from saber.agents.skills import skill_resources
 from saber.catalog.loader import repo_root
 from saber.environments.models import EnvironmentConfig
 from saber.world.agents import PLAYBOOKS
@@ -181,9 +182,9 @@ def render_bundle(
         for path in (root / "src" / "saber").rglob("*.py"):
             _copy_public(path, source / path.relative_to(root), root)
         for name in sorted(set(PLAYBOOKS.values())):
-            relative = Path(".claude") / "skills" / name / "SKILL.md"
-            if (root / relative).is_file():
-                _copy_public(root / relative, source / relative, root)
+            for path in skill_resources(name, root=root):
+                relative = path.relative_to(root.resolve())
+                _copy_public(path, source / relative, root)
         if (root / "agent-office").is_dir():
             for name in OFFICE_FILES:
                 relative = Path("agent-office") / name

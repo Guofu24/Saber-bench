@@ -10,6 +10,7 @@ from typing import Any
 import click
 from pydantic import ValidationError
 
+from saber.domain.errors import IntegrationBlocked
 from saber.environments.models import EnvironmentConfig, ProfileName, read_config
 from saber.environments.profiles import PROFILES, describe
 from saber.world.models import default_config
@@ -92,6 +93,8 @@ def render_profile(config: Path, out: Path) -> None:
     cfg = load(config)
     try:
         emit(render_bundle(cfg, out))
+    except IntegrationBlocked as exc:
+        raise click.ClickException(str(exc)) from None
     except (OSError, ValueError):
         raise click.ClickException(
             "Could not export bundle; use a new destination and check public source files."
