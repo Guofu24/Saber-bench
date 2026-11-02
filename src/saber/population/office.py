@@ -62,6 +62,10 @@ class OfficeEmitter:
                 self.enabled = False
 
     # --- event helpers ---------------------------------------------------------------------------
+    def world_snapshot(self, snapshot: dict[str, Any]) -> None:
+        """Publish one bounded, sanitized runtime snapshot instead of inferred LLM events."""
+        self._send([snapshot])
+
     def register_agents(self) -> None:
         self._send(
             [
