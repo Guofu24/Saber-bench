@@ -21,7 +21,7 @@ from saber.agents.skills import load_playbook
 from saber.agents.specialties import BLUE_SKILLS
 from saber.domain.errors import BudgetExceeded, IntegrationBlocked
 from saber.population.office import OfficeEmitter
-from saber.world import work
+from saber.world import learning, work
 from saber.world.agents import PLAYBOOKS, baseline, llm_messages, parse_plan
 from saber.world.environment import World
 from saber.world.models import Action, Actor, WorldConfig, specialties_for
@@ -81,7 +81,9 @@ class Planner:
 
     def __init__(self, provider: LLMProvider, actors: int, workers: int = 4) -> None:
         self.provider = provider
-        self.requests: queue.Queue[tuple[Actor, dict[str, Any]]] = queue.Queue(maxsize=actors)
+        self.requests: queue.Queue[tuple[Actor, dict[str, Any], dict[str, Any] | None]] = (
+            queue.Queue(maxsize=actors)
+        )
         self.results: queue.Queue[tuple[str, list[Action], str, int, int]] = queue.Queue(
             maxsize=actors
         )
@@ -95,16 +97,18 @@ class Planner:
         for thread in self.threads:
             thread.start()
 
-    def request(self, actor: Actor, obs: dict[str, Any]) -> None:
+    def request(
+        self, actor: Actor, obs: dict[str, Any], pinned: dict[str, Any] | None = None
+    ) -> None:
         if actor.id in self.pending or self.exhausted or self.stopping.is_set():
             return
         self.pending.add(actor.id)
-        self.requests.put_nowait((actor, obs))
+        self.requests.put_nowait((actor, obs, pinned))
 
     def _work(self) -> None:
         while not self.stopping.is_set():
             try:
-                actor, obs = self.requests.get(timeout=0.1)
+                actor, obs, pinned = self.requests.get(timeout=0.1)
             except queue.Empty:
                 continue
             if self.stopping.is_set():
@@ -115,12 +119,14 @@ class Planner:
                 if isinstance(self.provider, TeamQuotaProvider):
                     response = self.provider.generate_for(
                         actor.team,
-                        llm_messages(actor, obs),
+                        llm_messages(actor, obs, pinned=pinned),
                         max_tokens=1024,
                         should_stop=self.stopping.is_set,
                     )
                 else:
-                    response = self.provider.generate(llm_messages(actor, obs), max_tokens=1024)
+                    response = self.provider.generate(
+                        llm_messages(actor, obs, pinned=pinned), max_tokens=1024
+                    )
                 actions, note = parse_plan(actor, response.text)
             except BudgetExceeded:
                 self.exhausted = True
@@ -171,6 +177,16 @@ class Runner:
             } | {BLUE_SKILLS[s] for a in config.actors for s in specialties_for(a)}:
                 load_playbook(skill, mode="world")
         self.world = World(store, config)
+        learning.initialize(
+            self.world,
+            {
+                skill: load_playbook(skill, mode="world")
+                for skill in {
+                    PLAYBOOKS[a.team if a.team == "client" else a.role] for a in config.actors
+                }
+                | {BLUE_SKILLS[s] for a in config.actors for s in specialties_for(a)}
+            },
+        )
         with store.transaction():
             store.put("meta", "engine", "hybrid" if provider else "scripted")
             store.put(
@@ -256,6 +272,8 @@ class Runner:
     def step(self) -> dict[str, Any]:
         self._plans()
         tick = self.world.advance()
+        with self.store.transaction():
+            learning.activate(self.world)
         # Rotate start order so fixed role ordering does not give one team permanent advantage.
         actors = self.config.actors
         offset = (tick + self.config.seed) % len(actors)
@@ -276,7 +294,11 @@ class Runner:
             memory = self.store.get("memory", actor.id, {})
             turns = int(memory.get("turns", 0))
             if self.planner is not None and tick >= int(memory.get("next_plan", 0)):
-                self.planner.request(actor, obs)
+                self.planner.request(
+                    actor,
+                    obs,
+                    learning.prompt_version(self.store, learning.actor_skill(self.world, actor)),
+                )
                 memory["next_plan"] = tick + self.config.profile_refresh_ticks
                 with self.store.transaction():
                     self.store.put("memory", actor.id, memory)

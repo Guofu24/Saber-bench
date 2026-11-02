@@ -13,7 +13,7 @@ import json
 import uuid
 from typing import Any
 
-from saber.world import lab_tools, operations, work
+from saber.world import lab_tools, learning, operations, work
 from saber.world.models import Action, Actor, WorldConfig, safe_name, specialties_for, tools_for
 from saber.world.store import Store, utc_now
 
@@ -213,6 +213,7 @@ class World:
 
     def act(self, actor: Actor, action: Action) -> dict[str, Any]:
         with self.store.transaction():
+            skill = learning.actor_skill(self, actor)
             principal = self.principals[actor.id]
             effect: dict[str, Any] = {
                 "unauthorized_access": False,
@@ -267,6 +268,7 @@ class World:
             result = {"status": status, "event_id": eid, "tool": action.tool, **data}
             self.store.put("results", actor.id, result)
             self._apply_rules(eid, action.tool, status)
+            learning.capture(self, actor, result, target, skill)
             return result
 
     def _execute(

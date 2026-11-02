@@ -56,6 +56,8 @@ class WorldConfig(BaseModel):
     retention_events: int = Field(default=20000, ge=100, le=1000000)
     archive_bytes: int = Field(default=32_000_000, ge=10000)
     disk_budget_bytes: int = Field(default=512_000_000, ge=1_000_000)
+    learning_enabled: bool = True
+    learning_interval_ticks: int = Field(default=30, ge=1, le=100000)
 
     @model_validator(mode="after")
     def unique_ids(self) -> WorldConfig:
