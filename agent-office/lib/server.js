@@ -5,20 +5,29 @@ const zlib = require('zlib');
 const fs = require('fs');
 const path = require('path');
 const { Analyzer } = require('./analyzer');
+const { normalizeSnapshot, MAX_BYTES } = require('./snapshot');
 
 const VIEWER = path.join(__dirname, '..', 'viewer', 'index.html');
 const EVENT_TYPES = new Set(['agent', 'task', 'llm_start', 'tool', 'llm_end', 'llm_error', 'handoff', 'process', 'message', 'status']);
 
-function createOffice({ upstreams, config = {}, log = () => {} }) {
+function createOffice({ upstreams = {}, config = {}, log = () => {}, readOnly = false }) {
   const clients = new Set();
   const history = [];
   const agents = new Map();
+  const worlds = new Map();
   let seq = 0;
   const boot = Date.now().toString(36);
 
   function emit(ev) {
+    if (ev.type === 'world_snapshot') {
+      ev = normalizeSnapshot(ev);
+      const previous = worlds.get(ev.world_id);
+      if (previous && ev.updated_at <= previous.updated_at) return;
+      if (!worlds.has(ev.world_id) && worlds.size >= 16) worlds.delete(worlds.keys().next().value);
+    }
     ev.seq = ++seq; ev.ts = Date.now();
-    if (ev.type === 'agent') agents.set(ev.id, { ...(agents.get(ev.id) || {}), ...ev });
+    if (ev.type === 'world_snapshot') worlds.set(ev.world_id, ev);
+    else if (ev.type === 'agent') agents.set(ev.id, { ...(agents.get(ev.id) || {}), ...ev });
     else { history.push(ev); if (history.length > 400) history.shift(); }
     const line = `data: ${JSON.stringify(ev)}\n\n`;
     for (const c of clients) c.write(line);
@@ -30,13 +39,14 @@ function createOffice({ upstreams, config = {}, log = () => {} }) {
     res.write(`data: ${JSON.stringify({ type: 'hello', boot })}\n\n`);
     for (const a of agents.values()) res.write(`data: ${JSON.stringify({ ...a, replay: true })}\n\n`);
     for (const e of history) res.write(`data: ${JSON.stringify({ ...e, replay: true })}\n\n`);
+    for (const e of [...worlds.values()].sort((a, b) => a.seq - b.seq)) res.write(`data: ${JSON.stringify({ ...e, replay: true })}\n\n`);
     res.write(`data: ${JSON.stringify({ type: 'replay_done' })}\n\n`);
     clients.add(res);
     req.on('close', () => clients.delete(res));
   }
 
-  function readBody(req) {
-    return new Promise((resolve, reject) => { const ch = []; req.on('data', c => ch.push(c)); req.on('end', () => resolve(Buffer.concat(ch))); req.on('error', reject); });
+  function readBody(req, limit = Infinity) {
+    return new Promise((resolve, reject) => { const ch = []; let size = 0; req.on('data', c => { size += c.length; if (size > limit) { ch.length = 0; reject(new Error('Body too large')); } else ch.push(c); }); req.on('end', () => resolve(Buffer.concat(ch))); req.on('error', reject); });
   }
 
   async function proxy(req, res, provider, rest) {
@@ -102,15 +112,19 @@ function createOffice({ upstreams, config = {}, log = () => {} }) {
   const server = http.createServer(async (req, res) => {
     try {
       const url = req.url || '/';
+      if (readOnly && (req.method !== 'GET' || url.startsWith('/openai') || url.startsWith('/anthropic'))) { res.writeHead(405); return res.end('read-only monitor'); }
       if (url.startsWith('/openai/') || url === '/openai') return await proxy(req, res, 'openai', url.slice(7) || '/');
       if (url.startsWith('/anthropic/') || url === '/anthropic') return await proxy(req, res, 'anthropic', url.slice(10) || '/');
       if (req.method === 'GET' && url === '/events') return sse(req, res);
       if (req.method === 'POST' && url === '/ingest') {
-        const raw = (await readBody(req)).toString('utf8');
+        let raw;
+        try { raw = (await readBody(req, MAX_BYTES)).toString('utf8'); } catch (_) { res.writeHead(413); return res.end('too large'); }
         let evs; try { evs = JSON.parse(raw); } catch (_) { res.writeHead(400); return res.end('bad json'); }
-        for (const ev of [].concat(evs)) if (ev && EVENT_TYPES.has(ev.type)) emit(ev);
+        try { for (const ev of [].concat(evs)) if (ev && (EVENT_TYPES.has(ev.type) || ev.type === 'world_snapshot')) emit(ev); }
+        catch (_) { res.writeHead(400); return res.end('invalid snapshot'); }
         res.writeHead(204, { 'access-control-allow-origin': '*' }); return res.end();
       }
+      if (req.method === 'GET' && url === '/state') { res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' }); return res.end(JSON.stringify({ worlds: [...worlds.values()] })); }
       if (req.method === 'GET' && url === '/health') { res.writeHead(200, { 'content-type': 'application/json' }); return res.end(JSON.stringify({ ok: true, agents: agents.size, stats: analyzer.stats })); }
       if (req.method === 'GET' && (url === '/' || url.startsWith('/?'))) {
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
