@@ -45,6 +45,7 @@ class Actor(BaseModel):
 class WorldConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
     seed: int = 42
+    execution_mode: Literal["application", "native"] = "application"
     tick_seconds: float = Field(default=2.0, ge=0.01, le=3600)
     actors: list[Actor] = Field(min_length=1, max_length=200)
     red_start_tick: int = Field(default=8, ge=1)

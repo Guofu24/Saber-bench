@@ -42,18 +42,26 @@ world.add_command(learning_cli)
 @click.option("--seed", type=int, default=42, show_default=True)
 @click.option("--tick-seconds", type=click.FloatRange(0.01, 3600), default=2.0, show_default=True)
 @click.option(
+    "--execution",
+    type=click.Choice(["application", "native"]),
+    default="application",
+    help="native: execute each action in a measured, fixed Python child process.",
+)
+@click.option(
     "--blue-specialists",
     is_flag=True,
     help="Include all 12 blue specialties; default keeps the six-role roster.",
 )
 def init_world(
-    out: Path, clients: int, seed: int, tick_seconds: float, blue_specialists: bool
+    out: Path, clients: int, seed: int, tick_seconds: float, blue_specialists: bool, execution: str
 ) -> None:
     if (out / "config.json").exists() or (out / "world.sqlite3").exists():
         raise click.ClickException(
             "World already exists. Edit its config before first run, or choose a new directory."
         )
-    config = default_config(clients, seed).model_copy(update={"tick_seconds": tick_seconds})
+    config = default_config(clients, seed).model_copy(
+        update={"tick_seconds": tick_seconds, "execution_mode": execution}
+    )
     if blue_specialists:
         existing = {a.role for a in config.actors if a.team == "blue"}
         config = config.model_copy(
@@ -277,6 +285,39 @@ def status_world(out: Path) -> None:
     if not path.exists():
         raise click.ClickException("No world report yet.")
     click.echo(path.read_text(encoding="utf-8"))
+
+
+@world.command("native-logs", help="Read retained native evidence, with per-actor pagination.")
+@click.option("--out", type=click.Path(path_type=Path), required=True)
+@click.option("--actor", default=None)
+@click.option("--before", type=click.IntRange(1), default=None)
+@click.option("--limit", type=click.IntRange(1, 100), default=100)
+def native_logs(out: Path, actor: str | None, before: int | None, limit: int) -> None:
+    import sqlite3
+
+    path = (out / "world.sqlite3").resolve()
+    if not path.is_file():
+        raise click.ClickException("No world database at this path.")
+    # Truly read-only: viewing must not migrate, checkpoint or create a world.
+    sql = "SELECT id,data FROM native_events WHERE 1=1"
+    args: list[Any] = []
+    if actor:
+        sql += " AND actor_id=?"
+        args.append(actor)
+    if before is not None:
+        sql += " AND id<?"
+        args.append(before)
+    sql += " ORDER BY id DESC LIMIT ?"
+    args.append(limit)
+    db = sqlite3.connect(path.as_uri() + "?mode=ro", uri=True)
+    try:
+        rows = list(db.execute(sql, args))
+    except sqlite3.OperationalError:
+        raise click.ClickException("Native telemetry is not available in this world.") from None
+    finally:
+        db.close()
+    for eid, data in reversed(rows):
+        click.echo(json.dumps(json.loads(data) | {"id": eid}, ensure_ascii=False))
 
 
 @world.command("stop", help="Request a graceful stop. Data and checkpoints are preserved.")

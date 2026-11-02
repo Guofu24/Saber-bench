@@ -26,6 +26,7 @@ from saber.world.agents import PLAYBOOKS, baseline, llm_messages, parse_plan
 from saber.world.environment import World
 from saber.world.learning_worker import Learner
 from saber.world.models import Action, Actor, WorldConfig, specialties_for
+from saber.world.native import NativeExecutor
 from saber.world.office import deployment_profile, snapshot
 from saber.world.quota import TeamQuotaProvider
 from saber.world.service import LabServer
@@ -213,6 +214,7 @@ class Runner:
             store.root / "access.jsonl", maxBytes=5_000_000, backupCount=3, encoding="utf-8"
         )
         self.server.start()
+        self.native = NativeExecutor(store) if config.execution_mode == "native" else None
         self.clients = {a.id: self.server.client(a.id) for a in config.actors}
         atomic_json(
             store.root / "runtime.json",
@@ -319,7 +321,11 @@ class Runner:
             plan = self.store.get("plans", actor.id, [])
             source = "llm" if plan else ("scripted-fallback" if self.planner else "scripted")
             chosen = Action.model_validate(plan.pop(0)) if plan else baseline(actor, obs, turns)
-            result = client.act(chosen)
+            result = (
+                self.server.native_act(self.native, actor.id, tick, chosen)
+                if self.native
+                else client.act(chosen)
+            )
             # Persist a bounded private agent journal; never expose other teams' plans.
             with self.store.transaction():
                 if work.control(self.world, actor.id)["generation"] != control["generation"]:
@@ -431,6 +437,8 @@ class Runner:
         if self.learner:
             self.learner.close()
         self.server.close()
+        if self.native:
+            self.native.close()
         self.telemetry.close()
         self.store.checkpoint()
         atomic_json(self.store.root / "runtime.json", {"status": "stopped", "pid": os.getpid()})

@@ -91,6 +91,7 @@ def snapshot(
         "run_id": run_id,
         "profile": profile,
         "engine": report["engine"],
+        "execution_mode": config.execution_mode,
         "status": "stopped" if stopped else "running",
         "updated_at": time.time(),
         "tick_seconds": config.tick_seconds,

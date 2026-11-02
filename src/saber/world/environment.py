@@ -159,6 +159,19 @@ class World:
                 ],
             }
             if actor.team == "blue":
+                if self.config.execution_mode == "native":
+                    from saber.world.native import read_events
+
+                    obs["native_telemetry"] = {
+                        "sensor": "saber-native-v1",
+                        "coverage": "Fixed workload measurements; not host-wide/kernel capture. "
+                        "event_id links to application evidence; PID is not an attack verdict.",
+                        "events": [
+                            {k: v for k, v in row.items() if k != "actor_id"}
+                            | {"principal": self.principals[row["actor_id"]]}
+                            for row in read_events(self.store, through_tick=self.tick, limit=35)
+                        ],
+                    }
                 obs["events"] = self.store.events(
                     through_tick=self.tick, limit=self.config.telemetry_window
                 )
