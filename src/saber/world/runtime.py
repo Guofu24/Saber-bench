@@ -49,7 +49,7 @@ class WorldLock(AbstractContextManager["WorldLock"]):
                 self.file.flush()
             self.file.seek(0)
             if os.name == "nt":
-                import msvcrt
+                msvcrt = importlib.import_module("msvcrt")
 
                 msvcrt.locking(self.file.fileno(), msvcrt.LK_NBLCK, 1)
             else:
@@ -68,7 +68,7 @@ class WorldLock(AbstractContextManager["WorldLock"]):
         try:
             self.file.seek(0)
             if os.name == "nt":
-                import msvcrt
+                msvcrt = importlib.import_module("msvcrt")
 
                 msvcrt.locking(self.file.fileno(), msvcrt.LK_UNLCK, 1)
             else:
