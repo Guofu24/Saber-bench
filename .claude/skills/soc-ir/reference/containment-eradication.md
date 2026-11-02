@@ -97,7 +97,7 @@ dài hạn.
 | C2 qua web (T1071.001) / exfil (T1048) | log proxy, DNS, NetFlow |
 
 Nguồn **thiếu** = cần mà không có hoặc đang không khoẻ. Rule **thiếu** = technique chưa có rule trong kho (xem
-`soc-cnt/reference/coverage-intel.md`).
+`../../soc-cnt/reference/coverage-intel.md`).
 
 **Viết khuyến nghị theo ba trục tách biệt:**
 - `technical_controls` — kiểm soát kỹ thuật (vá, tắt WDigest, MFA, phân vùng, hạn chế quyền admin…);

@@ -45,7 +45,7 @@ lượng mạng, email, log Firewall/Proxy/SIEM.
 
 **Trích IOC** theo sáu loại (`ipv4`, `domain`, `url`, `sha256`, `email`, `cve`): refang (`hxxp`, `[.]`), chữ thường;
 bỏ IP private và domain lành tính/của tổ chức; không ghi host của URL hay domain của email vào `domain`; không coi
-tên tệp (`gate.php`) là domain. Chi tiết chuẩn hoá: `soc-cnt/reference/coverage-intel.md`.
+tên tệp (`gate.php`) là domain. Chi tiết chuẩn hoá: `../../soc-cnt/reference/coverage-intel.md`.
 
 **Dấu vết chống điều tra** — ghi `{kind, location}`:
 

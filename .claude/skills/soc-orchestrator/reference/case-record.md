@@ -13,7 +13,7 @@ bất kỳ trạng thái nào ─► ESCALATED (đang chờ tier/đội cao hơn
 ```
 
 - Chỉ chủ sở hữu hiện tại chuyển trạng thái; mỗi lần chuyển ghi một mục worklog nêu lý do.
-- Không đóng case khi còn thiếu mục bắt buộc của hồ sơ (xem `soc-ir/reference/triage-coordination.md`).
+- Không đóng case khi còn thiếu mục bắt buộc của hồ sơ (xem `../../soc-ir/reference/triage-coordination.md`).
 
 ## Cấu trúc bản ghi
 

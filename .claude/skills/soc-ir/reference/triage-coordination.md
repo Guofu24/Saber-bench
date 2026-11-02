@@ -8,7 +8,7 @@ Triage nhanh **dựa trên thông tin ban đầu** để quyết định phản 
 - **Chỉ dùng dữ kiện có tại t0.** Bỏ qua mọi thông tin xuất hiện sau thời điểm triage; không suy từ kết luận của
   case sau này. Đây là điểm khác giữa triage và đánh giá phạm vi đầy đủ.
 - **Loại sự cố** theo danh mục trong SOP; **mức độ** tra ma trận (phạm vi × mức độ ảnh hưởng — xem
-  `soc-mon/reference/cause-impact.md`).
+  `../../soc-mon/reference/cause-impact.md`).
 - **Hành động nhanh** tương xứng với dữ kiện t0: thu ảnh bộ nhớ, cô lập máy không phải VIP, chặn IOC đã rõ, khoá
   tài khoản bị lộ, kích hoạt IRT. Chưa khoanh phạm vi thì chưa diệt trừ.
 

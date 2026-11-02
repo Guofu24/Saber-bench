@@ -36,7 +36,7 @@ Dựa vào **dấu hiệu đặc trưng** — TTP, công cụ, hạ tầng, "vă
 nhóm tấn công và động cơ.
 
 **Quy trình quy kết thận trọng**
-1. Ánh xạ hành vi quan sát được sang technique ATT&CK (`soc-hunt/reference/ttp-actor.md`).
+1. Ánh xạ hành vi quan sát được sang technique ATT&CK (`../../soc-hunt/reference/ttp-actor.md`).
 2. So với hồ sơ TTP từng nhóm: chỉ tính phần **trùng có tính phân biệt** — công cụ/mã độc riêng của nhóm, hạ tầng tái
    sử dụng, chuỗi kỹ thuật đặc trưng, cách đặt tên/cấu hình. Technique phổ biến mà nhóm nào cũng dùng (`T1059`,
    `T1071`, `T1105`) **không** chứng minh danh tính.

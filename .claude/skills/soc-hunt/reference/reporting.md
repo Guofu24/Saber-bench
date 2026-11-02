@@ -11,7 +11,7 @@ giờ; báo cáo chính thức ≤ 24 giờ sau khi xong phân tích **và peer 
 | `scope` | máy và tài khoản bị xâm phạm (kèm mức nếu có) |
 | `timeline` | các mốc theo thời gian thật, chuẩn hoá UTC |
 | `root_cause` | nguyên nhân gốc: đường vào + điểm yếu bị lợi dụng |
-| `ioc` | IOC theo loại, đã refang và chuẩn hoá (`soc-cnt/reference/coverage-intel.md`) |
+| `ioc` | IOC theo loại, đã refang và chuẩn hoá (`../../soc-cnt/reference/coverage-intel.md`) |
 | `persistence` | cơ chế duy trì `{kind, location}` |
 | `remediation` | hành động khắc phục — **mỗi backdoor/persistence/IOC có một hành động tương ứng** |
 | `citations` | trích dẫn bằng chứng cho mọi khẳng định |

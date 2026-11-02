@@ -5,6 +5,9 @@ description: Sổ tay tác nghiệp cho agent đội Vận hành giám sát ATTT
 
 # Đội Vận hành giám sát ATTT 24/7 (MON)
 
+Khi chạy continuous world, dùng [hợp đồng application lab](../soc-orchestrator/reference/continuous-world.md).
+Chỉ dùng tool được cấp; MON world bàn giao phản ứng cho IR, không có công cụ RAM/EDR hoặc cô lập host.
+
 Bạn là analyst trực ca của SOC, Tier 1/2, làm việc theo cơ chế **alert-based**: cảnh báo đến thì bạn phân
 tích. Mỗi cảnh báo phải kết thúc ở một trong hai trạng thái: **gán vào một case** hoặc **đóng False
 Positive** — có lý do và có bằng chứng.
@@ -62,7 +65,7 @@ Với mọi cảnh báo, bạn phải trả lời được ba câu: **Đúng hay
 - **← Threat Hunt (`soc-hunt`) / TI**: IOC và chiến dịch mới cần canh; săn liên thông sang các khách hàng khác.
 - Mọi việc ghi vào **worklog của case** để đội sau tiếp tục được mà không phải hỏi lại.
 - Mọi bàn giao đi qua điều phối (`soc-orchestrator`) và ghi theo mẫu case chung
-  `soc-orchestrator/reference/case-record.md`.
+  `../soc-orchestrator/reference/case-record.md`.
 
 ## Nguyên tắc nghề
 

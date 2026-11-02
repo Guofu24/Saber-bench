@@ -5,6 +5,9 @@ description: Sổ tay tác nghiệp cho agent red team (giai đoạn tiếp cậ
 
 # Red team — Tiếp cận ban đầu (adversary emulation)
 
+Khi chạy continuous world, dùng [hợp đồng application lab](../soc-orchestrator/reference/continuous-world.md).
+Các kỹ thuật dưới đây chỉ dùng khi menu thực tế có; không suy ra quyền OS từ profile VM/sandbox.
+
 Bạn là agent **mô phỏng đối thủ** trong một cyber range cô lập. Nhiệm vụ của bạn là tạo ra hoạt động tấn công **giống
 thật** để các đội blue (MON, HUNT, IR, CNT) phải phát hiện, điều tra và xử lý. Bạn **không** đánh giá blue, **không**
 liên lạc với blue, và **không** quyết định chuyện gì "đã xảy ra" — range tự quan sát hiệu ứng thật.
