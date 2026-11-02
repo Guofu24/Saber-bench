@@ -9,13 +9,16 @@ inside this application. No command, host path or external URL is executable.
 from __future__ import annotations
 
 import hashlib
+import json
 import uuid
 from typing import Any
 
+from saber.world import operations
 from saber.world.models import Action, Actor, WorldConfig, safe_name, tools_for
 from saber.world.store import Store, utc_now
 
 TOOL_HELP = {
+    **operations.HELP,
     "browse": "Open the local portal; returns document links and application health.",
     "search": "Search the local website. args: query (text).",
     "login": "Log in as your assigned synthetic account. args: typo (bool, optional).",
@@ -39,7 +42,7 @@ TOOL_HELP = {
     "restore": "Recover the local business service. args: case_id.",
     "release": "Undo an existing containment. args: principal.",
     "notify": "Warn an existing client account. args: principal, text.",
-    "close_case": "Close a case after verified mitigation. args: case_id.",
+    "close_case": "Close after verified mitigation, or a cited FP finding. args: case_id, optional disposition (resolved/false_positive) and expected_revision for FP.",
 }
 
 
@@ -382,6 +385,39 @@ class World:
         # Evidence is captured when opening the case so log rotation cannot erase its timeline.
         return list(case["evidence"])
 
+    def _extend_case_evaluation(self, case: dict[str, Any], events: list[dict[str, Any]]) -> None:
+        """Update private scoring after evidence additions; never return it to agents."""
+        evaluation = self.store.get("case-evaluation", case["id"], {"offenders": []})
+        offenders = set(evaluation["offenders"])
+        was_positive = bool(offenders)
+        for event in events:
+            row = self.store.db.execute(
+                "SELECT data FROM effects WHERE event_id=?", (event["id"],)
+            ).fetchone()
+            if not row or not any(
+                json.loads(row[0]).get(k)
+                for k in (
+                    "unauthorized_access",
+                    "unauthorized_job",
+                    "disruption",
+                    "collected_bytes",
+                )
+            ):
+                continue
+            incident = self.store.get("incidents", str(event["id"]))
+            if incident:
+                offenders.add(incident["principal"])
+                if incident["detected_tick"] is None:
+                    incident["detected_tick"] = self.tick
+                    self.store.put("incidents", str(event["id"]), incident)
+                    self._metric("detected_incidents", 1)
+                    self._metric("detection_delay_ticks_sum", self.tick - incident["tick"])
+        if offenders and not was_positive:
+            self._metric("case_fp", -1)
+            self._metric("case_tp", 1)
+        evaluation["offenders"] = sorted(offenders)
+        self.store.put("case-evaluation", case["id"], evaluation)
+
     def _mitigation_active(self, case: dict[str, Any]) -> bool:
         state = self.store.get("service", "state")
         for e in self._case_evidence(case):
@@ -402,6 +438,8 @@ class World:
         self, actor: Actor, action: Action, effect: dict[str, Any]
     ) -> tuple[int, dict[str, Any], str]:
         tool, args = action.tool, action.args
+        if tool in operations.HELP:
+            return operations.execute(self, actor, action)
         if tool == "open_case":
             ids = args.get("evidence_ids", [])
             if not isinstance(ids, list) or not ids or any(type(x) is not int for x in ids):
@@ -424,6 +462,11 @@ class World:
                 "assignee": None,
                 "timeline": [],
                 "responses": [],
+                "revision": 0,
+                "classification": "UNDETERMINED",
+                "severity": "unknown",
+                "findings": [],
+                "worklog": [],
             }
             self.store.put("cases", cid, case)
             self._metric("cases", 1)
@@ -432,8 +475,6 @@ class World:
                 self.store.db.execute("SELECT data FROM effects WHERE event_id=?", (i,)).fetchone()
                 for i in ids
             ]
-            import json
-
             positive = any(
                 any(
                     json.loads(r[0]).get(k)
@@ -467,7 +508,7 @@ class World:
                 raise ValueError("not a blue teammate")
             case["assignee"] = assignee
             case["status"] = "INVESTIGATING"
-            self.store.put("cases", case["id"], case)
+            operations.save_case(self, case, actor, "Case assigned.")
             return 200, {"message": "Case assigned."}, case["id"]
         if tool == "investigate":
             case = self._case(args)
@@ -483,7 +524,7 @@ class World:
                 for e in self._case_evidence(case)
             ]
             case["analyst"] = actor.id
-            self.store.put("cases", case["id"], case)
+            operations.save_case(self, case, actor, "Timeline refreshed from case evidence.")
             return 200, {"timeline": case["timeline"]}, case["id"]
         if tool == "deploy_rule":
             match = str(args.get("tool", ""))
@@ -588,6 +629,29 @@ class World:
                 )
                 target = "business-app"
             else:
+                if case["status"] == "CLOSED":
+                    return 409, {"error": "Case is already closed."}, case["id"]
+                if any(
+                    t.get("case_id") == case["id"] and t["status"] in {"OFFERED", "ACTIVE"}
+                    for t in self.store.items("tasks").values()
+                ):
+                    return 409, {"error": "Finish or cancel outstanding work first."}, case["id"]
+                if args.get("disposition") == "false_positive":
+                    if (
+                        case.get("classification") != "FP"
+                        or not case.get("findings")
+                        or type(args.get("expected_revision")) is not int
+                        or args["expected_revision"] != case.get("revision", 0)
+                    ):
+                        return 409, {"error": "Current cited FP finding required."}, case["id"]
+                    case["status"] = "CLOSED"
+                    case["disposition"] = "false_positive"
+                    operations.save_case(
+                        self, case, actor, "Closed on analyst FP finding; not evaluator truth."
+                    )
+                    return 200, {"message": "Case closed as analyst false positive."}, case["id"]
+                if args.get("disposition", "resolved") != "resolved":
+                    raise ValueError("invalid disposition")
                 if (
                     not case["responses"]
                     or not any(r["verified"] for r in case["responses"])
@@ -595,7 +659,8 @@ class World:
                 ):
                     return 409, {"error": "Verified response required before closing."}, case["id"]
                 case["status"] = "CLOSED"
-                self.store.put("cases", case["id"], case)
+                case["disposition"] = "resolved"
+                operations.save_case(self, case, actor, "Closed after verified mitigation.")
                 return 200, {"message": "Case closed."}, case["id"]
             verified = bool(effect["response_verified"])
             if verified and not any(r["verified"] for r in case["responses"]):
@@ -613,7 +678,7 @@ class World:
             case["responses"] = case["responses"][-50:]
             if verified:
                 case["status"] = "INVESTIGATING" if tool == "unquarantine" else "MITIGATED"
-            self.store.put("cases", case["id"], case)
+            operations.save_case(self, case, actor, f"Response {tool}: verified={verified}.")
             return 200, {"message": "Response executed.", "verified": verified}, target
         raise ValueError("unknown tool")
 

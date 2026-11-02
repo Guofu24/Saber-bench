@@ -7,6 +7,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from saber.world.operations import CASE_TOOLS, READ_TOOLS
+
 Team = Literal["client", "red", "blue"]
 BLUE_ROLES = ("lead", "monitor", "hunter", "dfir", "content", "ir")
 RED_ROLES = ("recon", "access", "impact")
@@ -125,7 +127,12 @@ def tools_for(actor: Actor) -> frozenset[str]:
         return CLIENT_TOOLS
     if actor.team == "red":
         return RED_TOOLS
-    return BLUE_TOOLS[actor.role]
+    return (
+        BLUE_TOOLS[actor.role]
+        | READ_TOOLS
+        | CASE_TOOLS
+        | ({"reopen_case"} if actor.role == "lead" else set())
+    )
 
 
 def safe_name(value: Any) -> str:
