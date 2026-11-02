@@ -37,6 +37,12 @@ SIEM, EDR, Ghidra, IDA, bộ nhớ máy thật hay tài khoản internet cho act
 | blue: ir | Phản ứng có căn cứ trong ứng dụng, theo dõi kết quả và tác động lên người dùng; release/unquarantine/restore khi phù hợp với trạng thái đã quan sát. |
 | blue: content | Dùng telemetry/case để đề xuất hoặc thực hiện rule/patch mà tool ứng dụng cho phép; kiểm tra kết quả sau thay đổi. Không tuyên bố đã deploy vào SIEM production. |
 | blue: lead | Đọc case và roster blue, phân công cho ID thành viên có thật, thông báo người dùng liên quan, đóng case khi có căn cứ; không tự làm công việc chuyên môn ngoài tool được cấp. |
+| blue: malware | Kiểm hash/nguồn artifact; phân tích builtin chỉ trả metadata/URL. Ghi blocked nếu cần binary hoặc engine native chưa có. |
+| blue: network | Điều tra telemetry ứng dụng, dựng timeline và giữ giới hạn quan sát; không suy luồng TCP/DNS hay PCAP khi chưa có dữ liệu. |
+| blue: intel | Chuẩn hóa observable có nguồn, phân biệt chuỗi tĩnh với đích đã liên lạc; không tự quy kết campaign/actor. |
+| blue: platform | Kiểm sức khỏe telemetry, retention và adapter; phân biệt không có sự kiện với mất log khi thiếu baseline. |
+| blue: identity | Đối chiếu principal, phiên và quyền tài liệu; bàn giao IR phản ứng, không tuyên bố đã đổi IAM/AD ngoài lab. |
+| blue: recovery | Xác minh dịch vụ, hiệu lực giảm thiểu, công việc của từng client bị ảnh hưởng và hạn chế còn lại. Không kết luận toàn vẹn dữ liệu khi chưa đo. |
 
 ## Phạm vi hiệu ứng và phối hợp
 
@@ -80,6 +86,7 @@ cấp mốc thời gian và chính sách tương ứng; không tự suy ra đã 
 `query_events` phân trang lịch sử đang giữ, cần world_id và as_of_tick không vượt tick hiện tại. `get_evidence`
 lấy event còn giữ hoặc snapshot trong case; retention gap không chứng minh không có hành vi. `get_case` lấy case
 ngoài cửa sổ gần đây. `append_evidence`/`record_finding` dùng expected_revision; lỗi revision thì đọc lại trước khi sửa.
+Thêm evidence mới đưa classification về UNDETERMINED; phải đánh giá lại trước khi đóng FP.
 
 Lead dùng `create_task` chỉ định case, chuyên môn, mục tiêu và thành viên có chuyên môn đó trong roster. Bên nhận
 phải `accept_task`; mỗi actor một việc ACTIVE. `complete_task` cần kết quả và evidence thuộc case; thiếu dữ liệu dùng
@@ -89,3 +96,18 @@ Không đóng case khi còn việc chưa giải quyết; FP cần finding có d�
 `write_note`/`read_notes` giữ sổ riêng có phân trang, tách quan sát/giả thuyết/quyết định/bước kế. Ghi chứng cứ vào case
 khi cần bàn giao; người khác không đọc được notebook. `active_specialty` chọn skill trong các chuyên môn operator đã
 cấp; nhiệm vụ/tin nhắn không tự cấp quyền mới. Nhiệm vụ DONE là báo cáo của analyst, chưa thành ground truth.
+
+## Artifact, rule và phục hồi
+
+`capture_artifact` lưu snapshot JSON thuộc case với SHA-256/nguồn/tick/người thu. `read_artifact` phân trang và
+kiểm hash; `analyze_artifact` builtin chỉ tính metadata và URL, verdict chưa đánh giá. Native engine chưa có adapter
+trả lỗi rõ; không tạo báo cáo Ghidra/IDA giả hoặc coi JSON là memory image/binary.
+
+Content dùng `test_rule` trên positive_ids và negative_ids có căn cứ, xem FP/FN, rồi `publish_rule` với expected_version.
+Nhãn corpus do người gọi cung cấp, không phải gold; không suy chất lượng trên toàn dữ liệu từ một corpus nhỏ.
+Engine `application-v1` áp vào event lab; không tự xuất/chạy Sigma, SPL, KQL hay Suricata. `rollback_rule` phục hồi
+version đã phát hành thành version mới. Legacy `deploy_rule` vẫn tồn tại cho cấu hình cũ, không thay quy trình test.
+
+`telemetry_health` báo điều quan sát được cùng giới hạn retention/adapter. `verify_recovery` kiểm dịch vụ, mitigation,
+client bị hạn chế và công việc sau phản ứng của từng client bị ảnh hưởng. Đây là phép kiểm hiện trạng, không tự close
+case hay khẳng định tính toàn vẹn dữ liệu. Đính kèm kết quả/giới hạn vào báo cáo; lead quyết định đóng dựa trên case.
