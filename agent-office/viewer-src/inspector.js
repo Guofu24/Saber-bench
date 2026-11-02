@@ -1,0 +1,81 @@
+import { actorTrace, describeTool, httpOutcome } from './trace-view.js';
+
+const $inspector = document.getElementById('inspector');
+const $timeline = document.getElementById('traceTimeline');
+let detailEventId = null, detailSignature = '';
+
+function selectAgent(agent) {
+  selected = agent && selected !== agent ? agent : null;
+  detailEventId = null; detailSignature = '';
+  renderActorDetail();
+  if (selected?.worldActor) document.getElementById('closeInspector').focus({ preventScroll: true });
+}
+
+function closeInspector() {
+  const card = selected?.card;
+  selected = null; detailSignature = ''; renderActorDetail();
+  card?.focus({ preventScroll: true });
+}
+
+function renderActorDetail() {
+  const world = currentWorld(), actor = selected?.worldActor;
+  if (!world || !actor) { $inspector.hidden = true; return; }
+  $inspector.hidden = false;
+  document.getElementById('inspectorHealth').textContent = worldHealth(world) === 'stopped'
+    ? 'World đã dừng · xem lại dữ liệu' : worldHealth(world) === 'stale'
+      ? 'Mất cập nhật · dữ liệu cuối đã nhận' : 'Đang nhận dữ liệu';
+  const scope = document.getElementById('traceRelated').checked;
+  const signature = JSON.stringify([world.world_id, world.run_id, world.updated_at, actor.id, detailEventId, scope]);
+  if (signature === detailSignature) return;
+  detailSignature = signature;
+  const focusedEvent = $inspector.contains(document.activeElement)
+    ? document.activeElement.closest('[data-event-id]')?.dataset.eventId : null;
+  $inspector.style.setProperty('--agent-color', teamColors[actor.team]);
+  document.getElementById('inspectorTitle').textContent = actor.id;
+  document.getElementById('inspectorRole').textContent = `${teamNames[actor.team]} · ${actor.role} · ${actorStatus(actor)}`;
+  const trace = actorTrace(world, actor.id);
+  const $window = document.getElementById('traceWindow');
+  const $event = document.getElementById('traceEvent');
+  const $cases = document.getElementById('traceCases');
+  if (!trace) {
+    $window.textContent = 'Snapshot cũ chưa có lịch sử thao tác. Chạy/resume world bằng code mới để xuất lịch sử.';
+    $timeline.replaceChildren(); $event.replaceChildren(); $cases.replaceChildren(); return;
+  }
+  const all = world.trace.events;
+  $window.textContent = `${all.length}/${world.trace.limit} sự kiện gần nhất của toàn world${all.length ? ` · tick ${all[0].tick}–${all[all.length - 1].tick}` : ''}. ${trace.own.length} thao tác của agent. Tối đa 12 case và 8 phản ứng/case; đây là cửa sổ dữ liệu, không phải toàn bộ lịch sử.`;
+  const events = scope ? trace.events : trace.own;
+  const event = detailEventId == null ? trace.own[trace.own.length - 1] : all.find(e => e.id === detailEventId);
+  const scroll = $timeline.scrollTop;
+  $timeline.innerHTML = events.length ? [...events].reverse().map(e => {
+    const who = world.actors.find(a => a.id === e.actor_id);
+    return `<button class="trace-row${event?.id === e.id ? ' chosen' : ''}" data-event-id="${e.id}" aria-pressed="${event?.id === e.id}" style="--event-color:${teamColors[who?.team] || '#8993c2'}"><span class="trace-mark"></span><span><small>Tick ${e.tick} · #${e.id} · ${esc(e.actor_id)}</small><b>${esc(e.tool)}</b><span>${esc(e.target || 'Không ghi nhận mục tiêu')}</span></span><span class="http ${e.status >= 400 ? 'http-error' : ''}">${e.status}</span></button>`;
+  }).join('') : '<p class="muted">Chưa có thao tác phù hợp trong cửa sổ dữ liệu này.</p>';
+  $timeline.scrollTop = scroll;
+  if (event) {
+    const source = event.source === 'unknown' ? 'Chưa ghi nhận nguồn quyết định' : event.source;
+    $event.innerHTML = `<div class="trace-event-heading">Sự kiện #${event.id} · tick ${event.tick} · ${esc(source)}</div>
+      <div class="trace-flow"><div><small>Agent</small><b>${esc(event.actor_id)}</b></div><span>→</span><div><small>Thao tác</small><code>${esc(event.tool)}</code></div><span>→</span><div><small>Mục tiêu</small><b>${esc(event.target || '—')}</b></div></div>
+      <p>${esc(describeTool(event.tool))}</p><div class="trace-result ${event.status >= 400 ? 'http-error' : ''}">HTTP ${event.status} · ${esc(httpOutcome(event.status))}</div>
+      <p class="muted">HTTP thành công xác nhận yêu cầu đã xử lý; kết luận xâm nhập và hiệu quả phòng thủ cần bằng chứng bổ sung.</p>`;
+  } else {
+    $event.innerHTML = `<p class="muted">${detailEventId == null ? 'Chọn một thao tác để xem agent → công cụ → mục tiêu → kết quả.' : `Sự kiện #${detailEventId} đã ra khỏi cửa sổ dữ liệu. Chọn một sự kiện khác hoặc bấm Mới nhất.`}</p>`;
+  }
+  $cases.innerHTML = trace.cases.length ? trace.cases.map(c => {
+    const responses = c.responses.map(r => `<li><small>Tick ${r.tick} · ${esc(r.actor_id)}</small><div><code>${esc(r.tool)}</code> → ${esc(r.target || '—')}</div><span class="${r.verified ? 'run' : 'muted'}">${r.verified ? 'Thay đổi đã được xác minh lúc thực thi' : 'Chưa xác minh được thay đổi mới'}</span></li>`).join('');
+    const evidence = c.evidence_ids.map(id => `<button class="evidence-link" data-event-id="${id}">#${id}</button>`).join(' ');
+    return `<article class="trace-case"><b>${esc(c.id)}</b><span class="case-state">${esc(c.status)}</span><p>Bằng chứng trong cửa sổ: ${evidence || 'không còn'} <small>(${c.evidence_ids.length}/${c.evidence_count})</small></p><ul>${responses || '<li class="muted">Chưa ghi nhận phản ứng trong dữ liệu case.</li>'}</ul></article>`;
+  }).join('') : '<p class="muted">Chưa thấy case liên kết bằng chứng hoặc phản ứng của agent trong cửa sổ dữ liệu.</p>';
+  if (focusedEvent) $inspector.querySelector(`[data-event-id="${focusedEvent}"]`)?.focus({ preventScroll: true });
+}
+
+$inspector.addEventListener('click', event => {
+  const row = event.target.closest('[data-event-id]');
+  if (!row) return;
+  detailEventId = Number(row.dataset.eventId); renderActorDetail();
+});
+document.getElementById('closeInspector').addEventListener('click', closeInspector);
+document.getElementById('traceLatest').addEventListener('click', () => { detailEventId = null; renderActorDetail(); });
+document.getElementById('traceRelated').addEventListener('change', () => renderActorDetail());
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && !$inspector.hidden) closeInspector();
+});

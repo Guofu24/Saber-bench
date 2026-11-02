@@ -13,6 +13,7 @@ const short = n => Number(n || 0).toLocaleString('vi-VN');
 
 function clearOfficeActors() {
   selected = hovered = null;
+  renderActorDetail();
   for (const a of agents) {
     a.removed = true; clearTimeout(a.hideT);
     if (a.arrive) { a.arrive(); a.arrive = null; }

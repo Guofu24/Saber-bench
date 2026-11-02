@@ -40,6 +40,7 @@ function createAgent(ev) {
   if (slot) {
     slot.used = a; a.slot = slot;
     a.desk = slot.desk || (slot.desk = makeDesk(slot.x, slot.z, slot.w)); a.desk.g.visible = true;
+    a.desk.g.traverse(o => { o.userData.agent = a; });
     a.seat = { x: slot.x, z: slot.z + 0.78 }; a.behind = { x: slot.x, z: slot.z + 1.32 }; a.side = { x: slot.sideX, z: slot.z + 1.32 };
   } else {
     const f = FLOOR.find(s => !s.used) || FLOOR[agents.length % FLOOR.length]; f.used = a; a.floor = f;
@@ -203,7 +204,13 @@ const $log = document.getElementById('log'), $cards = document.getElementById('c
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 let proc = null;
 const shortCmd = c => String(c || '').replace(/(?:[A-Za-z]:)?[^\s]*[\/\\]([^\s\/\\]+)/g, '$1');
-window.__office = { agents, byId, onEvent, currentWorld, worldHealth };
+window.__office = { agents, byId, onEvent, currentWorld, worldHealth, selectAgent,
+  deskScreenPoint(id) {
+    const a = byId.get(id); if (!a?.desk) return null;
+    const p = a.desk.g.localToWorld(new THREE.Vector3(0, 1.12, -0.196)).project(camera);
+    const r = renderer.domElement.getBoundingClientRect();
+    return { x: r.left + (p.x + 1) * r.width / 2, y: r.top + (1 - p.y) * r.height / 2 };
+  } };
 function feed(who, color, html, cls = '') {
   const d = document.createElement('div'); d.className = 'msg ' + cls;
   const tm = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -217,10 +224,13 @@ function addCard(a) {
   const c = document.createElement('div'); c.className = 'card';
   c.innerHTML = `<div class="top"><span class="dot" style="background:${a.color};box-shadow:0 0 8px ${a.color}"></span><b></b><span class="rl"></span></div><div class="st"></div><div class="meta"></div>`;
   c.querySelector('b').textContent = a.name; c.querySelector('.rl').textContent = a.role;
-  c.addEventListener('click', () => { selected = selected === a ? null : a; });
+  c.tabIndex = 0; c.setAttribute('role', 'button'); c.setAttribute('aria-label', `Xem hoạt động ${a.name}`);
+  c.addEventListener('click', () => selectAgent(a));
+  c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectAgent(a); } });
   a.card = c; $cards.appendChild(c); document.getElementById('empty').style.display = 'none';
 }
 function ui() {
+  renderActorDetail();
   for (const a of agents) {
     const c = a.card; c.querySelector('.st').textContent = a.status;
     c.querySelector('.meta').textContent = a.worldActor ? `${a.tools} hành động · tick ${a.worldActor.last_tick ?? '—'}` : `${a.calls} call · ${a.tools} tool · ${a.tokens >= 1000 ? (a.tokens / 1000).toFixed(1) + 'k' : a.tokens} tok`;
@@ -259,12 +269,12 @@ function pickAgent(e) {
   const r = renderer.domElement.getBoundingClientRect();
   mp.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   ray.setFromCamera(mp, camera);
-  const hit = ray.intersectObjects(agents.map(a => a.robot), true)[0];
+  const hit = ray.intersectObjects(agents.flatMap(a => a.desk ? [a.robot, a.desk.g] : [a.robot]), true)[0];
   return hit ? hit.object.userData.agent : null;
 }
 let down = null;
 renderer.domElement.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; });
-renderer.domElement.addEventListener('pointerup', e => { if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 5) { const a = pickAgent(e); selected = a && selected !== a ? a : null; if (selected && selected.card) selected.card.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } down = null; });
+renderer.domElement.addEventListener('pointerup', e => { if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 5) { selectAgent(pickAgent(e)); if (selected && selected.card) selected.card.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } down = null; });
 let hoverT = 0;
 renderer.domElement.addEventListener('pointermove', e => { if (performance.now() - hoverT < 60) return; hoverT = performance.now(); hovered = pickAgent(e); renderer.domElement.style.cursor = hovered ? 'pointer' : 'grab'; });
 document.getElementById('toggleTeam').addEventListener('click', () => document.body.classList.toggle('team'));

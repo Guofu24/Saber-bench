@@ -104,6 +104,35 @@ code{font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:#ffe3a3}
 .team-summary div{margin-top:3px;overflow-wrap:anywhere}
 @media (max-width:899px){#right{height:42vh}}
 @media (max-width:899px){#teamMetrics{max-height:150px;overflow:auto;flex-shrink:0}.foot{font-size:10px;padding:6px 12px}}
+#inspector{z-index:10;top:16px;right:16px;bottom:16px;width:min(700px,calc(100vw - 300px));background:rgba(9,13,32,.97);overflow:auto;border-top:3px solid var(--agent-color);padding:20px}
+#inspector[hidden]{display:none}
+.inspector-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.inspector-head h2{font-size:21px;margin:3px 0;overflow-wrap:anywhere;color:var(--agent-color)}
+.inspector-head button{padding:8px 12px;background:#202c49;color:var(--text);flex-shrink:0}
+#inspectorRole,#traceWindow,#inspectorHealth{color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+#inspectorHealth{margin-top:8px}
+#inspector h3{font-size:14px;margin:20px 0 8px}
+.trace-controls{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:12px 0}
+.trace-controls button{padding:6px 10px}.trace-controls label{font-size:12px}
+#traceTimeline{max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:4px}
+.trace-row{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;color:var(--text);padding:9px;font-weight:400;border:1px solid transparent}
+.trace-row:hover,.trace-row.chosen{background:#17223a;border-color:var(--line)}
+.trace-row>span:nth-child(2){flex:1;min-width:0;overflow-wrap:anywhere}
+.trace-row small,.trace-row b,.trace-row>span:nth-child(2)>span{display:block}
+.trace-row small{color:var(--muted);font-size:11px}.trace-row b{color:var(--event-color);margin:2px 0}
+.trace-mark{width:8px;height:8px;border-radius:50%;background:var(--event-color);flex-shrink:0}
+.http{font:12px ui-monospace,monospace;background:#1e3043;padding:4px 6px;border-radius:5px;color:#94e4cf}.http-error{color:#ffb49f}
+#traceEvent{margin-top:14px;background:#0c1528;border:1px solid var(--line);border-radius:12px;padding:14px;font-size:12px}
+.trace-event-heading{color:var(--muted);margin-bottom:12px;font-size:11px}
+.trace-flow{display:flex;align-items:center;gap:8px}
+.trace-flow>div{min-width:0;flex:1;background:#17223a;border-radius:8px;padding:10px;overflow-wrap:anywhere}
+.trace-flow small{display:block;color:var(--muted);margin-bottom:4px}.trace-flow b{font-size:12px;font-weight:500}
+.trace-result{font-weight:600}.trace-case{border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0;font-size:12px}
+.trace-case>b{color:#a4e7ff}.case-state{float:right;color:var(--muted);font-size:11px}
+.trace-case ul{padding-left:18px;margin-bottom:0}.trace-case li{margin:10px 0}.trace-case small{color:var(--muted)}
+.evidence-link{padding:2px 5px;border-radius:5px;background:#20304c;color:#b9ddff;font-size:12px;margin:2px}
+.card:focus-visible,.trace-row:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media(max-width:899px){#inspector{inset:8px;width:auto;padding:14px}.trace-flow{flex-wrap:wrap}.trace-flow>div{min-width:75px}#traceTimeline{max-height:220px}}
 </style>
 </head>
 <body>
@@ -135,8 +164,18 @@ code{font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:#ffe3a3}
   <div id="log"></div>
   <div class="foot">World: trạng thái do runtime cung cấp · log của trang đang xem · quota là trạng thái ghi nhận gần nhất. Cảnh 3D minh họa agent, không phải màn hình máy thật.</div>
 </aside>
+<aside id="inspector" class="glass" role="dialog" aria-modal="false" aria-labelledby="inspectorTitle" hidden>
+  <div class="inspector-head"><div><small>HOẠT ĐỘNG ĐÃ THỰC THI · APPLICATION LAB</small><h2 id="inspectorTitle"></h2></div><button id="closeInspector" aria-label="Đóng chi tiết agent">Đóng ×</button></div>
+  <div id="inspectorRole"></div><div id="inspectorHealth"></div>
+  <h3>Diễn biến</h3><p id="traceWindow"></p>
+  <div class="trace-controls"><label><input type="checkbox" id="traceRelated" checked> Kèm sự kiện liên quan qua case / mục tiêu</label><button id="traceLatest">Mới nhất</button></div>
+  <div id="traceTimeline"></div><div id="traceEvent"></div>
+  <h3>Case và phản ứng phòng thủ</h3>
+  <p class="muted">Liên kết theo event được dẫn chứng hoặc thao tác gắn với case. Trạng thái case là ghi nhận của đội blue.</p>
+  <div id="traceCases"></div>
+</aside>
 <button id="toggleTeam">Đội agent</button>
-<div id="hint">Kéo để xoay · cuộn để zoom · bấm vào agent để xem</div>
+<div id="hint">Kéo để xoay · cuộn để zoom · bấm robot, màn hình trên bàn hoặc thẻ agent để xem thao tác</div>
 <script>/*BUNDLE*/</script>
 </body>
 </html>

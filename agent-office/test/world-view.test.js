@@ -2,6 +2,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { worldHealth, rosterPage, actorActivity, actorStatus } = require('../viewer-src/world-state');
+const { actorTrace, httpOutcome } = require('../viewer-src/trace-view');
 
 test('frozen telemetry becomes unknown, stopped remains stopped, resume becomes live', () => {
   const world = { status: 'running', updated_at: 100, tick_seconds: 2, tick: 10 };
@@ -40,4 +41,26 @@ test('finished and waiting actors remain idle even with an inference pending', (
   assert.match(actorStatus(actor), /vướng 1/);
   assert.match(actorStatus({ ...actor, control_status: 'DONE' }), /Đã hoàn tất/);
   assert.match(actorStatus({ ...actor, learning_counts: { episodes: 3, proposals: 2, published: 1 } }), /3 lượt.*2 đề xuất.*1 phát hành/);
+});
+
+test('actor detail links only case evidence, explicit case actions and direct targets', () => {
+  const world = { trace: { events: [
+    { id: 1, tick: 1, actor_id: 'red', tool: 'read_document' },
+    { id: 2, tick: 1, actor_id: 'blue', tool: 'open_case', case_id: 'case-1' },
+    { id: 3, tick: 1, actor_id: 'other-red', tool: 'read_document' },
+    { id: 4, tick: 2, actor_id: 'blue', tool: 'contain', target_actor_id: 'red', case_id: 'case-1' },
+    { id: 5, tick: 2, actor_id: 'other-blue', tool: 'restore', case_id: 'case-2' },
+  ], cases: [
+    { id: 'case-1', evidence_ids: [1], responses: [{ actor_id: 'blue' }] },
+    { id: 'case-2', evidence_ids: [3], responses: [{ actor_id: 'other-blue' }] },
+  ] } };
+  const detail = actorTrace(world, 'red');
+  assert.deepEqual(detail.own.map(e => e.id), [1]);
+  assert.deepEqual(detail.events.map(e => e.id), [1, 2, 4]);
+  assert.deepEqual(detail.cases.map(c => c.id), ['case-1']);
+  assert.deepEqual(actorTrace(world, 'blue').events.map(e => e.id), [1, 2, 4]);
+  assert.deepEqual(actorTrace(world, 'unknown').events, []);
+  assert.equal(actorTrace({}, 'red'), null);
+  assert.match(httpOutcome(403), /từ chối/);
+  assert.doesNotMatch(httpOutcome(200), /tấn công|xâm nhập/);
 });
