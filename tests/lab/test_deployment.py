@@ -14,6 +14,8 @@ def test_complete_bundle_has_isolated_roles_no_credentials_and_detects_changes(t
     spec = preset_spec(name)
     root = tmp_path / "bundle"
     render(spec, root)
+    assert (root / "SOC_COMPLETION.md").is_file()
+    assert (root / "source/docs/SOC_LAB_VI.md").is_file()
     assert verify_bundle(root) == spec
     doc = yaml.safe_load((root / "compose.yaml").read_text())
     assert {

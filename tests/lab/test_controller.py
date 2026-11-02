@@ -191,5 +191,13 @@ def test_busy_executor_does_not_advance_actor_and_uncertain_guest_stays_paused(
         controller.actor_step(actor, 2)
         assert calls[-1] == ("http://unused/execute", "windows_job_status")
         assert controller.store.get("lab-memory", actor.id)["turn"] == 1
+        content = next(a for a in spec.actors if a.role == "content")
+        obs = {
+            "turn": 1,
+            "result": {},
+            "cases": [{"id": "case-domain", "rule": "lab-domain-failed-logon"}],
+        }
+        tool, _, _ = controller.choose(content, obs)
+        assert tool == "evaluate_rule"
     finally:
         controller.close()

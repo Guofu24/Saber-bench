@@ -10,11 +10,18 @@ async function renderNative(world, actor, event) {
   nativeRequest?.abort();
   const request = nativeRequest = new AbortController();
   const panel = document.getElementById('nativeEvents'), hint = document.getElementById('nativeScope');
+  document.getElementById('nativeHistoryLabel').textContent = world.execution_mode === 'range'
+    ? 'Lịch sử riêng của agent (tối đa 12 job)' : 'Lịch sử riêng của agent (tối đa 100 bản ghi)';
   if (world.execution_mode === 'range') {
     document.getElementById('inspectorScope').textContent = 'HOẠT ĐỘNG ĐÃ THỰC THI · SOC LAB';
     const e = actor.executor;
+    const key = `range/${world.world_id}/${actor.id}/${document.getElementById('nativeAll').checked}`;
+    const same = key === nativePanelKey;
+    const expanded = new Set(same ? [...panel.querySelectorAll('details[open]')].map(n => n.dataset.job) : []);
+    const scroll = same ? panel.scrollTop : 0, screenOpen = same && panel.querySelector('.range-screen')?.open;
+    nativePanelKey = key;
     hint.textContent = '12 job gần nhất của agent; mở từng job để xem kết quả và bằng chứng. Hash được controller đối chiếu trước khi ẩn thông tin nhạy cảm. Ảnh là lần chụp trình duyệt gần nhất, không phải luồng desktop trực tiếp.';
-    panel.innerHTML = e ? `<div class="trace-case"><b>${esc(e.host || 'Chưa nhận receipt')}</b><p>PID ${e.pid ?? '—'} · exit ${e.exit_code ?? '—'}</p><p>Job ${esc(e.job_id || '—')}</p>${e.pending ? '<p>Đang chờ kết quả hoặc đối soát job; chưa xác nhận hiệu ứng.</p>' : ''}<ul>${e.artifacts.map(f => `<li><b>${esc(f.name)}</b> · ${f.bytes} bytes<pre style="white-space:pre-wrap;overflow-wrap:anywhere">SHA-256 ${esc(f.sha256)}</pre></li>`).join('')}</ul></div>` : '<p>Chưa nhận receipt thực thi.</p>';
+    if (!same) panel.innerHTML = e ? `<div class="trace-case"><b>${esc(e.host || 'Chưa nhận receipt')}</b><p>PID ${e.pid ?? '—'} · exit ${e.exit_code ?? '—'}</p><p>Job ${esc(e.job_id || '—')}</p>${e.pending ? '<p>Đang chờ kết quả hoặc đối soát job; chưa xác nhận hiệu ứng.</p>' : ''}<ul>${e.artifacts.map(f => `<li><b>${esc(f.name)}</b> · ${f.bytes} bytes<pre style="white-space:pre-wrap;overflow-wrap:anywhere">SHA-256 ${esc(f.sha256)}</pre></li>`).join('')}</ul></div>` : '<p>Chưa nhận receipt thực thi.</p>';
     try {
       const query = new URLSearchParams({ world: world.world_id, actor: actor.id });
       const response = await fetch(`/range-events?${query}`, { signal: request.signal, cache: 'no-store' });
@@ -23,10 +30,8 @@ async function renderNative(world, actor, event) {
       if (nativeRequest !== request || selected?.worldActor?.id !== actor.id || currentWorld()?.world_id !== world.world_id) return;
       const all = document.getElementById('nativeAll').checked;
       const rows = all ? page.entries : page.entries.filter(e => e.event_id === event?.id);
-      const screen = page.screen ? `<details class="trace-case range-screen"><summary>Ảnh trình duyệt thật · tick ${page.screen.tick}</summary><p>Job ${esc(page.screen.job_id)}</p><img alt="Ảnh trình duyệt của ${esc(actor.id)} tại tick ${page.screen.tick}" style="max-width:100%;height:auto" src="data:image/png;base64,${page.screen.png}"><p style="overflow-wrap:anywhere">SHA-256 ${esc(page.screen.sha256)}</p></details>` : '<p class="muted">Chưa có ảnh trình duyệt được xác minh cho agent này. Tác vụ dòng lệnh xem qua bằng chứng bên dưới.</p>';
+      const screen = page.screen ? `<details class="trace-case range-screen"${screenOpen ? ' open' : ''}><summary>Ảnh trình duyệt thật · tick ${page.screen.tick}</summary><p>Job ${esc(page.screen.job_id)}</p><img alt="Ảnh trình duyệt của ${esc(actor.id)} tại tick ${page.screen.tick}" style="max-width:100%;height:auto" src="data:image/png;base64,${page.screen.png}"><p style="overflow-wrap:anywhere">SHA-256 ${esc(page.screen.sha256)}</p></details>` : '<p class="muted">Chưa có ảnh trình duyệt được xác minh cho agent này. Tác vụ dòng lệnh xem qua bằng chứng bên dưới.</p>';
       const json = value => `<pre style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(JSON.stringify(value, null, 2))}</pre>`;
-      const expanded = new Set([...panel.querySelectorAll('details[open]')].map(n => n.dataset.job));
-      const scroll = panel.scrollTop;
       panel.innerHTML = screen + (rows.length ? [...rows].reverse().map(entry => `<details class="trace-case range-job" data-job="${entry.job_id}"${expanded.has(entry.job_id) || !all ? ' open' : ''}><summary><b>${esc(entry.tool)}</b> · tick ${entry.tick} · ${esc(entry.source)}</summary><p>Job ${esc(entry.job_id)}</p>${json(entry.result)}<p>${entry.evidence_complete ? 'Đã nhận và kiểm hash log khởi chạy/kết thúc cùng bằng chứng được dẫn chiếu.' : 'Bằng chứng chưa đầy đủ trong cửa sổ này; không suy ra thao tác thành công.'}</p>${entry.evidence.map(p => `<details><summary>${esc(p.event.kind)} · ${esc(p.event.host)} · ${esc(p.event.ts)}</summary>${json(p.event.data)}<p>${esc(p.event.sensor)} · ${esc(p.event.id)}</p><p style="overflow-wrap:anywhere">Hash bản gốc ${esc(p.sha256)} · ${p.hash_verified ? 'đã đối chiếu' : 'chưa đối chiếu'}</p></details>`).join('')}<p>Artifacts</p>${json(entry.artifacts)}</details>`).join('') : '<p class="muted">Thao tác chưa có trong cửa sổ bằng chứng. Bật lịch sử riêng để xem các job còn lưu trong cửa sổ.</p>');
       panel.scrollTop = scroll;
     } catch (error) {

@@ -29,6 +29,7 @@ async function main() {
       await page.getByRole('button', { name: `Xem hoạt động ${actor.id}`, exact: true }).click();
       await page.locator('#nativeAll').check();
       await page.locator('#nativeEvents .range-job').first().waitFor();
+      assert.match(await page.locator('#nativeHistoryLabel').textContent(), /12 job/);
       const evidence = await read.range(actor.id);
       assert.equal(await page.locator('#nativeEvents .range-job').count(), evidence.entries.length);
       const job = page.locator('#nativeEvents .range-job').first();
@@ -43,7 +44,7 @@ async function main() {
         await page.waitForFunction(() => document.querySelector('.range-screen img')?.naturalWidth > 0);
         assert.equal(await screen.locator('img').getAttribute('src'), 'data:image/png;base64,' + evidence.screen.png);
       }
-      await page.locator('#nativeScope').scrollIntoViewIfNeeded();
+      await page.locator('#nativeEvents').scrollIntoViewIfNeeded();
       await page.screenshot({ path: path.join(out, `${team}-range.png`) });
       await page.locator('#nativeAll').uncheck();
       await page.waitForFunction(() => document.querySelectorAll('.range-job').length === 1);

@@ -15,8 +15,9 @@ và `saber env` vẫn dùng được cho demo nhẹ. Bundle mới không nâng c
 containers có giới hạn riêng. `expanded` tăng quy mô executor/guest, chưa phải cụm SIEM HA.
 Sửa `actors`, `workers_per_team`, `tick_seconds`, dung lượng và VM trong JSON **trước khi render**.
 Logical agent không đồng nghĩa một máy: agents cùng đội dùng các worker của đội đó.
-Các đội được lập lịch đồng thời; từng đội xử lý hàng đợi lần lượt. Windows workload là
-scheduled task có hành vi cố định, không có model riêng chạy trong từng desktop.
+Các đội được lập lịch đồng thời; số job đồng thời trong mỗi đội tối đa bằng số worker.
+Windows job do agent chọn được đưa vào queue riêng rồi relay gọi scheduled task SYSTEM
+có hành vi cố định trong guest; không có model riêng chạy trong từng desktop.
 
 ## Dịch vụ và đường đi dữ liệu
 
@@ -95,14 +96,26 @@ tạo token mới rồi dùng lại volume cũ sẽ làm mất đồng bộ. Kh�
 Controller bắt đầu làm việc sau khi app/worker đã healthy. Chờ khoảng 1–3 phút để có chuỗi
 client → red → case → blue → bằng chứng chặn và để indexer nhận log, rồi chạy `verify`.
 
-- Agent Office: `http://127.0.0.1:7788` — bấm agent xem receipt, PID, host, job và hash artifact.
+- Agent Office: `http://127.0.0.1:7788` — bấm agent xem 12 job gần nhất, kết quả,
+  process launch/exit, bằng chứng ứng dụng và hash artifact; client có ảnh Chromium thật.
 - OpenSearch Dashboards: `http://127.0.0.1:5601` — tạo index pattern `saber-<name>`, time field `ts`.
 - Collector: `127.0.0.1:7789`; endpoint đọc/ghi có capability token, chỉ health công khai.
 - Máy khác xem qua SSH tunnel tới localhost của máy đích. Không đổi các port thành public.
 
-Office là monitor, không phải RDP/VNC toàn màn hình guest. Screenshot nằm tại
-`/data/workspace/<actor>/browser.png` trong volume worker client; hash ở receipt.
-Chi tiết log xem bằng Dashboards hoặc lệnh `lab logs` phía dưới.
+Office hiển thị ảnh trình duyệt chụp tại job được ghi tick/ID, không truyền RDP/VNC desktop guest.
+Controller kiểm hash ảnh và bằng chứng gốc trước khi tạo export đã ẩn thông tin nhạy cảm.
+Cửa sổ tối đa 12 job/agent và 2 MB/export; ảnh gần nhất tối đa 1 MB. Dữ liệu đầy đủ vẫn
+ở collector/worker. Checkbox lịch sử riêng chuyển giữa toàn cửa sổ và job đang chọn.
+Log Sysmon/Zeek ngoài các bằng chứng gắn với job xem bằng Dashboards hoặc `lab logs`.
+Viewer đọc export tĩnh, không nhận credential hay quyền chạy lệnh lên worker.
+
+Các công cụ blue đã có: truy vấn theo host/kind/thời gian và các trường principal,
+command line, PID, IP, domain, hash, path, event code, job ID; hunt mạng/identity,
+case timeline/export có kiểm hash, kiểm health sensor và đối chiếu phản ứng/recovery.
+Lead có thể giao case; mỗi đội có hộp trao đổi riêng. `publish_rule` lưu rule replay trong
+lab sau khi tái hiện bằng chứng, chưa triển khai rule liên tục vào một SIEM bên ngoài.
+Vai trò malware hiện phân tích telemetry, chưa gọi Ghidra/IDA hay phân tích memory image.
+Theo dõi phần đã làm và còn thiếu ở [SOC_COMPLETION](SOC_COMPLETION.md).
 
 ## Bật Gemini, giữ các pool 200 / 200 / còn lại
 
@@ -146,6 +159,21 @@ provisioner này dùng subnet trên; cấu hình subnet tùy biến cần cập 
 `Install-Sensors` yêu cầu Sysmon có chữ ký Microsoft hợp lệ và tạo checkpoint `SABER-baseline`.
 Guest process/file/network/DNS tới từ Sysmon; Security tới từ Windows Event Log.
 Relay giữ bookmark sau ACK, dùng ID xác định để tránh trùng khi gửi lại, không in credentials.
+
+Agent có thể chọn `windows_work`, `windows_recon`, `windows_failed_logon`,
+`windows_inventory` hoặc `windows_collect_evidence` theo quyền của vai trò.
+Client/red chỉ được chọn workstation thuộc bundle; thao tác AD chỉ nhắm tài khoản lab.
+Receipt `SUCCEEDED` phải có PID và các bằng chứng phù hợp với thao tác. Queue không cho
+agent tự chạy lại một job chưa rõ kết quả. Với `INDETERMINATE`, agent chỉ kiểm tra trạng thái.
+Sau khi người vận hành đã kiểm tra guest, dừng task cũ và xác nhận có thể tiếp tục:
+
+```powershell
+uv run --no-sync saber lab reconcile-guest --bundle .. --job-id JOB_UUID --reason "Inspected guest and stopped the original task; safe to resume."
+```
+
+Lệnh lưu lý do đối soát và mở lại agent; kết quả gốc vẫn là `INDETERMINATE`, không được
+đổi thành thành công. Relay credential chỉ người vận hành giữ, agent không có quyền đối soát.
+Script guest mới cần được copy bằng `Install-Sensors.ps1` từ bundle mới trên host lab.
 
 Nếu SOC chạy ở Linux server khác: copy cùng bundle + `.secrets/relay.json` riêng tư sang Hyper-V host,
 mở SSH tunnel từ host tới collector của Linux server (`127.0.0.1:7789` ở cả hai đầu),
@@ -195,7 +223,10 @@ VM thuộc lab, giữ chúng tắt; không rollback một DC đơn lẻ giữa d
 Raw events/outbox/jobs/cases lưu SQLite WAL; collector đẩy tài liệu thật sang OpenSearch và
 chỉ đánh dấu delivered sau ACK. Sau `retention_days` (mặc định 7), raw đã ACK được nén thành
 `/data/archives/*.jsonl.gz`, fsync và kiểm tra trước khi bỏ khỏi hot SQLite. Bản chưa ACK không bị
-xóa. OpenSearch vẫn giữ lịch sử đã index; file archive có event + SHA-256. Hết disk budget
+xóa. Bằng chứng mới chuyển archive có index theo ID; DFIR và endpoint `/evidence/{id}`
+đọc lại archive sau khi kiểm cả hash file và hash event. Archive hỏng trả lỗi, không coi là
+bằng chứng hợp lệ. Các archive tạo bởi bản cũ chưa có index này cần tra file archive trực tiếp.
+OpenSearch vẫn giữ lịch sử đã index; file archive có event + SHA-256. Hết disk budget
 thì runtime dừng/không nhận thêm bằng chứng, không xóa ngầm. Controller và từng dịch vụ có
 budget riêng; Zeek/indexer cần volume monitoring/backup ở host. Chạy liên tục vô hạn luôn cần
 chính sách dung lượng/luân chuyển sang storage khác, không có bảo đảm vô hạn trên ổ đĩa hữu hạn.
@@ -216,7 +247,7 @@ Job không có receipt hoàn tất cần operator điều tra dữ liệu trư�
 | Indexer | Kiểm thử hợp đồng HTTP/mapping/ACK; không mock thành runtime pass | OpenSearch thật, truy vấn khớp raw IDs |
 | AD/Hyper-V/Sysmon | Parse PowerShell/XML + kiểm tra giao thức queue/receipt | Provision, domain join, event capture, rollback thật |
 | Zeek/audit | Parser/checkpoint/partial line/redaction tests | Capture trên namespace/guest thật |
-| Viewer | Protocol tests, build viewer | Snapshot từ controller container |
+| Viewer | Protocol tests + Chrome mở bằng chứng cả ba đội, kiểm ảnh chụp thật từ worker | Snapshot từ controller container |
 
 `verification.receipt.json` chỉ ghi `runtime_verified=true` khi các check live đạt. File được
 render, unit test pass hoặc HTTP health đơn lẻ không đủ. Chưa tự nhận toàn bộ ba lab đã boot

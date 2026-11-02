@@ -513,3 +513,17 @@ Windows/AD cần host Hyper-V và base VHDX. Tại thư mục gốc bundle trên
 `windows/Provision-Lab.ps1`, `windows/Install-Sensors.ps1`, `windows/Relay-Lab.ps1`
 với tham số trong runbook. Dừng guest bằng `windows/Stop-Lab.ps1 -Bundle . -OnTarget`.
 Không chạy các lệnh provision trên laptop thiếu RAM. `lab validate` không thay cho `lab verify`.
+
+Office SOC mới: bấm agent → mở job để xem PID, process launch/exit, kết quả và hash bằng chứng.
+Client có ảnh trình duyệt gần nhất; tick và job ID cho biết ảnh thuộc lần chạy nào.
+Cửa sổ là tối đa 12 job/agent, không phải giới hạn toàn bộ lịch sử collector.
+
+Nếu Windows job báo `INDETERMINATE`, kiểm tra guest và dừng task cũ trước. Chỉ sau đó
+mới cho agent tiếp tục bằng lệnh operator (chạy trong `BUNDLE/source`):
+
+```powershell
+uv run --no-sync saber lab reconcile-guest --bundle .. --job-id JOB_UUID --reason "Inspected guest and stopped the original task; safe to resume."
+```
+
+Lệnh không đổi kết quả chưa rõ thành thành công. Không tạo job mới để né trạng thái chưa rõ.
+Các thiếu sót còn lại được ghi ở [bảng hoàn thiện SOC](docs/SOC_COMPLETION.md).

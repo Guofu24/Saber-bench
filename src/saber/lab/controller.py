@@ -148,7 +148,9 @@ class Controller:
             cases = [c for c in obs.get("cases", []) if not c.get("responses")]
             if cases and actor.role in ("ir", "content"):
                 if cases[0].get("rule") == "lab-domain-failed-logon":
-                    return "contain_domain_user", {"case_id": cases[0]["id"]}, source
+                    if "contain_domain_user" in allowed:
+                        return "contain_domain_user", {"case_id": cases[0]["id"]}, source
+                    return "evaluate_rule", {"query": {"kind": "windows.event"}}, source
                 return (
                     ("contain" if actor.role == "ir" else "patch"),
                     {"case_id": cases[0]["id"]},

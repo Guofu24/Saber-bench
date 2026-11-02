@@ -338,7 +338,10 @@ def render(spec: LabSpec, out: Path) -> dict[str, Any]:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, dest)
     (out / "lab.json").write_text(spec.model_dump_json(indent=2), encoding="utf-8")
-    shutil.copyfile(root / "docs/SOC_LAB_VI.md", out / "SOC_LAB_VI.md")
+    for name in ("SOC_LAB_VI.md", "SOC_COMPLETION.md"):
+        shutil.copyfile(root / "docs" / name, out / name)
+        (source / "docs").mkdir(exist_ok=True)
+        shutil.copyfile(root / "docs" / name, source / "docs" / name)
     (out / "compose.yaml").write_text(
         yaml.safe_dump(compose(spec), sort_keys=False), encoding="utf-8"
     )
