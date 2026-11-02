@@ -30,6 +30,13 @@ Các checkpoint trên branch `feat/environment-profiles`:
 | `2786a5f` | Yêu cầu đánh giá lại kết luận khi case có chứng cứ mới |
 | `266219f` | Office hiện chuyên môn/task/lifecycle; baseline dùng chuyên môn đang nhận việc |
 | `a268bc1` | Kiểm HTTP đầu cuối SOC/client recovery, smoke 12 chuyên môn và hướng dẫn phối hợp |
+| `f12c211` | Hướng dẫn dùng 12 chuyên môn, kiểm chứng và rollback |
+| `38384cb` | Nhật ký trải nghiệm riêng, skill version bất biến và epoch tồn tại qua restart |
+| `7c67814` | Worker reflection dùng chung quota, replay gate và phát hành lesson |
+| `4cc90a1` | Đổi epoch vô hiệu hóa kế hoạch cũ, giữ trạng thái WAITING/DONE |
+| `729546f` | Snapshot notebook khi đóng episode, chặn note viết muộn cùng tick |
+| `cb1db65` | CLI inspect/export/retry/rollback, suite mẫu, learning-only và office counters |
+| `5ef203d` | Báo cáo usage sau learning batch và tránh cắt mất counters trên UI |
 
 Các commit tài liệu/kiểm thử tiếp theo xem bằng:
 
@@ -80,3 +87,8 @@ Bản mở rộng SOC lưu thêm task, notebook, artifact, rule version và acto
 world database. Code trước mở rộng không hiểu các trạng thái này; không dùng nó để tiếp
 tục world có actor WAITING/DONE hay task đang mở. Giữ bản sao dữ liệu đã dừng và thử bản
 cũ trên world riêng. Revert code không tự hoàn tác một rule, response hoặc task đã chạy.
+
+Phần học lưu thêm journal/episode, proposal, suite, evaluation, skill version/release và
+epoch. `world learning rollback` đổi release head cho epoch tiếp theo, không sửa lịch sử
+và không đổi pin của case đang mở. Git revert không rollback các bản skill lưu trong DB.
+Xem [AGENT_LEARNING_VI](AGENT_LEARNING_VI.md) để phân biệt rollback code, dữ liệu và skill.

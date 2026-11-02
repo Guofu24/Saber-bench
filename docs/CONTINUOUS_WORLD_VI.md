@@ -76,6 +76,11 @@ LLM, shutdown chờ request đang chạy kết thúc (transport timeout 60 giây
 
 ## Kết nối pool Gemini
 
+Từ bản bổ sung [agent learning](AGENT_LEARNING_VI.md), world có journal kết quả riêng,
+worker reflection và replay gate cho skill extension. Worker học dùng chung provider,
+pool theo đội và budget tích lũy; ledger LLM bao gồm các lượt gọi đó. Skill epoch được
+giữ bền qua restart và không đổi khi còn case/task đang mở.
+
 Mặc định là **SCRIPTED**: không đọc key, không gọi model. Bật **HYBRID** bằng lệnh
 explicit có giới hạn số lượt HTTP. Ví dụ dưới đây cho phép tối đa 200 lượt trong
 toàn bộ vòng đời world, bao gồm các lần khởi động lại:

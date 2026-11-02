@@ -52,6 +52,9 @@ thuộc lệnh SABER sau `--`; xem [hướng dẫn world](../docs/CONTINUOUS_WOR
 ## Đọc giao diện world
 
 - Chọn world, lọc Clients/Red Team/Blue Team; tối đa 200 agent, 20 agent mỗi trang.
+- Dòng “học” cho biết số lượt tổng kết / đề xuất / bản phát hành của actor. Phát hành
+  không đồng nghĩa đã đổi bản trong case đang chạy; xem epoch ở `world learning status`.
+  Không xuất nội dung notebook, bài học hay đáp án replay lên viewer.
 - Mỗi actor hiện chuyên môn đã cấu hình, chuyên môn/task đang xử lý và số task
   offered/active/blocked/done. `WAITING` hiện tick thức dậy; `DONE` giữ idle dù request
   suy luận cũ chưa về. Đây là trạng thái actor, khác trạng thái dừng của cả world.

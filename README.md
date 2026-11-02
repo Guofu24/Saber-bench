@@ -138,6 +138,14 @@ Ghidra/IDA/EDR/SIEM ngoài lab vẫn cần adapter và dữ liệu thực. Xem
 
 ## Bật Gemini
 
+Agent có [luồng rút kinh nghiệm](docs/AGENT_LEARNING_VI.md): ghi kết quả riêng → tổng kết
+theo task/case/chu kỳ → đề xuất bài học → replay so bản cũ/mới → phát hành phiên bản skill
+cục bộ khi qua gate. Worker dùng chung budget/pool của đội. Mặc định scripted chỉ ghi
+nhận; reflection cần model. Cần suite do operator cấp để tự đánh giá/phát hành; có
+[mẫu phát triển cho client](config/learning/client-session.json). Agent-office hiển thị
+counters học; case đang chạy giữ phiên bản skill ổn định. Đây chưa phải bằng chứng
+Gemini tự cải thiện chất lượng SOC đầu cuối.
+
 Mọi profile mặc định scripted, không gọi API. Model mặc định: `gemini-3.5-flash-lite`.
 File key do chương trình nạp; không đưa vào Git/bundle.
 
@@ -168,6 +176,7 @@ Xem `llm.successes`, `llm.by_team`, `llm_pools` và nguồn hành động `llm` 
 | `config.json` | Cấu hình giữ ổn định cho world |
 | `report.json` | Tick, kết quả, usage và trạng thái pool |
 | `office.json` | Snapshot cho viewer: roster, nguồn hành động, counter, chỉ số quota |
+| `learning.json` | Trạng thái học, version IDs và epoch; không có nội dung notebook/lesson |
 | `access.jsonl` | Log thao tác ứng dụng, có rotation |
 | `world.sqlite3` | Trạng thái, case, journal và ledger đánh giá |
 | `STOP` | Yêu cầu dừng; tiếp tục bằng resume rõ ràng |
