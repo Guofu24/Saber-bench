@@ -10,7 +10,7 @@ const { normalizeSnapshot, MAX_BYTES } = require('./snapshot');
 const VIEWER = path.join(__dirname, '..', 'viewer', 'index.html');
 const EVENT_TYPES = new Set(['agent', 'task', 'llm_start', 'tool', 'llm_end', 'llm_error', 'handoff', 'process', 'message', 'status']);
 
-function createOffice({ upstreams = {}, config = {}, log = () => {}, readOnly = false }) {
+function createOffice({ upstreams = {}, config = {}, log = () => {}, readOnly = false, readNative = null }) {
   const clients = new Set();
   const history = [];
   const agents = new Map();
@@ -125,6 +125,22 @@ function createOffice({ upstreams = {}, config = {}, log = () => {}, readOnly = 
         res.writeHead(204, { 'access-control-allow-origin': '*' }); return res.end();
       }
       if (req.method === 'GET' && url === '/state') { res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' }); return res.end(JSON.stringify({ worlds: [...worlds.values()] })); }
+      if (req.method === 'GET' && url.startsWith('/native-events?')) {
+        const query = new URL(url, 'http://localhost').searchParams;
+        const world = worlds.get(query.get('world')), actor = query.get('actor');
+        if (!readNative || !world || world.execution_mode !== 'native' || !world.actors.some(a => a.id === actor)) {
+          res.writeHead(404); return res.end('Native telemetry unavailable');
+        }
+        try {
+          const page = await readNative(actor);
+          if (page.world_id !== world.world_id || page.actor_id !== actor) throw new Error('Wrong world');
+          // A file may be ahead of the most recently published snapshot during a tick.
+          page.events = page.events.filter(e => e.tick <= world.tick);
+          page.through_tick = Math.min(page.through_tick, world.tick);
+          res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+          return res.end(JSON.stringify(page));
+        } catch (_) { res.writeHead(404); return res.end('Native telemetry unavailable'); }
+      }
       if (req.method === 'GET' && url === '/health') { res.writeHead(200, { 'content-type': 'application/json' }); return res.end(JSON.stringify({ ok: true, agents: agents.size, stats: analyzer.stats })); }
       if (req.method === 'GET' && (url === '/' || url.startsWith('/?'))) {
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });

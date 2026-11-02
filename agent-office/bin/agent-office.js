@@ -74,8 +74,8 @@ async function main() {
     openai: o.openai || process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1',
     anthropic: o.anthropic || process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com',
   };
-  const { server, emit } = createOffice({ upstreams, config, log: say, readOnly: o.mode === 'watch' });
   const readSnapshot = o.mode === 'watch' ? await snapshotSource(o) : null;
+  const { server, emit } = createOffice({ upstreams, config, log: say, readOnly: o.mode === 'watch', readNative: readSnapshot?.native });
   const port = await listen(server, o.port);
   const base = `http://127.0.0.1:${port}`;
   const env = {

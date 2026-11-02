@@ -115,3 +115,21 @@ def test_transport_failure_is_logged_without_retry_or_success(tmp_path):
     finally:
         runner.close()
         store.close()
+
+
+def test_disk_failure_preserves_applied_event_and_is_not_retried(tmp_path):
+    store = Store(tmp_path)
+    runner = Runner(store, config())
+    try:
+        # A directory at the fixed artifact name makes the real OS write fail.
+        (tmp_path / "workloads" / "client-1" / "last-action.json").mkdir(parents=True)
+        with pytest.raises(RuntimeError, match="not retried"):
+            runner.server.native_act(runner.native, "client-1", 0, Action(tool="browse"))
+        rows = read_events(store, through_tick=0)
+        assert {r["event_id"] for r in rows} == {1}
+        assert len(store.events(through_tick=0)) == 1
+        assert rows[-1]["data"]["exit_code"] != 0
+        assert not any(r["kind"] == "file.write" for r in rows)
+    finally:
+        runner.close()
+        store.close()

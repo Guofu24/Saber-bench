@@ -174,11 +174,15 @@ code{font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:#ffe3a3}
   <div class="foot">World: trạng thái do runtime cung cấp · log của trang đang xem · quota là trạng thái ghi nhận gần nhất. Cảnh 3D minh họa agent, không phải màn hình máy thật.</div>
 </aside>
 <aside id="inspector" class="glass" role="dialog" aria-modal="false" aria-labelledby="inspectorTitle" hidden>
-  <div class="inspector-head"><div><small>HOẠT ĐỘNG ĐÃ THỰC THI · APPLICATION LAB</small><h2 id="inspectorTitle"></h2></div><button id="closeInspector" aria-label="Đóng chi tiết agent">Đóng ×</button></div>
+  <div class="inspector-head"><div><small id="inspectorScope">HOẠT ĐỘNG ĐÃ THỰC THI · APPLICATION LAB</small><h2 id="inspectorTitle"></h2></div><button id="closeInspector" aria-label="Đóng chi tiết agent">Đóng ×</button></div>
   <div id="inspectorRole"></div><div id="inspectorHealth"></div>
   <h3>Diễn biến</h3><p id="traceWindow"></p>
   <div class="trace-controls"><label><input type="checkbox" id="traceRelated" checked> Kèm sự kiện liên quan qua case / mục tiêu</label><button id="traceLatest">Mới nhất</button></div>
   <div id="traceTimeline"></div><div id="traceEvent"></div>
+  <h3>Process · File · DNS · Network</h3>
+  <p id="nativeScope" class="muted"></p>
+  <label><input id="nativeAll" type="checkbox" checked> Lịch sử riêng của agent (tối đa 100 bản ghi)</label>
+  <div id="nativeEvents" aria-live="polite" style="max-height:420px;overflow:auto"></div>
   <h3>Case và phản ứng phòng thủ</h3>
   <p class="muted">Liên kết theo event được dẫn chứng hoặc thao tác gắn với case. Trạng thái case là ghi nhận của đội blue.</p>
   <div id="traceCases"></div>

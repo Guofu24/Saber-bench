@@ -256,7 +256,7 @@ def run_world(
                 click.echo("Learning batch finished or deferred; actor tick was not advanced.")
                 return
             click.echo(
-                f"World: {out.resolve()} | actors={len(config.actors)} | engine={'HYBRID' if llm else 'SCRIPTED'}"
+                f"World: {out.resolve()} | actors={len(config.actors)} | engine={'HYBRID' if llm else 'SCRIPTED'} | execution={config.execution_mode}"
             )
             click.echo(
                 f'Local tool service: {runner.server.url} (authenticated). Stop: saber world stop --out "{out}"'

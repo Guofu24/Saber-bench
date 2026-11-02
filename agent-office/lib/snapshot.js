@@ -20,6 +20,37 @@ function boundedList(v, max) {
   if (!Array.isArray(v) || v.length > max) throw new Error('Invalid trace list');
   return v;
 }
+function normalizeNativePage(v) {
+  const actor = word(v.actor_id, 48);
+  if (!/^[a-zA-Z0-9_-]+$/.test(actor)) throw new Error('Invalid native actor');
+  const tick = integer(v.through_tick), sensor = choice(v.sensor, ['saber-native-v1']);
+  const fields = {
+    'process.start': ['command_line', 'ppid'], 'process.exit': ['exit_code', 'error'],
+    'dns.response': ['name', 'answer', 'server', 'transport', 'bytes'],
+    'network.connect': ['local', 'remote', 'transport'],
+    'http.response': ['method', 'path', 'status', 'bytes', 'duration_ms'],
+    'file.write': ['path', 'bytes'], 'file.read': ['path', 'bytes', 'sha256'],
+  };
+  const numeric = new Set(['ppid', 'exit_code', 'bytes', 'status', 'duration_ms']);
+  const events = boundedList(v.events, 100).map(e => {
+    const kind = choice(e.kind, Object.keys(fields)), data = {};
+    if (e.actor_id !== actor || e.sensor !== sensor || integer(e.tick) > tick) throw new Error('Invalid native provenance');
+    for (const k of fields[kind]) {
+      const value = e.data?.[k];
+      if (value == null && k === 'error') { data[k] = null; continue; }
+      if (numeric.has(k)) {
+        if (!Number.isFinite(value) || (k !== 'exit_code' && value < 0)) throw new Error('Invalid native number');
+        data[k] = value;
+      } else { data[k] = word(value, k === 'command_line' ? 4096 : 256); }
+    }
+    return { id: integer(e.id, 1), actor_id: actor, tick: e.tick, sensor, kind, data,
+      pid: integer(e.pid, 1), capture_id: word(e.capture_id, 64), ts: word(e.ts, 64),
+      event_id: e.event_id == null ? null : integer(e.event_id, 1) };
+  });
+  if (events.some((e, i) => i && (e.id <= events[i - 1].id || e.tick < events[i - 1].tick))) throw new Error('Invalid native order');
+  return { schema_version: choice(v.schema_version, [1]), world_id: word(v.world_id),
+    actor_id: actor, through_tick: tick, limit: choice(v.limit, [100]), sensor, events };
+}
 function normalizeTrace(v, actors, tick) {
   if (v == null) return null; // Older snapshots have no history; never fabricate it.
   const ids = new Set(actors.map(a => a.id));
@@ -75,9 +106,10 @@ function normalizeSnapshot(v) {
   }
   return { type: 'world_snapshot', schema_version: 1, world_id: word(v.world_id), run_id: word(v.run_id),
     profile: choice(v.profile, ['local', 'sandbox', 'vm', 'remote']), engine: choice(v.engine, ['scripted', 'hybrid']),
+    execution_mode: choice(v.execution_mode ?? 'application', ['application', 'native']),
     status: choice(v.status, ['running', 'stopped']), updated_at: number(v.updated_at), tick_seconds: number(v.tick_seconds),
     tick: number(v.tick), actors, trace: normalizeTrace(v.trace, actors, v.tick), actions: counters(v.actions, ACTIONS), llm: counters(v.llm),
     llm_by_team: Object.fromEntries(TEAMS.map(t => [t, counters(v.llm_by_team?.[t])])),
     key_layout: choice(v.key_layout, ['off', 'teams', 'shared']), pools, budget_exhausted: v.budget_exhausted === true };
 }
-module.exports = { normalizeSnapshot, MAX_BYTES };
+module.exports = { normalizeSnapshot, normalizeNativePage, MAX_BYTES };

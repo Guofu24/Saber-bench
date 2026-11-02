@@ -763,6 +763,7 @@ class World:
             return {
                 "world_id": self.store.get("meta", "world_id"),
                 "engine": self.store.get("meta", "engine", "scripted"),
+                "execution_mode": self.config.execution_mode,
                 "labels": ["CONTINUOUS_WORLD", "LOCAL_APPLICATION_LAB", "DEV_SIMULATION_ONLY"],
                 "tick": self.tick,
                 "actors": len(self.actors),

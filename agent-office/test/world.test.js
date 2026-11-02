@@ -5,7 +5,7 @@ const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
 const { createOffice } = require('../lib/server');
-const { normalizeSnapshot, MAX_BYTES } = require('../lib/snapshot');
+const { normalizeSnapshot, normalizeNativePage, MAX_BYTES } = require('../lib/snapshot');
 const { snapshotSource, watchSnapshots } = require('../lib/watch');
 
 function fixture(overrides = {}) {
@@ -34,6 +34,53 @@ test('snapshot validation bounds the roster and strips private data', () => {
   assert.throws(() => normalizeSnapshot(fixture({ actors: [input.actors[0], input.actors[0]] })));
   assert.throws(() => normalizeSnapshot(fixture({ tick: NaN })));
   assert.throws(() => normalizeSnapshot(fixture({ schema_version: 2 })));
+});
+
+function nativeFixture(overrides = {}) {
+  return { schema_version: 1, world_id: 'world-1', actor_id: 'client-1', through_tick: 8,
+    limit: 100, sensor: 'saber-native-v1', events: [{ id: 1, actor_id: 'client-1', tick: 8,
+      sensor: 'saber-native-v1', kind: 'process.start', pid: 123, capture_id: 'capture-1',
+      ts: '2026-11-02T00:00:00Z', event_id: 4,
+      data: { command_line: 'python -I -B native_worker.py', ppid: 12, token: 'SECRET' } }], ...overrides };
+}
+
+test('native protocol keeps measured fields and rejects future or mixed-actor evidence', () => {
+  const data = nativeFixture();
+  assert.doesNotMatch(JSON.stringify(normalizeNativePage(data)), /SECRET/);
+  assert.throws(() => normalizeNativePage({ ...data, through_tick: 7 }));
+  assert.throws(() => normalizeNativePage({ ...data, actor_id: 'other' }));
+  assert.throws(() => normalizeNativePage({ ...data, actor_id: '../keys_pool' }));
+  assert.throws(() => normalizeNativePage({ ...data, events: [data.events[0], data.events[0]] }));
+  assert.throws(() => normalizeNativePage({ ...data, events: Array(101).fill(data.events[0]) }));
+});
+
+test('native watch reads only per-actor public exports and scopes HTTP reads to known world actors', async t => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'office-native-'));
+  const folder = path.join(dir, 'native-office'); await fs.mkdir(folder);
+  const file = path.join(folder, 'client-1.json');
+  t.after(async () => {
+    await fs.unlink(file); await fs.rmdir(folder);
+    await fs.unlink(path.join(dir, 'office.json')); await fs.rmdir(dir);
+  });
+  await fs.writeFile(file, JSON.stringify(nativeFixture()));
+  await fs.writeFile(path.join(dir, 'office.json'), JSON.stringify(fixture({ execution_mode: 'native' })));
+  const read = await snapshotSource({ world: dir });
+  assert.equal((await read.native('client-1')).events[0].pid, 123);
+  await assert.rejects(() => read.native('../keys_pool'));
+  const { server, emit } = createOffice({ readOnly: true, readNative: read.native });
+  emit(await read());
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => { server.closeAllConnections(); server.close(); });
+  const base = `http://127.0.0.1:${server.address().port}/native-events?world=world-1&actor=`;
+  const response = await fetch(base + 'client-1'); assert.equal(response.status, 200);
+  assert.doesNotMatch(await response.text(), /SECRET/);
+  assert.equal((await fetch(base + 'unknown')).status, 404);
+  assert.equal((await fetch(base + '../keys_pool')).status, 404);
+  await fs.writeFile(file, JSON.stringify(nativeFixture({ world_id: 'another-world' })));
+  assert.equal((await fetch(base + 'client-1')).status, 404);
+  await fs.writeFile(file, JSON.stringify(nativeFixture({ through_tick: 9,
+    events: nativeFixture().events.map(e => ({ ...e, tick: 9 })) })));
+  assert.deepEqual((await (await fetch(base + 'client-1')).json()).events, []);
 });
 
 test('optional execution traces retain evidence links and reject forged references', () => {

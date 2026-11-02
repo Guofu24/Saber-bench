@@ -3,6 +3,44 @@ import { actorTrace, describeTool, httpOutcome } from './trace-view.js';
 const $inspector = document.getElementById('inspector');
 const $timeline = document.getElementById('traceTimeline');
 let detailEventId = null, detailSignature = '';
+let nativeRequest = null;
+let nativePanelKey = '';
+
+async function renderNative(world, actor, event) {
+  nativeRequest?.abort();
+  const request = nativeRequest = new AbortController();
+  const panel = document.getElementById('nativeEvents'), hint = document.getElementById('nativeScope');
+  document.getElementById('inspectorScope').textContent = world.execution_mode === 'native'
+    ? 'HOẠT ĐỘNG ĐÃ THỰC THI · NATIVE WORKLOAD + APPLICATION LAB'
+    : 'HOẠT ĐỘNG ĐÃ THỰC THI · APPLICATION LAB';
+  if (world.execution_mode !== 'native') {
+    hint.textContent = 'World này chưa bật native execution. Dữ liệu cũ không có log OS/network để khôi phục.';
+    panel.replaceChildren(); return;
+  }
+  hint.textContent = 'saber-native-v1 · đo process và I/O của workload thật; chưa giám sát toàn hệ điều hành. DNS dùng máy chủ nội bộ, kết nối dùng loopback.';
+  const all = document.getElementById('nativeAll').checked;
+  const key = `${world.world_id}/${actor.id}/${all ? 'all' : event?.id}`;
+  const same = key === nativePanelKey;
+  const expanded = new Set(same ? [...panel.querySelectorAll('details[open]')].map(e => e.dataset.nativeId) : []);
+  const scroll = same ? panel.scrollTop : 0;
+  nativePanelKey = key;
+  if (!same) panel.innerHTML = '<p class="muted">Đang đọc log riêng của agent…</p>';
+  try {
+    const query = new URLSearchParams({ world: world.world_id, actor: actor.id });
+    const response = await fetch(`/native-events?${query}`, { signal: request.signal, cache: 'no-store' });
+    if (!response.ok) throw new Error('unavailable');
+    const page = await response.json();
+    if (nativeRequest !== request || selected?.worldActor?.id !== actor.id || currentWorld()?.world_id !== world.world_id) return;
+    const rows = all ? page.events : page.events.filter(e => e.event_id === event?.id);
+    panel.innerHTML = rows.length ? `<p class="muted">${rows.length} bản ghi · cửa sổ riêng ${page.events.length}/${page.limit}. Lịch sử còn lưu trong SQLite xem bằng lệnh native-logs.</p>` + [...rows].reverse().map(e =>
+      `<details class="trace-case native-row" data-native-id="${e.id}"${expanded.has(String(e.id)) ? ' open' : ''}><summary><b>${esc(e.kind)}</b> · PID ${e.pid} · #${e.id}</summary><p>${esc(e.ts)} · tick ${e.tick} · sự kiện ứng dụng ${e.event_id == null ? 'chưa xác nhận' : `#${e.event_id}`}</p><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(JSON.stringify(e.data, null, 2))}</pre><small>capture ${esc(e.capture_id)}</small></details>`
+    ).join('') : '<p class="muted">Chưa có bản ghi tương ứng trong cửa sổ này. Bật lịch sử riêng để xem các thao tác khác.</p>';
+    panel.scrollTop = scroll;
+  } catch (error) {
+    if (error.name === 'AbortError' || nativeRequest !== request) return;
+    panel.innerHTML = '<p class="muted">Chưa đọc được log native. Dùng viewer mới với watch --world hoặc watch --bundle; kiểm tra agent đã chạy thao tác hay chưa.</p>';
+  }
+}
 
 function selectAgent(agent) {
   selected = agent && selected !== agent ? agent : null;
@@ -19,13 +57,13 @@ function closeInspector() {
 
 function renderActorDetail() {
   const world = currentWorld(), actor = selected?.worldActor;
-  if (!world || !actor) { $inspector.hidden = true; return; }
+  if (!world || !actor) { nativeRequest?.abort(); $inspector.hidden = true; return; }
   $inspector.hidden = false;
   document.getElementById('inspectorHealth').textContent = worldHealth(world) === 'stopped'
     ? 'World đã dừng · xem lại dữ liệu' : worldHealth(world) === 'stale'
       ? 'Mất cập nhật · dữ liệu cuối đã nhận' : 'Đang nhận dữ liệu';
   const scope = document.getElementById('traceRelated').checked;
-  const signature = JSON.stringify([world.world_id, world.run_id, world.updated_at, actor.id, detailEventId, scope]);
+  const signature = JSON.stringify([world.world_id, world.run_id, world.updated_at, actor.id, detailEventId, scope, document.getElementById('nativeAll').checked]);
   if (signature === detailSignature) return;
   detailSignature = signature;
   const focusedEvent = $inspector.contains(document.activeElement)
@@ -38,6 +76,7 @@ function renderActorDetail() {
   const $event = document.getElementById('traceEvent');
   const $cases = document.getElementById('traceCases');
   if (!trace) {
+    renderNative(world, actor, null);
     $window.textContent = 'Snapshot cũ chưa có lịch sử thao tác. Chạy/resume world bằng code mới để xuất lịch sử.';
     $timeline.replaceChildren(); $event.replaceChildren(); $cases.replaceChildren(); return;
   }
@@ -45,6 +84,7 @@ function renderActorDetail() {
   $window.textContent = `${all.length}/${world.trace.limit} sự kiện gần nhất của toàn world${all.length ? ` · tick ${all[0].tick}–${all[all.length - 1].tick}` : ''}. ${trace.own.length} thao tác của agent. Tối đa 12 case và 8 phản ứng/case; đây là cửa sổ dữ liệu, không phải toàn bộ lịch sử.`;
   const events = scope ? trace.events : trace.own;
   const event = detailEventId == null ? trace.own[trace.own.length - 1] : all.find(e => e.id === detailEventId);
+  renderNative(world, actor, event);
   const scroll = $timeline.scrollTop;
   $timeline.innerHTML = events.length ? [...events].reverse().map(e => {
     const who = world.actors.find(a => a.id === e.actor_id);
@@ -76,6 +116,7 @@ $inspector.addEventListener('click', event => {
 document.getElementById('closeInspector').addEventListener('click', closeInspector);
 document.getElementById('traceLatest').addEventListener('click', () => { detailEventId = null; renderActorDetail(); });
 document.getElementById('traceRelated').addEventListener('change', () => renderActorDetail());
+document.getElementById('nativeAll').addEventListener('change', () => renderActorDetail());
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape' && !$inspector.hidden) closeInspector();
 });

@@ -21,7 +21,7 @@ from typing import Any
 DNS_QUESTION = b"\x03lab\x05saber\x04test\x00\x00\x01\x00\x01"
 
 
-def execute(request: dict[str, Any], rows: list[dict[str, Any]]) -> dict[str, Any]:
+def execute(request: dict[str, Any], rows: list[dict[str, Any]], result: dict[str, Any]) -> None:
     def record(kind: str, **data: Any) -> None:
         rows.append({"kind": kind, "ts": datetime.now(UTC).isoformat(), **data})
 
@@ -74,7 +74,8 @@ def execute(request: dict[str, Any], rows: list[dict[str, Any]]) -> dict[str, An
         payload = response.read(1_048_577)
         if len(payload) > 1_048_576:
             raise ValueError("Response exceeds workload limit")
-        result: dict[str, Any] = json.loads(payload)
+        result.update(json.loads(payload))
+        result.setdefault("status", response.status)
         record(
             "http.response",
             method="POST",
@@ -104,7 +105,6 @@ def execute(request: dict[str, Any], rows: list[dict[str, Any]]) -> dict[str, An
     record(
         "file.read", path=path.name, bytes=len(actual), sha256=hashlib.sha256(actual).hexdigest()
     )
-    return result
 
 
 def main() -> None:
@@ -113,7 +113,7 @@ def main() -> None:
     error = None
     try:
         request = json.loads(sys.stdin.buffer.readline(32769))
-        result = execute(request, rows)
+        execute(request, rows, result)
     except Exception as exc:
         # Class name only: exceptions can contain credentials or request bodies.
         error = type(exc).__name__
