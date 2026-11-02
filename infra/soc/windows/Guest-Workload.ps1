@@ -1,6 +1,6 @@
 param([string]$Domain, [string]$FileServer, [ValidateSet('client','red')][string]$Role)
 $ErrorActionPreference = 'Stop'
-if ($Domain -notmatch '^[a-z][a-z0-9-]{0,30}\.test$' -or $FileServer -notmatch '^soc-[a-z0-9-]+$') { throw 'Only the configured lab domain is supported.' }
+if ($Domain -notmatch '^[a-z][a-z0-9-]{0,30}\.test$' -or $FileServer -notmatch '^[a-z][a-z0-9-]{0,14}$') { throw 'Only the configured lab domain is supported.' }
 $folder = 'C:\SaberWork'
 New-Item -ItemType Directory -Path $folder -Force | Out-Null
 Resolve-DnsName ($FileServer + '.' + $Domain) -ErrorAction SilentlyContinue | Out-Null

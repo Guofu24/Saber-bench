@@ -30,6 +30,16 @@ class Search(BaseModel):
     limit: int = Field(default=100, ge=1, le=1000)
 
 
+def cutoff_time(value: str | None) -> str:
+    try:
+        stamp = datetime.fromisoformat(value or now())
+        if stamp.tzinfo is None or stamp.astimezone(UTC) > datetime.now(UTC):
+            raise ValueError("future")
+        return stamp.astimezone(UTC).isoformat(timespec="milliseconds")
+    except ValueError:
+        raise HTTPException(400, "Invalid/future cutoff") from None
+
+
 def flush_index(ledger: Ledger, indexer: str, index: str) -> int:
     if not indexer:
         return 0
@@ -127,9 +137,17 @@ def create_collector(
             if fresh:
                 ledger.put("source_seen:" + event.host, now())
                 if (
-                    source.startswith("soc-")
+                    source in credentials.get("windows_sources", [])
                     and event.kind == "windows.event"
-                    and event.data.get("event_id") == 4625
+                    and event.data.get("channel") == "Security"
+                    and (
+                        event.data.get("event_id") in (4625, 4771)
+                        or (
+                            event.data.get("event_id") == 4776
+                            and str(event.data.get("fields", {}).get("Status", "")).lower()
+                            not in ("", "0", "0x0", "0x00000000")
+                        )
+                    )
                     and event.data.get("fields", {}).get("TargetUserName", "").lower()
                     == "saber-red"
                 ):
@@ -194,14 +212,7 @@ def create_collector(
     @app.post("/search")
     def search(body: Search, authorization: str = Header(default="")) -> dict[str, Any]:
         require_read(authorization)
-        cutoff = body.before or now()
-        try:
-            stamp = datetime.fromisoformat(cutoff)
-            if stamp.tzinfo is None or stamp.astimezone(UTC) > datetime.now(UTC):
-                raise ValueError("future")
-            cutoff = stamp.astimezone(UTC).isoformat(timespec="milliseconds")
-        except ValueError:
-            raise HTTPException(400, "Invalid/future cutoff") from None
+        cutoff = cutoff_time(body.before)
         selected = ledger.events(
             before=cutoff, host=body.host, kind=body.kind, cursor=body.cursor, limit=body.limit
         )
@@ -219,22 +230,23 @@ def create_collector(
         require_read(authorization)
         if not indexer:
             raise HTTPException(503, "Indexer not configured")
-        filters: list[dict[str, Any]] = [
-            {"range": {"ts": {"lte": min(body.before or now(), now())}}}
-        ]
+        filters: list[dict[str, Any]] = [{"range": {"ts": {"lte": cutoff_time(body.before)}}}]
         if body.host:
             filters.append({"term": {"host": body.host}})
         if body.kind:
             filters.append({"term": {"kind": body.kind}})
-        status, data = request(
-            f"{indexer}/{index}/_search",
-            body={
-                "size": body.limit,
-                "sort": [{"ts": "desc"}, {"id": "desc"}],
-                "query": {"bool": {"filter": filters}},
-                **({"search_after": list(body.cursor)} if body.cursor else {}),
-            },
-        )
+        try:
+            status, data = request(
+                f"{indexer}/{index}/_search",
+                body={
+                    "size": body.limit,
+                    "sort": [{"ts": "desc"}, {"id": "desc"}],
+                    "query": {"bool": {"filter": filters}},
+                    **({"search_after": list(body.cursor)} if body.cursor else {}),
+                },
+            )
+        except (OSError, ValueError, ConnectionError):
+            raise HTTPException(503, "Indexer unavailable; raw evidence retained") from None
         if status != 200 or data.get("timed_out") or data.get("_shards", {}).get("failed", 0):
             raise HTTPException(503, "Indexer query failed or partial")
         hits = data["hits"]["hits"]

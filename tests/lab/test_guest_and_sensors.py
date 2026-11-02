@@ -1,9 +1,14 @@
 import json
+import shutil
+import subprocess
 import uuid
+from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from saber.lab.collector import create_collector
+from saber.lab.events import SensorEvent
 from saber.lab.ledger import Ledger, now
 from saber.lab.logship import normalize, scan
 
@@ -11,6 +16,7 @@ from saber.lab.logship import normalize, scan
 def test_windows_evidence_queue_requires_capabilities_and_verified_rollback(tmp_path):
     ledger = Ledger(tmp_path)
     creds = {
+        "windows_sources": ["soc-dc"],
         "sources": {"soc-dc": "sensor", "red": "red-sensor"},
         "read_token": "read",
         "response_token": "respond",
@@ -23,7 +29,11 @@ def test_windows_evidence_queue_requires_capabilities_and_verified_rollback(tmp_
             "host": "soc-dc",
             "kind": "windows.event",
             "sensor": "windows-eventlog-v1",
-            "data": {"event_id": 4625, "fields": {"TargetUserName": "saber-red"}},
+            "data": {
+                "event_id": 4625,
+                "channel": "Security",
+                "fields": {"TargetUserName": "saber-red"},
+            },
         }
         assert (
             client.post(
@@ -151,3 +161,32 @@ def test_zeek_partial_lines_restart_and_raw_audit_provenance(tmp_path):
     )
     assert parsed["sensor"] == "audit-log-v1" and parsed["data"]["serial"] == "42"
     reopened.close()
+
+
+def test_windows_collector_executes_against_explicit_fixture_readers():
+    shell = shutil.which("powershell") or shutil.which("pwsh")
+    if not shell:
+        pytest.skip("PowerShell runtime unavailable for the Windows collector contract")
+    root = Path(__file__).resolve().parents[2]
+    result = subprocess.run(
+        [
+            shell,
+            "-NoProfile",
+            "-NonInteractive",
+            "-File",
+            str(Path(__file__).with_name("windows_collector_fixture.ps1")),
+            "-CollectorScript",
+            str(root / "infra/soc/windows/Collect-Events.ps1"),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=20,
+    )
+    assert result.returncode == 0, "Collector fixture failed; this is not guest runtime acceptance"
+    events = [SensorEvent.model_validate(e) for e in json.loads(result.stdout)]
+    assert len(events) == 3
+    security = next(e for e in events if e.data.get("event_id") == 4625)
+    assert security.data["fields"]["TargetUserName"] == "saber-red"
+    assert security.data["fields"]["Password"] == "[REDACTED]"
+    assert "fixture-sensitive" not in result.stdout
+    assert events[-1].data["part_of_domain"] is True

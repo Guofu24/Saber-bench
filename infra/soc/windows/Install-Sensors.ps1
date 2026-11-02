@@ -39,8 +39,8 @@ foreach ($node in $spec.windows) {
             }
             if ($Role -eq 'workstation') {
                 $workRole = if ($RedWorkstation) { 'red' } else { 'client' }
-                $args = '-NoProfile -NonInteractive -File C:\SaberLab\Guest-Workload.ps1 -Domain ' + $Domain + ' -FileServer ' + $FileServer + ' -Role ' + $workRole
-                $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $args
+                $taskArguments = '-NoProfile -NonInteractive -File C:\SaberLab\Guest-Workload.ps1 -Domain ' + $Domain + ' -FileServer ' + $FileServer + ' -Role ' + $workRole
+                $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $taskArguments
                 $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 1)
                 $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Minutes 1) -MultipleInstances IgnoreNew
                 Register-ScheduledTask -TaskName SABER-Workload -Action $action -Trigger $trigger -Settings $settings -User SYSTEM -RunLevel Highest -Force | Out-Null

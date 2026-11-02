@@ -58,6 +58,10 @@ foreach ($node in $spec.windows) {
         New-VM -Name $name -Generation 2 -MemoryStartupBytes ([long]$node.memory_gb * 1GB) -VHDPath $disk -SwitchName $switchName -Path $root | Out-Null
         Set-VM -Name $name -ProcessorCount $node.cpus -AutomaticCheckpointsEnabled $false -Notes ('SABER managed: ' + $bundlePath)
         Set-VMFirmware -VMName $name -EnableSecureBoot On
+        if ($node.role -eq 'workstation') {
+            Set-VMKeyProtector -VMName $name -NewLocalKeyProtector
+            Enable-VMTPM -VMName $name
+        }
     }
     if ((Get-VM -Name $name).State -ne 'Running') { Start-VM -Name $name | Out-Null }
     # On rerun a promoted DC requires the domain credential.
@@ -80,7 +84,11 @@ foreach ($node in $spec.windows) {
 $session = Open-Guest $dcVM $BaseCredential $domainCredential
 $promoted = Invoke-Command -Session $session -ArgumentList $spec.domain,$DsrmPassword -ScriptBlock {
     param($Domain,$Dsrm)
-    if ((Get-CimInstance Win32_ComputerSystem).DomainRole -ge 4) { return $false }
+    $system = Get-CimInstance Win32_ComputerSystem
+    if ($system.DomainRole -ge 4) {
+        if ($system.Domain -ine $Domain) { throw 'DC belongs to another domain.' }
+        return $false
+    }
     Install-WindowsFeature AD-Domain-Services -IncludeManagementTools | Out-Null
     Install-ADDSForest -DomainName $Domain -SafeModeAdministratorPassword $Dsrm -InstallDns -NoRebootOnCompletion -Force | Out-Null
     return $true
@@ -105,6 +113,8 @@ Invoke-Command -Session $session -ScriptBlock {
     }
     # Domain logon failure events; GUIDs avoid localized audit-policy names.
     auditpol.exe /set /subcategory:'{0CCE9215-69AE-11D9-BED3-505054503030}' /success:enable /failure:enable | Out-Null
+    auditpol.exe /set /subcategory:'{0CCE923F-69AE-11D9-BED3-505054503030}' /success:enable /failure:enable | Out-Null
+    auditpol.exe /set /subcategory:'{0CCE9242-69AE-11D9-BED3-505054503030}' /success:enable /failure:enable | Out-Null
 }
 Remove-PSSession $session
 @{ domain=$spec.domain; dc=$dc.name; provisioned_at=[DateTime]::UtcNow.ToString('o'); runtime_verified=$false } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $root 'domain.receipt.json') -Encoding UTF8

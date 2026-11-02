@@ -26,6 +26,7 @@ RUNTIME_SKILLS = frozenset(
     }
 )
 WORLD_REFERENCE = Path("soc-orchestrator/reference/continuous-world.md")
+RANGE_REFERENCE = Path("soc-orchestrator/reference/soc-lab.md")
 MAX_CASE_CHARS = 64000
 MAX_WORLD_CHARS = 18000
 MD_REFERENCE = re.compile(
@@ -130,7 +131,7 @@ def load_playbook(
     base = root / ".claude/skills"
     paths: tuple[Path, ...]
     if mode == "range":
-        paths = (base / "soc-orchestrator/reference/soc-lab.md",)
+        paths = (base / RANGE_REFERENCE,)
         limit = MAX_WORLD_CHARS
     elif mode == "world":
         paths = (base / WORLD_REFERENCE,)

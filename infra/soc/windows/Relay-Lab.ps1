@@ -22,9 +22,9 @@ if (Test-Path -LiteralPath $stateFile) {
 $collect = [scriptblock]::Create((Get-Content -LiteralPath (Join-Path $bundlePath 'windows\Collect-Events.ps1') -Raw))
 $relayHeaders = @{ Authorization='Bearer ' + $secrets.relay_token }
 function Call-Collector([string]$Path, [hashtable]$Headers, $Body) {
-    $args = @{ Uri=($Collector + $Path); Headers=$Headers; TimeoutSec=20; MaximumRedirection=0; ErrorAction='Stop' }
-    if ($null -ne $Body) { $args.Method='Post'; $args.ContentType='application/json'; $args.Body=[Text.Encoding]::UTF8.GetBytes(($Body | ConvertTo-Json -Depth 12 -Compress)) }
-    Invoke-RestMethod @args
+    $httpArguments = @{ Uri=($Collector + $Path); Headers=$Headers; TimeoutSec=20; MaximumRedirection=0; ErrorAction='Stop' }
+    if ($null -ne $Body) { $httpArguments.Method='Post'; $httpArguments.ContentType='application/json'; $httpArguments.Body=[Text.Encoding]::UTF8.GetBytes(($Body | ConvertTo-Json -Depth 12 -Compress)) }
+    Invoke-RestMethod @httpArguments
 }
 do {
     foreach ($node in $spec.windows) {

@@ -134,18 +134,18 @@ def create_worker(
                 stderr=subprocess.DEVNULL,
                 start_new_session=os.name == "posix",
             )
-            emitter.emit(
-                "process.launch",
-                {
-                    "job_id": job.id,
-                    "pid": process.pid,
-                    "ppid": os.getpid(),
-                    "command_line": subprocess.list2cmdline(argv),
-                    "tool": job.tool,
-                },
-                "saber-executor-v1",
-            )
             try:
+                emitter.emit(
+                    "process.launch",
+                    {
+                        "job_id": job.id,
+                        "pid": process.pid,
+                        "ppid": os.getpid(),
+                        "command_line": subprocess.list2cmdline(argv),
+                        "tool": job.tool,
+                    },
+                    "saber-executor-v1",
+                )
                 output, _ = process.communicate(json.dumps(payload).encode() + b"\n", timeout=30)
                 result = (
                     json.loads(output)
@@ -166,7 +166,10 @@ def create_worker(
                 result = {"status": 502, "error": "Invalid worker output; no automatic retry"}
             finally:
                 if process.poll() is None:
-                    process.kill()
+                    if sys.platform != "win32":
+                        os.killpg(process.pid, signal.SIGKILL)
+                    else:
+                        process.kill()
                     process.wait()
             artifacts = []
             for name in ("browser.png", "read-document.txt", "collected.txt", "evidence.json"):

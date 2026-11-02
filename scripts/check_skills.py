@@ -10,6 +10,7 @@ from typing import Any
 from saber.agents.skills import (
     MD_REFERENCE,
     RUNTIME_SKILLS,
+    RANGE_REFERENCE,
     load_playbook,
     read_skill,
     skill_resources,
@@ -47,7 +48,9 @@ def audit(root: Path) -> dict[str, Any]:
                     resources=len(paths),
                     case_chars=len(load_playbook(name, root=root)),
                     world_chars=len(load_playbook(name, mode="world", root=root)),
+                    range_chars=len(load_playbook(name, mode="range", root=root)),
                 )
+                resources.add((base / RANGE_REFERENCE).resolve())
             else:
                 # Development instructions intentionally refer to repository-root docs/tasks.
                 for ref in MD_REFERENCE.findall(body):

@@ -52,6 +52,15 @@ def verify_live(bundle: Path, endpoint: str = "http://127.0.0.1:7789") -> dict[s
     checks["evidence_linked_response"] = code == 200 and any(
         c.get("responses") for c in cases.get("cases", [])
     )
+    if spec.windows:
+        checks["domain_response_verified_with_rollback"] = code == 200 and any(
+            c.get("rule") == "lab-domain-failed-logon"
+            and any(
+                r.get("action") == "contain_domain_user" and r.get("verified") is True
+                for r in c.get("responses", [])
+            )
+            for c in cases.get("cases", [])
+        )
     checks["enforced_denial_observed"] = any(
         e["kind"] in ("file.access_denied", "auth.denied") for e in events
     )
