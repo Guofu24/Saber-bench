@@ -1,8 +1,8 @@
 # Skills: phạm vi, cách nạp và kiểm tra
 
 Repo có **18 skills** trong `.claude/skills`: **15 sổ tay nghiệp vụ** cho agent và
-**3 workflow phát triển**. Có **25 tài liệu tham chiếu** được liên kết từ các skills
-nghiệp vụ. Skill là hướng dẫn cho model; quyền thực thi do runtime/tool server kiểm
+**3 workflow phát triển**. Có **34 tài liệu tham chiếu** trong audit nghiệp vụ, gồm
+contract world/range và 8 reference DFIR mới. Skill là hướng dẫn cho model; quyền thực thi do runtime/tool server kiểm
 soát, không do nội dung Markdown cấp.
 
 Rà cấu trúc không đủ để xác nhận nghiệp vụ. [Báo cáo rà nội dung](SKILLS_REVIEW_VI.md) đối chiếu yêu cầu client/red/blue
@@ -38,15 +38,16 @@ và `gate-review` giữ `disable-model-invocation: true`: đây là trường h�
 Validator dành riêng cho định dạng Codex có thể không nhận trường này; không xóa
 chính sách gọi skill chỉ để làm validator khác hệ thống báo xanh.
 
-## Hai chế độ nạp
+## Ba chế độ nạp
 
-Loader chung là `src/saber/agents/skills.py`. Population, benchmark specialist và
-continuous world đều dùng loader này, với ngữ cảnh khác nhau:
+Loader chung là `src/saber/agents/skills.py`. Population, benchmark specialist,
+continuous world và SOC lab đều dùng loader này, với ngữ cảnh khác nhau:
 
 | Chế độ | Nội dung model nhận | Giới hạn |
 |---|---|---|
 | `case` — population / benchmark B2 | Body `SKILL.md` và nội dung các tài liệu được tham chiếu, đi theo liên kết, loại trùng; bỏ hướng dẫn riêng của world | 64.000 ký tự |
 | `world` — continuous world có model | Body theo vai và hợp đồng application lab dùng chung | 18.000 ký tự |
+| `range` — SOC lab | Body theo vai và hợp đồng executor/collector/analysis/SOAR của lab | 18.000 ký tự |
 
 World không có filesystem tool để model tự mở file tham chiếu. Loader đưa trực tiếp
 [hợp đồng world](../.claude/skills/soc-orchestrator/reference/continuous-world.md)
@@ -72,14 +73,39 @@ tool; chúng không chứng minh model hiểu hoặc làm theo skill một cách
 
 ## Bundle local / sandbox / VM / remote
 
-`env render` xuất 15 entrypoint và toàn bộ 25 tài liệu tham chiếu nghiệp vụ được khai
-báo, theo đường dẫn tương đối. Hash được ghi vào manifest. File Markdown không được
+`env render` xuất 15 entrypoint và toàn bộ tài liệu tham chiếu nghiệp vụ được khai
+báo; `lab render` bổ sung contract range. Các đường dẫn giữ tương đối, hash được ghi vào manifest. File Markdown không được
 tham chiếu, workflow phát triển, key pool và dữ liệu run không được tự động đóng gói.
 Thiếu tài liệu bắt buộc thì export thất bại thay vì sinh bundle thiếu chuyên môn.
 
 Bundle là bản chụp source lúc render. Sửa skill trong checkout không cập nhật một
 container/bundle đang dùng bản cũ; cần export/rebuild theo quy trình môi trường.
 Bundle mới có Compose project/volume mới: không tự chuyển dữ liệu world cũ.
+
+## DFIR mở rộng từ handbook
+
+[Review handbook](DFIR_HANDBOOK_REVIEW_VI.md) ghi lỗi xác nhận được, nguồn đối chiếu và phần không thể
+suy thành năng lực thực thi. [Skill DFIR](../.claude/skills/soc-dfir/SKILL.md) có luồng nhận case →
+giả thuyết → thu/QC → phân tích → scope/impact → handoff → learning. Tám reference gồm:
+
+| Reference | Nội dung |
+|---|---|
+| `acquisition` | Chọn phương pháp, volatility/risk, manifest/hash/custody, xử lý partial/mismatch |
+| `host-forensics` | Windows/Linux/macOS, execution/session/persistence, artifact caveats |
+| `memory-malware` | Symbols/plugin, injection alternatives, static/dynamic boundary và analysis receipts |
+| `network-identity` | DNS/PCAP/flow/email, AD/Entra, session/token/grant và impact |
+| `cloud-containers` | AWS/Azure/GCP/SaaS/Kubernetes/CI-CD; phạm vi OT/mobile/appliance |
+| `timeline-reporting` | Time uncertainty, entity graph, confidence, 12 nhóm hồ sơ và bàn giao |
+| `incident-playbooks` | 12 tình huống, dữ liệu cần thu, giả thuyết đối lập và tiêu chí kết luận |
+| `queries-validation` | Query tái lập, pagination, parser/negative controls và tiêu chí đánh giá hành vi |
+
+`case` nạp cả tám reference. `world`/`range` nhận bản cốt lõi trong entrypoint và contract tương ứng;
+runtime không có filesystem tool để tự đọc tám tài liệu sâu. Không quảng cáo chỉ thêm liên kết là model
+đã được nạp toàn bộ handbook. Scripted policy không tự đổi hành vi khi sửa Markdown.
+
+World đang chạy giữ epoch/skill version đã chụp; cập nhật source không thay prompt giữa case.
+Muốn thử baseline mới, tạo world/bundle mới; với learning release dùng quy trình activation/rollback hiện có.
+Bundle đã render cần render/rebuild lại để mang theo skill mới. Không chép skill đè vào bundle có manifest hash.
 
 ## Một lệnh kiểm tra
 
@@ -99,7 +125,7 @@ Kiểm thử phần nạp prompt, xuất bundle và runtime:
 ```powershell
 uv run pytest tests/unit/test_skills.py tests/unit/test_llm_solver.py tests/world tests/population tests/environments
 uv run ruff check src tests scripts
-uv run ruff format --check src tests
+uv run ruff format --check src tests scripts
 uv run mypy
 uv run python scripts/validate_catalog.py
 ```

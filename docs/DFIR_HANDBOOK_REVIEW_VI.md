@@ -92,3 +92,26 @@ không chuyển thành quyền mới, thời hạn pháp lý mặc định hay c
 - Chỉ trạng thái hoàn tất cùng receipt/evidence mới chứng minh thực thi; queued/failed/unavailable khác clean.
 - Kiểm tra cấu trúc/prompt không phải kiểm thử chất lượng suy luận của Gemini. Cần case hợp lệ và
   golden datasets/negative controls để đánh giá từng domain trước khi tuyên bố năng lực đầy đủ.
+
+## Kết quả triển khai và kiểm tra
+
+Đã mở rộng [soc-dfir](../.claude/skills/soc-dfir/SKILL.md) với 8 reference chuyên sâu,
+12 thẻ tình huống và 12 nhóm hồ sơ; thêm quy trình xử lý hash mismatch, partial acquisition,
+clock uncertainty, thiếu audit/data access, benign alternatives và job chưa hoàn tất.
+Đã cập nhật README và [hướng dẫn nạp skill](SKILLS_VI.md); giữ nguyên API/tool permissions và catalog.
+
+| Kiểm tra offline | Kết quả |
+|---|---|
+| Skill frontmatter và validator repository | PASS: 18 skills, 15 nghiệp vụ, 34 reference; không tài liệu bị bỏ rơi |
+| Prompt DFIR `case` | 56.297 / 64.000 ký tự, gồm reference đầy đủ |
+| Prompt DFIR `world` / `range` | 17.041 / 12.031 ký tự, mỗi mode dưới trần 18.000 |
+| Tests skill/solver/specialties/bundle/deployment/learning | 59 passed, không failure/error/skip |
+| Ruff lint / format | PASS; 305 file đã đúng format |
+| Mypy Linux / Windows | PASS; 200 source files mỗi nền tảng |
+| Frozen catalog | PASS: 55 nhóm NICE, 175 subtasks; không đổi đáp án |
+| Ví dụ PowerShell mới | Parse syntax PASS, không thực thi thu dữ liệu trên máy |
+
+Artifact local: `runs/dfir-handbook-review/skills-expanded.json` và
+`runs/dfir-handbook-review/tests.xml`. Không gọi provider, không đọc key pool,
+không triển khai cloud/VM hoặc chạy acquisition thật trong đợt sửa skill này.
+Các ca hành vi ở reference `queries-validation` là tiêu chí đánh giá tiếp theo, không phải kết quả Gemini đã đạt.

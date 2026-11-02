@@ -249,9 +249,10 @@ start container hoặc triển khai trong guest/server riêng. Không có `READY
 
 ## Kiểm thử và rollback
 
-Skills có kiểm tra riêng: 18 skills, 15 sổ tay nghiệp vụ và 25 tài liệu tham chiếu.
-World nạp hướng dẫn application lab; population/benchmark nạp tài liệu theo case.
+Skills có kiểm tra riêng: 18 skills, 15 sổ tay nghiệp vụ và 34 tài liệu tham chiếu.
+World/range nạp hướng dẫn cốt lõi cùng contract tương ứng; population/benchmark nạp tài liệu theo case.
 Bundle mang theo các reference cần thiết. Xem [hướng dẫn skills](docs/SKILLS_VI.md).
+DFIR có 8 reference chuyên sâu và 12 playbook; xem [review handbook và giới hạn thực thi](docs/DFIR_HANDBOOK_REVIEW_VI.md).
 Đã có [rà soát nội dung theo yêu cầu và catalog](docs/SKILLS_REVIEW_VI.md): sửa các quy tắc kết luận thiếu bằng
 chứng và bổ sung công việc/bàn giao qua nhiều lượt. PASS cấu trúc chưa chứng minh chất lượng suy luận model
 hoặc tích hợp công cụ SOC thật.
