@@ -120,6 +120,21 @@ URL được in ra, thường là `http://127.0.0.1:7788`. Viewer hiển thị t
 tool cuối, HTTP status, nguồn `llm` / `scripted` / `scripted-fallback`, usage và counters
 học. Viewer chỉ đọc snapshot, không khởi động agents hay gọi model; hoạt ảnh 3D minh họa.
 
+**Xem cụ thể red tấn công / blue phản ứng:** lọc Red Team, bấm robot, màn hình/bàn
+hoặc thẻ `red-access` / `red-impact`. Bảng chi tiết có timeline; bấm một event để xem
+agent → công cụ → mục tiêu → HTTP status, nguồn `llm`/scripted và case liên quan.
+Phần dưới hiển thị phản ứng blue có bằng chứng. Escape/nút Đóng để quay lại;
+checkbox cho phép chỉ xem thao tác của agent hoặc kèm sự kiện liên quan.
+
+Demo scripted đã chuẩn bị trên máy này, có thể xem ngay mà không gọi Gemini:
+
+```powershell
+node agent-office/bin/agent-office.js watch --world runs/office-inspector-demo --open
+```
+
+Nếu máy khác chưa có demo, tạo một world mới theo mục 2 và chạy ít nhất 18 tick.
+Hướng dẫn từng bước: [chi tiết Agent Office](agent-office/README.md).
+
 Xem báo cáo mới nhất:
 
 ```powershell
@@ -144,7 +159,11 @@ Get-Content runs/my-world/access.jsonl -Tail 30 -Wait
 
 Trong runtime world thông thường, log được xuất sau tick. Smoke learning gọi trực tiếp
 các bước kiểm thử nên xem `live-learning-check.json` của script để biết hành động đã chạy.
-Office chưa có timeline ghép toàn bộ chuỗi tấn công → điều tra → phòng thủ.
+Office có timeline theo agent/case trong cửa sổ tối đa 200 event gần nhất toàn world,
+12 case, 50 evidence IDs trong cửa sổ/case và 8 phản ứng cuối/case; không phải toàn bộ
+lịch sử. Snapshot cũ báo chưa có trace: chạy/resume bằng code mới để xuất dữ liệu.
+HTTP thành công không tự chứng minh tấn công thành công. Đây là thao tác trong lab,
+chưa phải video desktop/terminal của máy riêng.
 
 ## 5. Dừng, tiếp tục và resume actor
 

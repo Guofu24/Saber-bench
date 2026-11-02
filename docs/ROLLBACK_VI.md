@@ -40,6 +40,9 @@ Các checkpoint trên branch `feat/environment-profiles`:
 | `646c1aa` | Hướng dẫn luồng học, replay gate và vòng đời phiên bản |
 | `2fa2123` | Harness Gemini thật có budget, lập kế hoạch/reflection/replay và log chỉ có metadata |
 | `725740d` | Probe replay có nguồn operator, giữ nguyên NO_LESSON và budget tích lũy |
+| `ef33025` | Notes tra nhanh các lệnh vận hành client/red/blue |
+| `8b20bc4` | Trace thao tác có giới hạn và phản ứng case đã lọc cho Agent Office |
+| `008576a` | Bấm robot/màn hình/thẻ để xem thao tác, mục tiêu và phản ứng phòng thủ |
 
 Các commit tài liệu/kiểm thử tiếp theo xem bằng:
 

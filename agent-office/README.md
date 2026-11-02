@@ -71,16 +71,61 @@ thuộc lệnh SABER sau `--`; xem [hướng dẫn world](../docs/CONTINUOUS_WOR
 - Mỗi agent có tool cuối, HTTP status, tick và nguồn `llm`, `scripted` hoặc
   `scripted-fallback`. “Hoạt động tick” gồm agent vừa có hành động hoặc chờ suy luận;
   hoạt ảnh 3D chỉ minh họa. Log bên phải theo trang đang xem, giữ tối đa 200 dòng.
+- Bấm **robot, màn hình/bàn hoặc thẻ agent** để mở bảng chi tiết. Có thể dùng Tab +
+  Enter trên thẻ; Escape hoặc nút Đóng để quay lại. Bảng áp dụng cho cả client/red/blue.
 - `viewer online` chỉ xác nhận trình duyệt nối được viewer. Runtime có trạng thái
   riêng: đang chạy, đã dừng, hoặc mất cập nhật/chưa rõ. Mất heartbeat quá
   `max(30 giây, 3 × tick_seconds + 5 giây)` được đánh dấu cũ. Watch đọc mỗi 2 giây.
 
 `office.json` được ghi nguyên tử khi khởi động, sau mỗi tick và lúc dừng; chứa roster,
-counter và chỉ số quota. Không chứa raw key, bearer, prompt, nội dung tài liệu hay
+counter, chỉ số quota và trace thao tác đã lọc. Không chứa raw key, bearer, prompt, nội dung tài liệu hay
 plan riêng. Đây là màn hình **operator**, không cấp endpoint này cho agent. `watch`
 chỉ đọc, tắt proxy/ingest; không điều khiển world, SIEM/SOAR hay desktop máy thật.
 Nếu xem world cũ không có snapshot, chạy/resume bằng code mới. Khi render bundle mới,
 giữ nguyên dữ liệu cũ và làm theo [hướng dẫn môi trường](../docs/ENVIRONMENTS_VI.md).
+
+## Bấm vào red team để xem tấn công và phản ứng blue
+
+1. Chọn đúng world, lọc **Red Team**, bấm agent như `red-access` hoặc `red-impact`.
+2. Bấm một dòng trong **Diễn biến** để xem event ID, tick, nguồn quyết định và sơ đồ
+   **agent → công cụ → mục tiêu**, kèm HTTP status. Nút **Mới nhất** theo thao tác mới
+   nhất của agent; chọn một event cụ thể sẽ giữ lựa chọn khi snapshot tiếp theo tới.
+3. Checkbox **Kèm sự kiện liên quan qua case / mục tiêu** bật các sự kiện có liên kết
+   bằng chứng, cùng case hoặc nhắm trực tiếp tài khoản của agent. Không ghép sự kiện
+   chỉ vì cùng tick hoặc cùng tên dịch vụ.
+4. **Case và phản ứng phòng thủ** hiển thị event bằng chứng và các phản ứng đã ghi nhận
+   trong case, ví dụ `quarantine`, `contain`, `restore`. Bấm số event để xem chi tiết.
+
+HTTP 200/201 chỉ xác nhận yêu cầu thành công; không tự kết luận xâm nhập thành công.
+Dòng “Thay đổi đã được xác minh lúc thực thi” lấy từ kết quả phản ứng của runtime,
+không khẳng định biện pháp vẫn có hiệu lực ở tick hiện tại. Trạng thái case là ghi
+nhận của blue, không xuất ground truth của evaluator. Trace không có raw arguments,
+response body, notebook hay nội dung trao đổi riêng. Nguồn `unknown` nghĩa là không
+có journal xác nhận nguồn quyết định; không tự gán direct HTTP cho LLM.
+
+Cửa sổ chứa tối đa **200 event gần nhất toàn world**, **12 case liên quan**,
+**50 evidence IDs đang có trong cửa sổ/case** và **8 phản ứng cuối/case**. Bảng ghi rõ
+số dữ liệu đang xem; event bị xoay khỏi cửa sổ sẽ báo không còn thay vì thay bằng event
+khác. Xem toàn bộ lịch sử bằng log/database/archive của world theo quyền operator.
+Snapshot cũ vẫn xem được roster và báo chưa có trace; cần chạy/resume với code mới
+để sinh trace. Watch không sửa database hay tự chạy world.
+
+Demo scripted có sẵn trên máy phát triển trong `runs/office-inspector-demo`:
+
+```powershell
+node agent-office/bin/agent-office.js watch --world runs/office-inspector-demo --open
+```
+
+Nếu chưa có demo, tạo thư mục mới và chạy 18 tick, không cần Gemini:
+
+```powershell
+uv run saber world init --out runs/my-inspector-demo --clients 2 --tick-seconds 0.1
+uv run saber world run --out runs/my-inspector-demo --ticks 18
+node agent-office/bin/agent-office.js watch --world runs/my-inspector-demo --open
+```
+
+Đây là thao tác HTTP và thay đổi trạng thái trong application lab. Bảng không stream
+desktop/terminal của VM, và không dựng lại màn hình tấn công hệ điều hành chưa chạy.
 
 ## Proxy cho repo khác / population cũ
 
@@ -211,6 +256,7 @@ lib/snapshot.js         schema snapshot đã lọc, giới hạn 200 actor
 lib/watch.js            đọc file local hoặc snapshot container
 viewer/index.html       văn phòng 3D đã build (three.js inline, chạy offline)
 viewer-src/             mã nguồn viewer; world-state.js chứa selector có kiểm thử
+viewer-src/inspector.js bảng chi tiết agent; trace-view.js chọn sự kiện theo bằng chứng
 test/                   test protocol, watcher, trạng thái và browser smoke tùy chọn
 examples/               mock LLM + repo demo multi-agent
 ```
@@ -241,3 +287,14 @@ node agent-office/test/browser-smoke.cjs runs/world/office.json runs/office-brow
 Đầu vào cần snapshot của world **đã dừng**. Test kiểm tra roster đó rồi dùng dữ liệu
 thử để kiểm tra 200 agent, filter, quota, stale, resume và mobile; lưu ảnh cùng
 `verification.json`. Dữ liệu thử không phải bằng chứng 200 agent đã chạy workload.
+Nếu snapshot có trace và actor `red-impact` đã thực thi `register_job`, test kiểm thêm
+bảng chi tiết, liên kết case/phản ứng, lọc thao tác riêng và cú bấm vào bàn 3D thật.
+Một snapshot thử riêng kiểm việc hiển thị target như văn bản, không thực thi HTML.
+Dùng demo 18 tick ở trên cho nhánh kiểm tra này.
+
+Kiểm chứng ngày 2026-11-02: **121 test Python** (`tests/world`, `tests/environments`,
+`tests/population/test_office.py`), **11 test JavaScript**, build viewer và Chrome smoke
+đều qua; Ruff và mypy trên module Python thay đổi cũng qua. Demo scripted có 11 agent,
+162 thao tác, 3 case và 5 phản ứng xác minh. Không gọi Gemini cho lượt kiểm tra UI này.
+Artifact local: `runs/office-inspector-check/verification.json`, `red-agent-inspector.png`,
+`mobile-inspector.png`; snapshot demo ở `runs/office-inspector-demo/office.json`.

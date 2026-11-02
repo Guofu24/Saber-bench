@@ -212,6 +212,11 @@ container. VM/server dùng `watch --world` tại máy đích và SSH forward c�
 Chi tiết trạng thái heartbeat, STOP/resume và cách đọc counter ở
 [Agent Office README](../agent-office/README.md).
 Viewer không được cấp quyền đọc database hay ground truth.
+Runtime xuất thêm trace đã lọc vào `office.json`: bấm robot/màn hình/thẻ agent để xem
+200 event gần nhất toàn world và case/phản ứng có liên kết bằng chứng. Trace không
+chứa raw arguments, nội dung response, notebook hay nhãn evaluator; phản ứng được
+xác minh tại tick thực thi, không cam kết hiệu lực kéo dài. Chi tiết và demo ở
+[Agent Office](../agent-office/README.md).
 
 ## Dữ liệu và đánh giá
 
