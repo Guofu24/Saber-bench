@@ -10,6 +10,13 @@ async function renderNative(world, actor, event) {
   nativeRequest?.abort();
   const request = nativeRequest = new AbortController();
   const panel = document.getElementById('nativeEvents'), hint = document.getElementById('nativeScope');
+  if (world.execution_mode === 'range') {
+    document.getElementById('inspectorScope').textContent = 'HOẠT ĐỘNG ĐÃ THỰC THI · SOC LAB';
+    const e = actor.executor;
+    hint.textContent = 'Job chạy tại executor riêng. Log đầy đủ và bằng chứng Sysmon/Zeek xem trong SOC; bên dưới là receipt gần nhất của agent.';
+    panel.innerHTML = e ? `<div class="trace-case"><b>${esc(e.host || 'Chưa nhận receipt')}</b><p>PID ${e.pid ?? '—'} · exit ${e.exit_code ?? '—'}</p><p>Job ${esc(e.job_id || '—')}</p>${e.pending ? '<p>Đang chờ kết quả hoặc đối soát job; chưa xác nhận hiệu ứng.</p>' : ''}<ul>${e.artifacts.map(f => `<li><b>${esc(f.name)}</b> · ${f.bytes} bytes<pre style="white-space:pre-wrap;overflow-wrap:anywhere">SHA-256 ${esc(f.sha256)}</pre></li>`).join('')}</ul></div>` : '<p>Chưa nhận receipt thực thi.</p>';
+    return;
+  }
   document.getElementById('inspectorScope').textContent = world.execution_mode === 'native'
     ? 'HOẠT ĐỘNG ĐÃ THỰC THI · NATIVE WORKLOAD + APPLICATION LAB'
     : `HOẠT ĐỘNG ĐÃ THỰC THI · ${executionName(world).toUpperCase()}`;

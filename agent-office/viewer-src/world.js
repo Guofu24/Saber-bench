@@ -11,6 +11,7 @@ const $worldPanel = document.getElementById('worldPanel');
 const $teamMetrics = document.getElementById('teamMetrics');
 const currentWorld = () => worlds.get(worldId);
 const executionName = w => w.execution_mode === 'native' ? 'Native workload'
+  : w.execution_mode === 'range' ? 'SOC lab · remote executors'
   : w.execution_mode === 'application' ? 'Application lab' : 'Chưa rõ chế độ';
 const short = n => Number(n || 0).toLocaleString('vi-VN');
 

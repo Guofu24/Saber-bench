@@ -96,6 +96,17 @@ function normalizeSnapshot(v) {
     last_tool: a.last_tool == null ? null : word(a.last_tool),
     last_status: a.last_status == null ? null : number(a.last_status),
     source: choice(a.source, ['none', 'llm', 'scripted', 'scripted-fallback']),
+    ...(a.executor ? { executor: {
+      host: a.executor.host == null ? null : word(a.executor.host, 80),
+      pid: a.executor.pid == null ? null : integer(a.executor.pid, 1),
+      job_id: a.executor.job_id == null ? null : word(a.executor.job_id, 36),
+      exit_code: a.executor.exit_code == null ? null : integer(a.executor.exit_code, -255),
+      pending: a.executor.pending === true,
+      artifacts: boundedList(a.executor.artifacts ?? [], 4).map(f => ({
+        name: choice(f.name, ['browser.png', 'read-document.txt', 'collected.txt', 'evidence.json']),
+        bytes: integer(f.bytes), sha256: /^[a-f0-9]{64}$/.test(f.sha256) ? f.sha256 : (() => { throw new Error('Invalid artifact digest'); })(),
+      })),
+    }} : {}),
   }));
   if (new Set(actors.map(a => a.id)).size !== actors.length) throw new Error('Duplicate actor');
   const pools = {};
@@ -106,7 +117,7 @@ function normalizeSnapshot(v) {
   }
   return { type: 'world_snapshot', schema_version: 1, world_id: word(v.world_id), run_id: word(v.run_id),
     profile: choice(v.profile, ['local', 'sandbox', 'vm', 'remote']), engine: choice(v.engine, ['scripted', 'hybrid']),
-    execution_mode: choice(v.execution_mode ?? 'unknown', ['application', 'native', 'unknown']),
+    execution_mode: choice(v.execution_mode ?? 'unknown', ['application', 'native', 'range', 'unknown']),
     status: choice(v.status, ['running', 'stopped']), updated_at: number(v.updated_at), tick_seconds: number(v.tick_seconds),
     tick: number(v.tick), actors, trace: normalizeTrace(v.trace, actors, v.tick), actions: counters(v.actions, ACTIONS), llm: counters(v.llm),
     llm_by_team: Object.fromEntries(TEAMS.map(t => [t, counters(v.llm_by_team?.[t])])),

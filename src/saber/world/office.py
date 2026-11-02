@@ -82,6 +82,20 @@ def snapshot(
                     "last_tool": memory.get("last_tool"),
                     "last_status": memory.get("last_status"),
                     "source": memory.get("source", "none"),
+                    **(
+                        {
+                            "executor": {
+                                "host": memory.get("host"),
+                                "pid": memory.get("pid"),
+                                "job_id": memory.get("job_id"),
+                                "exit_code": memory.get("exit_code"),
+                                "artifacts": memory.get("artifacts", []),
+                                "pending": actor.id in pending,
+                            }
+                        }
+                        if config.execution_mode == "range"
+                        else {}
+                    ),
                 }
             )
     return {

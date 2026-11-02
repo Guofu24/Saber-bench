@@ -25,6 +25,7 @@ test('snapshot validation bounds the roster and strips private data', () => {
   assert.equal(normalizeSnapshot(fixture()).execution_mode, 'unknown');
   assert.equal(normalizeSnapshot(fixture({ execution_mode: 'application' })).execution_mode, 'application');
   assert.equal(normalizeSnapshot(fixture({ execution_mode: 'native' })).execution_mode, 'native');
+  assert.equal(normalizeSnapshot(fixture({ execution_mode: 'range' })).execution_mode, 'range');
   const input = fixture({ credential: 'SECRET', documents: ['PRIVATE'] });
   input.actors[0].note = 'PRIVATE'; input.pools.client.key = 'SECRET';
   input.actors[0].learning_counts = { episodes: 3, proposals: 2, published: 1, lesson: 'PRIVATE' };
