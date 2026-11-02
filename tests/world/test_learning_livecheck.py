@@ -4,6 +4,8 @@ import importlib.util
 import json
 from pathlib import Path
 
+import pytest
+
 from saber.agents.gemini import KeyPool
 from saber.world.key_layout import TeamKeyLayout
 from saber.world.quota import TeamQuotaProvider
@@ -11,7 +13,8 @@ from saber.world.runtime import Runner
 from saber.world.store import Store
 
 
-def test_live_harness_exercises_gate_without_faking_an_improvement(tmp_path, capsys):
+@pytest.mark.parametrize("no_lesson", [False, True])
+def test_live_harness_exercises_gate_without_faking_an_improvement(tmp_path, capsys, no_lesson):
     script = Path(__file__).resolve().parents[2] / "scripts/smoke_learning_gemini.py"
     spec = importlib.util.spec_from_file_location("learning_livecheck", script)
     module = importlib.util.module_from_spec(spec)
@@ -29,6 +32,8 @@ def test_live_harness_exercises_gate_without_faking_an_improvement(tmp_path, cap
                     "evidence_ids": [data["episode"]["records"][0]["event_id"]],
                 }
             }
+            if no_lesson:
+                value = {"lesson": None}
         elif "work_request" in data["observation"]:
             value = {
                 "actions": [
@@ -63,10 +68,17 @@ def test_live_harness_exercises_gate_without_faking_an_improvement(tmp_path, cap
         )
         module.install_suite(store, raw_suite)
         result = module.exercise(runner, provider)
-        assert result["pipeline_completed"] is True
+        assert result["pipeline_completed"] is not no_lesson
         assert result["skill_improved_on_submitted_replay"] is False
-        assert result["evaluations"][0]["status"] == "REJECTED"
-        assert all(c["base_ok"] and c["candidate_ok"] for c in result["evaluations"][0]["checks"])
+        if no_lesson:
+            probe = module.replay_probe(runner, provider)
+            assert probe["completed"] and probe["origin"] == "operator_smoke_probe"
+            assert all(e["status"] == "NO_LESSON" for e in result["episodes"])
+            evaluation = probe["evaluation"]
+        else:
+            evaluation = result["evaluations"][0]
+        assert evaluation["status"] == "REJECTED"
+        assert all(c["base_ok"] and c["candidate_ok"] for c in evaluation["checks"])
         assert store.get("meta", "llm_usage")["attempts"] == 18
         assert "unit-secret" not in capsys.readouterr().out
         assert set(result["plans"]) == {"client", "red", "blue"}

@@ -167,6 +167,46 @@ def exercise(runner: Runner, provider: TeamQuotaProvider) -> dict[str, Any]:
     }
 
 
+def replay_probe(runner: Runner, provider: TeamQuotaProvider) -> dict[str, Any]:
+    """Exercise the gate with operator advice; never relabel it as model learning."""
+    episode = next(
+        e
+        for e in runner.store.items("learning-episodes").values()
+        if e["actor_id"] == "check-client"
+    )
+    evidence_id = next(r["event_id"] for r in episode["records"] if r["status"] == 401)
+    with runner.store.transaction():
+        proposal = learning.propose(
+            runner.world,
+            runner.world.actors["check-client"],
+            episode["id"],
+            {
+                "failure_kind": "tool_contract",
+                "applicability": "When authenticated application work encounters an explicit sign-in prerequisite.",
+                "guidance": "Inspect your session and sign in before retrying an action that requires authentication. Once authenticated, continue legitimate work without unnecessary repeated login.",
+                "evidence_ids": [evidence_id],
+                "limitations": "This operator-authored smoke probe may repeat existing guidance; it does not establish a model mistake or improved skill. Authentication does not prove availability.",
+            },
+        )
+        proposal["origin"] = "operator_smoke_probe"
+        runner.store.put("learning-proposals", proposal["id"], proposal)
+    learner = Learner(runner.world, provider)
+    try:
+        learner.process_one()
+    finally:
+        learner.close()
+    updated = runner.store.get("learning-proposals", proposal["id"])
+    evaluation = runner.store.get("learning-evaluations", updated.get("evaluation_id", ""))
+    return {
+        "origin": "operator_smoke_probe",
+        "proposal_id": proposal["id"],
+        "status": updated["status"],
+        "error_kind": updated.get("error_kind"),
+        "evaluation": evaluation,
+        "completed": evaluation is not None,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--live", action="store_true")
@@ -174,16 +214,30 @@ def main() -> int:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--model", default="gemini-3.5-flash-lite")
     parser.add_argument("--call-budget", type=int, default=24)
+    parser.add_argument(
+        "--resume-probe",
+        action="store_true",
+        help="Test replay with labelled operator advice in an existing check; keep the original model and cumulative budget.",
+    )
     args = parser.parse_args()
     if not args.live or not 1 <= args.call_budget <= 24:
         parser.error("Requires --live and a call budget between 1 and 24.")
-    if args.out.exists():
+    prior = None
+    if args.resume_probe:
+        prior = json.loads((args.out / "live-learning-check.json").read_text(encoding="utf-8"))
+        if (
+            prior["model"] != args.model
+            or prior["call_budget"] != args.call_budget
+            or prior.get("replay_probe")
+        ):
+            parser.error("Probe requires the original model/budget and must not have run already.")
+    elif args.out.exists():
         parser.error("Use a new output directory.")
 
     # Credentials remain inside the application. Only ordinal key positions leave this scope.
     layout = TeamKeyLayout.from_file(args.key_pool)
     positions = {key: i + 1 for i, key in enumerate(layout.pool.keys)}
-    exchanges: list[dict[str, Any]] = []
+    exchanges: list[dict[str, Any]] = list(prior["exchanges"]) if prior else []
 
     def transport(url, key, body):
         started = time.monotonic()
@@ -207,8 +261,13 @@ def main() -> int:
         return status, data
 
     with WorldLock(args.out):
-        cfg = config()
-        atomic_json(args.out / "config.json", cfg.model_dump(mode="json"))
+        cfg = (
+            WorldConfig.model_validate_json((args.out / "config.json").read_text(encoding="utf-8"))
+            if prior
+            else config()
+        )
+        if not prior:
+            atomic_json(args.out / "config.json", cfg.model_dump(mode="json"))
         store = Store(args.out)
         runner = None
         try:
@@ -220,9 +279,17 @@ def main() -> int:
             with store.transaction():
                 store.put("meta", "engine", "hybrid")
                 store.put("meta", "llm_key_layout", "teams")
-            suite_path = Path(__file__).resolve().parents[1] / "config/learning/client-session.json"
-            suite_id = install_suite(store, json.loads(suite_path.read_text(encoding="utf-8")))
-            result = exercise(runner, provider)
+            if prior:
+                suite_id = prior["suite_id"]
+                if store.get("learning-suite-heads", "client-user") != suite_id:
+                    raise ValueError("The original replay suite changed")
+                result = prior | {"replay_probe": replay_probe(runner, provider)}
+            else:
+                suite_path = (
+                    Path(__file__).resolve().parents[1] / "config/learning/client-session.json"
+                )
+                suite_id = install_suite(store, json.loads(suite_path.read_text(encoding="utf-8")))
+                result = exercise(runner, provider)
             runner.close()
             report = runner.world.report() | {"stop_reason": "learning_live_check"}
             atomic_json(args.out / "report.json", report)
@@ -246,12 +313,16 @@ def main() -> int:
                             "skill_improved_on_submitted_replay"
                         ],
                         "usage": result["usage"],
+                        "replay_probe": result.get("replay_probe"),
                         "evidence": str(args.out / "live-learning-check.json"),
                     }
                 ),
                 flush=True,
             )
-            return 0 if result["pipeline_completed"] else 1
+            completed = (
+                result["replay_probe"]["completed"] if prior else result["pipeline_completed"]
+            )
+            return 0 if completed else 1
         finally:
             if runner is not None:
                 runner.close()
