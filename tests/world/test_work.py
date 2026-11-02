@@ -7,7 +7,7 @@ import time
 import pytest
 
 from saber.agents.provider import LLMResponse
-from saber.world.agents import action, parse_plan
+from saber.world.agents import action, baseline, parse_plan
 from saber.world.environment import World
 from saber.world.models import Actor, default_config
 from saber.world.runtime import Runner
@@ -124,6 +124,33 @@ def test_durable_notebook_is_private_and_other_actor_parameters_rejected(lab):
     with world.store.transaction():
         world.store.put("memory", "blue-dfir", {"note": "new planner note"})
     assert blue.act(action("read_notes"))["notes"][0]["text"] == "private hypothesis"
+
+
+def test_scripted_worker_accepts_and_uses_assigned_secondary_specialty(lab):
+    world, server = lab
+    cid, _ = case(server)
+    actor = world.actors["dfir-two"]
+    worker = server.client(actor.id)
+    task = server.client("blue-lead").act(
+        action(
+            "create_task",
+            case_id=cid,
+            assignee=actor.id,
+            specialty="malware",
+            objective="Collect and describe this application artifact without executing it.",
+        )
+    )["task"]
+    selected = []
+    for turn in range(3):
+        step = baseline(actor, worker.observe(), turn)
+        selected.append(step.tool)
+        assert worker.act(step)["status"] < 400
+    assert selected == ["accept_task", "capture_artifact", "analyze_artifact"]
+    obs = worker.observe()
+    assert obs["active_specialty"] == "malware" and obs["artifacts"][0]["analyzed"]
+    assert baseline(actor, obs, 3).tool == "share"
+    assert world.store.get("tasks", task["id"])["status"] == "ACTIVE"
+    # The scripted worker does not pretend its metadata extraction answers the task.
 
 
 def test_wait_and_finish_stop_scripted_fallback_and_survive_restart(tmp_path):

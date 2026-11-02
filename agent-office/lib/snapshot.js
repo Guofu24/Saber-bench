@@ -8,10 +8,20 @@ function number(v) { if (!Number.isFinite(v) || v < 0) throw new Error('Invalid 
 function word(v, max = 80) { if (typeof v !== 'string' || !v.length || v.length > max) throw new Error('Invalid snapshot text'); return v; }
 function choice(v, options) { if (!options.includes(v)) throw new Error('Invalid snapshot enum'); return v; }
 function counters(v = {}, names = USAGE) { return Object.fromEntries(names.map(k => [k, number(v[k] ?? 0)])); }
+function specialties(v = []) {
+  if (!Array.isArray(v) || v.length > 12) throw new Error('Invalid specialties');
+  return v.map(s => word(s, 40));
+}
 function normalizeSnapshot(v) {
   if (!v || v.type !== 'world_snapshot' || v.schema_version !== 1 || !Array.isArray(v.actors) || v.actors.length > 200) throw new Error('Unsupported world snapshot');
   const actors = v.actors.map(a => ({
     id: word(a.id, 48), team: choice(a.team, TEAMS), role: word(a.role),
+    specialties: specialties(a.specialties),
+    control_status: choice(a.control_status ?? 'ACTIVE', ['ACTIVE', 'WAITING', 'DONE']),
+    wake_tick: a.wake_tick == null ? null : number(a.wake_tick),
+    active_specialty: a.active_specialty == null ? a.role : word(a.active_specialty, 40),
+    active_task: a.active_task == null ? null : word(a.active_task, 80),
+    task_counts: counters(a.task_counts, ['offered', 'active', 'blocked', 'done']),
     activity: choice(a.activity, ['idle', 'planning']), turns: number(a.turns),
     last_tick: a.last_tick == null ? null : number(a.last_tick),
     last_tool: a.last_tool == null ? null : word(a.last_tool),

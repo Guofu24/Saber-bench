@@ -182,6 +182,7 @@ class World:
                 obs["specialties"] = specialties_for(actor)
                 obs["artifacts"] = [
                     {k: v for k, v in item.items() if k != "text"}
+                    | {"analyzed": self.store.get("artifact-analysis", item["id"]) is not None}
                     for item in list(self.store.items("artifacts").values())[-20:]
                 ]
                 own_tasks = [

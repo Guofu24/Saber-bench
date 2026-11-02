@@ -11,7 +11,15 @@ function rosterPage(world, team = 'all', page = 0) {
 }
 function actorActivity(world, actor, now) {
   if (worldHealth(world, now) !== 'running') return 'idle';
+  if (actor.control_status && actor.control_status !== 'ACTIVE') return 'idle';
   if (actor.activity === 'planning') return 'think';
   return actor.last_tick === world.tick ? 'tool' : 'idle';
 }
-module.exports = { worldHealth, rosterPage, actorActivity };
+function actorStatus(actor) {
+  const state = actor.control_status === 'DONE' ? 'Đã hoàn tất'
+    : actor.control_status === 'WAITING' ? `Chờ tới tick ${actor.wake_tick}` : 'Sẵn sàng';
+  const task = actor.active_task ? ` · ${actor.active_specialty} · ${actor.active_task}` : '';
+  const counts = actor.task_counts || {};
+  return `${state}${task} · việc chờ ${counts.offered || 0} / vướng ${counts.blocked || 0} / xong ${counts.done || 0}`;
+}
+module.exports = { worldHealth, rosterPage, actorActivity, actorStatus };

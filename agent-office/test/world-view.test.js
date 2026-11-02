@@ -1,7 +1,7 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { worldHealth, rosterPage, actorActivity } = require('../viewer-src/world-state');
+const { worldHealth, rosterPage, actorActivity, actorStatus } = require('../viewer-src/world-state');
 
 test('frozen telemetry becomes unknown, stopped remains stopped, resume becomes live', () => {
   const world = { status: 'running', updated_at: 100, tick_seconds: 2, tick: 10 };
@@ -28,4 +28,15 @@ test('every actor up to the runtime limit is accessible without overlapping desk
   assert.equal(blue.page, 2); assert.equal(blue.items.length, 10);
   assert(blue.items.every(a => a.team === 'blue'));
   assert.equal(rosterPage({ actors: [] }).pages, 1);
+});
+
+test('finished and waiting actors remain idle even with an inference pending', () => {
+  const world = { status: 'running', updated_at: 100, tick_seconds: 2, tick: 10 };
+  const actor = { activity: 'planning', last_tick: 10, control_status: 'WAITING', wake_tick: 15,
+    active_specialty: 'network', active_task: 'task-000001', task_counts: { blocked: 1, done: 2 } };
+  assert.equal(actorActivity(world, actor, 101), 'idle');
+  assert.match(actorStatus(actor), /Chờ tới tick 15/);
+  assert.match(actorStatus(actor), /network.*task-000001/);
+  assert.match(actorStatus(actor), /vướng 1/);
+  assert.match(actorStatus({ ...actor, control_status: 'DONE' }), /Đã hoàn tất/);
 });

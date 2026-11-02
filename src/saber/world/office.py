@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from saber.world.models import WorldConfig
+from saber.world.models import WorldConfig, specialties_for
 from saber.world.store import Store
 
 USAGE_FIELDS = ("attempts", "successes", "input_tokens", "output_tokens")
@@ -39,17 +39,32 @@ def snapshot(
     teams = ("client", "red", "blue")
     roster = []
     with store.lock:
+        all_tasks = list(store.items("tasks").values())
         for actor in config.actors:
             memory = store.get("memory", actor.id, {})
+            control = store.get("actor-control", actor.id, {"status": "ACTIVE"})
+            tasks = [t for t in all_tasks if t["assignee"] == actor.id]
+            active = next((t for t in tasks if t["status"] == "ACTIVE"), None)
             roster.append(
                 {
                     "id": actor.id,
                     "team": actor.team,
                     "role": actor.role,
+                    "specialties": list(specialties_for(actor)),
+                    "control_status": control["status"],
+                    "wake_tick": control.get("until_tick")
+                    if control["status"] == "WAITING"
+                    else None,
+                    "active_specialty": active["specialty"] if active else actor.role,
+                    "active_task": active["id"] if active else None,
+                    "task_counts": {
+                        s.lower(): sum(t["status"] == s for t in tasks)
+                        for s in ("OFFERED", "ACTIVE", "BLOCKED", "DONE")
+                    },
                     "activity": "idle"
                     if stopped
                     else "planning"
-                    if actor.id in pending
+                    if actor.id in pending and control["status"] == "ACTIVE"
                     else "idle",
                     "turns": memory.get("turns", 0),
                     "last_tick": memory.get("last_tick"),

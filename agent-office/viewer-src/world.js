@@ -1,4 +1,4 @@
-import { worldHealth, rosterPage, actorActivity } from './world-state.js';
+import { worldHealth, rosterPage, actorActivity, actorStatus } from './world-state.js';
 
 const worlds = new Map();
 let worldId = null, teamFilter = 'all', worldPage = 0, viewKey = '';
@@ -54,7 +54,7 @@ function renderWorld() {
   const key = JSON.stringify([w.world_id, w.run_id, page.items.map(a => a.id)]);
   if (viewKey !== key) {
     clearOfficeActors(); viewKey = key;
-    for (const a of page.items) createAgent({ id: `${w.world_id}/${a.id}`, name: a.id, role: `${teamNames[a.team]} / ${a.role}`, color: teamColors[a.team], replay: true });
+    for (const a of page.items) createAgent({ id: `${w.world_id}/${a.id}`, name: a.id, role: `${teamNames[a.team]} / ${(a.specialties?.length ? a.specialties : [a.role]).join(', ')}`, color: teamColors[a.team], replay: true });
   }
   document.getElementById('pageInfo').textContent = `${page.page + 1}/${page.pages} · ${page.count} agent`;
   document.getElementById('prevPage').disabled = page.page === 0;
@@ -65,8 +65,8 @@ function renderWorld() {
     const changed = a.worldActor && actor.turns > a.worldActor.turns;
     a.worldActor = actor; a.tools = actor.turns;
     a.activity = actorActivity(w, actor);
-    a.status = `${actor.source} · ${actor.last_tool || 'chưa có hành động'}${actor.last_status == null ? '' : ' · HTTP ' + actor.last_status}`;
-    if (actor.activity === 'planning' && worldHealth(w) === 'running') a.status = 'Chờ / đang suy luận · ' + a.status;
+    a.status = `${actorStatus(actor)} · ${actor.source} · ${actor.last_tool || 'chưa có hành động'}${actor.last_status == null ? '' : ' · HTTP ' + actor.last_status}`;
+    if (actor.activity === 'planning' && (actor.control_status ?? 'ACTIVE') === 'ACTIVE' && worldHealth(w) === 'running') a.status = 'Chờ / đang suy luận · ' + a.status;
     if (a.activity !== 'idle') a.lastActive = performance.now();
     if (changed) log(a, `<code>${esc(actor.last_tool)}</code> · ${esc(actor.source)} · HTTP ${actor.last_status} · tick ${actor.last_tick}`, 'k-tool');
   }
