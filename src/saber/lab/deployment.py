@@ -27,6 +27,7 @@ def compose(spec: LabSpec) -> dict[str, Any]:
     def service(name: str, role: str, networks: list[str], memory: str = "512m") -> dict[str, Any]:
         volumes[name] = {}
         config: dict[str, Any] = {
+            "image": f"saber/{spec.name}-{name}:local",
             "build": {
                 "context": "./source",
                 "dockerfile": "Dockerfile.worker" if role == "worker" else "Dockerfile",

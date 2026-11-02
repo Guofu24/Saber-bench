@@ -12,6 +12,7 @@ from typing import Any
 import click
 
 from saber.lab.analysis_cli import analysis_cli
+from saber.lab.backup_cli import backup_cli
 from saber.lab.deployment import initialize_secrets, render, verify_bundle
 from saber.lab.models import LabSpec, preset_spec
 from saber.lab.soar_cli import soar_cli
@@ -30,6 +31,7 @@ def lab() -> None:
 lab.add_command(learning_cli)
 lab.add_command(analysis_cli)
 lab.add_command(soar_cli)
+lab.add_command(backup_cli)
 
 
 @lab.command("list")
