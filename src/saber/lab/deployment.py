@@ -259,6 +259,7 @@ def initialize_secrets(bundle: Path, spec: LabSpec) -> None:
             "read_token": read_token,
             "response_token": response_token,
             "relay_token": relay_token,
+            "windows_sources": [w.name for w in spec.windows],
         },
         "relay": {
             "relay_token": relay_token,
@@ -285,7 +286,10 @@ def render(spec: LabSpec, out: Path) -> dict[str, Any]:
     if out.exists():
         raise ValueError("Choose a new bundle directory")
     root = repo_root()
-    if any(out.resolve().is_relative_to(root / source_dir) for source_dir in ("src", "infra/soc", "agent-office", ".claude")):
+    if any(
+        out.resolve().is_relative_to(root / source_dir)
+        for source_dir in ("src", "infra/soc", "agent-office", ".claude")
+    ):
         raise ValueError("Bundle output cannot be inside its own source inputs")
     out.mkdir(parents=True)
     source = out / "source"
@@ -320,6 +324,7 @@ def render(spec: LabSpec, out: Path) -> dict[str, Any]:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, dest)
     (out / "lab.json").write_text(spec.model_dump_json(indent=2), encoding="utf-8")
+    shutil.copyfile(root / "docs/SOC_LAB_VI.md", out / "SOC_LAB_VI.md")
     (out / "compose.yaml").write_text(
         yaml.safe_dump(compose(spec), sort_keys=False), encoding="utf-8"
     )

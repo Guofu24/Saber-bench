@@ -1,10 +1,20 @@
 # SABER — Client / Red Team / Blue Team Lab
 
+**Mới: bộ SOC lab nhiều dịch vụ và VM** đã có mã triển khai cho ba preset
+`linux-small`, `windows-ad`, `expanded`. Bắt đầu ở [SOC Lab — triển khai và nghiệm thu](docs/SOC_LAB_VI.md).
+Nhóm lệnh là **`saber lab`**: business app, worker từng đội, Chromium, collector, OpenSearch,
+Zeek, agent-office; bản AD có script Hyper-V/domain/Sysmon và phản ứng có rollback.
+Đã kiểm thử local bằng HTTP, subprocess và Chromium thật. **Chưa chạy nghiệm thu toàn bộ Docker/AD
+trên máy phát triển này**; `lab verify` phải đạt trên máy đích mới xác nhận runtime.
+
+`saber world` / `saber env` dưới đây vẫn là chế độ nhẹ. Chọn profile `vm` trong `env`
+không đồng nghĩa đã dựng SOC lab hoặc domain; muốn các bộ mới hãy dùng `saber lab`.
+
 SABER chạy một thế giới ứng dụng liên tục: client làm việc, red team thử điểm yếu
 trong lab, blue team quan sát log và xử lý case. Có thể dùng baseline scripted hoặc
 bật Gemini cho các agent lập kế hoạch. Project còn có bộ lõi benchmark SOC riêng.
 
-**Trạng thái hiện tại:** HTTP và thay đổi trạng thái ứng dụng được thực thi thật;
+**Phạm vi chế độ world/env:** HTTP và thay đổi trạng thái ứng dụng được thực thi thật;
 tài khoản, dữ liệu và kỹ thuật trong world là mô phỏng. Các actor chia sẻ một runtime
 Python, chưa phải desktop/VM riêng. Chế độ **`--execution native`** bổ sung process
 con cho mỗi thao tác cùng bằng chứng PID/command line, file, DNS và TCP thật của

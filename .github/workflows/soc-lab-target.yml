@@ -1,0 +1,59 @@
+name: soc-lab-target
+on:
+  workflow_dispatch:
+    inputs:
+      preset:
+        type: choice
+        options: [linux-small]
+        default: linux-small
+        description: "Deploy only on a dedicated isolated runner with sufficient resources"
+      run_name:
+        type: string
+        default: ci-soc
+        description: "Unique deployment name; volumes are preserved after the run"
+permissions:
+  contents: read
+concurrency:
+  group: soc-lab-target
+  cancel-in-progress: false
+jobs:
+  deployment:
+    runs-on: [self-hosted, linux, saber-lab]
+    timeout-minutes: 60
+    env:
+      LAB_PRESET: ${{ inputs.preset }}
+      LAB_NAME: ${{ inputs.run_name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.9.13"
+      - run: uv sync --locked
+      - name: Render a unique bundle; no provider keys
+        run: |
+          uv run saber lab init --preset "$LAB_PRESET" --name "${LAB_NAME}-${GITHUB_RUN_ID}" --out "runs/target-${GITHUB_RUN_ID}.json"
+          uv run saber lab render --config "runs/target-${GITHUB_RUN_ID}.json" --out "runs/target-${GITHUB_RUN_ID}"
+          uv run saber lab doctor --config "runs/target-${GITHUB_RUN_ID}/lab.json" --storage runs
+          uv run saber lab credentials --bundle "runs/target-${GITHUB_RUN_ID}"
+      - name: Start the isolated container services
+        run: uv run saber lab up --bundle "runs/target-${GITHUB_RUN_ID}" --on-target
+      - name: Require live evidence, indexing, browser and defense
+        run: |
+          for attempt in $(seq 1 20); do
+            if uv run saber lab verify --bundle "runs/target-${GITHUB_RUN_ID}"; then exit 0; fi
+            sleep 15
+          done
+          exit 1
+      - name: Preserve acceptance report only, never credentials/raw data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soc-lab-acceptance
+          path: runs/target-${{ github.run_id }}/verification.receipt.json
+          if-no-files-found: warn
+      - name: Stop containers; preserve named volumes for investigation
+        if: always()
+        run: |
+          if [ -f "runs/target-${GITHUB_RUN_ID}/active.receipt.json" ]; then
+            uv run saber lab down --bundle "runs/target-${GITHUB_RUN_ID}"
+          fi

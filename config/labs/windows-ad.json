@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "name": "soc-windows-ad",
+  "preset": "windows-ad",
+  "actors": [
+    {
+      "id": "client-1",
+      "team": "client",
+      "role": "person",
+      "goal": "Carry out ordinary work and react to errors or security notifications.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "client-2",
+      "team": "client",
+      "role": "employee",
+      "goal": "Carry out ordinary work and react to errors or security notifications.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "client-3",
+      "team": "client",
+      "role": "developer",
+      "goal": "Carry out ordinary work and react to errors or security notifications.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "client-4",
+      "team": "client",
+      "role": "administrator",
+      "goal": "Carry out ordinary work and react to errors or security notifications.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "red-recon",
+      "team": "red",
+      "role": "recon",
+      "goal": "Discover and test weaknesses in this local application only.",
+      "interval_ticks": 2,
+      "specialties": []
+    },
+    {
+      "id": "red-access",
+      "team": "red",
+      "role": "access",
+      "goal": "Discover and test weaknesses in this local application only.",
+      "interval_ticks": 2,
+      "specialties": []
+    },
+    {
+      "id": "red-impact",
+      "team": "red",
+      "role": "impact",
+      "goal": "Discover and test weaknesses in this local application only.",
+      "interval_ticks": 2,
+      "specialties": []
+    },
+    {
+      "id": "blue-lead",
+      "team": "blue",
+      "role": "lead",
+      "goal": "Protect users, investigate evidence and minimize disruption.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "blue-monitor",
+      "team": "blue",
+      "role": "monitor",
+      "goal": "Protect users, investigate evidence and minimize disruption.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "blue-hunter",
+      "team": "blue",
+      "role": "hunter",
+      "goal": "Protect users, investigate evidence and minimize disruption.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "blue-dfir",
+      "team": "blue",
+      "role": "dfir",
+      "goal": "Protect users, investigate evidence and minimize disruption.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "blue-content",
+      "team": "blue",
+      "role": "content",
+      "goal": "Protect users, investigate evidence and minimize disruption.",
+      "interval_ticks": 1,
+      "specialties": []
+    },
+    {
+      "id": "blue-ir",
+      "team": "blue",
+      "role": "ir",
+      "goal": "Protect users, investigate evidence and minimize disruption.",
+      "interval_ticks": 1,
+      "specialties": []
+    }
+  ],
+  "host_ram_gb": 64,
+  "host_cpus": 8,
+  "disk_gb": 500,
+  "workers_per_team": 1,
+  "tick_seconds": 5.0,
+  "retention_days": 7,
+  "evidence_budget_mb": 4096,
+  "domain": "saber.test",
+  "windows_subnet": "172.28.80.0/24",
+  "windows": [
+    {
+      "name": "soc-dc",
+      "address": "172.28.80.10",
+      "role": "dc",
+      "memory_gb": 4,
+      "cpus": 2
+    },
+    {
+      "name": "soc-ws-1",
+      "address": "172.28.80.20",
+      "role": "workstation",
+      "memory_gb": 8,
+      "cpus": 2
+    },
+    {
+      "name": "soc-ws-2",
+      "address": "172.28.80.21",
+      "role": "workstation",
+      "memory_gb": 8,
+      "cpus": 2
+    },
+    {
+      "name": "soc-files",
+      "address": "172.28.80.40",
+      "role": "member-server",
+      "memory_gb": 4,
+      "cpus": 2
+    }
+  ],
+  "opensearch_version": "3.3.2",
+  "playwright_version": "1.56.0"
+}

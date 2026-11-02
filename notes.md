@@ -15,6 +15,7 @@ Các ví dụ chạy trong PowerShell; chọn chế độ cần dùng, không ch
 | Chạy VM hoặc server riêng | 9 |
 | Kiểm tra skills, catalog và viewer | 10 |
 | Process, file, DNS/TCP thật và log riêng từng agent | 11 |
+| SOC lab nhiều dịch vụ, SIEM, Windows/AD, lab mở rộng | 12 |
 
 ## 1. Chuẩn bị
 
@@ -471,3 +472,44 @@ Native mode đo process và I/O của workload cố định, chưa phải Sysmon
 desktop hay OS riêng cho từng agent. File là receipt; DNS/TCP chạy loopback nội bộ.
 Red/blue vẫn tác động lên ứng dụng lab. Xem [chi tiết, storage và sandbox/VM](docs/NATIVE_TELEMETRY_VI.md).
 Thêm `--execution native` vào `env init` nếu tạo profile sandbox/VM/remote.
+
+
+## 12. SOC lab Linux / Windows AD / mở rộng
+
+Đây là `saber lab`, khác các profile di chuyển world ở mục 8–9.
+Runbook đầy đủ: [SOC_LAB_VI](docs/SOC_LAB_VI.md).
+
+Trên máy phát triển, chỉ chuẩn bị bundle:
+
+```powershell
+uv run saber lab list
+uv run saber lab render --config config/labs/linux-small.json --out runs/soc-linux-bundle
+uv run saber lab render --config config/labs/windows-ad.json --out runs/soc-ad-bundle
+uv run saber lab render --config config/labs/expanded.json --out runs/soc-expanded-bundle
+uv run saber lab validate --bundle runs/soc-linux-bundle
+```
+
+Chuyển một bundle sang máy đủ tài nguyên. Trong `BUNDLE/source` trên máy đích:
+
+```powershell
+uv sync --frozen --no-dev
+uv run --no-sync saber lab doctor --config ../lab.json --storage ..
+uv run --no-sync saber lab credentials --bundle ..
+uv run --no-sync saber lab up --bundle .. --on-target
+uv run --no-sync saber lab status --bundle ..
+uv run --no-sync saber lab verify --bundle ..
+uv run --no-sync saber lab logs --bundle .. --limit 100
+uv run --no-sync saber lab stop --bundle ..
+uv run --no-sync saber lab resume --bundle ..
+uv run --no-sync saber lab down --bundle ..
+```
+
+Office ở `http://127.0.0.1:7788`, Dashboards ở `http://127.0.0.1:5601`.
+Bật Gemini: thêm `--llm --key-pool PATH --model MODEL_ID --call-budget 300` vào `lab up`.
+Chỉ controller được mount key; 200 client / 200 red / phần còn lại blue, trạng thái quota giữ qua restart.
+`credentials` chỉ chạy một lần. `down` giữ volumes, không dừng VM/relay riêng.
+
+Windows/AD cần host Hyper-V và base VHDX. Tại thư mục gốc bundle trên host đó, chạy lần lượt
+`windows/Provision-Lab.ps1`, `windows/Install-Sensors.ps1`, `windows/Relay-Lab.ps1`
+với tham số trong runbook. Dừng guest bằng `windows/Stop-Lab.ps1 -Bundle . -OnTarget`.
+Không chạy các lệnh provision trên laptop thiếu RAM. `lab validate` không thay cho `lab verify`.
