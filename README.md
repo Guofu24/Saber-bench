@@ -23,6 +23,7 @@ Cấu hình SIEM/SOAR có sẵn hiện hỗ trợ **inventory và kiểm tra HTT
 kết nối luồng log hay hành động phòng thủ với sản phẩm bên ngoài.
 
 - [Hướng dẫn đầy đủ từng môi trường](docs/ENVIRONMENTS_VI.md)
+- [Notes — tra nhanh các lệnh chạy](notes.md)
 - [Cấu hình mẫu](config/environments/)
 - [Commit và rollback](docs/ROLLBACK_VI.md)
 
