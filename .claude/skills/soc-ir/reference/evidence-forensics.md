@@ -10,8 +10,9 @@ lý phục vụ dựng lại hành vi thực thi.
 `ram` → `network_connections` → `processes` → `disk_images` → `local_logs` → `archived_logs`
 (RAM → kết nối đang mở → tiến trình → disk → log tại chỗ → log tập trung/lưu trữ).
 
-Đây là thứ tự case, không phải danh sách nguyên văn áp dụng cho mọi máy trong RFC 3227.
-Kiểm retention, trạng thái máy và quyền trước khi thu; yêu cầu RAM trước cô lập của case vẫn phải giữ.
+Chỉ áp dụng thứ tự này khi SOP/contract của case yêu cầu; không phải quy tắc chung cho mọi máy.
+Case benchmark yêu cầu RAM trước cô lập vẫn giữ điều kiện đó. Trong sự cố thật, xét tác hại đang diễn ra,
+retention, độ ổn định và đường thu từ xa; IR có thể cần cô lập trước. Ghi quyết định và chứng cứ bị mất.
 [RFC 3227 §2](https://www.rfc-editor.org/rfc/rfc3227.html#section-2) nêu nguyên tắc ưu tiên dữ liệu dễ mất và
 ghi nhận ảnh hưởng của việc thu. Live acquisition có thể đổi trạng thái; không hứa "không dấu vết".
 
@@ -19,7 +20,7 @@ ghi nhận ảnh hưởng của việc thu. Live acquisition có thể đổi tr
 
 | Loại | Phương pháp |
 |---|---|
-| RAM | `live_memory_acquisition` — thu khi máy còn chạy; không tắt máy, không cô lập trước |
+| RAM | `live_memory_acquisition` — thu khi máy còn chạy; xét ảnh hưởng cô lập tới đường thu, tránh reboot không cần thiết |
 | kết nối mạng | `snapshot_connections` — chụp bảng kết nối hiện hành |
 | tiến trình | `capture_process_state` — chụp danh sách và trạng thái tiến trình |
 | ổ đĩa | `forensic_disk_image` — ảnh bit-by-bit qua write-blocker, có hash |
@@ -27,7 +28,8 @@ ghi nhận ảnh hưởng của việc thu. Live acquisition có thể đổi tr
 | log tập trung | `export_from_central_store` — xuất từ kho log tập trung |
 
 **Checklist bắt buộc cho mọi đợt thu:** **hash từng tệp** (SHA-256) · **biên bản thu giữ** · **chuỗi bàn giao**
-(ai, khi nào, giao cho ai, vì sao). Thiếu một mục là gói bằng chứng không dùng được.
+(ai, khi nào, giao cho ai, vì sao). Thiếu mục: giữ dữ liệu, ghi hạn chế và yêu cầu bổ sung; không tự loại bỏ
+mọi giá trị điều tra hay phán quyết giá trị pháp lý. Case có checklist bắt buộc vẫn báo chưa đạt.
 
 ```json
 {"collection_order": ["ram", "network_connections", "processes", "disk_images", "local_logs"],
@@ -43,7 +45,7 @@ AV ghi nhận mã độc từng bị phát hiện nhưng xử lý không thành 
 1. Đưa bản sao về kho bằng chứng (vd `/workspace/evidence/`) **không làm đổi hash và timestamp của bản gốc** — đọc và
    sao chép; **không** di chuyển, **không** sửa bản gốc. Dùng image/read-only mount/write-blocker phù hợp;
    nếu không bảo đảm ràng buộc bất biến của case thì báo thiếu công cụ, không tự nới yêu cầu.
-2. Thu đúng order of volatility, không chỉ thu đủ.
+2. Thu theo thứ tự phù hợp rủi ro; lưu lý do nếu khác SOP được giao.
 3. Chính hành vi chống điều tra là một dấu vết phải thu: sự kiện 1102, trạng thái service EDR, mục log AV "xử lý thất bại".
 
 ```json
@@ -78,8 +80,8 @@ Rà **Run, RunOnce, Scheduled Tasks, Services, WMI Event Consumers**; trên Linu
 - **Đầu mối:** binary trong Temp/ProgramData lạ, không chữ ký, tên giả, tham số mã hoá, thời điểm tạo bất thường.
   Kết luận bằng target/command, hash, creator và hành vi. `Teams.lnk`, service đã ký hoặc task cập nhật vẫn cần
   kiểm baseline; tên và chữ ký không tự chứng minh hợp lệ.
-- **WMI Event Consumer** (`ROOT\subscription:CommandLineEventConsumer=…` + filter + binding) là chỗ **hầu hết công cụ
-  bỏ sót** — luôn kiểm namespace `ROOT\subscription`.
+- **WMI Event Consumer** (`ROOT\subscription:CommandLineEventConsumer=…` + filter + binding): kiểm namespace
+  `ROOT\subscription` khi điều tra persistence; đối chiếu baseline, không mặc định là độc hại.
 - Ghi kèm dấu vết chống điều tra liên quan (mục bị xoá, sửa thời gian).
 
 ```json
@@ -116,7 +118,7 @@ PE header/shellcode + không gắn image + thread lạ; kiểm tiến trình có
 
 ## Sai lầm thường gặp
 
-- Cô lập/tắt máy trước khi thu RAM; thu log trước RAM.
+- Áp một thứ tự thu RAM/cô lập cho mọi sự cố; bỏ qua yêu cầu riêng của case hoặc tác hại đang diễn ra.
 - "Thu thập" bằng cách di chuyển bản gốc.
 - Lấp khoảng log bị xoá bằng suy đoán.
 - Bỏ sót WMI Event Consumer.
