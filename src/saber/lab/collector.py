@@ -82,6 +82,7 @@ def create_collector(
             "ok": True,
             "service": "collector",
             "indexer_last_success": ledger.get("indexer_last_success"),
+            "retention_error": ledger.get("retention_error"),
         }
 
     @app.get("/status")
@@ -250,7 +251,7 @@ def create_collector(
             values = [
                 json.loads(r[0])
                 for r in ledger.db.execute(
-                    "SELECT v FROM state WHERE k LIKE 'case-%' ORDER BY k LIMIT 1000"
+                    "SELECT v FROM state WHERE k LIKE 'case-%' ORDER BY json_extract(v,'$.opened_at') DESC LIMIT 1000"
                 )
             ]
         return {"cases": values}

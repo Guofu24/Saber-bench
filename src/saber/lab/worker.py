@@ -40,6 +40,7 @@ def create_worker(
     emitter: Emitter,
     *,
     browser: bool = True,
+    browser_executable: str | None = None,
 ) -> FastAPI:
     app = FastAPI(title=f"SABER {team} executor")
     accounts = {a["actor_id"]: a for a in credentials["accounts"].values()}
@@ -112,6 +113,7 @@ def create_worker(
                 "read_token": credentials.get("read_token", ""),
                 "response_token": credentials.get("response_token", ""),
                 "browser": browser,
+                "browser_executable": browser_executable,
             }
             argv = [sys.executable, "-m", "saber.lab.task"]
             env = {

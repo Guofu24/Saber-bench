@@ -62,7 +62,7 @@ def compose(spec: LabSpec) -> dict[str, Any]:
                     "CMD",
                     "python",
                     "-c",
-                    "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health',timeout=2)",
+                    "import json,urllib.request; assert json.load(urllib.request.urlopen('http://127.0.0.1:8080/health',timeout=2))['ok']",
                 ],
                 "interval": "15s",
                 "timeout": "3s",
@@ -75,6 +75,7 @@ def compose(spec: LabSpec) -> dict[str, Any]:
     app = service("app", "app", ["business", "telemetry"])
     app["secrets"] = ["app"]
     app["environment"]["SABER_COLLECTOR"] = "http://collector:8080"
+    app["depends_on"] = {"collector": {"condition": "service_healthy"}}
     collector = service("collector", "collector", ["telemetry", "soc"], "1g")
     collector["secrets"] = ["collector"]
     collector["environment"]["SABER_INDEXER"] = "http://indexer:9200"
@@ -91,8 +92,15 @@ def compose(spec: LabSpec) -> dict[str, Any]:
         )
         worker["shm_size"] = "256m"
         worker["deploy"] = {"replicas": spec.workers_per_team}
+        worker["depends_on"] = {
+            "app": {"condition": "service_healthy"},
+            "collector": {"condition": "service_healthy"},
+        }
     controller = service("controller", "controller", ["control", "telemetry"], "1g")
     controller["secrets"] = ["controller"]
+    controller["depends_on"] = {
+        team: {"condition": "service_healthy"} for team in ("client", "red", "blue")
+    }
     controller["environment"].update(
         {
             "SABER_CLIENT": "http://client:8080",
@@ -277,6 +285,8 @@ def render(spec: LabSpec, out: Path) -> dict[str, Any]:
     if out.exists():
         raise ValueError("Choose a new bundle directory")
     root = repo_root()
+    if any(out.resolve().is_relative_to(root / source_dir) for source_dir in ("src", "infra/soc", "agent-office", ".claude")):
+        raise ValueError("Bundle output cannot be inside its own source inputs")
     out.mkdir(parents=True)
     source = out / "source"
     for name in ("pyproject.toml", "uv.lock", "README.md", "catalog/subtasks.json"):
@@ -286,6 +296,14 @@ def render(spec: LabSpec, out: Path) -> dict[str, Any]:
     for path in (root / "src" / "saber").rglob("*.py"):
         if path.is_symlink():
             raise ValueError("Source symlinks are not allowed")
+        dest = source / path.relative_to(root)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, dest)
+    from saber.agents.skills import RUNTIME_SKILLS, skill_resources
+
+    resources = {p for name in RUNTIME_SKILLS for p in skill_resources(name, root=root)}
+    resources.add(root / ".claude/skills/soc-orchestrator/reference/soc-lab.md")
+    for path in resources:
         dest = source / path.relative_to(root)
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(path, dest)
@@ -304,6 +322,26 @@ def render(spec: LabSpec, out: Path) -> dict[str, Any]:
     (out / "lab.json").write_text(spec.model_dump_json(indent=2), encoding="utf-8")
     (out / "compose.yaml").write_text(
         yaml.safe_dump(compose(spec), sort_keys=False), encoding="utf-8"
+    )
+    gemini = {
+        "services": {
+            "controller": {
+                "networks": ["control", "telemetry", "provider-egress"],
+                "secrets": ["controller", "gemini-pool"],
+                "environment": {
+                    "SABER_LLM": "1",
+                    "SABER_CALL_BUDGET": "${SABER_CALL_BUDGET:?Explicit budget required}",
+                    "SABER_MODEL": "${SABER_MODEL:?Explicit model required}",
+                },
+            }
+        },
+        "networks": {"provider-egress": {"internal": False}},
+        "secrets": {
+            "gemini-pool": {"file": "${SABER_GEMINI_POOL:?Existing private key file required}"}
+        },
+    }
+    (out / "compose.gemini.yaml").write_text(
+        yaml.safe_dump(gemini, sort_keys=False), encoding="utf-8"
     )
     (out / ".gitignore").write_text(".secrets/\n*.receipt.json\n*.vhdx\n", encoding="utf-8")
     manifest = {
@@ -339,6 +377,8 @@ def verify_bundle(bundle: Path) -> LabSpec:
             raise ValueError("Bundle integrity check failed")
     # Build context cannot contain operator credentials or unmanifested files.
     for path in (root / "source").rglob("*"):
+        if path.is_symlink():
+            raise ValueError("Symlinked build context is forbidden")
         if path.is_file() and path.relative_to(root).as_posix() not in manifest["files"]:
             raise ValueError("Unexpected build context file")
     return LabSpec.model_validate_json((root / "lab.json").read_text(encoding="utf-8"))

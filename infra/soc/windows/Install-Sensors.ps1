@@ -47,5 +47,8 @@ foreach ($node in $spec.windows) {
             }
         }
     } finally { Remove-PSSession $session }
+    if (-not (Get-VMSnapshot -VMName $name -Name 'SABER-baseline' -ErrorAction SilentlyContinue)) {
+        Checkpoint-VM -Name $name -SnapshotName 'SABER-baseline'
+    }
 }
 Write-Output 'Sensors and bounded guest workloads installed. Start Relay-Lab.ps1 to deliver evidence and execute queued domain responses.'

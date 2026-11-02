@@ -41,7 +41,14 @@ def execute(job: dict[str, Any]) -> dict[str, Any]:
             sync_playwright = importlib.import_module("playwright.sync_api").sync_playwright
 
             with sync_playwright() as playwright:
-                browser = playwright.chromium.launch(headless=True)
+                browser = playwright.chromium.launch(
+                    headless=True,
+                    **(
+                        {"executable_path": job["browser_executable"]}
+                        if job.get("browser_executable")
+                        else {}
+                    ),
+                )
                 context = browser.new_context(
                     extra_http_headers={"Authorization": "Bearer " + token}
                 )

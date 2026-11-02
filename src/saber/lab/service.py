@@ -22,6 +22,7 @@ from saber.lab.controller import Controller
 from saber.lab.events import Emitter
 from saber.lab.ledger import Ledger
 from saber.lab.models import LabSpec
+from saber.lab.retention import archive
 from saber.lab.sensor import PollSensor
 from saber.lab.worker import create_worker
 
@@ -55,6 +56,15 @@ def main() -> None:
     )
     sensor = PollSensor(emitter, args.data / ("documents" if args.role == "app" else "workspace"))
     controller: Controller | None = None
+
+    def retention_loop() -> None:
+        while not stop.wait(60):
+            try:
+                archive(ledger, spec.retention_days)
+            except (OSError, ValueError):
+                ledger.put("retention_error", "Archive blocked; hot evidence retained")
+
+    threads.append(threading.Thread(target=retention_loop, daemon=True))
     if args.role == "app":
         app = create_application(ledger, credentials, emitter)
     elif args.role == "collector":
@@ -109,9 +119,10 @@ def main() -> None:
 
         @app.get("/health")
         def controller_health() -> dict[str, Any]:
-            return {"ok": any(t.is_alive() for t in threads), "service": "controller"}
+            return {"ok": controller_thread.is_alive(), "service": "controller"}
 
-        threads.append(threading.Thread(target=controller.run, daemon=True))
+        controller_thread = threading.Thread(target=controller.run, daemon=True)
+        threads.append(controller_thread)
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> Any:

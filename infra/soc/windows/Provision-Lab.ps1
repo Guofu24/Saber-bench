@@ -28,10 +28,13 @@ if (-not $switch) { New-VMSwitch -Name $switchName -SwitchType Private | Out-Nul
 $domainCredential = [pscredential]::new(($spec.domain + '\Administrator'), $BaseCredential.Password)
 $dc = @($spec.windows | Where-Object role -eq 'dc')[0]
 $dcVM = $spec.name + '-' + $dc.name
-function Open-Guest([string]$Name, [pscredential]$Credential) {
+function Open-Guest([string]$Name, [pscredential]$Credential, [pscredential]$Alternate = $null) {
     for ($i = 0; $i -lt 120; $i++) {
         try { return New-PSSession -VMName $Name -Credential $Credential -ErrorAction Stop }
-        catch { Start-Sleep -Seconds 5 }
+        catch {
+            if ($Alternate) { try { return New-PSSession -VMName $Name -Credential $Alternate -ErrorAction Stop } catch { } }
+            Start-Sleep -Seconds 5
+        }
     }
     throw "PowerShell Direct unavailable: $Name. Check unattended first boot and credentials."
 }
@@ -59,7 +62,8 @@ foreach ($node in $spec.windows) {
     if ((Get-VM -Name $name).State -ne 'Running') { Start-VM -Name $name | Out-Null }
     # On rerun a promoted DC requires the domain credential.
     $credential = if ($node.role -eq 'dc' -and (Test-Path -LiteralPath (Join-Path $root 'domain.receipt.json'))) { $domainCredential } else { $BaseCredential }
-    $session = Open-Guest $name $credential
+    $alternate = if ($node.role -eq 'dc') { $domainCredential } else { $null }
+    $session = Open-Guest $name $credential $alternate
     $rename = Invoke-Command -Session $session -ArgumentList $node.name,$node.address,$dc.address -ScriptBlock {
         param($Name,$Address,$Dns)
         $nic = Get-NetAdapter | Where-Object Status -eq Up | Select-Object -First 1
@@ -73,7 +77,7 @@ foreach ($node in $spec.windows) {
     }
     if ($rename) { Restart-Guest $name $session } else { Remove-PSSession $session }
 }
-$session = Open-Guest $dcVM $BaseCredential
+$session = Open-Guest $dcVM $BaseCredential $domainCredential
 $promoted = Invoke-Command -Session $session -ArgumentList $spec.domain,$DsrmPassword -ScriptBlock {
     param($Domain,$Dsrm)
     if ((Get-CimInstance Win32_ComputerSystem).DomainRole -ge 4) { return $false }
