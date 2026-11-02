@@ -20,6 +20,7 @@ from saber.catalog import load_catalog
 from saber.environments.cli import env
 from saber.episodes import build_episode, write_episode
 from saber.episodes.runner import run_oracle, run_reference, run_stub
+from saber.lab.cli import lab
 from saber.subtasks import implemented_ids, load_subtask
 from saber.world.cli import world
 
@@ -1092,6 +1093,7 @@ def main() -> None:
 
 cli.add_command(world)
 cli.add_command(env)
+cli.add_command(lab)
 
 
 if __name__ == "__main__":
