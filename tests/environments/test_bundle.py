@@ -3,7 +3,7 @@ import json
 import pytest
 import yaml
 
-from saber.environments.bundle import compose_config, render_bundle, verify_bundle
+from saber.environments.bundle import OFFICE_FILES, compose_config, render_bundle, verify_bundle
 from saber.environments.models import EnvironmentConfig
 
 
@@ -16,6 +16,13 @@ def test_bundle_is_portable_and_contains_only_allowlisted_inputs(tmp_path, profi
     (root / "catalog/subtasks.json").write_text("{}")
     (root / "pyproject.toml").write_text("")
     (root / "uv.lock").write_text("")
+    for name in OFFICE_FILES:
+        path = root / "agent-office" / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("public viewer")
+    (root / "agent-office/private.js").write_text("DO-NOT-EXPORT")
+    (root / "agent-office/node_modules").mkdir()
+    (root / "agent-office/node_modules/private.txt").write_text("DO-NOT-EXPORT")
     for name in ("keys_pool.txt", ".env", "private.txt"):
         (root / name).write_text("DO-NOT-EXPORT")
     config = EnvironmentConfig(name="example", profile=profile)
@@ -24,6 +31,8 @@ def test_bundle_is_portable_and_contains_only_allowlisted_inputs(tmp_path, profi
     assert verify_bundle(out) == config
     assert not any(b"DO-NOT-EXPORT" in p.read_bytes() for p in out.rglob("*") if p.is_file())
     assert (out / "compose.yaml").exists() == (profile == "sandbox")
+    assert (out / "agent-office/viewer/index.html").read_text() == "public viewer"
+    assert not (out / "source/agent-office").exists()
     with pytest.raises(ValueError, match="already exists"):
         render_bundle(config, out, source_root=root)
 

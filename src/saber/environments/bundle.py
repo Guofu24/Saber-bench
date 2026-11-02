@@ -19,6 +19,17 @@ from saber.catalog.loader import repo_root
 from saber.environments.models import EnvironmentConfig
 from saber.world.agents import PLAYBOOKS
 
+OFFICE_FILES = (
+    "package.json",
+    "README.md",
+    "bin/agent-office.js",
+    "lib/server.js",
+    "lib/analyzer.js",
+    "lib/snapshot.js",
+    "lib/watch.js",
+    "viewer/index.html",
+)
+
 DOCKERFILE = """# Dependency versions come from uv.lock; update image versions deliberately.
 FROM ghcr.io/astral-sh/uv:0.9.5 AS uv
 FROM python:3.12.12-slim-bookworm
@@ -75,6 +86,25 @@ It is not an appropriate container for executing arbitrary malware or shell tool
 Container data uses a named volume; `down` preserves it. `up --resume` resumes the
 same volume after STOP. Do not run `down -v` unless intentionally deleting data.
 Export a report before removing the container. No volumes are deleted by SABER.
+
+## Agent Office (optional, Node.js 18+ on the viewer host)
+
+The allowlisted `agent-office/` viewer is included when exporting from a full
+checkout. No npm install is required to view. It stays outside the image context.
+From this bundle directory, in a second terminal:
+
+    node agent-office/bin/agent-office.js watch --world ./world
+    node agent-office/bin/agent-office.js watch --bundle .
+
+Use --world on the local/VM/server runtime host, or --bundle on the Docker host.
+Open the loopback URL printed by the viewer (normally http://127.0.0.1:7788).
+Sandbox monitoring copies only /data/office.json through the host Docker daemon;
+it needs no container port or network. It cannot show data after the container is
+removed, even though the named volume survives. Start the container to view again.
+For a remote VM/server viewer, forward its loopback port with your SSH client:
+`ssh -N -L 7788:127.0.0.1:7788 user@lab-host`, then browse localhost:7788 locally.
+The viewer shows application agents, action sources and recorded quota indices;
+it is not a remote desktop, SIEM, or runtime control panel.
 
 CPU/RAM limits apply to the sandbox container only. Guest/server sizing is managed
 by the operator. The image build needs registry/package access; scripted runtime
@@ -154,6 +184,10 @@ def render_bundle(
             relative = Path(".claude") / "skills" / name / "SKILL.md"
             if (root / relative).is_file():
                 _copy_public(root / relative, source / relative, root)
+        if (root / "agent-office").is_dir():
+            for name in OFFICE_FILES:
+                relative = Path("agent-office") / name
+                _copy_public(root / relative, stage / relative, root)
         (source / "README.md").write_text("# SABER exported runtime\n", encoding="utf-8")
         (source / "Dockerfile").write_text(DOCKERFILE, encoding="utf-8")
         (source / ".dockerignore").write_text(
