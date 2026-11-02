@@ -134,13 +134,15 @@ def test_zeek_partial_lines_restart_and_raw_audit_provenance(tmp_path):
     ledger = Ledger(tmp_path / "data")
     logs = tmp_path / "logs"
     logs.mkdir()
+    # Ephemeral log content for the redaction test, never a login credential.
+    synthetic_marker = uuid.uuid4().hex
     record = json.dumps(
         {
             "ts": 1700000000.25,
             "uid": "C123",
             "id.orig_h": "172.28.80.20",
             "id.resp_h": "172.28.80.40",
-            "password": "do-not-store",
+            "password": synthetic_marker,
         }
     ).encode()
     path = logs / "conn.log"
@@ -150,6 +152,7 @@ def test_zeek_partial_lines_restart_and_raw_audit_provenance(tmp_path):
     assert scan(ledger, logs, "network", "zeek") == 1
     assert scan(ledger, logs, "network", "zeek") == 0
     assert ledger.events()[0]["data"]["password"] == "[REDACTED]"
+    assert synthetic_marker not in json.dumps(ledger.events())
     ledger.close()
     reopened = Ledger(tmp_path / "data")
     assert scan(reopened, logs, "network", "zeek") == 0
@@ -168,6 +171,8 @@ def test_windows_collector_executes_against_explicit_fixture_readers():
     if not shell:
         pytest.skip("PowerShell runtime unavailable for the Windows collector contract")
     root = Path(__file__).resolve().parents[2]
+    # Pass a fresh marker to the fixture; no fixed password-like literal in source.
+    synthetic_marker = uuid.uuid4().hex
     result = subprocess.run(
         [
             shell,
@@ -177,6 +182,8 @@ def test_windows_collector_executes_against_explicit_fixture_readers():
             str(Path(__file__).with_name("windows_collector_fixture.ps1")),
             "-CollectorScript",
             str(root / "infra/soc/windows/Collect-Events.ps1"),
+            "-SyntheticMarker",
+            synthetic_marker,
         ],
         capture_output=True,
         text=True,
@@ -188,5 +195,5 @@ def test_windows_collector_executes_against_explicit_fixture_readers():
     security = next(e for e in events if e.data.get("event_id") == 4625)
     assert security.data["fields"]["TargetUserName"] == "saber-red"
     assert security.data["fields"]["Password"] == "[REDACTED]"
-    assert "fixture-sensitive" not in result.stdout
+    assert synthetic_marker not in result.stdout
     assert events[-1].data["part_of_domain"] is True
