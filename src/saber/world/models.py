@@ -8,6 +8,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from saber.agents.specialties import BLUE_SKILLS, DEFAULT_BLUE_ROLES
+from saber.world.lab_tools import ARTIFACT_TOOLS, RULE_TOOLS
 from saber.world.operations import CASE_TOOLS, READ_TOOLS
 from saber.world.work import LEAD_TOOLS, PERSONAL_TOOLS, WORKER_TOOLS
 
@@ -120,19 +121,28 @@ RED_TOOLS = frozenset(
     {"browse", "search", "login", "read_document", "collect", "register_job", "disrupt", "share"}
 )
 BLUE_TOOLS = {
-    "lead": frozenset({"open_case", "assign", "notify", "close_case", "share"}),
+    "lead": frozenset({"open_case", "assign", "notify", "close_case", "share", "verify_recovery"}),
     "monitor": frozenset({"open_case", "share"}),
     "hunter": frozenset({"open_case", "share"}),
-    "dfir": frozenset({"investigate", "share"}),
-    "content": frozenset({"deploy_rule", "patch", "share"}),
-    "malware": frozenset({"share"}),
-    "network": frozenset({"investigate", "share"}),
-    "intel": frozenset({"share"}),
+    "dfir": frozenset({"investigate", "share"}) | ARTIFACT_TOOLS,
+    "content": frozenset({"deploy_rule", "patch", "share"}) | RULE_TOOLS,
+    "malware": frozenset({"share"}) | ARTIFACT_TOOLS,
+    "network": frozenset({"investigate", "share"}) | ARTIFACT_TOOLS,
+    "intel": frozenset({"share"}) | ARTIFACT_TOOLS,
     "platform": frozenset({"share"}),
-    "identity": frozenset({"investigate", "share"}),
-    "recovery": frozenset({"share"}),
+    "identity": frozenset({"investigate", "share"}) | ARTIFACT_TOOLS,
+    "recovery": frozenset({"share", "verify_recovery"}),
     "ir": frozenset(
-        {"contain", "quarantine", "unquarantine", "restore", "release", "notify", "share"}
+        {
+            "contain",
+            "quarantine",
+            "unquarantine",
+            "restore",
+            "release",
+            "notify",
+            "share",
+            "verify_recovery",
+        }
     ),
 }
 
@@ -146,6 +156,7 @@ def tools_for(actor: Actor) -> frozenset[str]:
         frozenset().union(*(BLUE_TOOLS[s] for s in specialties_for(actor)))
         | READ_TOOLS
         | CASE_TOOLS
+        | {"telemetry_health"}
         | PERSONAL_TOOLS
         | WORKER_TOOLS
         | ({"reopen_case", *LEAD_TOOLS} if "lead" in specialties_for(actor) else set())

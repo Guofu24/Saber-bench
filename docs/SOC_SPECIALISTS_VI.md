@@ -10,9 +10,9 @@ cũ, catalog 175 subtask và dữ liệu run hiện có. Không coi tên skill l
 |---|---|---|
 | 1 | Query phân trang, cutoff/world scope, lấy evidence và case cũ, finding, đóng FP/mở lại | Đã có code và test HTTP |
 | 2 | 12 chuyên môn blue, cấu hình agent kiêm nhiệm, nạp skill theo nhiệm vụ | Đã có registry, skill, phân quyền và test |
-| 3 | Nhiệm vụ có nhận việc/bàn giao/kết quả, memory, wait và hoàn tất có hiệu lực | Đã có state machine; đang kiểm hồi quy |
-| 4 | Artifact, kiểm rule, sức khoẻ telemetry và xác nhận phục hồi trong lab | Đang triển khai |
-| 5 | Agent-office, README, smoke đầu cuối và kiểm tra hồi quy | Tiếp theo |
+| 3 | Nhiệm vụ có nhận việc/bàn giao/kết quả, memory, wait và hoàn tất có hiệu lực | Đã kiểm HTTP, restart và plan trả về muộn |
+| 4 | Artifact, kiểm rule, sức khoẻ telemetry và xác nhận phục hồi trong lab | Đã có công cụ và test HTTP/trạng thái |
+| 5 | Agent-office, README, smoke đầu cuối và kiểm tra hồi quy | Đang triển khai |
 
 ## Chứng cứ và case
 
@@ -65,3 +65,25 @@ Lead được resume đồng đội blue. Operator có thể resume bất kỳ a
 ```powershell
 uv run saber world actor-resume --out runs/world --actor red-impact
 ```
+
+## Công cụ chuyên môn chạy được
+
+- `capture_artifact` chụp event/document/job/identity/service trong phạm vi case; lưu
+  SHA-256, byte count, nguồn, người thu và tick. Bản chụp bất biến dù tài liệu sống thay
+  đổi. `read_artifact` phân trang; sai hash thì từ chối. Không có đường dẫn host tùy ý.
+- `analyze_artifact` builtin tính hash/size và trích URL từ JSON lab. Kết quả ghi rõ
+  chưa đánh giá malware, không phải decompile hay sandbox execution. Yêu cầu native
+  Ghidra/IDA/Volatility/tshark/YARA/Suricata trả lỗi adapter chưa cấu hình, không tạo
+  báo cáo giả. Cần adapter và input thực được cấp để hoàn thành phần tích hợp đó.
+- `test_rule` chạy điều kiện engine `application-v1` trên event dương/âm được dẫn ID;
+  trả TP/FP/FN/TN theo nhãn người gọi. Không đọc gold. `publish_rule` đòi kết quả test
+  không FP/FN trên corpus đó và expected_version; rule mới áp vào telemetry thực.
+  `rollback_rule` khôi phục bản cũ thành version mới, giữ lịch sử. Không tự deploy SIEM ngoài.
+- `telemetry_health` báo range/retention, số event và lỗi theo loại hành động, trạng thái
+  adapter. Không có baseline thì không tự kết luận nguồn im lặng là mất log.
+- `verify_recovery` kiểm dịch vụ, hiệu lực giảm thiểu, client bị hạn chế và công việc
+  sau phản ứng của từng client bị ảnh hưởng. Chỉ một client phục hồi chưa đủ cho outage
+  ảnh hưởng nhiều client. Tính toàn vẹn dữ liệu ghi `not_measured` khi thiếu baseline/backup.
+
+Mọi kết quả là trong application lab. Không gọi API Gemini hoặc native engine trong
+các test offline này; không có chứng nhận benchmark/chất lượng model từ test công cụ.

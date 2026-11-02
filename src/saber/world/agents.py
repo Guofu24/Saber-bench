@@ -143,7 +143,7 @@ def _blue(actor: Actor, obs: dict[str, Any], turn: int) -> Action:
             return action("patch", control="document_acl")
         if "register_job" in evidence_tools and not controls["job_acl"]:
             return action("patch", control="job_acl")
-        existing = {r["tool"] for r in obs["rules"]}
+        existing = {r.get("tool") for r in obs["rules"]}
         for tool in ("read_document", "register_job", "disrupt"):
             if tool in evidence_tools and tool not in existing:
                 return action("deploy_rule", tool=tool, min_status=200)

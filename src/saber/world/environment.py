@@ -13,13 +13,14 @@ import json
 import uuid
 from typing import Any
 
-from saber.world import operations, work
+from saber.world import lab_tools, operations, work
 from saber.world.models import Action, Actor, WorldConfig, safe_name, specialties_for, tools_for
 from saber.world.store import Store, utc_now
 
 TOOL_HELP = {
     **operations.HELP,
     **work.HELP,
+    **lab_tools.HELP,
     "browse": "Open the local portal; returns document links and application health.",
     "search": "Search the local website. args: query (text).",
     "login": "Log in as your assigned synthetic account. args: typo (bool, optional).",
@@ -179,6 +180,10 @@ class World:
                     if a.team == "blue"
                 ]
                 obs["specialties"] = specialties_for(actor)
+                obs["artifacts"] = [
+                    {k: v for k, v in item.items() if k != "text"}
+                    for item in list(self.store.items("artifacts").values())[-20:]
+                ]
                 own_tasks = [
                     t
                     for t in self.store.items("tasks").values()
@@ -472,6 +477,8 @@ class World:
         tool, args = action.tool, action.args
         if tool in operations.HELP:
             return operations.execute(self, actor, action)
+        if tool in lab_tools.HELP:
+            return lab_tools.execute(self, actor, action)
         if tool == "open_case":
             ids = args.get("evidence_ids", [])
             if not isinstance(ids, list) or not ids or any(type(x) is not int for x in ids):
@@ -717,7 +724,12 @@ class World:
 
     def _apply_rules(self, event_id: int, tool: str, status: int) -> None:
         for rule in self.store.items("rules").values():
-            if rule["tool"] == tool and status >= rule["min_status"]:
+            if rule.get("engine") == "application-v1":
+                event = self.store.evidence([event_id], self.tick)[0]
+                matched = lab_tools.matches(event, rule["conditions"])
+            else:
+                matched = rule["tool"] == tool and status >= rule["min_status"]
+            if matched:
                 alerts = self.store.get("messages", "blue", [])
                 alerts.append(
                     {
