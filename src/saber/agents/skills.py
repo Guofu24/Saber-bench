@@ -8,6 +8,7 @@ from typing import Any, Literal
 
 import yaml
 
+from saber.agents.specialties import BLUE_SKILLS
 from saber.catalog.loader import repo_root
 from saber.domain.errors import IntegrationBlocked
 
@@ -21,6 +22,7 @@ RUNTIME_SKILLS = frozenset(
         "soc-ir",
         "soc-cnt",
         "soc-orchestrator",
+        *BLUE_SKILLS.values(),
     }
 )
 WORLD_REFERENCE = Path("soc-orchestrator/reference/continuous-world.md")

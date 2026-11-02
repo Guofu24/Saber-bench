@@ -7,10 +7,11 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from saber.agents.specialties import BLUE_SKILLS, DEFAULT_BLUE_ROLES
 from saber.world.operations import CASE_TOOLS, READ_TOOLS
 
 Team = Literal["client", "red", "blue"]
-BLUE_ROLES = ("lead", "monitor", "hunter", "dfir", "content", "ir")
+BLUE_ROLES = tuple(BLUE_SKILLS)
 RED_ROLES = ("recon", "access", "impact")
 CLIENT_ROLES = ("person", "employee", "developer", "administrator")
 
@@ -22,9 +23,16 @@ class Actor(BaseModel):
     role: str = Field(min_length=1, max_length=80)
     goal: str = Field(default="", max_length=500)
     interval_ticks: int = Field(default=1, ge=1, le=10000)
+    specialties: tuple[str, ...] = Field(default=(), max_length=12)
 
     @model_validator(mode="after")
     def role_matches_team(self) -> Actor:
+        if self.specialties and (
+            self.team != "blue" or any(s not in BLUE_SKILLS for s in self.specialties)
+        ):
+            raise ValueError("additional specialties must be known blue capabilities")
+        if len(set(self.specialties)) != len(self.specialties):
+            raise ValueError("duplicate specialties")
         if self.team == "blue" and self.role not in BLUE_ROLES:
             raise ValueError(f"blue role must be one of {BLUE_ROLES}")
         if self.team == "red" and self.role not in RED_ROLES:
@@ -84,7 +92,7 @@ def default_config(clients: int = 6, seed: int = 42) -> WorldConfig:
             role=r,
             goal="Protect users, investigate evidence and minimize disruption.",
         )
-        for r in BLUE_ROLES
+        for r in DEFAULT_BLUE_ROLES
     ]
     return WorldConfig(actors=actors, seed=seed)
 
@@ -116,6 +124,12 @@ BLUE_TOOLS = {
     "hunter": frozenset({"open_case", "share"}),
     "dfir": frozenset({"investigate", "share"}),
     "content": frozenset({"deploy_rule", "patch", "share"}),
+    "malware": frozenset({"share"}),
+    "network": frozenset({"investigate", "share"}),
+    "intel": frozenset({"share"}),
+    "platform": frozenset({"share"}),
+    "identity": frozenset({"investigate", "share"}),
+    "recovery": frozenset({"share"}),
     "ir": frozenset(
         {"contain", "quarantine", "unquarantine", "restore", "release", "notify", "share"}
     ),
@@ -128,11 +142,15 @@ def tools_for(actor: Actor) -> frozenset[str]:
     if actor.team == "red":
         return RED_TOOLS
     return (
-        BLUE_TOOLS[actor.role]
+        frozenset().union(*(BLUE_TOOLS[s] for s in specialties_for(actor)))
         | READ_TOOLS
         | CASE_TOOLS
-        | ({"reopen_case"} if actor.role == "lead" else set())
+        | ({"reopen_case"} if "lead" in specialties_for(actor) else set())
     )
+
+
+def specialties_for(actor: Actor) -> tuple[str, ...]:
+    return tuple(dict.fromkeys((actor.role, *actor.specialties))) if actor.team == "blue" else ()
 
 
 def safe_name(value: Any) -> str:

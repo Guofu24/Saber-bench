@@ -14,7 +14,7 @@ import uuid
 from typing import Any
 
 from saber.world import operations
-from saber.world.models import Action, Actor, WorldConfig, safe_name, tools_for
+from saber.world.models import Action, Actor, WorldConfig, safe_name, specialties_for, tools_for
 from saber.world.store import Store, utc_now
 
 TOOL_HELP = {
@@ -168,8 +168,11 @@ class World:
                     if a.team == "client"
                 ]
                 obs["roster"] = [
-                    {"id": a.id, "role": a.role} for a in self.config.actors if a.team == "blue"
+                    {"id": a.id, "role": a.role, "specialties": specialties_for(a)}
+                    for a in self.config.actors
+                    if a.team == "blue"
                 ]
+                obs["specialties"] = specialties_for(actor)
             else:
                 obs["events"] = self.store.events(
                     through_tick=self.tick, limit=10, principal=principal

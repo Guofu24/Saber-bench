@@ -9,8 +9,8 @@ cũ, catalog 175 subtask và dữ liệu run hiện có. Không coi tên skill l
 | Bước | Nội dung | Trạng thái |
 |---|---|---|
 | 1 | Query phân trang, cutoff/world scope, lấy evidence và case cũ, finding, đóng FP/mở lại | Đã có code và test HTTP |
-| 2 | 12 chuyên môn blue, cấu hình agent kiêm nhiệm, nạp skill theo nhiệm vụ | Đang triển khai |
-| 3 | Nhiệm vụ có nhận việc/bàn giao/kết quả, memory, wait và hoàn tất có hiệu lực | Tiếp theo |
+| 2 | 12 chuyên môn blue, cấu hình agent kiêm nhiệm, nạp skill theo nhiệm vụ | Đã có registry, skill, phân quyền và test |
+| 3 | Nhiệm vụ có nhận việc/bàn giao/kết quả, memory, wait và hoàn tất có hiệu lực | Đang triển khai |
 | 4 | Artifact, kiểm rule, sức khoẻ telemetry và xác nhận phục hồi trong lab | Tiếp theo |
 | 5 | Agent-office, README, smoke đầu cuối và kiểm tra hồi quy | Tiếp theo |
 
@@ -28,3 +28,20 @@ case có tác động vẫn phải qua kiểm chứng phản ứng khi đóng th
 
 Quyền giới hạn trong một world được xác thực bởi HTTP capability. Một world hiện là một
 lab dùng chung; đây chưa phải giải pháp SOC nhiều khách hàng có phân quyền tenant riêng.
+
+## Chuyên môn
+
+Blue có 12 chuyên môn: `lead`, `monitor`, `hunter`, `dfir`, `ir`, `content`, `malware`,
+`network`, `intel`, `platform`, `identity`, `recovery`. Sáu vai mặc định giữ nguyên;
+DFIR dùng `soc-dfir` riêng. Bảy skill mới đưa tổng repo lên 18 skills (15 nghiệp vụ,
+3 phát triển), vẫn dùng 25 reference có sẵn để không sao chép handbook.
+
+Operator cấu hình kiêm nhiệm trong world config, ví dụ:
+
+```json
+{"id":"blue-analyst","team":"blue","role":"dfir","specialties":["network","malware"]}
+```
+
+Tool của actor là hợp quyền của các chuyên môn được cấu hình. Message/model không tự
+thêm chuyên môn hay quyền. Skill đang dùng chuyển theo chuyên môn nhiệm vụ trong phạm
+vi đó; toàn bộ skill đã cấu hình được preflight trước khi mở lab có model.

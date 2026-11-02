@@ -18,11 +18,12 @@ from typing import Any, BinaryIO
 
 from saber.agents.provider import LLMProvider
 from saber.agents.skills import load_playbook
+from saber.agents.specialties import BLUE_SKILLS
 from saber.domain.errors import BudgetExceeded, IntegrationBlocked
 from saber.population.office import OfficeEmitter
 from saber.world.agents import PLAYBOOKS, baseline, llm_messages, parse_plan
 from saber.world.environment import World
-from saber.world.models import Action, Actor, WorldConfig
+from saber.world.models import Action, Actor, WorldConfig, specialties_for
 from saber.world.office import deployment_profile, snapshot
 from saber.world.quota import TeamQuotaProvider
 from saber.world.service import LabServer
@@ -156,7 +157,7 @@ class Runner:
         if provider is not None:
             for skill in {
                 PLAYBOOKS[a.team if a.team == "client" else a.role] for a in config.actors
-            }:
+            } | {BLUE_SKILLS[s] for a in config.actors for s in specialties_for(a)}:
                 load_playbook(skill, mode="world")
         self.world = World(store, config)
         with store.transaction():
