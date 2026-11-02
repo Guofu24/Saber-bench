@@ -54,7 +54,14 @@ class Ledger:
                 if old[0] != digest:
                     raise ValueError("Evidence ID reused with different content")
                 return False
-            if sum(p.stat().st_size for p in self.root.glob("*") if p.is_file()) >= self.budget:
+            if (
+                sum(
+                    p.stat().st_size
+                    for p in self.root.rglob("*")
+                    if p.is_file() and not p.is_symlink()
+                )
+                >= self.budget
+            ):
                 raise OSError("Evidence disk budget reached; export/expand storage before resuming")
             self.db.execute(
                 "INSERT INTO events(id,ts,host,kind,data,sha256) VALUES (?,?,?,?,?,?)",
@@ -67,19 +74,29 @@ class Ledger:
         *,
         before: str | None = None,
         host: str | None = None,
+        kind: str | None = None,
+        cursor: tuple[str, str] | None = None,
         limit: int = 100,
         pending: bool = False,
     ) -> list[dict[str, Any]]:
-        sql, args = "SELECT data FROM events WHERE 1=1", []
+        sql = "SELECT data FROM events WHERE 1=1"
+        args: list[Any] = []
         if before:
             sql += " AND ts<=?"
             args.append(before)
         if host:
             sql += " AND host=?"
             args.append(host)
+        if kind:
+            sql += " AND kind=?"
+            args.append(kind)
+        if cursor:
+            sql += " AND (ts<? OR (ts=? AND id<?))"
+            args.extend([cursor[0], cursor[0], cursor[1]])
         if pending:
             sql += " AND delivered=0"
-        sql += " ORDER BY ts " + ("ASC" if pending else "DESC") + ",id LIMIT ?"
+        direction = "ASC" if pending else "DESC"
+        sql += f" ORDER BY ts {direction},id {direction} LIMIT ?"
         args.append(max(1, min(limit, 1000)))
         with self.lock:
             return [json.loads(r[0]) for r in self.db.execute(sql, args)]

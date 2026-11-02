@@ -173,6 +173,8 @@ class Runner:
         emitter: OfficeEmitter | None = None,
     ) -> None:
         self.store, self.config = store, config
+        if config.execution_mode == "range":
+            raise ValueError("SOC range execution uses 'saber lab' deployments, not 'world run'.")
         if provider is not None:
             for skill in {
                 PLAYBOOKS[a.team if a.team == "client" else a.role] for a in config.actors
