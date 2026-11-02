@@ -24,6 +24,7 @@ from saber.population.office import OfficeEmitter
 from saber.world import learning, work
 from saber.world.agents import PLAYBOOKS, baseline, llm_messages, parse_plan
 from saber.world.environment import World
+from saber.world.learning_worker import Learner
 from saber.world.models import Action, Actor, WorldConfig, specialties_for
 from saber.world.office import deployment_profile, snapshot
 from saber.world.quota import TeamQuotaProvider
@@ -223,6 +224,9 @@ class Runner:
             },
         )
         self._publish_office(self.world.report())
+        self.learner = (
+            Learner(self.world, provider) if provider and config.learning_enabled else None
+        )
 
     def _publish_office(self, report: dict[str, Any]) -> None:
         event = snapshot(
@@ -333,6 +337,8 @@ class Runner:
                 )
                 self.store.put("journals", actor.id, journal[-100:])
                 self.world._metric("actions_" + source.replace("-", "_"), 1)
+        if self.learner:
+            self.learner.poll()
         report = self.world.report()
         cursor = int(self.store.get("meta", "telemetry_cursor", 0))
         events = self.store.events(after=cursor, through_tick=tick, limit=2000)
@@ -385,12 +391,21 @@ class Runner:
         except KeyboardInterrupt:
             reason = "interrupted"
         except Exception:
+            reason = "error"
             atomic_json(
                 self.store.root / "report.json", self.world.report() | {"stop_reason": "error"}
             )
             raise
         finally:
-            self.close()
+            try:
+                with self.store.transaction():
+                    for actor in self.config.actors:
+                        learning.seal(self.world, actor, "run_end")
+                # Only a normal finite run drains work. STOP/Ctrl+C do not start more calls.
+                if reason == "tick_limit" and self.learner:
+                    self.learner.flush()
+            finally:
+                self.close()
         report = self.world.report() | {"stop_reason": reason}
         atomic_json(self.store.root / "report.json", report)
         return report
@@ -399,8 +414,12 @@ class Runner:
         if self._closed:
             return
         self._closed = True
+        if self.learner:
+            self.learner.stopping.set()
         if self.planner:
             self.planner.close()
+        if self.learner:
+            self.learner.close()
         self.server.close()
         self.telemetry.close()
         self.store.checkpoint()
