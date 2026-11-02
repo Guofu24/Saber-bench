@@ -36,6 +36,29 @@ test('snapshot validation bounds the roster and strips private data', () => {
   assert.throws(() => normalizeSnapshot(fixture({ schema_version: 2 })));
 });
 
+test('optional execution traces retain evidence links and reject forged references', () => {
+  assert.equal(normalizeSnapshot(fixture()).trace, null);
+  const input = fixture({ trace: { limit: 200,
+    events: [{ id: 4, tick: 8, actor_id: 'client-1', tool: 'read_document', target: 'welcome',
+      status: 200, source: 'unknown', args: { token: 'SECRET' }, result: 'PRIVATE BODY' }],
+    cases: [{ id: 'case-1', status: 'OPEN', evidence_ids: [4], evidence_count: 1,
+      summary: 'PRIVATE', responses: [{ actor_id: 'client-1', tick: 8, tool: 'restore', target: 'business-app', verified: false, note: 'PRIVATE' }] }],
+  } });
+  const value = normalizeSnapshot(input);
+  assert.equal(value.trace.events[0].id, 4);
+  assert.deepEqual(value.trace.cases[0].evidence_ids, [4]);
+  assert.equal(value.trace.cases[0].responses[0].verified, false);
+  assert.doesNotMatch(JSON.stringify(value), /SECRET|PRIVATE/);
+  for (const patch of [{ actor_id: 'other-world-actor' }, { tick: 9 }, { source: 'claimed-llm' }, { status: 900 }]) {
+    const copy = structuredClone(input); Object.assign(copy.trace.events[0], patch);
+    assert.throws(() => normalizeSnapshot(copy));
+  }
+  const copy = structuredClone(input); copy.trace.cases[0].evidence_ids = [999];
+  assert.throws(() => normalizeSnapshot(copy));
+  assert.throws(() => normalizeSnapshot(fixture({ trace: { ...input.trace, events: Array(201).fill(input.trace.events[0]) } })));
+  assert.throws(() => normalizeSnapshot(fixture({ trace: { ...input.trace, events: [...input.trace.events, ...input.trace.events] } })));
+});
+
 test('HTTP ingestion, latest state, SSE replay and legacy events coexist', async t => {
   const { server, emit } = createOffice({ upstreams: {} });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));

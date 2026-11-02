@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from saber.world.models import WorldConfig, specialties_for
+from saber.world.office_trace import trace
 from saber.world.store import Store
 
 USAGE_FIELDS = ("attempts", "successes", "input_tokens", "output_tokens")
@@ -39,6 +40,7 @@ def snapshot(
     teams = ("client", "red", "blue")
     roster = []
     with store.lock:
+        activity_trace = trace(store, config, report["tick"])
         all_tasks = list(store.items("tasks").values())
         all_proposals = list(store.items("learning-proposals").values())
         for actor in config.actors:
@@ -94,6 +96,7 @@ def snapshot(
         "tick_seconds": config.tick_seconds,
         "tick": report["tick"],
         "actors": roster,
+        "trace": activity_trace,
         "actions": {name: report["metrics"].get(name, 0) for name in ACTION_FIELDS},
         "llm": {name: usage.get(name, 0) for name in USAGE_FIELDS},
         "llm_by_team": {
