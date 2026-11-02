@@ -39,4 +39,5 @@ test('finished and waiting actors remain idle even with an inference pending', (
   assert.match(actorStatus(actor), /network.*task-000001/);
   assert.match(actorStatus(actor), /vướng 1/);
   assert.match(actorStatus({ ...actor, control_status: 'DONE' }), /Đã hoàn tất/);
+  assert.match(actorStatus({ ...actor, learning_counts: { episodes: 3, proposals: 2, published: 1 } }), /3 lượt.*2 đề xuất.*1 phát hành/);
 });

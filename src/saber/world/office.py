@@ -40,6 +40,7 @@ def snapshot(
     roster = []
     with store.lock:
         all_tasks = list(store.items("tasks").values())
+        all_proposals = list(store.items("learning-proposals").values())
         for actor in config.actors:
             memory = store.get("memory", actor.id, {})
             control = store.get("actor-control", actor.id, {"status": "ACTIVE"})
@@ -60,6 +61,14 @@ def snapshot(
                     "task_counts": {
                         s.lower(): sum(t["status"] == s for t in tasks)
                         for s in ("OFFERED", "ACTIVE", "BLOCKED", "DONE")
+                    },
+                    "learning_counts": {
+                        "episodes": store.get("learning-counts", actor.id, {}).get("episodes", 0),
+                        "proposals": sum(p["actor_id"] == actor.id for p in all_proposals),
+                        "published": sum(
+                            p["actor_id"] == actor.id and p["status"] == "PUBLISHED"
+                            for p in all_proposals
+                        ),
                     },
                     "activity": "idle"
                     if stopped

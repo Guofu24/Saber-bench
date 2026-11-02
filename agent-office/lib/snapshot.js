@@ -22,6 +22,7 @@ function normalizeSnapshot(v) {
     active_specialty: a.active_specialty == null ? a.role : word(a.active_specialty, 40),
     active_task: a.active_task == null ? null : word(a.active_task, 80),
     task_counts: counters(a.task_counts, ['offered', 'active', 'blocked', 'done']),
+    learning_counts: counters(a.learning_counts, ['episodes', 'proposals', 'published']),
     activity: choice(a.activity, ['idle', 'planning']), turns: number(a.turns),
     last_tick: a.last_tick == null ? null : number(a.last_tick),
     last_tool: a.last_tool == null ? null : word(a.last_tool),

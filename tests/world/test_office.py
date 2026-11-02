@@ -112,12 +112,27 @@ def test_office_shows_work_state_without_task_objectives_or_notebook_text(tmp_pa
             action("accept_task", task_id=task["id"], expected_revision=0)
         )
         client.act(action("finish", reason="PRIVATE REASON"))
+        with store.transaction():
+            store.put(
+                "learning-proposals",
+                "test-proposal",
+                {
+                    "actor_id": "client-1",
+                    "status": "AWAITING_SUITE",
+                    "lesson": "PRIVATE LESSON",
+                },
+            )
         runner._publish_office(runner.world.report())
         snapshot = json.loads((tmp_path / "office.json").read_text())
         by_id = {a["id"]: a for a in snapshot["actors"]}
         assert by_id["client-1"]["control_status"] == "DONE"
         assert by_id["blue-dfir"]["active_task"] == task["id"]
         assert by_id["blue-dfir"]["task_counts"]["active"] == 1
+        assert by_id["client-1"]["learning_counts"] == {
+            "episodes": 1,
+            "proposals": 1,
+            "published": 0,
+        }
         assert "PRIVATE" not in json.dumps(snapshot)
     finally:
         runner.close()

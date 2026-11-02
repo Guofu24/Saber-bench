@@ -20,6 +20,7 @@ function actorStatus(actor) {
     : actor.control_status === 'WAITING' ? `Chờ tới tick ${actor.wake_tick}` : 'Sẵn sàng';
   const task = actor.active_task ? ` · ${actor.active_specialty} · ${actor.active_task}` : '';
   const counts = actor.task_counts || {};
-  return `${state}${task} · việc chờ ${counts.offered || 0} / vướng ${counts.blocked || 0} / xong ${counts.done || 0}`;
+  const learning = actor.learning_counts || {};
+  return `${state}${task} · việc chờ ${counts.offered || 0} / vướng ${counts.blocked || 0} / xong ${counts.done || 0} · học: ${learning.episodes || 0} lượt / ${learning.proposals || 0} đề xuất / ${learning.published || 0} phát hành`;
 }
 module.exports = { worldHealth, rosterPage, actorActivity, actorStatus };

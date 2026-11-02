@@ -229,6 +229,16 @@ class Runner:
         )
 
     def _publish_office(self, report: dict[str, Any]) -> None:
+        atomic_json(
+            self.store.root / "learning.json",
+            learning.summary(self.store)
+            | {
+                "tick": self.world.tick,
+                "released_versions": self.store.items("skill-heads"),
+                "active_epoch": self.store.get("learning-meta", "epoch", {}),
+                "enabled": self.config.learning_enabled,
+            },
+        )
         event = snapshot(
             self.store,
             self.config,

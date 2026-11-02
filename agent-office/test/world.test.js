@@ -24,9 +24,11 @@ function fixture(overrides = {}) {
 test('snapshot validation bounds the roster and strips private data', () => {
   const input = fixture({ credential: 'SECRET', documents: ['PRIVATE'] });
   input.actors[0].note = 'PRIVATE'; input.pools.client.key = 'SECRET';
+  input.actors[0].learning_counts = { episodes: 3, proposals: 2, published: 1, lesson: 'PRIVATE' };
   const value = normalizeSnapshot(input);
   assert.equal(value.llm.attempts, 7);
   assert.equal(value.pools.client.active_key, 2);
+  assert.deepEqual(value.actors[0].learning_counts, { episodes: 3, proposals: 2, published: 1 });
   assert.doesNotMatch(JSON.stringify(value), /SECRET|PRIVATE/);
   assert.throws(() => normalizeSnapshot(fixture({ actors: Array(201).fill(input.actors[0]) })));
   assert.throws(() => normalizeSnapshot(fixture({ actors: [input.actors[0], input.actors[0]] })));

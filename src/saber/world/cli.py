@@ -16,6 +16,7 @@ from saber.domain.errors import SaberError
 from saber.population.office import OfficeEmitter
 from saber.world.environment import World
 from saber.world.key_layout import TeamKeyLayout
+from saber.world.learning_cli import learning_cli
 from saber.world.models import BLUE_ROLES, Actor, WorldConfig, default_config
 from saber.world.quota import QuotaProvider, TeamQuotaProvider
 from saber.world.runtime import Runner, WorldLock, atomic_json
@@ -28,6 +29,9 @@ from saber.world.work import set_control
 )
 def world() -> None:
     pass
+
+
+world.add_command(learning_cli)
 
 
 @world.command("init", help="Create an editable actor roster and world configuration.")
@@ -143,6 +147,12 @@ def actor_resume(out: Path, actor_id: str) -> None:
 @click.option("--project-rpd", type=click.IntRange(1), default=20, show_default=True)
 @click.option("--project-tpm", type=click.IntRange(1), default=100000, show_default=True)
 @click.option("--office-url", default=None, help="Optional existing agent-office viewer URL.")
+@click.option(
+    "--learning-only",
+    is_flag=True,
+    help="Process saved learning work without advancing actors; requires --llm and a saved world.",
+)
+@click.option("--learning-jobs", type=click.IntRange(1, 100), default=4, show_default=True)
 def run_world(
     out: Path,
     ticks: int,
@@ -160,7 +170,11 @@ def run_world(
     project_rpd: int,
     project_tpm: int,
     office_url: str | None,
+    learning_only: bool,
+    learning_jobs: int,
 ) -> None:
+    if learning_only and (not llm or not (out / "world.sqlite3").is_file()):
+        raise click.ClickException("--learning-only requires --llm and an existing saved world.")
     if llm and call_budget is None:
         raise click.ClickException("--llm requires an explicit --call-budget. No API calls made.")
     if not llm and call_budget is not None:
@@ -176,9 +190,9 @@ def run_world(
             )
             if not path.exists():
                 atomic_json(path, config.model_dump(mode="json"))
-            if resume:
+            if resume and not learning_only:
                 (out / "STOP").unlink(missing_ok=True)
-            elif (out / "STOP").exists():
+            elif (out / "STOP").exists() and not learning_only:
                 raise click.ClickException(
                     "STOP exists. Use --resume when you want this world to continue."
                 )
@@ -223,6 +237,13 @@ def run_world(
                     )
             runner = Runner(store, config, provider=provider, emitter=OfficeEmitter(office_url))
             resources.callback(runner.close)
+            if learning_only:
+                if runner.learner is None:
+                    raise click.ClickException("Learning is disabled in this world's config.")
+                runner.learner.flush(limit=learning_jobs)
+                runner.close()
+                click.echo("Learning batch finished or deferred; actor tick was not advanced.")
+                return
             click.echo(
                 f"World: {out.resolve()} | actors={len(config.actors)} | engine={'HYBRID' if llm else 'SCRIPTED'}"
             )
