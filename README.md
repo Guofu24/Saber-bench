@@ -179,6 +179,9 @@ start container hoặc triển khai trong guest/server riêng. Không có `READY
 Skills có kiểm tra riêng: 11 skills, 8 sổ tay nghiệp vụ và 25 tài liệu tham chiếu.
 World nạp hướng dẫn application lab; population/benchmark nạp tài liệu theo case.
 Bundle mang theo các reference cần thiết. Xem [hướng dẫn skills](docs/SKILLS_VI.md).
+Đã có [rà soát nội dung theo yêu cầu và catalog](docs/SKILLS_REVIEW_VI.md): sửa các quy tắc kết luận thiếu bằng
+chứng và bổ sung công việc/bàn giao qua nhiều lượt. PASS cấu trúc chưa chứng minh chất lượng suy luận model
+hoặc tích hợp công cụ SOC thật.
 
 ```powershell
 uv run pytest tests/environments tests/world

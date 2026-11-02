@@ -5,6 +5,10 @@ Repo có **11 skills** trong `.claude/skills`: **8 sổ tay nghiệp vụ** cho 
 nghiệp vụ. Skill là hướng dẫn cho model; quyền thực thi do runtime/tool server kiểm
 soát, không do nội dung Markdown cấp.
 
+Rà cấu trúc không đủ để xác nhận nghiệp vụ. [Báo cáo rà nội dung](SKILLS_REVIEW_VI.md) đối chiếu yêu cầu client/red/blue
+và 55 nhóm NICE / 175 subtask, ghi các suy luận sai đã sửa, quy trình phối hợp còn thiếu đã bổ sung, cùng những
+khả năng runtime/model chưa kiểm chứng. Không coi audit PASS là SOC đã hoàn chỉnh.
+
 ## Vai nào dùng skill nào
 
 | Vai | Skill |
@@ -86,7 +90,7 @@ uv run mypy
 uv run python scripts/validate_catalog.py
 ```
 
-## Kết quả kiểm tra ngày 2026-11-01
+## Kết quả kiểm tra cấu trúc ngày 2026-11-01
 
 - Đã sửa: reference không được đưa vào prompt case; bundle bỏ sót reference;
   thiếu skill bị thay bằng chuỗi rỗng; tham chiếu chéo không tương đối đúng;

@@ -19,6 +19,9 @@ Các checkpoint trên branch `feat/environment-profiles`:
 | `f46c633` | Hướng dẫn theo dõi runtime bằng viewer và rollback |
 | `c03694b` | Làm rõ khả năng world trong skills, sửa tham chiếu chéo và hướng dẫn nghiệp vụ |
 | `cd76fcc` | Loader skill có kiểm tra, export đầy đủ reference và audit trong CI |
+| `960d9a0` | Ghi kết quả audit cấu trúc và hợp đồng nạp skills |
+| `4d4479b` | Sửa suy luận SOC thiếu căn cứ, chuẩn hoá IOC và ngữ cảnh pháp y |
+| `ca0f898` | Quy trình client/red/blue qua nhiều lượt, bàn giao và kiểm chứng rule/parser |
 
 Các commit tài liệu/kiểm thử tiếp theo xem bằng:
 
