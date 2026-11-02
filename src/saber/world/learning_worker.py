@@ -35,12 +35,8 @@ class Learner:
 
     def reflect(self, episode: dict[str, Any]) -> None:
         actor = self.world.actors[episode["actor_id"]]
-        # A whole episode is already frozen. Read only this actor's notebook up to its cutoff.
-        notes = [
-            n
-            for n in self.store.get("notebook", actor.id, [])
-            if n["tick"] <= episode["through_tick"]
-        ][-5:]
+        # Freeze notes at sealing, including within-tick ordering. Never read later notes.
+        notes = episode.get("notes", [])
         messages = [
             {
                 "role": "system",
@@ -62,7 +58,7 @@ class Learner:
                 "role": "user",
                 "content": json.dumps(
                     {
-                        "episode": episode,
+                        "episode": {k: v for k, v in episode.items() if k != "notes"},
                         "own_notes": notes,
                         "current_skill": learning.version(self.store, episode["version"]),
                     },

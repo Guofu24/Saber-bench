@@ -167,6 +167,7 @@ def seal(world: World, actor: Actor, reason: str) -> str | None:
         "through_tick": world.tick,
         "reason": reason,
         "records": current,
+        "notes": world.store.get("notebook", actor.id, [])[-5:],
         "summary": {
             "actions": len(current),
             "http_errors": errors,

@@ -107,6 +107,18 @@ def test_reflect_replay_publish_pin_and_rollback(lab):
     learner = Learner(lab.world, provider)
     old = learning.prompt_version(lab.store, "client-user")
     try:
+        # A later note in the same tick must not enter the already sealed episode.
+        with lab.store.transaction():
+            notes = lab.store.get("notebook", "client-1", [])
+            notes.append(
+                {
+                    "seq": 2,
+                    "tick": lab.world.tick,
+                    "kind": "hypothesis",
+                    "text": "FUTURE_NOTE_SAME_TICK",
+                }
+            )
+            lab.store.put("notebook", "client-1", notes)
         assert learner.process_one()
         proposal = next(iter(lab.store.items("learning-proposals").values()))
         assert proposal["status"] == "AWAITING_SUITE"
@@ -119,6 +131,7 @@ def test_reflect_replay_publish_pin_and_rollback(lab):
         assert report["passed"] and len(report["checks"]) == 6
         assert len(provider.calls) == 13
         assert "OTHER_TEAM_PRIVATE" not in json.dumps(provider.calls)
+        assert "FUTURE_NOTE_SAME_TICK" not in json.dumps(provider.calls)
         assert all(
             "expected" not in json.loads(m[-1]["content"]).get("observation", {})
             for m in provider.calls
