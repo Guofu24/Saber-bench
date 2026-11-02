@@ -19,7 +19,7 @@ Giải mã URL-encoding trước, rồi đánh giá từng request:
 | Command injection / RCE | `;`, `\|`, `$(`, backtick ghép lệnh hệ thống (`id`, `whoami`, `wget`) | ký tự đặc biệt trong ô tìm kiếm |
 | Upload webshell | POST tới endpoint upload với script phía server (`.php .aspx .jsp`) | triển khai script được phép (`health.php`, `status.aspx`) |
 
-Một request khai thác vẫn là request khai thác dù nó thất bại (403/404) — ghi nhận nó, nhưng tác động được
+Một request khai thác vẫn là attempt dù phản hồi là 403/404 — ghi nhận nó, nhưng thành công và tác động được
 đánh giá riêng (xem nhóm `WEB_APP_EXPLOIT` trong `alert-groups.md`).
 
 Khi có thêm log AD và các nguồn khác cùng khung giờ: nối các mảnh thành một nhận định — **có tấn công thật
@@ -40,7 +40,8 @@ Rà kết nối outbound tìm kết nối tới IP/domain độc hại — đặ
 2. Beacon thường có: **chu kỳ đều, jitter thấp**; kích thước gói nhỏ, ổn định; kéo dài; đích **hiếm** (ít host
    khác nói chuyện cùng); tiến trình không phải trình duyệt hay dịch vụ đã biết.
 3. **Lưu lượng nền cũng có chu kỳ đều**: NTP (udp/123 tới máy chủ thời gian), telemetry của hãng, health-check.
-   Đều đặn **không đủ** — cần thêm đích lạ + tiến trình lạ + không thuộc dịch vụ hợp lệ.
+   Đều đặn **không đủ** — cần đối chiếu ngữ cảnh, tiến trình, dữ liệu và hành vi. C2 có thể dùng trình duyệt,
+   dịch vụ quen hoặc nhịp không đều; không coi "đích lạ + process lạ" là điều kiện bắt buộc.
 4. Gắn **tiến trình** mở kết nối (netconn endpoint khớp theo ip, port, thời gian) — không biết tiến trình thì
    chặn sai chỗ.
 5. Ước lượng **chu kỳ beacon** (trung vị khoảng cách).
@@ -54,9 +55,9 @@ Rà kết nối outbound tìm kết nối tới IP/domain độc hại — đặ
 
 ## Mối đe doạ tới tài nguyên mạng — săn liên thông
 
-Khi phát hiện tấn công nhắm vào **một** khách hàng, lập tức săn IoC đó trên **toàn bộ** hệ sinh thái khách
-hàng còn lại. Hunting chạy liên tục 24/7 và kích hoạt ngay khi có tình báo về chiến dịch mới. Đầu ra: danh
-sách tài sản/khách hàng khác đang bị nhắm tới.
+Khi phát hiện chiến dịch, săn IOC trên các tenant **đã được cấp phạm vi liên thông**. Chỉ chuyển chỉ dấu được phép
+chia sẻ, không chuyển case/log/danh tính của khách hàng khác. Thiếu quyền thì bàn giao operator; mỗi tenant có
+truy vấn, bằng chứng và báo cáo riêng. Đầu ra: tài sản đang bị nhắm tới trong phạm vi được giao.
 
 1. **Host bị dò quét:** host **đích** nhận kết nối từ một nguồn tới nhiều cổng/nhiều lần bị chặn trong thời
    gian ngắn. Liệt kê **nạn nhân**, không phải nguồn quét.

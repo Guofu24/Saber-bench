@@ -8,11 +8,12 @@ lại bằng chứng từng xảy ra trong quá khứ**. Đầu ra: có hay khô
 **Dấu vết xâm nhập trên một máy:** persistence lạ · binary độc (hash) · tiến trình bất thường · đăng nhập bất
 thường · webshell hoặc request khai thác trong log web.
 
-**Dấu vết quá khứ:** tệp đã bị xoá nhưng còn **log AV** (đã phát hiện/đã xử lý) và **prefetch** (chứng minh binary
-từng chạy), event log cũ ⇒ máy đó **vẫn là máy bị xâm nhập**. Đừng loại vì "không còn thấy tệp".
+**Dấu vết quá khứ:** log AV, prefetch và event log có thể hỗ trợ xác nhận xâm nhập đã xảy ra dù tệp đã bị xoá.
+Kiểm hash/path, thời gian, kết quả chặn và bằng chứng thực thi: phát hiện/quarantine đơn lẻ không chứng minh
+compromise; prefetch cần gắn đúng binary và ngữ cảnh. Tách "từng bị xâm nhập" với "còn bị kiểm soát".
 
 **Máy sạch nhiều nhiễu:** phần mềm quản trị, agent backup tạo nhiều hoạt động trông giống tấn công nhưng khớp
-whitelist ⇒ không đưa vào. Mỗi máy đưa vào phải có bản ghi chứng minh.
+whitelist và hành vi hợp lệ thì có thể loại; không miễn trừ chỉ vì tên/whitelist. Mỗi máy đưa vào phải có bản ghi chứng minh.
 
 ```json
 {"compromised": ["ws-07", "srv-app-02"], "evidence": ["…"],
@@ -24,11 +25,11 @@ whitelist ⇒ không đưa vào. Mỗi máy đưa vào phải có bản ghi ch�
 Phân tích **chuỗi hành vi bất thường và TTP**, không dừng ở IOC/signature. Kill Chain: **Reconnaissance →
 Weaponization → Delivery → Exploitation → Installation → Command & Control → Actions on Objectives**.
 
-1. **Sắp sự kiện theo giai đoạn**: dùng logic nhân quả trước (phải có delivery trước exploitation), timestamp là
-   phụ — timestamp có thể bị xáo hoặc bị sửa. Giữ đủ mọi sự kiện.
-2. **Gán giai đoạn cho từng sự kiện.**
+1. Giữ nguyên timestamp gốc; chuẩn hoá bằng timezone/clock offset có căn cứ. Dùng quan hệ nhân quả để kiểm tra
+   thứ tự, không sửa thời gian để ép khớp mô hình. Nếu case yêu cầu thứ tự theo giai đoạn, trình bày riêng với timeline.
+2. **Gán giai đoạn có bằng chứng cho từng sự kiện**; một chiến dịch có thể lặp, rẽ nhánh hoặc không quan sát đủ các pha.
 3. Với **trọn một case** (kể cả ảnh bộ nhớ): xác định **đường vào** (`vector`), **timeline** các mốc chính (chuẩn
-   hoá UTC — xem `soc-ir`; lệch quá 5 phút coi là sai mốc), **phạm vi** host bị ảnh hưởng, và **kết luận mã độc** từ
+   hoá UTC — xem `soc-ir`; ghi độ chính xác/offset còn chưa rõ), **phạm vi** host bị ảnh hưởng, và **kết luận mã độc** từ
    báo cáo phân tích + ảnh bộ nhớ (tiến trình bị inject, kết nối chỉ có trong RAM).
 
 ```json
@@ -43,9 +44,9 @@ Weaponization → Delivery → Exploitation → Installation → Command & Contr
 Chủ động tìm dấu hiệu xâm nhập trên **toàn bề mặt tấn công**: endpoint (máy chủ, máy trạm, thiết bị OT), lưu
 lượng mạng, email, log Firewall/Proxy/SIEM.
 
-**Trích IOC** theo sáu loại (`ipv4`, `domain`, `url`, `sha256`, `email`, `cve`): refang (`hxxp`, `[.]`), chữ thường;
-bỏ IP private và domain lành tính/của tổ chức; không ghi host của URL hay domain của email vào `domain`; không coi
-tên tệp (`gate.php`) là domain. Chi tiết chuẩn hoá: `../../soc-cnt/reference/coverage-intel.md`.
+**Trích IOC** theo sáu loại (`ipv4`, `domain`, `url`, `sha256`, `email`, `cve`): giữ bản gốc và nguồn, chuẩn hoá theo
+loại, phân biệt observable với IOC có căn cứ. Không loại IP nội bộ mặc định hoặc coi tên tệp là domain.
+Chi tiết chuẩn hoá: `../../soc-cnt/reference/coverage-intel.md`.
 
 **Dấu vết chống điều tra** — ghi `{kind, location}`:
 
@@ -56,7 +57,8 @@ tên tệp (`gate.php`) là domain. Chi tiết chuẩn hoá: `../../soc-cnt/refe
 | sửa timestamp | mtime/ctime **lùi** về trước thời điểm hợp lý; lệch giữa các nguồn thời gian |
 | xoá lịch sử / shadow copy | `.bash_history` bị xoá hoặc `HISTFILE=/dev/null`; `vssadmin delete shadows` |
 
-Hành vi chống điều tra tự nó là chỉ dấu mạnh — báo cả khi không còn payload. Trên trọn một đợt săn: gộp IOC +
+Đối chiếu maintenance/retention và sức khoẻ nguồn log trước khi gán mục đích chống điều tra; khoảng trống log đơn
+lẻ chưa chứng minh attacker xoá log. Nếu có căn cứ thì báo cả khi không còn payload. Trên trọn một đợt săn: gộp IOC +
 dấu vết chống điều tra + timeline thành một bức tranh.
 
 ```json
@@ -72,7 +74,8 @@ Xác định toàn bộ **máy trạm, máy chủ và tài khoản** đã bị c
 phạm vi bị xâm phạm**.
 
 - **Tài khoản bị chiếm:** đăng nhập thành công bất thường sau chuỗi thất bại (brute force/spray), từ nguồn/giờ/máy
-  lạ, logon type lạ với tài khoản đó, dùng để di chuyển ngang; tài khoản mới do attacker tạo.
+  lạ, logon type lạ với tài khoản đó là đầu mối; xác nhận bằng phiên/hành vi trái phép, không chỉ chuỗi fail → success.
+  Tài khoản mới phải có bằng chứng attacker tạo, không suy từ thời điểm tạo đơn lẻ.
 - **Máy bị xâm phạm:** thêm log biên — máy có kết nối C2/VPN lạ/proxy bất thường, máy là đích của tài khoản bị chiếm.
 - **Ba mức** (hai mức đầu dẫn tới **hai kế hoạch xử lý khác hẳn nhau** — dựng lại máy/đổi mật khẩu vs điều tra thêm):
 
@@ -93,8 +96,8 @@ Gán mức theo bằng chứng chứng minh được; không chắc thì chọn 
 
 - Bỏ máy chỉ còn dấu vết quá khứ.
 - Đưa máy quản trị/backup nhiều nhiễu vào danh sách xâm nhập.
-- Sắp Kill Chain thuần theo timestamp khi timestamp bị xáo/sửa.
-- Đếm một domain hai lần, đưa IP private vào IOC.
+- Ép timeline vào thứ tự Kill Chain hoặc tự sửa timestamp không có căn cứ.
+- Đếm hai biểu diễn của cùng observable thành hai bằng chứng; loại IP private mặc định.
 - Gán `bị_kiểm_soát` cho máy chỉ bị quét.
 
 Nguồn nghiệp vụ: NICE T1102, T1103, T2013, T2016 (catalog SABER).

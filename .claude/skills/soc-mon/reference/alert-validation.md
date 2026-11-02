@@ -6,7 +6,8 @@ tới lúc bạn gán nó vào case hoặc đóng FP.
 ## Kiểm chứng một cảnh báo
 
 **Dữ liệu cần:** cảnh báo gốc (rule, host, user, mức, thời điểm, mô tả, tệp/tiến trình bị cảnh báo), log thô
-±60 phút quanh cảnh báo, telemetry tiến trình, danh mục tài sản, whitelist, danh mục log source.
+±60 phút quanh cảnh báo trong phạm vi case và **không sau `as_of`/thời điểm chốt**, telemetry tiến trình,
+danh mục tài sản, whitelist, danh mục log source. Không dùng dữ liệu tương lai để cải thiện kết luận tại t0.
 
 **Quy trình**
 1. **Đọc điều cảnh báo khẳng định**, không đọc tên rule. Vd: "một interpreter do tài liệu Office sinh ra rồi
@@ -55,8 +56,8 @@ Chỉ thẩm định cảnh báo từ sensor **nằm trong phạm vi log source 
 **Quy trình**
 1. Tách đúng phiên mà cảnh báo trỏ tới (5-tuple + thời điểm) trong PCAP.
 2. Dựng lại payload tầng ứng dụng (URI, body HTTP, truy vấn DNS…) và tìm **đoạn byte làm chữ ký khớp**.
-3. TP khi payload thật sự mang nội dung độc hại như chữ ký mô tả; FP khi chữ ký khớp nhầm (chuỗi giống nhưng
-   ngữ cảnh lành tính — nội dung tài liệu, ô tìm kiếm) hoặc phiên không chứa payload đó.
+3. TP khi payload xác nhận claim của chữ ký; FP khi khớp nhầm ngữ cảnh hoặc dữ liệu đầy đủ bác bỏ claim.
+   PCAP thiếu đoạn, mã hoá hay lỗi reassembly thì chưa xác định, không tự gán FP vì không tìm thấy byte.
 4. **Có NAT trong đường đi**: truy ngược IP nguồn **thật** qua bảng NAT, log firewall và flow — IP mà IDS
    nhìn thấy có thể là IP sau NAT.
 5. **Chấm lại mức độ theo vai trò máy đích** (máy chủ core, hệ thống cấp 3, máy VIP nặng hơn máy trạm

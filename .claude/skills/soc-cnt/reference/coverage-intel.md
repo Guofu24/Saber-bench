@@ -38,12 +38,16 @@ săn tìm** và **chữ ký YARA/Sigma**. Đầu ra là chỉ dấu tác nghiệ
 
 Gom theo sáu loại: `ipv4`, `domain`, `url`, `sha256`, `email`, `cve`.
 
-- **Refang và chuẩn hoá trước khi lưu:** `hxxp` → `http`, `[.]`/`(.)` → `.`, `[@]` → `@`; chữ thường; bỏ `/` và
-  `.` ở cuối URL.
-- **Không phải IOC:** IP private (10/8, 172.16/12, 192.168/16, 127/8); domain lành tính hoặc của chính tổ chức
-  (`example.com`, mail domain nội bộ); tên tệp (`gate.php`, `.exe`, `.dll`); đoạn path.
-- **Mỗi giá trị đúng một loại:** host của một URL đã ghi ở `url` thì không ghi lại ở `domain`; domain của email
-  cũng vậy.
+- **Giữ giá trị gốc, nguồn, thời điểm và vai trò** của mỗi observable. Refang `hxxp` → `http`, `[.]`/`(.)` → `.`,
+  `[@]` → `@` để đối chiếu; không truy cập URL chỉ vì đã refang.
+- **Chuẩn hoá theo loại:** hash/domain dùng chữ thường; URL chỉ hạ chữ scheme/host, giữ path/query và dấu `/`
+  có ý nghĩa. Không hạ chữ email local-part mặc định. Quy tắc so sánh riêng do case yêu cầu áp dụng trên bản so sánh,
+  không ghi đè bản gốc. [RFC 3986 §6.2.2.1](https://www.rfc-editor.org/rfc/rfc3986.html#section-6.2.2.1).
+- **Observable chưa phải IOC độc hại:** cần ngữ cảnh và bằng chứng. IP private/domain nội bộ có thể là hạ tầng
+  bị chiếm; IP công khai/CDN có thể là dịch vụ hợp lệ. Lọc theo phạm vi case và căn cứ, không chỉ theo lớp địa chỉ.
+  Tên tệp/đoạn path không tự trở thành domain; CVE là tham chiếu lỗ hổng, chưa chứng minh đã khai thác.
+- **Dedupe trong từng loại theo contract.** Chỉ xuất host/domain suy ra từ URL/email nếu case yêu cầu hoặc có
+  quan sát độc lập; ghi quan hệ nguồn để không đếm thành hai bằng chứng độc lập.
 - Loại hiếm (cve, email) quan trọng ngang loại phổ biến — đừng bỏ sót.
 
 ```json
@@ -76,7 +80,7 @@ Gom theo sáu loại: `ipv4`, `domain`, `url`, `sha256`, `email`, `cve`.
 
 - Coi rule tồn tại là đã phủ mà không kiểm nguồn log.
 - Kết luận "không có dấu vết" khi thật ra thiếu nguồn log.
-- Đưa IP private, domain nội bộ, tên tệp vào IOC; ghi một domain ở cả `url` lẫn `domain`.
+- Loại mọi IP private/domain nội bộ, hạ chữ cả URL hoặc bỏ dấu `/` làm mất phân biệt tài nguyên.
 - Chỉ nộp bảng IOC mà không có rule hành vi.
 
 Nguồn nghiệp vụ: NICE T1384, T1644 (catalog SABER).

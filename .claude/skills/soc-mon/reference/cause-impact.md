@@ -13,7 +13,8 @@ và mapping ATT&CK, thống kê alert theo rule, whitelist, danh mục log sourc
 2. Đi ngược từ tiến trình bị cảnh báo lên trên cho tới tiến trình **đầu tiên nằm ngoài hành vi bình thường** —
    thường là ứng dụng nhận nội dung từ ngoài: Office, trình duyệt, mail client, worker của web server, dịch vụ
    bị khai thác.
-3. Không chọn gốc của cả cây hệ điều hành (`explorer.exe`, `services.exe`, `init`); chọn **khởi nguồn chuỗi độc**.
+3. Chọn **khởi nguồn chuỗi độc có bằng chứng**, không mặc định gốc cây OS hay Office là nguyên nhân.
+   Phân biệt host + PID + thời điểm tạo để tránh PID reuse; tên tiến trình hợp lệ vẫn có thể bị chiếm/inject.
 
 **Xác định cơ chế khớp rule:** sự kiện nào, vào thời điểm nào (`t0`), thoả điều kiện nào của rule. Viết lại
 được câu "rule X khớp vì trường A = … ở sự kiện B lúc t0".
@@ -65,7 +66,7 @@ nhiễu hoặc thay đổi môi trường, mở ticket tối ưu cho Content Sec
 3. Tra **đúng ô** ma trận = (hàng phạm vi, cột mức độ) và đọc ra mức. **Ghi lại ô đã dùng** — đúng mức mà không
    chỉ ra được ô là đoán, không phải suy ra.
 4. Nhiều tài sản/nhiều tác động: lấy ô **nặng nhất** mà bằng chứng chứng minh được.
-5. **Phạm vi:** liệt kê mọi host bị tác động — bỏ sót đắt hơn báo thừa.
+5. **Phạm vi:** liệt kê host có bằng chứng bị tác động; giữ riêng host nghi vấn/cần kiểm tra, không nâng thành đã bị chiếm.
 6. **Nguy cơ dữ liệu** (ba mức): *đã bị trích xuất* / *có nguy cơ* / *không có bằng chứng*. Dựa vào flow ra,
    truy vấn CSDL bất thường, hành vi mã độc. "Không loại trừ" là kết luận hợp lệ khi có truy cập nhưng chưa
    thấy dữ liệu ra.

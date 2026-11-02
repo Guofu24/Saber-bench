@@ -6,10 +6,12 @@ Kết hợp PCAP với log Firewall, Proxy và SIEM để xác định **kênh l
 ngoài**. Đầu ra: kênh C2 và bằng chứng exfiltration (nếu có).
 
 **Đọc PCAP tìm kênh độc**
-1. Liệt kê hội thoại (endpoint, cổng, giao thức, bytes, thời lượng); bỏ hội thoại nội bộ và dịch vụ hạ tầng đã biết.
+1. Liệt kê hội thoại (endpoint, cổng, giao thức, bytes, thời lượng); xét cả nội bộ và dịch vụ quen trong phạm vi.
+   Chỉ loại lưu lượng khi có ngữ cảnh xác nhận hợp lệ, không chỉ vì private IP hoặc cổng phổ biến.
 2. Đối chiếu DNS/HTTP/TLS: domain mới đăng ký/DGA/subdomain dài; SNI/Host header; User-Agent lạ; URI cố định lặp lại
    (`/gate.php`, `/api/beacon`).
-3. **Tách kênh điều khiển:** C2 có chu kỳ đều + payload nhỏ hai chiều (lệnh/đáp), khác kênh tải về một chiều lớn.
+3. **Tách kênh điều khiển:** chu kỳ và payload hai chiều là đầu mối; C2 có thể không đều hoặc cùng kênh truyền dữ liệu.
+   Liên kết phiên với tiến trình, cấu hình mẫu và chuỗi hành vi; không bắt buộc một hình dạng lưu lượng cố định.
 4. IOC chỉ gồm IOC **của kênh độc** — không đưa domain CDN/phần mềm hợp lệ cùng xuất hiện trong PCAP.
 5. Gắn **tiến trình** mở kết nối (netconn endpoint).
 
@@ -21,7 +23,9 @@ ngoài**. Đầu ra: kênh C2 và bằng chứng exfiltration (nếu có).
 | `có_nguy_cơ` | attacker có truy cập dữ liệu và có kênh ra, lượng ra bất thường, nhưng **không xác nhận được nội dung** (mã hoá, không tách được). **"Không loại trừ" là kết luận IR hợp lệ.** |
 | `không_có_bằng_chứng` | không thấy kênh hay lượng dữ liệu ra bất thường |
 
-Ước lượng **tổng byte gửi ra** (`bytes_out`) trên các phiên của kênh exfil/C2 đã xác định.
+Ước lượng **tổng byte gửi ra** (`bytes_out`) trên các phiên đã xác định; ghi điểm quan sát, chiều, cửa sổ thời gian,
+NAT và cách loại trùng/retransmission. Bytes trên dây không tự bằng dung lượng dữ liệu nhạy cảm đã mất.
+`không_có_bằng_chứng` chỉ nói về dữ liệu đã quan sát; PCAP thiếu/mã hoá không đủ để khẳng định không exfil.
 
 ```json
 {"c2_conns": [{"ip": "198.51.100.4", "port": 443, "process": "rundll32.exe"}],
@@ -40,13 +44,14 @@ nhóm tấn công và động cơ.
 2. So với hồ sơ TTP từng nhóm: chỉ tính phần **trùng có tính phân biệt** — công cụ/mã độc riêng của nhóm, hạ tầng tái
    sử dụng, chuỗi kỹ thuật đặc trưng, cách đặt tên/cấu hình. Technique phổ biến mà nhóm nào cũng dùng (`T1059`,
    `T1071`, `T1105`) **không** chứng minh danh tính.
-3. Kiểm theo mô hình **Diamond** (adversary · infrastructure · capability · victim): quy kết cần ít nhất hai đỉnh độc
-   lập cùng trùng khớp.
+3. Dùng **Diamond** (adversary · infrastructure · capability · victim) để tổ chức giả thuyết. Không có ngưỡng
+   "hai đỉnh" bảo đảm quy kết đúng. Cần bằng chứng độc lập có tính phân biệt, xét hạ tầng/tool dùng chung,
+   nguồn TI/thời điểm, giả thuyết khác và mức tin cậy.
 4. **Không đủ căn cứ ⇒ kết luận `khong_du_can_cu_quy_ket`.** Quy kết bừa là rủi ro nghiệp vụ thật (ảnh hưởng pháp lý,
    quan hệ với khách hàng).
 5. Luôn nộp kèm **tập TTP làm căn cứ** cho kết luận. Nêu tên nhóm mà không chỉ ra được TTP trùng khớp là đoán tên,
    không phải suy ra.
-6. Dùng tên/alias trong **bảng alias** của TI (vd APT41 = Winnti = Barium theo bảng nguồn).
+6. Dùng tên/alias theo **bảng alias của nguồn TI được cấp**; tên theo hãng có thể chỉ chồng lấn, không tự coi là đồng nhất ngoài phạm vi bảng.
 
 ```json
 {"apt_group": "khong_du_can_cu_quy_ket", "ttps": ["T1190", "T1059.001", "T1071.001"],
