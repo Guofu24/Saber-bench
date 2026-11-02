@@ -41,6 +41,7 @@ try {
             Add-Type -AssemblyName System.DirectoryServices.AccountManagement
             $context = New-Object System.DirectoryServices.AccountManagement.PrincipalContext('Domain', $ExpectedDomain)
             try { $accepted = $context.ValidateCredentials('saber-red', [guid]::NewGuid().ToString()) } finally { $context.Dispose() }
+            if ($accepted) { throw 'Expected failed lab authentication was accepted.' }
             $result = @{ account='saber-red'; authentication_succeeded=$accepted; attempts=1; pid=$PID }
         }
         'windows_inventory' {

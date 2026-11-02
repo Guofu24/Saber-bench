@@ -77,7 +77,7 @@ async function main() {
     anthropic: o.anthropic || process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com',
   };
   const readSnapshot = o.mode === 'watch' ? await snapshotSource(o) : null;
-  const { server, emit } = createOffice({ upstreams, config, log: say, readOnly: o.mode === 'watch', readNative: readSnapshot?.native });
+  const { server, emit } = createOffice({ upstreams, config, log: say, readOnly: o.mode === 'watch', readNative: readSnapshot?.native, readRange: readSnapshot?.range });
   const port = await listen(server, o.port, o.listen);
   const base = `http://127.0.0.1:${port}`;
   const env = {

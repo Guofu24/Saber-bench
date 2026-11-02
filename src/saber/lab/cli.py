@@ -285,3 +285,36 @@ def verify(bundle: Path) -> None:
     emit(result)
     if not result["passed"]:
         raise click.exceptions.Exit(1)
+
+
+@lab.command("reconcile-guest")
+@click.option("--bundle", type=click.Path(path_type=Path, exists=True), required=True)
+@click.option("--job-id", required=True)
+@click.option(
+    "--reason",
+    required=True,
+    help="Record the operator's guest inspection and why it is safe to resume.",
+)
+def reconcile_guest(bundle: Path, job_id: str, reason: str) -> None:
+    """After manual inspection, release an actor paused on an uncertain Windows job."""
+    import re
+
+    from saber.lab.transport import request
+
+    try:
+        verify_bundle(bundle)
+        if not re.fullmatch(r"[a-f0-9-]{32,36}", job_id) or not 20 <= len(reason) <= 1000:
+            raise ValueError("Invalid reconciliation")
+        auth = json.loads((bundle / ".secrets/relay.json").read_text())["relay_token"]
+        code, result = request(
+            "http://127.0.0.1:7789/relay/work/" + job_id + "/reconcile",
+            token=auth,
+            body={"reason": reason},
+        )
+        if code != 200:
+            raise ValueError("Reconciliation rejected")
+    except (OSError, ValueError, ConnectionError):
+        raise click.ClickException(
+            "Guest reconciliation unavailable or invalid; no credentials printed"
+        ) from None
+    emit(result)

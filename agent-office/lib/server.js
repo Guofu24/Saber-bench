@@ -10,7 +10,7 @@ const { normalizeSnapshot, MAX_BYTES } = require('./snapshot');
 const VIEWER = path.join(__dirname, '..', 'viewer', 'index.html');
 const EVENT_TYPES = new Set(['agent', 'task', 'llm_start', 'tool', 'llm_end', 'llm_error', 'handoff', 'process', 'message', 'status']);
 
-function createOffice({ upstreams = {}, config = {}, log = () => {}, readOnly = false, readNative = null }) {
+function createOffice({ upstreams = {}, config = {}, log = () => {}, readOnly = false, readNative = null, readRange = null }) {
   const clients = new Set();
   const history = [];
   const agents = new Map();
@@ -125,6 +125,20 @@ function createOffice({ upstreams = {}, config = {}, log = () => {}, readOnly = 
         res.writeHead(204, { 'access-control-allow-origin': '*' }); return res.end();
       }
       if (req.method === 'GET' && url === '/state') { res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' }); return res.end(JSON.stringify({ worlds: [...worlds.values()] })); }
+      if (req.method === 'GET' && url.startsWith('/range-events?')) {
+        const query = new URL(url, 'http://localhost').searchParams;
+        const world = worlds.get(query.get('world')), actor = query.get('actor');
+        if (!readRange || !world || world.execution_mode !== 'range' || !world.actors.some(a => a.id === actor)) { res.writeHead(404); return res.end('Range evidence unavailable'); }
+        try {
+          const page = await readRange(actor);
+          if (page.world_id !== world.world_id || page.actor_id !== actor) throw new Error('Wrong world');
+          page.entries = page.entries.filter(e => e.tick <= world.tick);
+          if (page.screen?.tick > world.tick) page.screen = null;
+          page.through_tick = Math.min(page.through_tick, world.tick);
+          res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+          return res.end(JSON.stringify(page));
+        } catch (_) { res.writeHead(404); return res.end('Range evidence unavailable'); }
+      }
       if (req.method === 'GET' && url.startsWith('/native-events?')) {
         const query = new URL(url, 'http://localhost').searchParams;
         const world = worlds.get(query.get('world')), actor = query.get('actor');

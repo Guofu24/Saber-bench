@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import os
@@ -46,6 +47,24 @@ def create_worker(
     accounts = {a["actor_id"]: a for a in credentials["accounts"].values()}
     gate = threading.Semaphore(1)
 
+    @app.get("/screens/{actor}/{digest}")
+    def screen(actor: str, digest: str, authorization: str = Header(default="")) -> dict[str, Any]:
+        if not secrets.compare_digest(authorization, "Bearer " + credentials["rpc_token"]):
+            raise HTTPException(403, "Executor capability required")
+        if actor not in accounts:
+            raise HTTPException(404, "Unknown actor")
+        path = ledger.root / "workspace" / actor / "browser.png"
+        if (
+            path.resolve() != path.absolute()
+            or not path.is_file()
+            or path.stat().st_size > 1_000_000
+        ):
+            raise HTTPException(404, "Screenshot unavailable")
+        data = path.read_bytes()
+        if not data.startswith(b"\x89PNG\r\n\x1a\n") or hashlib.sha256(data).hexdigest() != digest:
+            raise HTTPException(409, "Screenshot changed or invalid")
+        return {"sha256": digest, "png": base64.b64encode(data).decode("ascii")}
+
     @app.get("/jobs/{job_id}")
     def receipt(job_id: str, authorization: str = Header(default="")) -> dict[str, Any]:
         if not secrets.compare_digest(authorization, "Bearer " + credentials["rpc_token"]):
@@ -61,7 +80,12 @@ def create_worker(
 
     @app.get("/health")
     def health() -> dict[str, Any]:
-        return {"ok": True, "team": team, "tools": sorted(TOOLS[team]), "sensor": sensor_coverage()}
+        available = {
+            t
+            for t in TOOLS[team]
+            if credentials.get("windows_nodes") or not t.startswith("windows_")
+        }
+        return {"ok": True, "team": team, "tools": sorted(available), "sensor": sensor_coverage()}
 
     @app.post("/execute")
     def run(job: Job, authorization: str = Header(default="")) -> dict[str, Any]:
@@ -76,18 +100,6 @@ def create_worker(
             or job.tool not in allowed(team, account["role"], tuple(account.get("specialties", [])))
         ):
             raise HTTPException(403, "Actor/tool not available on this executor")
-        if job.tool in (
-            "contain",
-            "release",
-            "patch",
-            "unpatch",
-            "contain_domain_user",
-        ) and account["role"] not in (
-            "ir",
-            "content",
-            "lead",
-        ):
-            raise HTTPException(403, "Response role required")
         if len(json.dumps(job.args)) > 8192:
             raise HTTPException(413, "Arguments too large")
         if not gate.acquire(blocking=False):

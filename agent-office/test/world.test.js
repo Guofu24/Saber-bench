@@ -5,7 +5,7 @@ const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
 const { createOffice } = require('../lib/server');
-const { normalizeSnapshot, normalizeNativePage, MAX_BYTES } = require('../lib/snapshot');
+const { normalizeSnapshot, normalizeNativePage, normalizeRangePage, MAX_BYTES } = require('../lib/snapshot');
 const { snapshotSource, watchSnapshots } = require('../lib/watch');
 
 function fixture(overrides = {}) {
@@ -47,6 +47,38 @@ function nativeFixture(overrides = {}) {
       ts: '2026-11-02T00:00:00Z', event_id: 4,
       data: { command_line: 'python -I -B native_worker.py', ppid: 12, token: 'SECRET' } }], ...overrides };
 }
+
+test('range evidence validates screen hashes, isolates actors and strips credentials', async t => {
+  const crypto = require('node:crypto');
+  const id = '12345678-1234-1234-1234-123456789abc';
+  const png = Buffer.from('89504e470d0a1a0a00000000', 'hex');
+  const page = { schema_version: 1, world_id: 'world-1', actor_id: 'client-1', through_tick: 8, limit: 12,
+    entries: [{ job_id: id, tick: 8, event_id: 1, tool: 'browse', source: 'scripted',
+      result: { pid: 10, token: 'PRIVATE' }, artifacts: [], evidence_complete: true,
+      evidence: [{ sha256: 'a'.repeat(64), hash_verified: true, event: { id, ts: new Date().toISOString(), host: 'client', kind: 'process.launch', sensor: 'test', data: { pid: 10, authorization: 'PRIVATE' } } }] }],
+    screen: { job_id: id, tick: 8, sha256: crypto.createHash('sha256').update(png).digest('hex'), png: png.toString('base64') } };
+  assert.doesNotMatch(JSON.stringify(normalizeRangePage(page)), /PRIVATE|authorization|token/);
+  assert.throws(() => normalizeRangePage({ ...page, screen: { ...page.screen, sha256: '0'.repeat(64) } }));
+  assert.throws(() => normalizeRangePage({ ...page, through_tick: 7 }));
+  assert.throws(() => normalizeRangePage({ ...page, entries: Array(13).fill(page.entries[0]) }));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'office-range-'));
+  const folder = path.join(dir, 'range-office'); await fs.mkdir(folder);
+  const file = path.join(folder, 'client-1.json');
+  await fs.writeFile(file, JSON.stringify(page));
+  await fs.writeFile(path.join(dir, 'office.json'), JSON.stringify(fixture({ execution_mode: 'range' })));
+  t.after(async () => { await fs.unlink(file); await fs.rmdir(folder); await fs.unlink(path.join(dir, 'office.json')); await fs.rmdir(dir); });
+  const read = await snapshotSource({ world: dir });
+  await assert.rejects(() => read.range('../keys_pool'));
+  const { server, emit } = createOffice({ readOnly: true, readRange: read.range });
+  emit(await read()); await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => { server.closeAllConnections(); server.close(); });
+  const base = `http://127.0.0.1:${server.address().port}/range-events?world=world-1&actor=`;
+  assert.equal((await fetch(base + 'client-1')).status, 200);
+  assert.doesNotMatch(await (await fetch(base + 'client-1')).text(), /PRIVATE/);
+  assert.equal((await fetch(base + 'unknown')).status, 404);
+  await fs.writeFile(file, JSON.stringify({ ...page, world_id: 'other' }));
+  assert.equal((await fetch(base + 'client-1')).status, 404);
+});
 
 test('native protocol keeps measured fields and rejects future or mixed-actor evidence', () => {
   const data = nativeFixture();

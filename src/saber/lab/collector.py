@@ -59,7 +59,12 @@ def flush_index(ledger: Ledger, indexer: str, index: str) -> int:
         and creation.get("error", {}).get("type") == "resource_already_exists_exception"
     ):
         raise ConnectionError("Indexer unavailable")
-    if ledger.get("indexed_fields_version") != 1:
+    target = indexer + "/" + index
+    if (
+        status == 200
+        or ledger.get("indexed_fields_version") != 1
+        or ledger.get("indexed_target") != target
+    ):
         if status == 400:
             code, _ = request(
                 indexer + "/" + index + "/_mapping",
@@ -75,6 +80,7 @@ def flush_index(ledger: Ledger, indexer: str, index: str) -> int:
         with ledger.lock, ledger.db:
             ledger.db.execute("UPDATE events SET delivered=0")
             ledger.put("indexed_fields_version", 1)
+            ledger.put("indexed_target", target)
     sent = 0
     for event in ledger.events(pending=True, limit=100):
         status, result = request(
@@ -268,7 +274,16 @@ def create_collector(
                     "size": body.limit,
                     "sort": [{"ts": "desc"}, {"id": "desc"}],
                     "query": {"bool": {"filter": filters}},
-                    **({"search_after": list(body.cursor)} if body.cursor else {}),
+                    **(
+                        {
+                            "search_after": [
+                                int(datetime.fromisoformat(body.cursor[0]).timestamp() * 1000),
+                                body.cursor[1],
+                            ]
+                        }
+                        if body.cursor
+                        else {}
+                    ),
                 },
             )
         except (OSError, ValueError, ConnectionError):
@@ -279,7 +294,9 @@ def create_collector(
         return {
             "events": [public_event(h["_source"]) for h in hits],
             "source": "opensearch",
-            "next_cursor": hits[-1].get("sort") if len(hits) == body.limit else None,
+            "next_cursor": [hits[-1]["_source"]["ts"], hits[-1]["_source"]["id"]]
+            if len(hits) == body.limit
+            else None,
         }
 
     @app.get("/cases")

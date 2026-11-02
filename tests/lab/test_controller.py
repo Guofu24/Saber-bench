@@ -55,6 +55,9 @@ def test_controller_reconciles_completed_job_without_repeating_side_effect(
             snapshot = json.loads((tmp_path / "control/office.json").read_text())
             assert snapshot["execution_mode"] == "range"
             assert next(a for a in snapshot["actors"] if a["id"] == actor.id)["executor"]["pid"] > 0
+            page = json.loads((tmp_path / "control/range-office/client-1.json").read_text())
+            assert page["entries"][0]["result"]["pid"] > 0
+            assert page["entries"][0]["job_id"] == launches[0]["data"]["job_id"]
             controller.close()
     worker_store.close()
 
@@ -99,6 +102,14 @@ def test_three_team_scheduler_uses_real_executors_and_observed_evidence(lab, tmp
             )
             assert controller.store.get("lab", "metrics")["actions_scripted"] > 10
             assert not any(controller.store.items("lab-pending").values())
+            controller.publish(stopped=True)
+            page = json.loads((tmp_path / "control/range-office/client-1.json").read_text())
+            assert any(e["evidence_complete"] for e in page["entries"])
+            assert any(
+                p["event"]["kind"] == "process.launch" and p["hash_verified"]
+                for e in page["entries"]
+                for p in e["evidence"]
+            )
         finally:
             controller.close()
             for emitter in emitters:
@@ -138,4 +149,47 @@ def test_real_chrome_browser_job_has_screenshot_and_process_receipt(lab, tmp_pat
         assert result["pid"] > 0
         assert any(a["name"] == "browser.png" and a["bytes"] > 1000 for a in result["artifacts"])
         assert (store.root / "workspace/client-1/browser.png").read_bytes().startswith(b"\x89PNG")
+        artifact = next(a for a in result["artifacts"] if a["name"] == "browser.png")
+        client = TestClient(worker)
+        path = "/screens/client-1/" + artifact["sha256"]
+        assert client.get(path).status_code == 403
+        auth = {"Authorization": "Bearer " + creds["client"]["rpc_token"]}
+        assert client.get(path, headers=auth).json()["sha256"] == artifact["sha256"]
+        assert client.get("/screens/client-1/" + "0" * 64, headers=auth).status_code == 409
     store.close()
+
+
+def test_busy_executor_does_not_advance_actor_and_uncertain_guest_stays_paused(
+    lab, tmp_path, monkeypatch
+):
+    spec, creds, *_ = lab
+    controller = Controller(
+        spec, tmp_path / "busy", creds["controller"], {"client": "http://unused"}, "http://unused"
+    )
+    from saber.lab import controller as module
+
+    calls = []
+
+    def busy(url, **kwargs):
+        calls.append((url, kwargs.get("body", {}).get("tool")))
+        return 429, {"detail": "busy"}
+
+    monkeypatch.setattr(module, "request", busy)
+    actor = next(a for a in spec.actors if a.team == "client")
+    try:
+        controller.actor_step(actor, 1)
+        assert controller.store.get("lab-memory", actor.id) is None
+        assert controller.store.get("lab", "metrics") is None
+        assert controller.store.get("lab-pending", actor.id) is None
+        assert calls == [("http://unused/execute", "login")]
+        with controller.store.transaction():
+            controller.store.put(
+                "lab-memory",
+                actor.id,
+                {"turn": 1, "result": {"guest_work": {"state": "INDETERMINATE", "id": "a" * 32}}},
+            )
+        controller.actor_step(actor, 2)
+        assert calls[-1] == ("http://unused/execute", "windows_job_status")
+        assert controller.store.get("lab-memory", actor.id)["turn"] == 1
+    finally:
+        controller.close()

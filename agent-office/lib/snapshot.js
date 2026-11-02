@@ -123,4 +123,42 @@ function normalizeSnapshot(v) {
     llm_by_team: Object.fromEntries(TEAMS.map(t => [t, counters(v.llm_by_team?.[t])])),
     key_layout: choice(v.key_layout, ['off', 'teams', 'shared']), pools, budget_exhausted: v.budget_exhausted === true };
 }
-module.exports = { normalizeSnapshot, normalizeNativePage, MAX_BYTES };
+const RANGE_BYTES = 2_000_000;
+function publicData(value, depth = 0) {
+  if (depth > 16) throw new Error('Excessive evidence nesting');
+  if (Array.isArray(value)) return boundedList(value, 1000).map(v => publicData(v, depth + 1));
+  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).filter(([k]) => !/password|token|authorization|api_key|secret|credential/i.test(k)).map(([k, v]) => [k, publicData(v, depth + 1)]));
+  if (typeof value === 'string') return value.replace(/AIza[\w-]{25,}/g, '[REDACTED]').replace(/((?:password|token|api[_-]?key|secret)[\s=:]+)\S+/gi, '$1[REDACTED]').slice(0, 16384);
+  if (value == null || typeof value === 'boolean' || (typeof value === 'number' && Number.isFinite(value))) return value;
+  throw new Error('Invalid evidence value');
+}
+function normalizeRangePage(v) {
+  const actor = word(v.actor_id, 48), tick = integer(v.through_tick);
+  if (!/^[a-zA-Z0-9_-]+$/.test(actor)) throw new Error('Invalid range actor');
+  const digest = v => { if (!/^[a-f0-9]{64}$/.test(v)) throw new Error('Invalid evidence digest'); return v; };
+  const id = v => { if (!/^[a-f0-9-]{32,36}$/.test(v)) throw new Error('Invalid job/evidence id'); return v; };
+  const at = v => { if (integer(v) > tick) throw new Error('Future range evidence'); return v; };
+  const entries = boundedList(v.entries, 12).map(e => ({
+    job_id: id(e.job_id), tick: at(e.tick), event_id: integer(e.event_id, 1),
+    tool: word(e.tool), source: choice(e.source, ['llm', 'scripted', 'scripted-fallback']),
+    result: publicData(e.result), evidence_complete: e.evidence_complete === true,
+    artifacts: boundedList(e.artifacts, 12).map(a => ({ name: word(a.name, 64), bytes: integer(a.bytes), sha256: digest(a.sha256) })),
+    evidence: boundedList(e.evidence, 10).map(p => ({
+      sha256: digest(p.sha256), hash_verified: p.hash_verified === true, display_redacted: true,
+      event: { id: id(p.event.id), ts: word(p.event.ts, 64), host: word(p.event.host),
+        kind: word(p.event.kind), sensor: word(p.event.sensor), data: publicData(p.event.data) },
+    })),
+  }));
+  if (entries.some((e, i) => i && e.event_id <= entries[i - 1].event_id)) throw new Error('Invalid range order');
+  let screen = null;
+  if (v.screen) {
+    const crypto = require('node:crypto'), s = v.screen;
+    if (typeof s.png !== 'string' || s.png.length > 1_333_336 || !/^[A-Za-z0-9+/]*={0,2}$/.test(s.png)) throw new Error('Invalid screenshot');
+    const bytes = Buffer.from(s.png, 'base64');
+    if (bytes.length > 1_000_000 || !bytes.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex')) || crypto.createHash('sha256').update(bytes).digest('hex') !== digest(s.sha256)) throw new Error('Screenshot integrity failure');
+    screen = { job_id: id(s.job_id), tick: at(s.tick), sha256: s.sha256, png: bytes.toString('base64') };
+  }
+  return { schema_version: choice(v.schema_version, [1]), world_id: word(v.world_id),
+    actor_id: actor, through_tick: tick, limit: choice(v.limit, [12]), entries, screen };
+}
+module.exports = { normalizeSnapshot, normalizeNativePage, normalizeRangePage, MAX_BYTES, RANGE_BYTES };

@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 import pytest
 from fastapi import FastAPI
@@ -38,7 +39,13 @@ def test_indexer_http_contract_persists_ack_and_queries_actual_sources(tmp_path)
     @backend.post("/saber-test/_search")
     def search(body: dict):
         assert body["query"]["bool"]["filter"][0]["range"]["ts"]["lte"]
-        assert body["size"] == 100 and body["sort"] == [{"ts": "desc"}, {"id": "desc"}]
+        assert body["size"] in (1, 100) and body["sort"] == [{"ts": "desc"}, {"id": "desc"}]
+        if "search_after" in body:
+            assert body["search_after"] == [
+                int(datetime.fromisoformat(event["ts"]).timestamp() * 1000),
+                event["id"],
+            ]
+            return {"hits": {"hits": []}}
         return {
             "timed_out": False,
             "_shards": {"failed": 0},
@@ -56,6 +63,18 @@ def test_indexer_http_contract_persists_ack_and_queries_actual_sources(tmp_path)
         result = gateway.post("/siem/search", headers={"Authorization": "Bearer reader"}, json={})
         assert result.json()["events"] == [event]
         assert result.json()["source"] == "opensearch"
+        page = gateway.post(
+            "/siem/search", headers={"Authorization": "Bearer reader"}, json={"limit": 1}
+        ).json()
+        assert page["next_cursor"] == [event["ts"], event["id"]]
+        assert (
+            gateway.post(
+                "/siem/search",
+                headers={"Authorization": "Bearer reader"},
+                json={"cursor": page["next_cursor"]},
+            ).json()["events"]
+            == []
+        )
     ledger.close()
 
 

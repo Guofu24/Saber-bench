@@ -55,13 +55,24 @@ def test_actor_windows_work_is_scoped_durable_and_receipt_cannot_change(tmp_path
         "id": job["id"],
         "node": "soc-ws-1",
         "state": "SUCCEEDED",
-        "result": {"file_sha256": "a" * 64, "bytes": 40},
+        "result": {
+            "file_sha256": "a" * 64,
+            "bytes": 40,
+            "pid": 123,
+            "path": "\\\\soc-files\\SaberWork\\soc-ws-1.txt",
+        },
     }
     assert (
         client.post(
             "/relay/work-receipts", headers=relay, json=receipt | {"node": "soc-dc"}
         ).status_code
         == 409
+    )
+    assert (
+        client.post(
+            "/relay/work-receipts", headers=relay, json=receipt | {"result": {}}
+        ).status_code
+        == 422
     )
     assert client.post("/relay/work-receipts", headers=relay, json=receipt).status_code == 200
     assert client.post("/relay/work-receipts", headers=relay, json=receipt).status_code == 200
@@ -73,7 +84,36 @@ def test_actor_windows_work_is_scoped_durable_and_receipt_cannot_change(tmp_path
     )
     assert client.get("/guest/work/" + job["id"], headers=auth).json()["result"]["bytes"] == 40
     assert not client.get("/relay/work", headers=relay).json()["jobs"]
+    uncertain = job | {"id": str(uuid.uuid4())}
+    assert client.post("/guest/work", headers=auth, json=uncertain).status_code == 200
+    assert (
+        client.post("/relay/work/" + uncertain["id"] + "/claim", headers=relay, json={}).status_code
+        == 200
+    )
+    assert (
+        client.post(
+            "/relay/work-receipts",
+            headers=relay,
+            json=receipt
+            | {"id": uncertain["id"], "state": "INDETERMINATE", "result": {"retry_allowed": False}},
+        ).status_code
+        == 200
+    )
+    assert (
+        client.post("/guest/work", headers=auth, json=job | {"id": str(uuid.uuid4())}).status_code
+        == 409
+    )
     blue = {"Authorization": "Bearer hunter"}
+    reason = {"reason": "Inspected guest receipt and stopped the original task before resuming."}
+    path = "/relay/work/" + uncertain["id"] + "/reconcile"
+    assert client.post(path, headers=auth, json=reason).status_code == 403
+    assert client.post(path, headers=relay, json=reason).status_code == 200
+    status = client.get("/guest/work/" + uncertain["id"], headers=auth).json()
+    assert status["state"] == "INDETERMINATE" and status["resolution"]
+    assert (
+        client.post("/guest/work", headers=auth, json=job | {"id": str(uuid.uuid4())}).status_code
+        == 200
+    )
     assert (
         client.post(
             "/guest/work",

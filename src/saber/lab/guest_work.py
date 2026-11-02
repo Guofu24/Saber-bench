@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import secrets
 from typing import Any, Literal
 
@@ -43,6 +44,11 @@ class Receipt(BaseModel):
     result: dict[str, Any]
 
 
+class Reconciliation(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    reason: str = Field(min_length=20, max_length=1000)
+
+
 def routes(app: FastAPI, ledger: Ledger, credentials: dict[str, Any]) -> None:
     def identity(auth: str) -> dict[str, Any]:
         for token, actor in credentials.get("actor_capabilities", {}).items():
@@ -80,7 +86,7 @@ def routes(app: FastAPI, ledger: Ledger, credentials: dict[str, Any]) -> None:
                     raise HTTPException(409, "Job ID cannot change its operation")
                 return old
             active = ledger.db.execute(
-                "SELECT 1 FROM state WHERE k LIKE 'guest-work:%' AND json_extract(v,'$.actor')=? AND json_extract(v,'$.state') IN ('QUEUED','DISPATCHED') LIMIT 1",
+                "SELECT 1 FROM state WHERE k LIKE 'guest-work:%' AND json_extract(v,'$.actor')=? AND json_extract(v,'$.state') IN ('QUEUED','DISPATCHED','INDETERMINATE') AND json_extract(v,'$.resolution') IS NULL LIMIT 1",
                 (actor["actor"],),
             ).fetchone()
             if active:
@@ -137,6 +143,48 @@ def routes(app: FastAPI, ledger: Ledger, credentials: dict[str, Any]) -> None:
             job = ledger.get("guest-work:" + body.id)
             if not job or job["state"] == "QUEUED" or job["node"] != body.node:
                 raise HTTPException(409, "Receipt not bound to a dispatched guest job")
+            if body.state == "SUCCEEDED":
+                result = body.result
+                valid = isinstance(result.get("pid"), int) and result["pid"] > 0
+                tool = job["tool"]
+                if tool in ("windows_work", "windows_collect_evidence"):
+                    key = "file_sha256" if tool == "windows_work" else "sha256"
+                    valid = valid and bool(re.fullmatch(r"[a-f0-9]{64}", str(result.get(key, ""))))
+                    valid = valid and isinstance(result.get("bytes"), int) and result["bytes"] > 0
+                if tool == "windows_work":
+                    valid = (
+                        valid
+                        and isinstance(result.get("path"), str)
+                        and result["path"].startswith("\\\\")
+                    )
+                if tool == "windows_collect_evidence":
+                    valid = valid and result.get("artifact") == "event-evidence.json"
+                    valid = (
+                        valid and isinstance(result.get("records"), int) and result["records"] >= 0
+                    )
+                if tool == "windows_recon":
+                    valid = (
+                        valid
+                        and isinstance(result.get("dns"), list)
+                        and isinstance(result.get("files"), list)
+                    )
+                if tool == "windows_inventory":
+                    valid = (
+                        valid
+                        and isinstance(result.get("processes"), list)
+                        and isinstance(result.get("connections"), list)
+                    )
+                if tool == "windows_failed_logon":
+                    valid = (
+                        valid
+                        and result.get("account") == "saber-red"
+                        and result.get("attempts") == 1
+                    )
+                    valid = valid and result.get("authentication_succeeded") is False
+                if not valid:
+                    raise HTTPException(
+                        422, "Successful guest receipt requires measured operation evidence"
+                    )
             if job["state"] != "DISPATCHED":
                 if job["state"] != body.state or job.get("result") != body.result:
                     raise HTTPException(409, "Terminal receipt is immutable")
@@ -144,3 +192,23 @@ def routes(app: FastAPI, ledger: Ledger, credentials: dict[str, Any]) -> None:
             job.update(state=body.state, result=body.result, completed_at=now())
             ledger.put("guest-work:" + body.id, job)
         return {"accepted": True}
+
+    @app.post("/relay/work/{job_id}/reconcile")
+    def reconcile(
+        job_id: str, body: Reconciliation, authorization: str = Header(default="")
+    ) -> dict[str, Any]:
+        from saber.lab.events import redact
+
+        relay(authorization)
+        with ledger.lock:
+            job = ledger.get("guest-work:" + job_id)
+            if not job or job["state"] != "INDETERMINATE":
+                raise HTTPException(409, "Only an indeterminate guest receipt can be reconciled")
+            if not job.get("resolution"):
+                job["resolution"] = {
+                    "at": now(),
+                    "reason": redact(body.reason),
+                    "disposition": "operator-inspected; resume permitted; original outcome remains unknown",
+                }
+                ledger.put("guest-work:" + job_id, job)
+        return {"reconciled": True, "job_id": job_id, "state": job["state"]}
