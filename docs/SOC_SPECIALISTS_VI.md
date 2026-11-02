@@ -10,8 +10,8 @@ cũ, catalog 175 subtask và dữ liệu run hiện có. Không coi tên skill l
 |---|---|---|
 | 1 | Query phân trang, cutoff/world scope, lấy evidence và case cũ, finding, đóng FP/mở lại | Đã có code và test HTTP |
 | 2 | 12 chuyên môn blue, cấu hình agent kiêm nhiệm, nạp skill theo nhiệm vụ | Đã có registry, skill, phân quyền và test |
-| 3 | Nhiệm vụ có nhận việc/bàn giao/kết quả, memory, wait và hoàn tất có hiệu lực | Đang triển khai |
-| 4 | Artifact, kiểm rule, sức khoẻ telemetry và xác nhận phục hồi trong lab | Tiếp theo |
+| 3 | Nhiệm vụ có nhận việc/bàn giao/kết quả, memory, wait và hoàn tất có hiệu lực | Đã có state machine; đang kiểm hồi quy |
+| 4 | Artifact, kiểm rule, sức khoẻ telemetry và xác nhận phục hồi trong lab | Đang triển khai |
 | 5 | Agent-office, README, smoke đầu cuối và kiểm tra hồi quy | Tiếp theo |
 
 ## Chứng cứ và case
@@ -45,3 +45,23 @@ Operator cấu hình kiêm nhiệm trong world config, ví dụ:
 Tool của actor là hợp quyền của các chuyên môn được cấu hình. Message/model không tự
 thêm chuyên môn hay quyền. Skill đang dùng chuyển theo chuyên môn nhiệm vụ trong phạm
 vi đó; toàn bộ skill đã cấu hình được preflight trước khi mở lab có model.
+
+## Nhiệm vụ và vòng đời actor
+
+Lead tạo task theo chuyên môn; bên nhận phải accept, chỉ có một task ACTIVE tại một
+thời điểm. Kết quả cần dẫn chứng đã gắn vào case. Handoff đưa việc về OFFERED và bên
+nhận phải chấp nhận; blocked có lý do, lead có thể cancel và giao việc thay thế. Deadline
+là tick của lab, không được tự chuyển thành SLA phút của khách hàng.
+
+Notebook riêng tồn tại qua restart, có 200 mục/actor, phân trang và báo đầy rõ ràng;
+không bị ghi đè bởi note 1.000 ký tự của planner. Notebook không hiện trong office/team.
+
+`wait` tạm ngừng actor theo tick; `finish` dừng tới khi resume. Plan rỗng hợp lệ được
+chuyển thành wait một tick. Model lỗi hoặc plan sai vẫn có fallback. In-flight plan
+mang generation của actor: đổi nhiệm vụ/trạng thái sẽ vô hiệu hóa quyết định cũ.
+
+Lead được resume đồng đội blue. Operator có thể resume bất kỳ actor trong world đã dừng:
+
+```powershell
+uv run saber world actor-resume --out runs/world --actor red-impact
+```

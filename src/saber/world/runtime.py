@@ -21,6 +21,7 @@ from saber.agents.skills import load_playbook
 from saber.agents.specialties import BLUE_SKILLS
 from saber.domain.errors import BudgetExceeded, IntegrationBlocked
 from saber.population.office import OfficeEmitter
+from saber.world import work
 from saber.world.agents import PLAYBOOKS, baseline, llm_messages, parse_plan
 from saber.world.environment import World
 from saber.world.models import Action, Actor, WorldConfig, specialties_for
@@ -81,7 +82,9 @@ class Planner:
     def __init__(self, provider: LLMProvider, actors: int, workers: int = 4) -> None:
         self.provider = provider
         self.requests: queue.Queue[tuple[Actor, dict[str, Any]]] = queue.Queue(maxsize=actors)
-        self.results: queue.Queue[tuple[str, list[Action], str, int]] = queue.Queue(maxsize=actors)
+        self.results: queue.Queue[tuple[str, list[Action], str, int, int]] = queue.Queue(
+            maxsize=actors
+        )
         self.pending: set[str] = set()
         self.stopping = threading.Event()
         self.exhausted = False
@@ -127,7 +130,15 @@ class Planner:
             except Exception:
                 actions, note = [], "LLM failure; scripted fallback (error details redacted)."
             if not self.stopping.is_set():
-                self.results.put((actor.id, actions, note, int(obs["tick"])))
+                self.results.put(
+                    (
+                        actor.id,
+                        actions,
+                        note,
+                        int(obs["tick"]),
+                        int(obs.get("control", {}).get("generation", 0)),
+                    )
+                )
 
     def close(self) -> None:
         self.stopping.set()
@@ -216,13 +227,21 @@ class Runner:
             return
         while True:
             try:
-                aid, actions, note, at = self.planner.results.get_nowait()
+                aid, actions, note, at, generation = self.planner.results.get_nowait()
             except queue.Empty:
                 break
             self.planner.pending.discard(aid)
             # Drop stale decisions rather than executing against an unrelated world state.
             fresh = self.world.tick - at <= self.config.profile_refresh_ticks
             with self.store.transaction():
+                current = work.control(self.world, aid)
+                if (
+                    not fresh
+                    or current["status"] != "ACTIVE"
+                    or current["generation"] != generation
+                ):
+                    self.world._metric("discarded_plans", 1)
+                    continue
                 self.store.put("plans", aid, [a.model_dump() for a in actions] if fresh else [])
                 memory = self.store.get("memory", aid, {})
                 memory.update(
@@ -241,6 +260,13 @@ class Runner:
         actors = self.config.actors
         offset = (tick + self.config.seed) % len(actors)
         for actor in actors[offset:] + actors[:offset]:
+            with self.store.transaction():
+                control = work.control(self.world, actor.id)
+                if control["status"] == "WAITING" and tick >= control["until_tick"]:
+                    work.set_control(self.world, actor.id, "ACTIVE", "Wait completed.")
+                    control = work.control(self.world, actor.id)
+            if control["status"] != "ACTIVE":
+                continue
             if tick % actor.interval_ticks or (
                 actor.team == "red" and tick < self.config.red_start_tick
             ):
@@ -252,12 +278,17 @@ class Runner:
             if self.planner is not None and tick >= int(memory.get("next_plan", 0)):
                 self.planner.request(actor, obs)
                 memory["next_plan"] = tick + self.config.profile_refresh_ticks
+                with self.store.transaction():
+                    self.store.put("memory", actor.id, memory)
             plan = self.store.get("plans", actor.id, [])
             source = "llm" if plan else ("scripted-fallback" if self.planner else "scripted")
             chosen = Action.model_validate(plan.pop(0)) if plan else baseline(actor, obs, turns)
             result = client.act(chosen)
             # Persist a bounded private agent journal; never expose other teams' plans.
             with self.store.transaction():
+                if work.control(self.world, actor.id)["generation"] != control["generation"]:
+                    plan = []
+                memory = self.store.get("memory", actor.id, memory)
                 memory.update(
                     {
                         "turns": turns + 1,

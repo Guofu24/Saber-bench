@@ -14,11 +14,13 @@ from saber.agents.gemini import KeyPool
 from saber.agents.provider import LLMProvider
 from saber.domain.errors import SaberError
 from saber.population.office import OfficeEmitter
+from saber.world.environment import World
 from saber.world.key_layout import TeamKeyLayout
-from saber.world.models import WorldConfig, default_config
+from saber.world.models import BLUE_ROLES, Actor, WorldConfig, default_config
 from saber.world.quota import QuotaProvider, TeamQuotaProvider
 from saber.world.runtime import Runner, WorldLock, atomic_json
 from saber.world.store import Store
+from saber.world.work import set_control
 
 
 @click.group(
@@ -35,15 +37,65 @@ def world() -> None:
 @click.option("--clients", type=click.IntRange(1, 100), default=6, show_default=True)
 @click.option("--seed", type=int, default=42, show_default=True)
 @click.option("--tick-seconds", type=click.FloatRange(0.01, 3600), default=2.0, show_default=True)
-def init_world(out: Path, clients: int, seed: int, tick_seconds: float) -> None:
+@click.option(
+    "--blue-specialists",
+    is_flag=True,
+    help="Include all 12 blue specialties; default keeps the six-role roster.",
+)
+def init_world(
+    out: Path, clients: int, seed: int, tick_seconds: float, blue_specialists: bool
+) -> None:
     if (out / "config.json").exists() or (out / "world.sqlite3").exists():
         raise click.ClickException(
             "World already exists. Edit its config before first run, or choose a new directory."
         )
     config = default_config(clients, seed).model_copy(update={"tick_seconds": tick_seconds})
+    if blue_specialists:
+        existing = {a.role for a in config.actors if a.team == "blue"}
+        config = config.model_copy(
+            update={
+                "actors": config.actors
+                + [
+                    Actor(
+                        id=f"blue-{role}",
+                        team="blue",
+                        role=role,
+                        goal="Resolve assigned specialist work using cited evidence.",
+                    )
+                    for role in BLUE_ROLES
+                    if role not in existing
+                ]
+            }
+        )
     out.mkdir(parents=True, exist_ok=True)
     atomic_json(out / "config.json", config.model_dump(mode="json"))
     click.echo(f"Created {out / 'config.json'} ({len(config.actors)} actors).")
+
+
+@world.command(
+    "actor-resume",
+    help="Resume a finished/waiting actor in a stopped world; keeps evidence and clears stale plans.",
+)
+@click.option("--out", type=click.Path(path_type=Path, exists=True), required=True)
+@click.option("--actor", "actor_id", required=True)
+def actor_resume(out: Path, actor_id: str) -> None:
+    if not (out / "world.sqlite3").is_file():
+        raise click.ClickException("No saved world at this directory.")
+    try:
+        config = WorldConfig.model_validate_json((out / "config.json").read_text(encoding="utf-8"))
+        if actor_id not in {a.id for a in config.actors}:
+            raise click.ClickException("Unknown actor.")
+        with WorldLock(out):
+            store = Store(out)
+            try:
+                lab = World(store, config)
+                with store.transaction():
+                    set_control(lab, actor_id, "ACTIVE", "Operator explicitly resumed actor.")
+            finally:
+                store.close()
+    except (OSError, ValueError, RuntimeError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(f"Resumed {actor_id}; start/resume the world to continue.")
 
 
 @world.command(

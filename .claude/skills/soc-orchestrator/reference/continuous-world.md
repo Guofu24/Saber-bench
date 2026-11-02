@@ -66,10 +66,26 @@ cấp mốc thời gian và chính sách tương ứng; không tự suy ra đã 
   để tránh mở trùng/đụng hành động. DFIR bàn giao evidence/timeline/điều chưa rõ; IR kiểm lại đích và trạng thái trước
   phản ứng, sau đó báo kết quả/ảnh hưởng; content kiểm rule/patch; lead giao việc và thông báo đúng client.
 - Bàn giao gồm mục tiêu/case, bằng chứng có thể tìm lại, việc đã làm và kết quả, việc còn thiếu, người tiếp nhận.
-  Chỉ dùng thành viên/ID đã được cung cấp; ghi trong `share` nếu không có API bàn giao riêng. Đây là quy ước phối hợp,
-  không phải khoá sở hữu hay giao dịch nguyên tử mà server đã cưỡng chế.
+  Dùng task/handoff/accept để chuyển việc; `share` dành cho trao đổi thêm. Server kiểm assignee, chuyên môn,
+  trạng thái và revision của task; quyền phản ứng vẫn được kiểm riêng theo actor và bằng chứng của case.
 - Tool lỗi hoặc bị từ chối: ghi lý do, kiểm điều kiện, không lặp tác động khi chưa xác minh trạng thái. Chưa đủ dữ liệu
   thì điều tra/bàn giao; không suy TP/FP từ status, chữ ký, port/private IP hoặc chỉ từ tên actor/rule.
-- `actions: []`, note "đã xong" hay hết plan **không phải lệnh pause**: runtime dùng scripted fallback. Scheduler
-  quản lý nhịp và dừng; skill không tự đảm bảo lịch nghỉ, ngân sách chiến dịch hoặc chạy forever không gián đoạn.
+- `wait` tạm dừng hành động và planning theo số tick; `finish` kết thúc nhiệm vụ actor tới khi được resume rõ ràng.
+  Plan hợp lệ `actions: []` được chuyển thành chờ 1 tick; model lỗi/plan không hợp lệ mới fallback. Note "xong"
+  không thay cho `finish`. Plan cũ bị loại khi actor chờ, hoàn tất hoặc đổi nhiệm vụ.
   Không đọc/quản lý key pool trong vai nghiệp vụ; provider/quota do control plane quản lý.
+
+## Công cụ điều tra và công việc
+
+`query_events` phân trang lịch sử đang giữ, cần world_id và as_of_tick không vượt tick hiện tại. `get_evidence`
+lấy event còn giữ hoặc snapshot trong case; retention gap không chứng minh không có hành vi. `get_case` lấy case
+ngoài cửa sổ gần đây. `append_evidence`/`record_finding` dùng expected_revision; lỗi revision thì đọc lại trước khi sửa.
+
+Lead dùng `create_task` chỉ định case, chuyên môn, mục tiêu và thành viên có chuyên môn đó trong roster. Bên nhận
+phải `accept_task`; mỗi actor một việc ACTIVE. `complete_task` cần kết quả và evidence thuộc case; thiếu dữ liệu dùng
+`block_task`, chuyển người dùng `handoff_task` và bên nhận chấp nhận lại. Lead có thể `cancel_task` với lý do.
+Không đóng case khi còn việc chưa giải quyết; FP cần finding có dẫn chứng, resolved cần phản ứng đã kiểm chứng.
+
+`write_note`/`read_notes` giữ sổ riêng có phân trang, tách quan sát/giả thuyết/quyết định/bước kế. Ghi chứng cứ vào case
+khi cần bàn giao; người khác không đọc được notebook. `active_specialty` chọn skill trong các chuyên môn operator đã
+cấp; nhiệm vụ/tin nhắn không tự cấp quyền mới. Nhiệm vụ DONE là báo cáo của analyst, chưa thành ground truth.

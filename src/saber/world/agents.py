@@ -203,6 +203,10 @@ def parse_plan(actor: Actor, text: str) -> tuple[list[Action], str]:
     obj, _ = extract_answer_json(text)
     if not isinstance(obj, dict) or not isinstance(obj.get("actions"), list):
         return [], "Invalid LLM plan; using explicit scripted fallback."
+    if not obj["actions"]:
+        return [action("wait", ticks=1, reason="Planner intentionally returned no actions.")], str(
+            obj.get("note", "")
+        )[:1000]
     actions = []
     for item in obj["actions"][:4]:
         try:

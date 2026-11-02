@@ -13,12 +13,13 @@ import json
 import uuid
 from typing import Any
 
-from saber.world import operations
+from saber.world import operations, work
 from saber.world.models import Action, Actor, WorldConfig, safe_name, specialties_for, tools_for
 from saber.world.store import Store, utc_now
 
 TOOL_HELP = {
     **operations.HELP,
+    **work.HELP,
     "browse": "Open the local portal; returns document links and application health.",
     "search": "Search the local website. args: query (text).",
     "login": "Log in as your assigned synthetic account. args: typo (bool, optional).",
@@ -150,6 +151,11 @@ class World:
                 "last_result": self.store.get("results", actor.id, {}),
                 "tools": {name: TOOL_HELP[name] for name in sorted(tools_for(actor))},
                 "memory": self.store.get("memory", actor.id, {}),
+                "control": work.control(self, actor.id),
+                "notebook_index": [
+                    {"seq": n["seq"], "tick": n["tick"], "kind": n["kind"]}
+                    for n in self.store.get("notebook", actor.id, [])[-10:]
+                ],
             }
             if actor.team == "blue":
                 obs["events"] = self.store.events(
@@ -173,6 +179,22 @@ class World:
                     if a.team == "blue"
                 ]
                 obs["specialties"] = specialties_for(actor)
+                own_tasks = [
+                    t
+                    for t in self.store.items("tasks").values()
+                    if t["assignee"] == actor.id and t["status"] in {"OFFERED", "ACTIVE", "BLOCKED"}
+                ]
+                own_tasks.sort(
+                    key=lambda t: (
+                        t["status"] != "ACTIVE",
+                        t["deadline_tick"] or 10**15,
+                        t["sequence"],
+                    )
+                )
+                obs["tasks"] = own_tasks[:20]
+                obs["active_specialty"] = next(
+                    (t["specialty"] for t in own_tasks if t["status"] == "ACTIVE"), actor.role
+                )
             else:
                 obs["events"] = self.store.events(
                     through_tick=self.tick, limit=10, principal=principal
@@ -245,6 +267,13 @@ class World:
         self, actor: Actor, action: Action, effect: dict[str, Any]
     ) -> tuple[int, dict[str, Any], str]:
         tool, args = action.tool, action.args
+        if tool in work.HELP:
+            return work.execute(self, actor, action)
+        control = work.control(self, actor.id)
+        if control["status"] == "DONE" or (
+            control["status"] == "WAITING" and control["until_tick"] > self.tick
+        ):
+            return 409, {"error": "Actor is waiting or finished; resume before acting."}, actor.id
         p = self.principals[actor.id]
         state = self.store.get("service", "state")
         if actor.team != "blue" and tool not in {"share", "acknowledge"}:
@@ -635,7 +664,8 @@ class World:
                 if case["status"] == "CLOSED":
                     return 409, {"error": "Case is already closed."}, case["id"]
                 if any(
-                    t.get("case_id") == case["id"] and t["status"] in {"OFFERED", "ACTIVE"}
+                    t.get("case_id") == case["id"]
+                    and t["status"] in {"OFFERED", "ACTIVE", "BLOCKED"}
                     for t in self.store.items("tasks").values()
                 ):
                     return 409, {"error": "Finish or cancel outstanding work first."}, case["id"]

@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from saber.agents.specialties import BLUE_SKILLS, DEFAULT_BLUE_ROLES
 from saber.world.operations import CASE_TOOLS, READ_TOOLS
+from saber.world.work import LEAD_TOOLS, PERSONAL_TOOLS, WORKER_TOOLS
 
 Team = Literal["client", "red", "blue"]
 BLUE_ROLES = tuple(BLUE_SKILLS)
@@ -138,14 +139,16 @@ BLUE_TOOLS = {
 
 def tools_for(actor: Actor) -> frozenset[str]:
     if actor.team == "client":
-        return CLIENT_TOOLS
+        return CLIENT_TOOLS | PERSONAL_TOOLS
     if actor.team == "red":
-        return RED_TOOLS
+        return RED_TOOLS | PERSONAL_TOOLS
     return (
         frozenset().union(*(BLUE_TOOLS[s] for s in specialties_for(actor)))
         | READ_TOOLS
         | CASE_TOOLS
-        | ({"reopen_case"} if "lead" in specialties_for(actor) else set())
+        | PERSONAL_TOOLS
+        | WORKER_TOOLS
+        | ({"reopen_case", *LEAD_TOOLS} if "lead" in specialties_for(actor) else set())
     )
 
 
