@@ -43,6 +43,20 @@ vòng đời.
 3. Xem thống kê alert theo rule để không viết lại một rule vốn đã nhiễu; nếu đụng rule cũ thì mở ticket tối ưu.
 4. **Parser** cho log ứng dụng nội bộ: tách đúng các trường thời gian, nguồn, người dùng, hành động, kết quả để
    rule phía sau dùng được; kiểm trên mẫu log thật của hệ thống đó.
+5. Với signature mạng, xác nhận engine/version, giao thức và chiều flow; replay PCAP dương/âm trong môi trường
+   kiểm thử được cấp. Kiểm dữ liệu sau reassembly và giới hạn khi TLS/mất gói; so alert thực với phiên cần bắt.
+   SNI/JA3/URI chỉ là đặc trưng có điều kiện, không tự chứng minh C2.
+6. Với parser, chốt field/type/timezone, null/escaping và hành vi khi dòng sai; kiểm cả biến thể format, bản ghi
+   thiếu trường và lỗi parse. Giữ raw record + locator để truy lại; lỗi parse không được biến thành dữ liệu sạch giả.
+
+## Kiểm thử và phát hành có thể kiểm chứng
+
+- Nhãn corpus đến từ bằng chứng đã review, không từ chính rule đang viết. Có mẫu âm gần giống và biến thể chưa
+  dùng lúc soạn; ghi TP/FP/FN, coverage và thời gian chạy trên đúng corpus/version. Không có corpus/engine thì ghi chưa kiểm.
+- Trước phát hành lưu phiên bản cũ, thay đổi, log source/field phụ thuộc, kết quả test và phạm vi áp dụng.
+  Dùng quy trình review/rollout được cấp; một rule được lưu vào kho chưa có nghĩa đã bật ở engine đích.
+- Sau triển khai kiểm trạng thái bật, log source, alert và tải hệ thống; kiểm cả TP quan trọng còn phát hiện.
+  Nếu hồi quy, dùng phiên bản/rollback đã chuẩn bị qua quyền được cấp và bàn giao MON; không tự deploy production.
 
 ## Sai lầm thường gặp
 

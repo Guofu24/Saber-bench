@@ -40,8 +40,8 @@ lập **war room** (kênh liên lạc khẩn cấp). Đầu ra: Incident Ticket,
 Xác định **hệ thống nào bị tác động, tài khoản/lỗ hổng nào bị lạm dụng, dữ liệu nào có nguy cơ bị trích xuất**.
 Đầu ra: scope of compromise và mức ưu tiên xử lý.
 
-- **Host bị ảnh hưởng:** đích của đăng nhập thành công bằng tài khoản bị chiếm; máy có tiến trình/persistence độc;
-  máy có detection EDR. **Tài khoản:** tài khoản bị dùng bất thường. Bỏ sót đắt hơn báo thừa.
+- **Host/tài khoản:** đối chiếu phiên trái phép, thực thi/persistence và detection đã kiểm chứng; detection hoặc đăng
+  nhập bất thường đơn lẻ chỉ là đầu mối. Tách đã bị chiếm, bị chạm và nghi vấn, không gộp thành đã bị kiểm soát.
 - **Cạnh di chuyển ngang** `{src, dst}` giữa các máy trong phạm vi.
 - **Tự kiểm trước khi chốt:** với **từng** phần tử, hỏi "suy ra được từ hiện vật nào?". Không trỏ được ⇒ bỏ.
 

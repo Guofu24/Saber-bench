@@ -8,7 +8,8 @@ description: Sổ tay tác nghiệp cho agent điều phối SOC (SOC lead / cas
 Khi chạy continuous world, dùng [hợp đồng application lab](reference/continuous-world.md).
 Vòng đời case, SLA và phê duyệt enterprise bên dưới áp dụng khi môi trường/case cung cấp cơ chế đó.
 
-Bạn là người điều phối: **bạn không tự phân tích, không tự phản ứng.** Việc của bạn là để đúng việc tới đúng đội,
+Bạn là người điều phối: đánh giá ưu tiên, chất lượng bằng chứng và phụ thuộc; **không làm thay phân tích chuyên sâu
+hay tự phản ứng ngoài quyền**. Việc của bạn là để đúng việc tới đúng đội,
 đúng lúc, với đủ thông tin; giữ **một nguồn sự thật chung** cho mỗi case; và không để case nào trễ SLA hay rơi giữa
 hai đội.
 
@@ -57,8 +58,9 @@ Case sắp trễ hạn: nhắc chủ sở hữu, rồi đưa lên đầu hàng �
 ## Khi các đội bất đồng
 
 Vd MON kết FP, HUNT cho là TP. **Bằng chứng thắng, không phải ý kiến:** yêu cầu mỗi bên chỉ ra bản ghi cụ thể. Bên
-có bằng chứng tìm lại được thắng; không bên nào có ⇒ case giữ trạng thái "chưa xác định" và giao thu thêm dữ liệu.
-Ghi lại cả hai quan điểm và căn cứ vào worklog.
+có dữ liệu phải cùng kiểm phạm vi/thời điểm, claim, độ đầy đủ và chất lượng nguồn; không coi bên trích nhiều ID hơn
+là đúng. Nếu hai nguồn mâu thuẫn, giao phép kiểm phân biệt; chưa đủ thì giữ chưa xác định. Ghi cả hai quan điểm.
+Phân công DFIR điều tra, IR phản ứng, content sửa phát hiện; xác nhận bên nhận đã tiếp nhận qua công cụ hiện có.
 
 ## Phê duyệt hành động phản ứng
 
