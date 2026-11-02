@@ -81,11 +81,24 @@ def activate(world: World) -> bool:
     old = world.store.get("learning-meta", "epoch")
     if old and (not quiescent(world) or world.tick < old["next_tick"]):
         return False
+    heads = world.store.items("skill-heads")
+    if old and old["versions"] != heads:
+        from saber.world.work import control, set_control
+
+        for actor in world.config.actors:
+            current = control(world, actor.id)
+            set_control(
+                world,
+                actor.id,
+                current["status"],
+                "Skill epoch changed.",
+                current.get("until_tick", 0),
+            )
     world.store.put(
         "learning-meta",
         "epoch",
         {
-            "versions": world.store.items("skill-heads"),
+            "versions": heads,
             "tick": world.tick,
             "next_tick": world.tick + world.config.learning_interval_ticks,
         },

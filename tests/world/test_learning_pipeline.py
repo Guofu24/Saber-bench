@@ -128,7 +128,12 @@ def test_reflect_replay_publish_pin_and_rollback(lab):
         for _ in range(lab.config.learning_interval_ticks):
             lab.world.advance()
         with lab.store.transaction():
+            lab.store.put("plans", "client-1", [{"tool": "call_app", "args": {}}])
+            generation = lab.store.get("actor-control", "client-1")["generation"]
             assert learning.activate(lab.world)
+        assert lab.store.get("plans", "client-1") == []
+        assert lab.store.get("actor-control", "client-1")["generation"] > generation
+        assert lab.store.get("actor-control", "client-1")["status"] == "DONE"
         assert learning.prompt_version(lab.store, "client-user")["id"] == p["published_version"]
         rollback(lab.store, "client-user", old["id"])
         assert lab.store.get("skill-heads", "client-user") == old["id"]
