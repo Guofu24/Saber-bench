@@ -165,6 +165,9 @@ def execute(world: World, actor: Actor, action: Action) -> tuple[int, dict[str, 
         merged.update({e["id"]: e for e in cited})
         if len(merged) > 200:
             raise ValueError("split investigations larger than 200 events")
+        if set(merged) - set(case["evidence_ids"]):
+            # Keep the audit history, but require a fresh assessment of the expanded case.
+            case["classification"] = "UNDETERMINED"
         case["evidence"] = [merged[i] for i in sorted(merged)]
         case["evidence_ids"] = sorted(merged)
         case["timeline"] = []  # Previous timeline no longer covers all case evidence.

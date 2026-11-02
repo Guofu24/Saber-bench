@@ -199,3 +199,40 @@ def test_added_attack_evidence_updates_private_scoring_without_exposing_labels(l
     assert contained["verified"] is True
     assert world.report()["metrics"]["false_containments"] == 0
     assert "offenders" not in json.dumps(blue.act(action("get_case", case_id=cid)))
+
+
+def test_new_evidence_invalidates_old_fp_verdict_before_closure(lab):
+    _, server = lab
+    blue, lead = server.client("blue-monitor"), server.client("blue-lead")
+    client = server.client("client-1")
+    first = client.act(action("browse"))["event_id"]
+    cid = blue.act(action("open_case", evidence_ids=[first]))["case_id"]
+    blue.act(
+        action(
+            "record_finding",
+            case_id=cid,
+            expected_revision=0,
+            classification="FP",
+            evidence_ids=[first],
+            note="Ordinary browsing.",
+        )
+    )
+    second = client.act(action("search", query="work"))["event_id"]
+    blue.act(
+        action(
+            "append_evidence",
+            case_id=cid,
+            expected_revision=1,
+            evidence_ids=[second],
+            note="Additional activity needs assessment.",
+        )
+    )
+    case = blue.act(action("get_case", case_id=cid))["case"]
+    assert case["classification"] == "UNDETERMINED"
+    assert case["findings"][0]["classification"] == "FP"  # Audit history is preserved.
+    assert (
+        lead.act(
+            action("close_case", case_id=cid, disposition="false_positive", expected_revision=2)
+        )["status"]
+        == 409
+    )
