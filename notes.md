@@ -120,6 +120,14 @@ URL được in ra, thường là `http://127.0.0.1:7788`. Viewer hiển thị t
 tool cuối, HTTP status, nguồn `llm` / `scripted` / `scripted-fallback`, usage và counters
 học. Viewer chỉ đọc snapshot, không khởi động agents hay gọi model; hoạt ảnh 3D minh họa.
 
+**Bố cục và số slots:** Clients, Red Team, Blue Team có khu riêng. Trong sidebar,
+chọn **Số bàn mỗi đội → 12 hoặc 24**, tương ứng tối đa **36 hoặc 72 agents/lượt xem**.
+Mũi tên trang chuyển nhóm tiếp theo của từng đội; vẫn xem đủ roster tối đa 200 agents.
+Các nút **Toàn cảnh / Clients / Red Team / Blue Team** phía trên đổi góc nhìn camera;
+bộ lọc đội trong sidebar còn giới hạn agent đang hiển thị. Thêm slots chỉ đổi viewer,
+không tăng số agents, số worker hay quota. Sau khi cập nhật code, refresh trình duyệt
+bằng Ctrl+F5 để nạp viewer mới.
+
 **Xem cụ thể red tấn công / blue phản ứng:** lọc Red Team, bấm robot, màn hình/bàn
 hoặc thẻ `red-access` / `red-impact`. Bảng chi tiết có timeline; bấm một event để xem
 agent → công cụ → mục tiêu → HTTP status, nguồn `llm`/scripted và case liên quan.

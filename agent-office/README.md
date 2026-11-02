@@ -51,7 +51,19 @@ thuộc lệnh SABER sau `--`; xem [hướng dẫn world](../docs/CONTINUOUS_WOR
 
 ## Đọc giao diện world
 
-- Chọn world, lọc Clients/Red Team/Blue Team; tối đa 200 agent, 20 agent mỗi trang.
+- Chọn world, lọc Clients/Red Team/Blue Team; hỗ trợ roster tối đa 200 agent.
+  Ba đội ngồi trong ba khu riêng: Clients xanh ngọc, Red Team đỏ, Blue Team xanh dương.
+  Bàn có mã C01…C24 / R01…R24 / B01…B24, hiển thị trên thẻ agent.
+- Chọn **Số bàn mỗi đội**: 12 (36 slots, mặc định) hoặc 24 (72 slots). Mỗi lượt xem
+  lấy tối đa số bàn đã chọn **từ từng đội**, nên client đông không đẩy red/blue ra
+  khỏi trang đầu. Mũi tên chuyển nhóm tiếp theo của từng đội; đội đã hết người ở trang
+  đó có thể trống. `72/200` nghĩa là 72 agent đang hiển thị trong roster 200.
+- Các nút **Toàn cảnh / Clients / Red Team / Blue Team** phía trên đổi góc nhìn camera.
+  Bộ lọc đội trong sidebar đổi các agent đang hiển thị và nhìn gần khu đó. Lọc đội
+  vẫn giữ agent trong đúng khu; không chuyển blue sang bàn client. Biển khu ghi số
+  đang thấy/tổng số hoặc “ẩn theo bộ lọc”. Bàn trống không đại diện cho một agent.
+- Thêm slots chỉ đổi bố cục viewer; không tăng số agent, worker hay budget của runtime.
+  Để thay roster, chỉnh cấu hình world trước lần chạy đầu theo [notes](../notes.md).
 - Dòng “học” cho biết số lượt tổng kết / đề xuất / bản phát hành của actor. Phát hành
   không đồng nghĩa đã đổi bản trong case đang chạy; xem epoch ở `world learning status`.
   Không xuất nội dung notebook, bài học hay đáp án replay lên viewer.
@@ -244,7 +256,8 @@ curl -X POST $AGENT_OFFICE_URL/ingest -H 'content-type: application/json' -d '[
 - Repo hardcode URL API, hoặc SDK không đọc `*_BASE_URL`, sẽ đi thẳng ra ngoài mà không qua proxy. Trường hợp này cần thêm cấu hình hoặc chế độ HTTPS proxy, chưa làm.
 - Proxy hỗ trợ định dạng API của OpenAI và Anthropic. Gemini native và Ollama `/api/chat` không qua proxy này; **SABER Gemini vẫn hiển thị bằng snapshot runtime**.
 - Tên agent và giao việc là suy đoán. Dùng `agent-office.json` hoặc header `X-Agent-Name` để chính xác hơn.
-- Proxy legacy có 20 bàn và khu đứng. World dùng phân trang 20 agent để xem đủ roster.
+- Proxy legacy dùng chỗ trống chung và khu đứng; không tự suy ra đội từ tên agent.
+  Phân khu client/red/blue và chia trang theo đội dùng trường `team` trong snapshot world.
 
 ## Cấu trúc
 
@@ -257,6 +270,7 @@ lib/watch.js            đọc file local hoặc snapshot container
 viewer/index.html       văn phòng 3D đã build (three.js inline, chạy offline)
 viewer-src/             mã nguồn viewer; world-state.js chứa selector có kiểm thử
 viewer-src/inspector.js bảng chi tiết agent; trace-view.js chọn sự kiện theo bằng chứng
+viewer-src/office-layout.js tọa độ ba khu, 72 bàn và phân trang theo từng đội
 test/                   test protocol, watcher, trạng thái và browser smoke tùy chọn
 examples/               mock LLM + repo demo multi-agent
 ```
@@ -292,9 +306,17 @@ bảng chi tiết, liên kết case/phản ứng, lọc thao tác riêng và cú
 Một snapshot thử riêng kiểm việc hiển thị target như văn bản, không thực thi HTML.
 Dùng demo 18 tick ở trên cho nhánh kiểm tra này.
 
-Kiểm chứng ngày 2026-11-02: **121 test Python** (`tests/world`, `tests/environments`,
+Kiểm chứng lượt inspector ngày 2026-11-02: **121 test Python** (`tests/world`, `tests/environments`,
 `tests/population/test_office.py`), **11 test JavaScript**, build viewer và Chrome smoke
 đều qua; Ruff và mypy trên module Python thay đổi cũng qua. Demo scripted có 11 agent,
 162 thao tác, 3 case và 5 phản ứng xác minh. Không gọi Gemini cho lượt kiểm tra UI này.
 Artifact local: `runs/office-inspector-check/verification.json`, `red-agent-inspector.png`,
 `mobile-inspector.png`; snapshot demo ở `runs/office-inspector-demo/office.json`.
+
+Lượt phối lại ba khu: **12 test JavaScript**, build và Chrome smoke qua. Kiểm tra cả
+36/72 slots, không trùng bàn, không lẫn khu, giữ chỗ khi lọc, phân trang đủ 200 agent,
+camera, inspector và mobile. Roster 200 / ảnh 72 agent là dữ liệu UI thử nghiệm;
+không phải 200 agents đã chạy workload. Artifact local:
+`runs/office-team-zones-check/verification.json`, `actual-world.png`,
+`synthetic-72-seats.png`, `blue-zone.png`, `mobile-team-zone.png`. Lượt này chỉ đổi
+viewer, không chạy lại Gemini hay thay đổi runtime world.

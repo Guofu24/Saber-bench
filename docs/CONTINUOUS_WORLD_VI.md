@@ -206,6 +206,9 @@ Hoặc chạy `agent-office serve` rồi thêm `--office-url http://127.0.0.1:77
 `world run`. Không suy ra API calls từ số lần agent xin plan: usage lấy từ ledger
 provider. Roster có lọc đội/phân trang; từng agent hiển thị nguồn hành động, HTTP
 status và tick cuối. Quota chỉ hiển thị số thứ tự key, không raw key hay prompt.
+Office có ba khu client/red/blue riêng; chọn 12 hoặc 24 bàn mỗi đội để hiển thị
+tối đa 36/72 agents một lượt. Phân trang lấy một nhóm từ từng đội, hỗ trợ roster
+200 agents; thay số bàn không đổi cấu hình hay số agents của world.
 
 Sandbox dùng `watch --bundle PATH_TO_BUNDLE` trên Docker host, không mở network
 container. VM/server dùng `watch --world` tại máy đích và SSH forward cổng viewer.

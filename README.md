@@ -197,7 +197,9 @@ profile, scripted/Gemini, nguồn hành động và quota theo đội; chỉ đ�
 Bấm robot, màn hình/bàn hoặc thẻ agent để xem timeline thao tác, mục tiêu, HTTP status
 và phản ứng blue gắn với bằng chứng của case. Lịch sử trên viewer là cửa sổ có giới hạn;
 HTTP thành công không tự chứng minh tấn công thành công. Xem [notes](notes.md) để chạy demo.
-Màn hình phân trang 20 agent, hỗ trợ roster 200 agent. Sandbox giữ mạng cô lập;
+Office chia ba khu Clients/Red/Blue, chọn 12 hoặc 24 bàn mỗi đội (36/72 slots).
+Phân trang theo từng đội để xem đủ roster 200 agent; nút phía trên zoom từng khu.
+Thêm slots không tạo thêm agent. Sandbox giữ mạng cô lập;
 VM/server chạy viewer tại máy đích rồi forward cổng loopback. Xem
 [hướng dẫn Agent Office](agent-office/README.md) và
 [hướng dẫn world](docs/CONTINUOUS_WORLD_VI.md).

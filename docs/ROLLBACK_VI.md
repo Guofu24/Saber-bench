@@ -43,6 +43,8 @@ Các checkpoint trên branch `feat/environment-profiles`:
 | `ef33025` | Notes tra nhanh các lệnh vận hành client/red/blue |
 | `8b20bc4` | Trace thao tác có giới hạn và phản ứng case đã lọc cho Agent Office |
 | `008576a` | Bấm robot/màn hình/thẻ để xem thao tác, mục tiêu và phản ứng phòng thủ |
+| `3fbf4fd` | Định nghĩa ba khu, kiểm tra 72 chỗ ngồi và phân trang theo từng đội |
+| `ed3aaf3` | Cảnh office ba khu riêng, chọn 36/72 slots và camera nhìn từng khu |
 
 Các commit tài liệu/kiểm thử tiếp theo xem bằng:
 
