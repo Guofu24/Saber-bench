@@ -16,6 +16,9 @@ Các checkpoint trên branch `feat/environment-profiles`:
 | `51dbb37` | Watch local/sandbox, validate snapshot và SSE replay |
 | `c3e475d` | UI world, lọc đội, phân trang, quota và kiểm thử trình duyệt |
 | `2367ee0` | Đóng gói viewer độc lập cho local/VM/server và host sandbox |
+| `f46c633` | Hướng dẫn theo dõi runtime bằng viewer và rollback |
+| `c03694b` | Làm rõ khả năng world trong skills, sửa tham chiếu chéo và hướng dẫn nghiệp vụ |
+| `cd76fcc` | Loader skill có kiểm tra, export đầy đủ reference và audit trong CI |
 
 Các commit tài liệu/kiểm thử tiếp theo xem bằng:
 

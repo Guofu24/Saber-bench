@@ -176,6 +176,8 @@ schema riêng; không ghi đè hoặc tự chuyển quyền từ file đó.
   `pyproject.toml`, `uv.lock` và các file viewer công khai được allowlist. Viewer nằm
   ở `agent-office/` ngoài Docker build context; không mang theo `node_modules`.
   Không xuất `.env`, key pool, `.git`, venv, runs hay dữ liệu riêng.
+- Playbook gồm entrypoint **và các reference được liên kết**, có kiểm tra tồn tại,
+  phạm vi và symlink. Thiếu reference thì export thất bại. Xem [kiểm tra skills](SKILLS_VI.md).
 - File hash trong manifest xác định nội dung working tree được xuất; `source_revision`
   chỉ là commit nền. Hash không phải chữ ký chứng thực nguồn.
 - Các manifest Compose được đối chiếu với profile hỗ trợ trước lifecycle. Không chỉnh

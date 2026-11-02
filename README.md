@@ -176,8 +176,13 @@ start container hoặc triển khai trong guest/server riêng. Không có `READY
 
 ## Kiểm thử và rollback
 
+Skills có kiểm tra riêng: 11 skills, 8 sổ tay nghiệp vụ và 25 tài liệu tham chiếu.
+World nạp hướng dẫn application lab; population/benchmark nạp tài liệu theo case.
+Bundle mang theo các reference cần thiết. Xem [hướng dẫn skills](docs/SKILLS_VI.md).
+
 ```powershell
 uv run pytest tests/environments tests/world
+uv run python scripts/check_skills.py --out runs/skills-check/audit.json
 uv run ruff check src tests scripts
 uv run ruff format --check src tests
 uv run mypy

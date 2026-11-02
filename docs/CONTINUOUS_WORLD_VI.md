@@ -172,6 +172,11 @@ Không được gọi kết quả HYBRID là kết quả LLM thuần.
 
 ## Quan sát bằng agent-office
 
+Skills của các vai và kiểm tra cách nạp được mô tả trong
+[hướng dẫn skills](SKILLS_VI.md). Khi bật model, world dùng entrypoint theo vai và
+hợp đồng application lab; `observation.tools` vẫn quyết định quyền thực tế. Scripted
+policy không gọi model. Thiếu/hỏng skill không được tự thay thành specialist rỗng.
+
 Runtime ghi snapshot `office.json` mỗi tick, lúc khởi động và lúc dừng. Xem world
 đang chạy hoặc đã dừng từ một terminal riêng (Node.js 18+, không cần npm install):
 
