@@ -12,9 +12,11 @@ async function renderNative(world, actor, event) {
   const panel = document.getElementById('nativeEvents'), hint = document.getElementById('nativeScope');
   document.getElementById('inspectorScope').textContent = world.execution_mode === 'native'
     ? 'HOẠT ĐỘNG ĐÃ THỰC THI · NATIVE WORKLOAD + APPLICATION LAB'
-    : 'HOẠT ĐỘNG ĐÃ THỰC THI · APPLICATION LAB';
+    : `HOẠT ĐỘNG ĐÃ THỰC THI · ${executionName(world).toUpperCase()}`;
   if (world.execution_mode !== 'native') {
-    hint.textContent = 'World này chưa bật native execution. Dữ liệu cũ không có log OS/network để khôi phục.';
+    hint.textContent = world.execution_mode === 'application'
+      ? 'World này chạy Application lab, chưa bật native execution. Chọn đúng world native để xem log process/file/DNS/network.'
+      : 'Snapshot hoặc backend viewer cũ chưa cung cấp chế độ thực thi. Chưa thể kết luận world có log native hay không. Khởi động lại viewer bằng code mới với đúng thư mục world.';
     panel.replaceChildren(); return;
   }
   hint.textContent = 'saber-native-v1 · đo process và I/O của workload thật; chưa giám sát toàn hệ điều hành. DNS dùng máy chủ nội bộ, kết nối dùng loopback.';

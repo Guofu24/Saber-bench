@@ -454,6 +454,10 @@ Bấm agent → **Process · File · DNS · Network** → mở từng dòng. M�
 ghi riêng của agent; bỏ checkbox để lọc theo thao tác đang chọn. Viewer bản cũ cần
 dừng và chạy lại bằng code mới. Chỉ refresh trang không nâng cấp backend Node đang chạy.
 
+Đầu trang và tên tab phải hiện **Native workload**. Nếu vẫn là **Application lab**,
+kiểm tra đúng cổng viewer và thư mục `--world`; nhiều viewer có thể đang xem các world
+khác nhau. **Chưa rõ chế độ** nghĩa snapshot/backend thiếu metadata, cần viewer mới.
+
 ```powershell
 # Xem demo đã chạy xong trên máy phát triển, không khởi động agent/Gemini
 node agent-office/bin/agent-office.js watch --world runs/world-native-demo --open

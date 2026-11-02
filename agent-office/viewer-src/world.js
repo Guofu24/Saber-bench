@@ -10,6 +10,8 @@ const $teamFilter = document.getElementById('teamFilter');
 const $worldPanel = document.getElementById('worldPanel');
 const $teamMetrics = document.getElementById('teamMetrics');
 const currentWorld = () => worlds.get(worldId);
+const executionName = w => w.execution_mode === 'native' ? 'Native workload'
+  : w.execution_mode === 'application' ? 'Application lab' : 'Chưa rõ chế độ';
 const short = n => Number(n || 0).toLocaleString('vi-VN');
 
 function clearOfficeActors() {
@@ -44,7 +46,7 @@ function receiveWorld(ev) {
   if (!worldId) worldId = ev.world_id;
   $worldSelect.replaceChildren(...[...worlds.values()].map(w => {
     const option = document.createElement('option'); option.value = w.world_id;
-    option.textContent = `${w.profile} · ${w.world_id.slice(0, 8)}`; return option;
+    option.textContent = `${w.profile} · ${executionName(w)} · ${w.world_id.slice(0, 8)}`; return option;
   }));
   $worldSelect.value = worldId;
   if (ev.world_id !== worldId) return;
@@ -89,7 +91,8 @@ function updateWorldUI() {
   const health = worldHealth(w), stale = health === 'stale', stopped = health === 'stopped';
   if (stale || stopped) for (const a of agents) a.activity = 'idle';
   const age = Math.max(0, Math.floor(Date.now() / 1000 - w.updated_at));
-  document.getElementById('proc').textContent = `${w.profile} · ${w.engine === 'scripted' ? 'Scripted' : 'Gemini + fallback'} · tick ${short(w.tick)}`;
+  document.getElementById('proc').textContent = `${w.profile} · ${executionName(w)} · ${w.engine === 'scripted' ? 'Scripted' : 'Gemini + fallback'} · tick ${short(w.tick)}`;
+  document.title = `Agent Office · ${executionName(w)}${location.port ? ` · :${location.port}` : ''}`;
   const state = document.getElementById('worldStatus');
   state.textContent = `${stopped ? 'Đã dừng' : stale ? 'Mất cập nhật — chưa rõ runtime' : 'Đang chạy'} · cập nhật ${age}s trước`;
   state.className = stale ? 'off' : stopped ? 'muted' : 'run';

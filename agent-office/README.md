@@ -62,6 +62,11 @@ Nếu đồng bộ snapshot từ VM, cần thêm thư mục `native-office/` cù
 này. `run`/`serve` hiện chỉ nhận snapshot, chưa tự tải cửa sổ native. Backend Node cũ
 cần restart sau cập nhật code; refresh trình duyệt chỉ nạp lại phần giao diện.
 
+Đầu trang, danh sách world và tên tab ghi **Native workload**, **Application lab**
+hoặc **Chưa rõ chế độ**. Trường hợp chưa rõ có thể do snapshot/backend cũ thiếu
+metadata, không chứng minh rằng log native không tồn tại. Nếu mở nhiều viewer,
+đối chiếu cổng trên URL và world ID; mỗi viewer `watch` trỏ vào thư mục riêng.
+
 - Chọn world, lọc Clients/Red Team/Blue Team; hỗ trợ roster tối đa 200 agent.
   Ba đội ngồi trong ba khu riêng: Clients xanh ngọc, Red Team đỏ, Blue Team xanh dương.
   Bàn có mã C01…C24 / R01…R24 / B01…B24, hiển thị trên thẻ agent.

@@ -106,7 +106,7 @@ function normalizeSnapshot(v) {
   }
   return { type: 'world_snapshot', schema_version: 1, world_id: word(v.world_id), run_id: word(v.run_id),
     profile: choice(v.profile, ['local', 'sandbox', 'vm', 'remote']), engine: choice(v.engine, ['scripted', 'hybrid']),
-    execution_mode: choice(v.execution_mode ?? 'application', ['application', 'native']),
+    execution_mode: choice(v.execution_mode ?? 'unknown', ['application', 'native', 'unknown']),
     status: choice(v.status, ['running', 'stopped']), updated_at: number(v.updated_at), tick_seconds: number(v.tick_seconds),
     tick: number(v.tick), actors, trace: normalizeTrace(v.trace, actors, v.tick), actions: counters(v.actions, ACTIONS), llm: counters(v.llm),
     llm_by_team: Object.fromEntries(TEAMS.map(t => [t, counters(v.llm_by_team?.[t])])),
