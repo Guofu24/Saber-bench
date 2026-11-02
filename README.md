@@ -6,7 +6,10 @@ bật Gemini cho các agent lập kế hoạch. Project còn có bộ lõi bench
 
 **Trạng thái hiện tại:** HTTP và thay đổi trạng thái ứng dụng được thực thi thật;
 tài khoản, dữ liệu và kỹ thuật trong world là mô phỏng. Các actor chia sẻ một runtime
-Python, chưa phải desktop/VM riêng. Kết quả mang nhãn `DEV_SIMULATION_ONLY`.
+Python, chưa phải desktop/VM riêng. Chế độ **`--execution native`** bổ sung process
+con cho mỗi thao tác cùng bằng chứng PID/command line, file, DNS và TCP thật của
+workload. Sensor chưa giám sát toàn OS; xem [phạm vi và lệnh chạy](docs/NATIVE_TELEMETRY_VI.md).
+Kết quả mang nhãn `DEV_SIMULATION_ONLY`.
 
 ## Chọn môi trường
 
@@ -24,6 +27,7 @@ kết nối luồng log hay hành động phòng thủ với sản phẩm bên n
 
 - [Hướng dẫn đầy đủ từng môi trường](docs/ENVIRONMENTS_VI.md)
 - [Notes — tra nhanh các lệnh chạy](notes.md)
+- [Log native và xem riêng từng agent](docs/NATIVE_TELEMETRY_VI.md)
 - [Cấu hình mẫu](config/environments/)
 - [Commit và rollback](docs/ROLLBACK_VI.md)
 

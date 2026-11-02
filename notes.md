@@ -14,6 +14,7 @@ Các ví dụ chạy trong PowerShell; chọn chế độ cần dùng, không ch
 | Chạy Docker sandbox | 8 |
 | Chạy VM hoặc server riêng | 9 |
 | Kiểm tra skills, catalog và viewer | 10 |
+| Process, file, DNS/TCP thật và log riêng từng agent | 11 |
 
 ## 1. Chuẩn bị
 
@@ -30,7 +31,8 @@ Nếu repo ở máy khác, thay đường dẫn `cd`. Với virtualenv đã có,
 
 Các đường dẫn `runs/my-world`, `runs/env-sandbox.json`… là ví dụ. Dùng đường dẫn
 nhất quán trong cùng một luồng; tạo world/bundle mới bằng đường dẫn chưa tồn tại.
-Mỗi world chỉ chạy một process ghi dữ liệu tại một thời điểm.
+Mỗi world chỉ có một controller ghi checkpoint/SQLite tại một thời điểm;
+native workers ghi receipt riêng trong thư mục của actor.
 
 ## 2. Tạo world và chỉnh số agents
 
@@ -432,3 +434,36 @@ không phải lệnh vận hành client/red/blue. Hướng dẫn riêng:
 Tài liệu chi tiết: [world](docs/CONTINUOUS_WORLD_VI.md),
 [môi trường](docs/ENVIRONMENTS_VI.md), [Agent Office](agent-office/README.md),
 [learning](docs/AGENT_LEARNING_VI.md), [rollback](docs/ROLLBACK_VI.md).
+
+## 11. Chạy workload native và xem process/file/DNS/network
+
+Tạo world mới; world cũ không có log native để bổ sung ngược:
+
+```powershell
+uv run saber world init --out runs/native-world --clients 4 --execution native
+uv run saber world run --out runs/native-world --forever
+```
+
+Terminal thứ hai:
+
+```powershell
+node agent-office/bin/agent-office.js watch --world runs/native-world --open
+```
+
+Bấm agent → **Process · File · DNS · Network** → mở từng dòng. Mặc định xem 100 bản
+ghi riêng của agent; bỏ checkbox để lọc theo thao tác đang chọn. Viewer bản cũ cần
+dừng và chạy lại bằng code mới. Chỉ refresh trang không nâng cấp backend Node đang chạy.
+
+```powershell
+# Xem demo đã chạy xong trên máy phát triển, không khởi động agent/Gemini
+node agent-office/bin/agent-office.js watch --world runs/world-native-demo --open
+
+# Đọc lịch sử retained, có phân trang theo ID native
+uv run saber world native-logs --out runs/native-world --actor client-1 --limit 100
+uv run saber world native-logs --out runs/native-world --actor client-1 --before 101
+```
+
+Native mode đo process và I/O của workload cố định, chưa phải Sysmon/EDR toàn máy,
+desktop hay OS riêng cho từng agent. File là receipt; DNS/TCP chạy loopback nội bộ.
+Red/blue vẫn tác động lên ứng dụng lab. Xem [chi tiết, storage và sandbox/VM](docs/NATIVE_TELEMETRY_VI.md).
+Thêm `--execution native` vào `env init` nếu tạo profile sandbox/VM/remote.

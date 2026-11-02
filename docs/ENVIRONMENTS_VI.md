@@ -3,8 +3,9 @@
 ## Phạm vi đã triển khai
 
 Bốn profile triển khai **cùng runtime ứng dụng**: các actor client/red/blue, dịch vụ
-HTTP nội bộ, trạng thái SQLite, log và case SOC. Mỗi world có một process Python;
-actor là vai trò phần mềm, chưa phải một máy tính/desktop độc lập.
+HTTP nội bộ, trạng thái SQLite, log và case SOC. Mỗi world có một controller Python;
+`--execution native` tạo thêm process con ngắn hạn cho từng thao tác và đo I/O thật.
+Actor vẫn chưa phải một máy tính/desktop độc lập. Xem [native telemetry](NATIVE_TELEMETRY_VI.md).
 
 | Profile | Nơi chạy | Người quản lý môi trường | Phạm vi cô lập |
 |---|---|---|---|

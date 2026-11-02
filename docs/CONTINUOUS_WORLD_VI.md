@@ -6,6 +6,10 @@ nguyên hợp đồng. Trạng thái nghiên cứu vẫn là `DEV_SIMULATION_ONL
 
 ## Đã có gì
 
+- Tùy chọn `world init --execution native`: mỗi thao tác chạy trong process con thật,
+  có log PID/command line, file receipt, DNS nội bộ và socket TCP. Cửa sổ Office 100
+  bản ghi riêng từng agent; [phạm vi sensor, bằng chứng và lệnh chạy](NATIVE_TELEMETRY_VI.md).
+
 - Một ứng dụng lab HTTP thật, chỉ bind `127.0.0.1`, với danh tính và bearer capability
   riêng cho từng agent. Tài khoản, tài liệu, phiên đăng nhập, job và trạng thái dịch vụ
   nằm trong SQLite; các nhóm sử dụng cùng một môi trường.

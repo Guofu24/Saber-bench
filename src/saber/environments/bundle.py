@@ -48,7 +48,10 @@ CMD ["python", "-m", "saber.environments.worker", "--config", "/config/environme
 BUNDLE_README = """# SABER environment bundle
 
 This bundle runs the existing continuous APPLICATION lab. All client/red/blue actors
-share one Python runtime. It does not provision per-actor desktops, drive browsers,
+share one Python controller. With world.execution_mode=native, each action runs in
+a fixed child process with measured process/file/loopback DNS/TCP evidence. This
+is workload instrumentation, not a host-wide OS sensor or per-actor sandbox.
+It does not provision per-actor desktops, drive browsers,
 attack the guest OS, or install a SIEM/SOAR. See environment.json for the selected
 deployment profile. Runtime labels remain DEV_SIMULATION_ONLY.
 
@@ -99,8 +102,9 @@ From this bundle directory, in a second terminal:
 
 Use --world on the local/VM/server runtime host, or --bundle on the Docker host.
 Open the loopback URL printed by the viewer (normally http://127.0.0.1:7788).
-Sandbox monitoring copies only /data/office.json through the host Docker daemon;
-it needs no container port or network. It cannot show data after the container is
+Sandbox monitoring copies /data/office.json through the host Docker daemon;
+native inspection additionally copies /data/native-office/<actor>.json public
+windows. It needs no container port or network. It cannot show data after the container is
 removed, even though the named volume survives. Start the container to view again.
 For a remote VM/server viewer, forward its loopback port with your SSH client:
 `ssh -N -L 7788:127.0.0.1:7788 user@lab-host`, then browse localhost:7788 locally.

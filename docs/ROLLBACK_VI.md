@@ -45,6 +45,8 @@ Các checkpoint trên branch `feat/environment-profiles`:
 | `008576a` | Bấm robot/màn hình/thẻ để xem thao tác, mục tiêu và phản ứng phòng thủ |
 | `3fbf4fd` | Định nghĩa ba khu, kiểm tra 72 chỗ ngồi và phân trang theo từng đội |
 | `ed3aaf3` | Cảnh office ba khu riêng, chọn 36/72 slots và camera nhìn từng khu |
+| `9e59031` | Native executor, process/file/DNS/TCP thật, lịch sử và phân trang CLI |
+| `23944f7` | Agent Office xem native theo actor/event, kiểm thử Chrome và lỗi sau thực thi |
 
 Các commit tài liệu/kiểm thử tiếp theo xem bằng:
 
@@ -100,3 +102,9 @@ Phần học lưu thêm journal/episode, proposal, suite, evaluation, skill vers
 epoch. `world learning rollback` đổi release head cho epoch tiếp theo, không sửa lịch sử
 và không đổi pin của case đang mở. Git revert không rollback các bản skill lưu trong DB.
 Xem [AGENT_LEARNING_VI](AGENT_LEARNING_VI.md) để phân biệt rollback code, dữ liệu và skill.
+
+Native mode bổ sung `execution_mode` trong config/checkpoint, bảng `native_events`,
+log xuất và thư mục `workloads/`, `native-office/`. Code trước `9e59031` không hiểu
+config native. Muốn quay lại application mode hãy dùng world mới hoặc bản sao world
+application đã dừng; không xóa trường config để ép resume checkpoint native. Revert
+viewer không xóa bằng chứng, nhưng viewer cũ sẽ không hiện cửa sổ native.

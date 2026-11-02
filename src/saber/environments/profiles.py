@@ -13,7 +13,7 @@ PROFILES: dict[ProfileName, dict[str, Any]] = {
     },
     "sandbox": {
         "location": "One hardened Linux container containing the application world",
-        "isolation": "Container boundary around the world; actors share its process/kernel",
+        "isolation": "Container boundary around the world; native workers share its kernel/user",
         "prerequisites": ["Docker Linux engine", "Docker Compose", "Image build access"],
         "use_when": "A reproducible disposable application lab without managing a VM",
     },

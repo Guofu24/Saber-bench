@@ -51,6 +51,17 @@ thuộc lệnh SABER sau `--`; xem [hướng dẫn world](../docs/CONTINUOUS_WOR
 
 ## Đọc giao diện world
 
+World tạo bằng `--execution native` có thêm **Process · File · DNS · Network** khi
+bấm agent. Viewer `watch` đọc 100 bản ghi riêng từ `native-office/<actor>.json`,
+local hoặc `docker cp` từ sandbox; không đọc key hay DB evaluator. Mở từng dòng để
+xem PID/command line, DNS, socket, file hash và exit code. Bỏ checkbox lịch sử riêng
+để lọc theo application event đang chọn. Các mục đã mở được giữ khi cập nhật live.
+Sensor chỉ đo workload cố định, chưa giám sát toàn OS. [Hướng dẫn native](../docs/NATIVE_TELEMETRY_VI.md).
+
+Nếu đồng bộ snapshot từ VM, cần thêm thư mục `native-office/` cùng world để xem mục
+này. `run`/`serve` hiện chỉ nhận snapshot, chưa tự tải cửa sổ native. Backend Node cũ
+cần restart sau cập nhật code; refresh trình duyệt chỉ nạp lại phần giao diện.
+
 - Chọn world, lọc Clients/Red Team/Blue Team; hỗ trợ roster tối đa 200 agent.
   Ba đội ngồi trong ba khu riêng: Clients xanh ngọc, Red Team đỏ, Blue Team xanh dương.
   Bàn có mã C01…C24 / R01…R24 / B01…B24, hiển thị trên thẻ agent.
