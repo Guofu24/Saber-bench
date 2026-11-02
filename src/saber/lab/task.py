@@ -8,22 +8,12 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from saber.lab.analysis_tools import ANALYSIS_TOOLS
+from saber.lab.analysis_tools import execute as analyze
+from saber.lab.capabilities import TOOLS
+from saber.lab.guest_work import WORK_TEAMS
+from saber.lab.query import Search
 from saber.lab.transport import request
-
-TOOLS = {
-    "client": {"login", "browse", "read_document", "write_document"},
-    "red": {"login", "browse", "read_document", "collect"},
-    "blue": {
-        "query_events",
-        "query_siem",
-        "investigate",
-        "contain",
-        "release",
-        "patch",
-        "unpatch",
-        "contain_domain_user",
-    },
-}
 
 
 def execute(job: dict[str, Any]) -> dict[str, Any]:
@@ -32,7 +22,44 @@ def execute(job: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("Tool not available to this team")
     app, collector, token = job["app"], job["collector"], job["token"]
     args = job["args"]
-    if tool == "login":
+    if tool in WORK_TEAMS:
+        status, result = request(
+            collector + "/guest/work",
+            token=job["actor_token"],
+            body={"id": job["job_id"], "tool": tool, "node": args.get("node", "")},
+        )
+        if status == 200:
+            return {
+                "status": 202 if result["state"] in ("QUEUED", "DISPATCHED") else 200,
+                "guest_work": result,
+            }
+        return {"status": status, **result}
+    if tool == "windows_job_status":
+        import re
+
+        job_id = str(args.get("job_id", ""))
+        if not re.fullmatch(r"[a-f0-9-]{32,36}", job_id):
+            raise ValueError("Invalid guest job ID")
+        status, result = request(collector + "/guest/work/" + job_id, token=job["actor_token"])
+        return {
+            "status": 202
+            if status == 200 and result["state"] in ("QUEUED", "DISPATCHED")
+            else status,
+            "guest_work": result,
+        }
+    if tool in ANALYSIS_TOOLS:
+        return analyze(job)
+    if tool == "share":
+        status, result = request(collector + "/team/messages", token=job["actor_token"], body=args)
+    elif tool == "read_messages":
+        status, result = request(collector + "/team/messages", token=job["actor_token"])
+    elif tool in ("assign_case", "publish_rule"):
+        status, result = request(
+            collector + ("/cases/assign" if tool == "assign_case" else "/rules"),
+            token=job["actor_token"],
+            body=args,
+        )
+    elif tool == "login":
         status, result = request(app + "/login", token=token, body={})
     elif tool == "browse":
         if team == "client" and job.get("browser", True):
@@ -117,7 +144,7 @@ def execute(job: dict[str, Any]) -> dict[str, Any]:
         status, result = request(
             collector + ("/search" if tool == "query_events" else "/siem/search"),
             token=job["read_token"],
-            body={"limit": 100},
+            body=Search.model_validate(args).model_dump(exclude_none=True),
         )
     elif tool == "investigate":
         _, cases = request(collector + "/cases", token=job["read_token"])

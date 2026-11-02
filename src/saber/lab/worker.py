@@ -17,10 +17,10 @@ from typing import Any
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
+from saber.lab.capabilities import ARTIFACTS, TOOLS, allowed
 from saber.lab.events import Emitter
 from saber.lab.ledger import Ledger
 from saber.lab.sensor import sensor_coverage
-from saber.lab.task import TOOLS
 
 
 class Job(BaseModel):
@@ -68,7 +68,13 @@ def create_worker(
         if not secrets.compare_digest(authorization, "Bearer " + credentials["rpc_token"]):
             raise HTTPException(403, "Executor capability required")
         account = accounts.get(job.actor)
-        if account is None or account["team"] != team or job.tool not in TOOLS[team]:
+        if job.tool.startswith("windows_") and not credentials.get("windows_nodes"):
+            raise HTTPException(403, "No Windows guests configured")
+        if (
+            account is None
+            or account["team"] != team
+            or job.tool not in allowed(team, account["role"], tuple(account.get("specialties", [])))
+        ):
             raise HTTPException(403, "Actor/tool not available on this executor")
         if job.tool in (
             "contain",
@@ -104,6 +110,7 @@ def create_worker(
             ):
                 raise HTTPException(400, "Workspace links are forbidden")
             payload = {
+                "job_id": job.id,
                 "team": team,
                 "tool": job.tool,
                 "args": job.args,
@@ -112,6 +119,7 @@ def create_worker(
                 "collector": collector_url,
                 "read_token": credentials.get("read_token", ""),
                 "response_token": credentials.get("response_token", ""),
+                "actor_token": credentials.get("actor_capabilities", {}).get(job.actor, ""),
                 "browser": browser,
                 "browser_executable": browser_executable,
             }
@@ -172,7 +180,7 @@ def create_worker(
                         process.kill()
                     process.wait()
             artifacts = []
-            for name in ("browser.png", "read-document.txt", "collected.txt", "evidence.json"):
+            for name in ARTIFACTS:
                 path = directory / name
                 if (
                     path.is_file()

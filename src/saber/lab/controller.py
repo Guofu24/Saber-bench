@@ -11,9 +11,9 @@ from pathlib import Path
 from typing import Any
 
 from saber.agents.skills import load_playbook
+from saber.lab.capabilities import allowed as role_tools
 from saber.lab.deployment import principal
 from saber.lab.models import LabSpec
-from saber.lab.task import TOOLS
 from saber.lab.transport import request
 from saber.world.agents import PLAYBOOKS
 from saber.world.models import WorldConfig
@@ -71,9 +71,12 @@ class Controller:
         return own
 
     def choose(self, actor: Any, obs: dict[str, Any]) -> tuple[str, dict[str, Any], str]:
-        allowed = set(TOOLS[actor.team])
-        if actor.role not in ("ir", "content", "lead"):
-            allowed -= {"contain", "release", "patch", "unpatch", "contain_domain_user"}
+        allowed = role_tools(actor.team, actor.role, actor.specialties)
+        if not self.spec.windows:
+            allowed = {t for t in allowed if not t.startswith("windows_")}
+        previous = obs.get("result", {}).get("guest_work", {})
+        if previous.get("state") in ("QUEUED", "DISPATCHED"):
+            return "windows_job_status", {"job_id": previous["id"]}, "scripted"
         if self.provider:
             try:
                 response = self.provider.generate_for(
@@ -110,6 +113,22 @@ class Controller:
                 pass  # errors never leak provider credentials; fallback is labeled below
         source = "scripted-fallback" if self.provider else "scripted"
         turn, last = obs["turn"], obs.get("result", {})
+        workstations = [n.name for n in self.spec.windows if n.role == "workstation"]
+        if workstations and turn > 0 and turn % 5 == 0:
+            if actor.team == "client":
+                return "windows_work", {"node": workstations[-1]}, source
+            if actor.team == "red":
+                return (
+                    ("windows_recon" if actor.role == "recon" else "windows_failed_logon"),
+                    {"node": workstations[0]},
+                    source,
+                )
+            if actor.role in ("dfir", "platform"):
+                return (
+                    ("windows_collect_evidence" if actor.role == "dfir" else "windows_inventory"),
+                    {"node": workstations[-1]},
+                    source,
+                )
         if actor.team == "blue":
             cases = [c for c in obs.get("cases", []) if not c.get("responses")]
             if cases and actor.role in ("ir", "content"):
@@ -120,15 +139,45 @@ class Controller:
                     {"case_id": cases[0]["id"]},
                     source,
                 )
+            all_cases = obs.get("cases", [])
+            if actor.role == "lead":
+                target = next(
+                    (a.id for a in self.spec.actors if a.team == "blue" and a.role == "dfir"), None
+                )
+                unassigned = next((c for c in all_cases if not c.get("assignee")), None)
+                if target and unassigned:
+                    return "assign_case", {"case_id": unassigned["id"], "assignee": target}, source
+            if actor.role in ("dfir", "malware") and all_cases:
+                own = next((c for c in all_cases if c.get("assignee") == actor.id), all_cases[0])
+                return (
+                    ("export_case" if actor.role == "dfir" else "analyze_evidence"),
+                    {"case_id": own["id"]},
+                    source,
+                )
+            if actor.role == "recovery":
+                case = next(
+                    (
+                        c
+                        for c in all_cases
+                        if c.get("responses") and c.get("rule") == "cross-owner-document-read"
+                    ),
+                    None,
+                )
+                if case:
+                    return "verify_recovery", {"case_id": case["id"]}, source
+            tools = {
+                "lead": "review_cases",
+                "monitor": "triage_cases",
+                "hunter": "hunt",
+                "content": "evaluate_rule",
+                "network": "network_hunt",
+                "identity": "identity_hunt",
+                "platform": "sensor_health",
+            }
+            selected = tools.get(actor.role, "query_siem" if turn % 3 == 1 else "query_events")
             return (
-                (
-                    "investigate"
-                    if turn % 3 == 0
-                    else "query_siem"
-                    if turn % 3 == 1
-                    else "query_events"
-                ),
-                {},
+                selected,
+                {"query": {"kind": "file.read"}} if selected in ("hunt", "evaluate_rule") else {},
                 source,
             )
         if turn == 0 or last.get("status") == 401:
@@ -150,6 +199,8 @@ class Controller:
         return "browse", {}, source
 
     def actor_step(self, actor: Any, tick: int) -> None:
+        if self.stop.is_set():
+            return
         try:
             obs = self.observe(actor)
             pending = self.store.get("lab-pending", actor.id)
@@ -181,8 +232,15 @@ class Controller:
                 )
                 if status >= 500 or status == 409:
                     return
-            if status == 429:  # no job was accepted; next tick may schedule fresh work
-                result = {"status": 429, "error": "Executor busy; no action started"}
+            if status == 429:  # no job accepted: do not advance the actor's plan or claim execution
+                with self.store.transaction():
+                    self.store.put("lab-pending", actor.id, None)
+                    self.store.put(
+                        "lab-jobs",
+                        job["id"],
+                        {"actor": actor.id, "tick": tick, "tool": tool, "status": "NOT_ACCEPTED"},
+                    )
+                return
             elif status != 200:
                 result = {"status": status, "error": "Executor rejected job"}
         except (OSError, ValueError, ConnectionError):
@@ -283,11 +341,23 @@ class Controller:
 
                     # Groups run concurrently; each team's queue remains ordered for its workers.
                     def team_steps(team: str, tick: int = tick) -> None:
-                        for actor in self.spec.actors:
-                            if self.stop.is_set():
-                                break
-                            if actor.team == team and (team != "red" or tick >= 3):
-                                self.actor_step(actor, tick)
+                        ready = [
+                            actor
+                            for actor in self.spec.actors
+                            if (
+                                actor.team == team
+                                and (team != "red" or tick >= 3)
+                                and (tick - (3 if team == "red" else 1)) % actor.interval_ticks == 0
+                            )
+                        ]
+                        with concurrent.futures.ThreadPoolExecutor(
+                            max_workers=self.spec.workers_per_team
+                        ) as workers:
+                            futures = [
+                                workers.submit(self.actor_step, actor, tick) for actor in ready
+                            ]
+                            for future in futures:
+                                future.result()
 
                     futures = [
                         self.pool.submit(team_steps, team) for team in ("client", "red", "blue")

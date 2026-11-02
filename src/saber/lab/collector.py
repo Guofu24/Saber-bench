@@ -10,24 +10,18 @@ from typing import Any
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
+from saber.lab.coordination import routes as coordination_routes
 from saber.lab.events import SensorEvent
 from saber.lab.guest import routes as guest_routes
+from saber.lab.guest_work import routes as guest_work_routes
 from saber.lab.ledger import Ledger, now
+from saber.lab.query import PATHS, Search, backend_predicates, normalized, public_event
 from saber.lab.transport import request
 
 
 class Batch(BaseModel):
     model_config = ConfigDict(extra="forbid")
     events: list[SensorEvent] = Field(max_length=100)
-
-
-class Search(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    host: str | None = Field(default=None, pattern=r"^[a-zA-Z0-9_-]{1,80}$")
-    kind: str | None = Field(default=None, max_length=64)
-    before: str | None = None
-    cursor: tuple[str, str] | None = None
-    limit: int = Field(default=100, ge=1, le=1000)
 
 
 def cutoff_time(value: str | None) -> str:
@@ -55,6 +49,7 @@ def flush_index(ledger: Ledger, indexer: str, index: str) -> int:
                     "kind": {"type": "keyword"},
                     "sensor": {"type": "keyword"},
                     "data": {"type": "object", "enabled": False},
+                    "fields": {"properties": {k: {"type": "keyword"} for k in PATHS}},
                 }
             }
         },
@@ -64,9 +59,29 @@ def flush_index(ledger: Ledger, indexer: str, index: str) -> int:
         and creation.get("error", {}).get("type") == "resource_already_exists_exception"
     ):
         raise ConnectionError("Indexer unavailable")
+    if ledger.get("indexed_fields_version") != 1:
+        if status == 400:
+            code, _ = request(
+                indexer + "/" + index + "/_mapping",
+                method="PUT",
+                body={
+                    "properties": {
+                        "fields": {"properties": {k: {"type": "keyword"} for k in PATHS}}
+                    }
+                },
+            )
+            if code != 200:
+                raise ConnectionError("Indexer normalized-field mapping unavailable")
+        with ledger.lock, ledger.db:
+            ledger.db.execute("UPDATE events SET delivered=0")
+            ledger.put("indexed_fields_version", 1)
     sent = 0
     for event in ledger.events(pending=True, limit=100):
-        status, result = request(f"{indexer}/{index}/_doc/{event['id']}", method="PUT", body=event)
+        status, result = request(
+            f"{indexer}/{index}/_doc/{event['id']}",
+            method="PUT",
+            body=event | {"fields": normalized(event)},
+        )
         if status not in (200, 201) or result.get("result") not in ("created", "updated"):
             raise ConnectionError("Indexer did not persist document")
         with ledger.lock, ledger.db:
@@ -81,6 +96,8 @@ def create_collector(
 ) -> FastAPI:
     app = FastAPI(title="SABER SOC evidence gateway")
     guest_routes(app, ledger, credentials)
+    guest_work_routes(app, ledger, credentials)
+    coordination_routes(app, ledger, credentials)
 
     def require_read(auth: str) -> None:
         if not secrets.compare_digest(auth, "Bearer " + credentials["read_token"]):
@@ -214,7 +231,13 @@ def create_collector(
         require_read(authorization)
         cutoff = cutoff_time(body.before)
         selected = ledger.events(
-            before=cutoff, host=body.host, kind=body.kind, cursor=body.cursor, limit=body.limit
+            before=cutoff,
+            after=body.after,
+            host=body.host,
+            kind=body.kind,
+            cursor=body.cursor,
+            limit=body.limit,
+            filters=body.filters,
         )
         return {
             "events": selected,
@@ -231,6 +254,9 @@ def create_collector(
         if not indexer:
             raise HTTPException(503, "Indexer not configured")
         filters: list[dict[str, Any]] = [{"range": {"ts": {"lte": cutoff_time(body.before)}}}]
+        if body.after:
+            filters.append({"range": {"ts": {"gte": body.after}}})
+        filters.extend(backend_predicates(body.filters))
         if body.host:
             filters.append({"term": {"host": body.host}})
         if body.kind:
@@ -251,7 +277,7 @@ def create_collector(
             raise HTTPException(503, "Indexer query failed or partial")
         hits = data["hits"]["hits"]
         return {
-            "events": [h["_source"] for h in hits],
+            "events": [public_event(h["_source"]) for h in hits],
             "source": "opensearch",
             "next_cursor": hits[-1].get("sort") if len(hits) == body.limit else None,
         }

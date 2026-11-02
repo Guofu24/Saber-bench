@@ -102,8 +102,8 @@ function normalizeSnapshot(v) {
       job_id: a.executor.job_id == null ? null : word(a.executor.job_id, 36),
       exit_code: a.executor.exit_code == null ? null : integer(a.executor.exit_code, -255),
       pending: a.executor.pending === true,
-      artifacts: boundedList(a.executor.artifacts ?? [], 4).map(f => ({
-        name: choice(f.name, ['browser.png', 'read-document.txt', 'collected.txt', 'evidence.json']),
+      artifacts: boundedList(a.executor.artifacts ?? [], 12).map(f => ({
+        name: choice(f.name, ['browser.png', 'read-document.txt', 'collected.txt', 'evidence.json', 'analysis.json', 'case-evidence.json', 'case-timeline.json', 'rule-evaluation.json']),
         bytes: integer(f.bytes), sha256: /^[a-f0-9]{64}$/.test(f.sha256) ? f.sha256 : (() => { throw new Error('Invalid artifact digest'); })(),
       })),
     }} : {}),

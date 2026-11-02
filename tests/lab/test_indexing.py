@@ -49,7 +49,7 @@ def test_indexer_http_contract_persists_ack_and_queries_actual_sources(tmp_path)
         assert flush_index(ledger, url, "saber-test") == 1
         assert not ledger.events(pending=True)
         assert mappings[0]["mappings"]["properties"]["data"] == {"type": "object", "enabled": False}
-        assert documents[event["id"]] == event
+        assert documents[event["id"]] == event | {"fields": {}}
         gateway = TestClient(
             create_collector(ledger, {"sources": {}, "read_token": "reader"}, url, "saber-test")
         )

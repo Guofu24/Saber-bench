@@ -44,6 +44,24 @@ do {
         } catch { Write-Warning ('Telemetry retry pending for ' + $node.name + '; diagnostics suppressed to protect credentials.') }
     }
     try {
+        $work = Call-Collector '/relay/work' $relayHeaders $null
+        $fileServer = @($spec.windows | Where-Object role -eq 'member-server')[0].name
+        foreach ($job in $work.jobs) {
+            if ($job.id -notmatch '^[a-f0-9-]{32,36}$' -or $job.tool -notin @('windows_work','windows_recon','windows_failed_logon','windows_inventory','windows_collect_evidence')) { throw 'Unsupported guest work.' }
+            $target = @($spec.windows | Where-Object name -eq $job.node)
+            if ($target.Count -ne 1) { throw 'Guest outside this lab.' }
+            $vmName = $spec.name + '-' + $job.node
+            if ((Get-VM -Name $vmName).Notes -ne ('SABER managed: ' + $bundlePath)) { throw 'VM ownership mismatch.' }
+            $claimed = Call-Collector ('/relay/work/' + $job.id + '/claim') $relayHeaders @{}
+            if ($claimed.state -ne 'DISPATCHED') { continue }
+            $json = Invoke-Command -VMName $vmName -Credential $DomainCredential -ArgumentList $job.id,$job.tool,$spec.domain,$job.node,$fileServer -ScriptBlock {
+                param($Id,$Tool,$Domain,$Node,$FileServer)
+                & 'C:\SaberLab\Dispatch-GuestJob.ps1' -JobId $Id -Tool $Tool -ExpectedDomain $Domain -Node $Node -FileServer $FileServer
+            }
+            $null = Call-Collector '/relay/work-receipts' $relayHeaders ($json | ConvertFrom-Json)
+        }
+    } catch { Write-Warning 'Guest work pending; no automatic replay of uncertain operations.' }
+    try {
         $jobs = Call-Collector '/guest/actions' $relayHeaders $null
         $dc = @($spec.windows | Where-Object role -eq 'dc')[0]
         $dcName = $spec.name + '-' + $dc.name

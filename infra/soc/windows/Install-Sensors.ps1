@@ -19,7 +19,7 @@ foreach ($node in $spec.windows) {
             icacls.exe 'C:\SaberLab' /inheritance:r /grant:r '*S-1-5-18:(OI)(CI)F' '*S-1-5-32-544:(OI)(CI)F' | Out-Null
         }
         Copy-Item -LiteralPath $SysmonExe -Destination 'C:\SaberLab\Sysmon64.exe' -ToSession $session
-        foreach ($asset in @('sysmon.xml','Guest-Workload.ps1','Respond-Domain.ps1')) {
+        foreach ($asset in @('sysmon.xml','Guest-Workload.ps1','Respond-Domain.ps1','Run-GuestJob.ps1','Dispatch-GuestJob.ps1','Collect-Events.ps1')) {
             Copy-Item -LiteralPath (Join-Path $bundlePath ('windows\' + $asset)) -Destination ('C:\SaberLab\' + $asset) -ToSession $session
         }
         Invoke-Command -Session $session -ArgumentList $node.role,$spec.domain,$fileServer,($node.name -eq $firstWorkstation) -ScriptBlock {

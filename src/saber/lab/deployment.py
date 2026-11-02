@@ -230,6 +230,7 @@ def initialize_secrets(bundle: Path, spec: LabSpec) -> None:
             "team": a.team,
             "role": a.role,
             "actor_id": a.id,
+            "specialties": list(a.specialties),
         }
         for a in spec.actors
     }
@@ -237,6 +238,7 @@ def initialize_secrets(bundle: Path, spec: LabSpec) -> None:
     response_token = secrets.token_urlsafe(32)
     relay_token = secrets.token_urlsafe(32)
     rpc_tokens = {t: secrets.token_urlsafe(32) for t in ("client", "red", "blue")}
+    actor_tokens = {a.id: secrets.token_urlsafe(32) for a in spec.actors}
     ingestion = {
         n: secrets.token_urlsafe(32)
         for n in (
@@ -260,6 +262,16 @@ def initialize_secrets(bundle: Path, spec: LabSpec) -> None:
             "response_token": response_token,
             "relay_token": relay_token,
             "windows_sources": [w.name for w in spec.windows],
+            "windows_nodes": [w.model_dump() for w in spec.windows],
+            "actor_capabilities": {
+                actor_tokens[a.id]: {
+                    "actor": a.id,
+                    "team": a.team,
+                    "role": a.role,
+                    "specialties": list(a.specialties),
+                }
+                for a in spec.actors
+            },
         },
         "relay": {
             "relay_token": relay_token,
@@ -268,6 +280,8 @@ def initialize_secrets(bundle: Path, spec: LabSpec) -> None:
     }
     for team in ("client", "red", "blue"):
         configs[team] = {
+            "windows_nodes": [w.model_dump() for w in spec.windows],
+            "actor_capabilities": {a.id: actor_tokens[a.id] for a in spec.actors if a.team == team},
             "accounts": {p: a for p, a in accounts.items() if a["team"] == team},
             "read_token": read_token if team == "blue" else "",
             "rpc_token": rpc_tokens[team],

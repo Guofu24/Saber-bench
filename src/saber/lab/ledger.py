@@ -73,17 +73,28 @@ class Ledger:
         self,
         *,
         before: str | None = None,
+        after: str | None = None,
         host: str | None = None,
         kind: str | None = None,
         cursor: tuple[str, str] | None = None,
         limit: int = 100,
         pending: bool = False,
+        filters: list[Any] | None = None,
     ) -> list[dict[str, Any]]:
         sql = "SELECT data FROM events WHERE 1=1"
         args: list[Any] = []
         if before:
             sql += " AND ts<=?"
             args.append(before)
+        if after:
+            sql += " AND ts>=?"
+            args.append(after)
+        if filters:
+            from saber.lab.query import sql_predicates
+
+            expression, parameters = sql_predicates(filters)
+            sql += " AND " + expression
+            args.extend(parameters)
         if host:
             sql += " AND host=?"
             args.append(host)
