@@ -15,10 +15,12 @@ nguyên hợp đồng. Trạng thái nghiên cứu vẫn là `DEV_SIMULATION_ONL
 - Red có các vai recon/access/impact: khám phá liên kết, thử quyền đọc tài liệu, lưu bản
   sao dữ liệu đã thực sự đọc vào kho trong lab, đăng ký automation và gây lỗi dịch vụ
   có thời hạn. Các agent trao đổi phát hiện qua kênh riêng của đội.
-- Blue gồm lead/monitor/hunter/DFIR/content/IR. Có case chung, giao việc, timeline từ
+- Blue mặc định gồm lead/monitor/hunter/DFIR/content/IR; `world init --blue-specialists`
+  bổ sung malware/network/intel/platform/identity/recovery. Có case chung, giao việc, timeline từ
   evidence ID, rule có schema giới hạn, sửa kiểm soát truy cập, containment theo bằng
   chứng, quarantine/rollback job, khôi phục dịch vụ, cảnh báo người dùng và đóng case.
-- Đóng case yêu cầu kết quả thực thi đã xác minh và biện pháp vẫn có hiệu lực. Điểm
+- Đóng case resolved yêu cầu kết quả thực thi đã xác minh và biện pháp vẫn có hiệu lực;
+  đóng FP cần finding có dẫn chứng. Không đóng khi còn task chưa giải quyết. Điểm
   phát hiện không được dùng thay cho bằng chứng containment. Chặn nhầm client làm
   request của client bị từ chối thật và được tính vào tác động vận hành.
 - Chạy theo tick với thứ tự actor luân phiên; mỗi actor có nhịp riêng. LLM chạy trong
@@ -26,6 +28,11 @@ nguyên hợp đồng. Trạng thái nghiên cứu vẫn là `DEV_SIMULATION_ONL
   thực thi xen kẽ trên ứng dụng chung, không phải mỗi agent là một VM/OS riêng.
 - Checkpoint, STOP, khóa một writer, JSONL xoay vòng, archive bằng chứng, ngân sách đĩa,
   giới hạn LLM lưu bền và supervisor khởi động lại worker khi lỗi.
+
+[Hướng dẫn SOC specialists](SOC_SPECIALISTS_VI.md) mô tả actor kiêm nhiệm, truy vấn log
+phân trang, task nhận việc/bàn giao, notebook bền, `wait`/`finish`, artifact, rule testing
+và kiểm tra phục hồi. `world actor-resume` cho phép operator tiếp tục actor đã dừng;
+lệnh này yêu cầu world không đang chạy. Resume process không tự resume actor đã finish.
 
 ## Chạy nhanh trên máy này
 
@@ -172,13 +179,33 @@ Không được gọi kết quả HYBRID là kết quả LLM thuần.
 
 ## Quan sát bằng agent-office
 
-Runtime phát sự kiện agent/tool/status/LLM trực tiếp tới viewer hiện có:
+Skills của các vai và kiểm tra cách nạp được mô tả trong
+[hướng dẫn skills](SKILLS_VI.md). Khi bật model, world dùng entrypoint theo vai và
+hợp đồng application lab; `observation.tools` vẫn quyết định quyền thực tế. Scripted
+policy không gọi model. Thiếu/hỏng skill không được tự thay thành specialist rỗng.
+
+Runtime ghi snapshot `office.json` mỗi tick, lúc khởi động và lúc dừng. Xem world
+đang chạy hoặc đã dừng từ một terminal riêng (Node.js 18+, không cần npm install):
+
+```powershell
+node agent-office/bin/agent-office.js watch --world runs/world --open
+```
+
+Hoặc khởi động world qua viewer để nhận snapshot trực tiếp:
 
 ```powershell
 node agent-office/bin/agent-office.js run -- .venv/Scripts/python.exe -m saber.cli.main world run --out runs/world --forever
 ```
 
-Hoặc chạy viewer riêng rồi thêm `--office-url http://127.0.0.1:7788` vào `world run`.
+Hoặc chạy `agent-office serve` rồi thêm `--office-url http://127.0.0.1:7788` vào
+`world run`. Không suy ra API calls từ số lần agent xin plan: usage lấy từ ledger
+provider. Roster có lọc đội/phân trang; từng agent hiển thị nguồn hành động, HTTP
+status và tick cuối. Quota chỉ hiển thị số thứ tự key, không raw key hay prompt.
+
+Sandbox dùng `watch --bundle PATH_TO_BUNDLE` trên Docker host, không mở network
+container. VM/server dùng `watch --world` tại máy đích và SSH forward cổng viewer.
+Chi tiết trạng thái heartbeat, STOP/resume và cách đọc counter ở
+[Agent Office README](../agent-office/README.md).
 Viewer không được cấp quyền đọc database hay ground truth.
 
 ## Dữ liệu và đánh giá
@@ -189,6 +216,7 @@ Viewer không được cấp quyền đọc database hay ground truth.
 | `world.sqlite3` | Trạng thái kiểm soát, case, telemetry, memory riêng và ledger evaluator |
 | `access.jsonl`, `.1`–`.3` | Telemetry công khai từ thao tác đã thực thi, tối đa khoảng 20 MB |
 | `report.json` | Báo cáo cho operator; không đưa vào observation của agent |
+| `office.json` | Snapshot operator cho Agent Office; roster, counter và chỉ số quota |
 | `runtime.json` | Trạng thái process và địa chỉ loopback, không chứa bearer token |
 | `sealed-archives/` | Các cặp event/effect nén, có hash trong DB, chỉ cho evaluator/operator |
 

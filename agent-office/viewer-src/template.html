@@ -90,7 +90,19 @@ code{font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:#ffe3a3}
 .sub code{color:var(--text)}
 .run{color:#5df2b0}.off{color:#ff8a8a}
 .foot{border-top:1px solid var(--line);padding:10px 16px;color:var(--muted);font-size:11.5px}
+#worldPanel{margin-bottom:12px;font-size:11.5px}
+#worldPanel label{display:block;color:var(--muted);margin-top:8px}
+#worldPanel select{width:100%;padding:6px;background:#111a32;color:var(--text);border:1px solid var(--line);border-radius:7px;font:inherit}
+#worldStatus{margin-top:7px}.muted{color:var(--muted)}
+#worldUsage,#actionSources{margin-top:6px;line-height:1.6}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:8px}
+.pager button{padding:4px 9px}button:disabled{opacity:.35;cursor:default}
+#teamMetrics{padding:4px 16px 10px;border-bottom:1px solid var(--line)}
+.team-summary{border-left:2px solid var(--team);padding:5px 9px;margin:7px 0;font-size:11.5px;color:var(--muted)}
+.team-summary b{color:var(--team);display:block}.team-summary b span{float:right;color:var(--text);font-weight:400}
+.team-summary div{margin-top:3px;overflow-wrap:anywhere}
 @media (max-width:899px){#right{height:42vh}}
+@media (max-width:899px){#teamMetrics{max-height:150px;overflow:auto;flex-shrink:0}.foot{font-size:10px;padding:6px 12px}}
 </style>
 </head>
 <body>
@@ -100,18 +112,27 @@ code{font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:#ffe3a3}
   <div class="sub" id="proc">Chưa có tiến trình — đang chờ…</div>
   <div class="stats">
     <div class="stat"><b id="sAgents" style="color:#ff7eb6">0</b><span>agent</span></div>
-    <div class="stat"><b id="sActive" style="color:#4fd8ff">0</b><span>đang làm</span></div>
-    <div class="stat"><b id="sCalls" style="color:#ffd36b">0</b><span>LLM call</span></div>
-    <div class="stat"><b id="sTools" style="color:#6bf29b">0</b><span>tool call</span></div>
+    <div class="stat"><b id="sActive" style="color:#4fd8ff">0</b><span>hoạt động tick</span></div>
+    <div class="stat"><b id="sCalls" style="color:#ffd36b">0</b><span>LLM attempt</span></div>
+    <div class="stat"><b id="sTools" style="color:#6bf29b">0</b><span>hành động</span></div>
+  </div>
+  <div id="worldPanel" hidden>
+    <label for="worldSelect">World đang xem</label><select id="worldSelect"></select>
+    <div id="worldStatus"></div><div id="worldUsage"></div><div id="actionSources"></div>
+    <label for="teamFilter">Đội agent</label>
+    <select id="teamFilter"><option value="all">Tất cả</option><option value="client">Clients</option><option value="red">Red Team</option><option value="blue">Blue Team</option></select>
+    <div class="pager"><button id="prevPage" aria-label="Trang trước">←</button><span id="pageInfo"></span><button id="nextPage" aria-label="Trang sau">→</button></div>
+    <div class="muted">20 agent/trang · tổng số liệu của cả world</div>
   </div>
   <div class="sec">Đội agent</div>
-  <div id="empty" class="empty">Chưa có agent nào. Agent sẽ tự xuất hiện khi repo của bạn gọi LLM qua agent-office.</div>
+  <div id="empty" class="empty">Chưa có agent trong trang này. Dùng watch để xem world có sẵn, hoặc run để nhận sự kiện runtime.</div>
   <div id="cards"></div>
 </aside>
 <aside id="right" class="glass">
   <div class="hd"><b>Hoạt động</b><span class="live" id="conn">● đang kết nối</span></div>
+  <div id="teamMetrics" hidden></div>
   <div id="log"></div>
-  <div class="foot">Agent được nhận diện tự động từ system prompt · đặt tên trong <code>agent-office.json</code></div>
+  <div class="foot">World: trạng thái do runtime cung cấp · log của trang đang xem · quota là trạng thái ghi nhận gần nhất. Cảnh 3D minh họa agent, không phải màn hình máy thật.</div>
 </aside>
 <button id="toggleTeam">Đội agent</button>
 <div id="hint">Kéo để xoay · cuộn để zoom · bấm vào agent để xem</div>

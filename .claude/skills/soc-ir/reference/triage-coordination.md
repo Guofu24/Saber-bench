@@ -8,7 +8,7 @@ Triage nhanh **dựa trên thông tin ban đầu** để quyết định phản 
 - **Chỉ dùng dữ kiện có tại t0.** Bỏ qua mọi thông tin xuất hiện sau thời điểm triage; không suy từ kết luận của
   case sau này. Đây là điểm khác giữa triage và đánh giá phạm vi đầy đủ.
 - **Loại sự cố** theo danh mục trong SOP; **mức độ** tra ma trận (phạm vi × mức độ ảnh hưởng — xem
-  `soc-mon/reference/cause-impact.md`).
+  `../../soc-mon/reference/cause-impact.md`).
 - **Hành động nhanh** tương xứng với dữ kiện t0: thu ảnh bộ nhớ, cô lập máy không phải VIP, chặn IOC đã rõ, khoá
   tài khoản bị lộ, kích hoạt IRT. Chưa khoanh phạm vi thì chưa diệt trừ.
 
@@ -40,8 +40,8 @@ lập **war room** (kênh liên lạc khẩn cấp). Đầu ra: Incident Ticket,
 Xác định **hệ thống nào bị tác động, tài khoản/lỗ hổng nào bị lạm dụng, dữ liệu nào có nguy cơ bị trích xuất**.
 Đầu ra: scope of compromise và mức ưu tiên xử lý.
 
-- **Host bị ảnh hưởng:** đích của đăng nhập thành công bằng tài khoản bị chiếm; máy có tiến trình/persistence độc;
-  máy có detection EDR. **Tài khoản:** tài khoản bị dùng bất thường. Bỏ sót đắt hơn báo thừa.
+- **Host/tài khoản:** đối chiếu phiên trái phép, thực thi/persistence và detection đã kiểm chứng; detection hoặc đăng
+  nhập bất thường đơn lẻ chỉ là đầu mối. Tách đã bị chiếm, bị chạm và nghi vấn, không gộp thành đã bị kiểm soát.
 - **Cạnh di chuyển ngang** `{src, dst}` giữa các máy trong phạm vi.
 - **Tự kiểm trước khi chốt:** với **từng** phần tử, hỏi "suy ra được từ hiện vật nào?". Không trỏ được ⇒ bỏ.
 

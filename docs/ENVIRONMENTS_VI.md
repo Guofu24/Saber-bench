@@ -173,7 +173,11 @@ schema riêng; không ghi đè hoặc tự chuyển quyền từ file đó.
 ## Dữ liệu, build và rollback
 
 - Bundle chỉ xuất Python source, public catalog cần thiết, playbook đã chọn,
-  `pyproject.toml` và `uv.lock`. Không xuất `.env`, key pool, `.git`, venv, runs hay dữ liệu riêng.
+  `pyproject.toml`, `uv.lock` và các file viewer công khai được allowlist. Viewer nằm
+  ở `agent-office/` ngoài Docker build context; không mang theo `node_modules`.
+  Không xuất `.env`, key pool, `.git`, venv, runs hay dữ liệu riêng.
+- Playbook gồm entrypoint **và các reference được liên kết**, có kiểm tra tồn tại,
+  phạm vi và symlink. Thiếu reference thì export thất bại. Xem [kiểm tra skills](SKILLS_VI.md).
 - File hash trong manifest xác định nội dung working tree được xuất; `source_revision`
   chỉ là commit nền. Hash không phải chữ ký chứng thực nguồn.
 - Các manifest Compose được đối chiếu với profile hỗ trợ trước lifecycle. Không chỉnh
@@ -184,6 +188,26 @@ schema riêng; không ghi đè hoặc tự chuyển quyền từ file đó.
 - Đổi Git commit không khôi phục SQLite, volume, VM snapshot hoặc quota đã dùng.
 
 Xem [quy trình commit và rollback](ROLLBACK_VI.md). Không có lệnh mặc định nào xóa volume.
+
+## Quan sát bằng Agent Office
+
+Node.js 18+ chỉ cần ở máy chạy viewer. Từ root repo:
+
+```powershell
+node agent-office/bin/agent-office.js watch --world runs/world --open
+node agent-office/bin/agent-office.js watch --bundle runs/my-sandbox --open
+```
+
+Lệnh đầu dùng đúng thư mục `--out` local/guest. Lệnh sau đọc snapshot qua Docker host,
+không thêm network/port cho sandbox. Từ bundle mới, cũng có thể chạy
+`node agent-office/bin/agent-office.js watch --bundle .`. Bản runtime cũ chưa sinh
+`office.json` cần cập nhật/rebuild theo quy trình bảo toàn dữ liệu; render bundle mới
+tạo project/volume mới, không tự dùng lại world cũ.
+
+VM/server chạy viewer tại máy đích rồi SSH forward cổng loopback về máy xem. Viewer
+hiển thị profile được khai báo, đội agent, nguồn hành động, counters API và chỉ số key;
+không tự xác nhận hypervisor hoặc kết nối SIEM/SOAR. Xem
+[hướng dẫn Agent Office](../agent-office/README.md).
 
 ## Xác minh và giới hạn
 

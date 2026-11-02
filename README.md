@@ -108,6 +108,34 @@ sẽ từ chối cấu hình khác. Dùng thư mục mới để thử cấu hì
 Các lệnh `world init/run/supervise/status/stop` vẫn được giữ nguyên; `world supervise`
 có thể restart process lỗi với số lần giới hạn.
 
+## Đội blue có 12 chuyên môn
+
+Tạo world mới có đủ chuyên môn (mặc định cũ vẫn là 6 vai blue):
+
+```powershell
+uv run saber world init --out runs/soc-specialists --clients 4 --blue-specialists
+uv run saber world run --out runs/soc-specialists --ticks 30
+# Chạy liên tục sau khi xem kết quả:
+uv run saber world run --out runs/soc-specialists --forever
+```
+
+| Nhóm | Chuyên môn |
+|---|---|
+| Điều phối / phát hiện | Lead, monitoring, threat hunting |
+| Điều tra | DFIR, malware/RE, network, threat intelligence, identity |
+| Phòng thủ / vận hành | Incident response, detection engineering, SOC platform, recovery |
+
+Có thể tạo nhiều actor cùng chuyên môn hoặc cấu hình `specialties` để một actor kiêm nhiệm.
+Blue có query log phân trang, case/finding có dẫn chứng, task có nhận việc/bàn giao,
+notebook riêng, snapshot chứng cứ có hash, kiểm thử/version/rollback rule và kiểm tra
+client phục hồi. `wait`/`finish` thực sự ngừng hành động của actor. Agent-office hiển thị
+chuyên môn, task và trạng thái này.
+
+Baseline scripted thu thập/xử lý theo policy có sẵn; nhiệm vụ chuyên môn có mục tiêu tự do
+cần planner hoặc operator đánh giá và kết luận. Công cụ chạy trên application lab;
+Ghidra/IDA/EDR/SIEM ngoài lab vẫn cần adapter và dữ liệu thực. Xem
+[cách dùng, quyền công cụ và giới hạn](docs/SOC_SPECIALISTS_VI.md).
+
 ## Bật Gemini
 
 Mọi profile mặc định scripted, không gọi API. Model mặc định: `gemini-3.5-flash-lite`.
@@ -139,13 +167,27 @@ Xem `llm.successes`, `llm.by_team`, `llm_pools` và nguồn hành động `llm` 
 |---|---|
 | `config.json` | Cấu hình giữ ổn định cho world |
 | `report.json` | Tick, kết quả, usage và trạng thái pool |
+| `office.json` | Snapshot cho viewer: roster, nguồn hành động, counter, chỉ số quota |
 | `access.jsonl` | Log thao tác ứng dụng, có rotation |
 | `world.sqlite3` | Trạng thái, case, journal và ledger đánh giá |
 | `STOP` | Yêu cầu dừng; tiếp tục bằng resume rõ ràng |
 
 Thư mục world là đường dẫn `--out`; sandbox dùng `/data` trong named volume. Không
-cấp database/ground truth cho agents. `agent-office` là viewer tùy chọn cho runtime
-trực tiếp; xem [hướng dẫn world](docs/CONTINUOUS_WORLD_VI.md).
+cấp database/ground truth cho agents. Xem world từ terminal thứ hai (Node.js 18+,
+không cần cài npm dependencies):
+
+```powershell
+node agent-office/bin/agent-office.js watch --world runs/world --open
+# Sandbox: thay bằng đường dẫn bundle đã env up
+node agent-office/bin/agent-office.js watch --bundle runs/my-sandbox --open
+```
+
+Thay `runs/world` bằng thư mục `--out` thực tế. Viewer hiển thị Client/Red/Blue,
+profile, scripted/Gemini, nguồn hành động và quota theo đội; chỉ đọc chỉ số key.
+Màn hình phân trang 20 agent, hỗ trợ roster 200 agent. Sandbox giữ mạng cô lập;
+VM/server chạy viewer tại máy đích rồi forward cổng loopback. Xem
+[hướng dẫn Agent Office](agent-office/README.md) và
+[hướng dẫn world](docs/CONTINUOUS_WORLD_VI.md).
 `env doctor --probe-services` chỉ gọi GET health của dịch vụ đã được cho phép trong
 inventory. Một HTTP 200 không xác nhận SIEM/SOAR adapter hoạt động.
 
@@ -162,8 +204,16 @@ start container hoặc triển khai trong guest/server riêng. Không có `READY
 
 ## Kiểm thử và rollback
 
+Skills có kiểm tra riêng: 18 skills, 15 sổ tay nghiệp vụ và 25 tài liệu tham chiếu.
+World nạp hướng dẫn application lab; population/benchmark nạp tài liệu theo case.
+Bundle mang theo các reference cần thiết. Xem [hướng dẫn skills](docs/SKILLS_VI.md).
+Đã có [rà soát nội dung theo yêu cầu và catalog](docs/SKILLS_REVIEW_VI.md): sửa các quy tắc kết luận thiếu bằng
+chứng và bổ sung công việc/bàn giao qua nhiều lượt. PASS cấu trúc chưa chứng minh chất lượng suy luận model
+hoặc tích hợp công cụ SOC thật.
+
 ```powershell
 uv run pytest tests/environments tests/world
+uv run python scripts/check_skills.py --out runs/skills-check/audit.json
 uv run ruff check src tests scripts
 uv run ruff format --check src tests
 uv run mypy

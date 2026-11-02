@@ -11,7 +11,8 @@ dẫn** gán cho khách hàng/đội theo SOP; sự cố **chưa có hướng d�
 
 **Khi mở hoặc rà một ticket**
 1. Đối chiếu với **danh sách trường bắt buộc** của SOP; ticket thiếu trường bắt buộc thì bổ sung trước khi
-   chuyển tiếp. Phân biệt trường bắt buộc với trường tuỳ chọn.
+   chuyển tiếp. Trường chưa biết ghi thiếu và người cần bổ sung; không bịa dữ liệu hoặc trì hoãn leo thang khẩn
+   để làm đẹp hồ sơ. Phân biệt trường bắt buộc để đóng case với thông tin có thể bổ sung trong điều tra.
 2. `incident_type` theo danh mục loại sự cố trong SOP; `severity` tra ma trận (xem `cause-impact.md`).
 3. `entities`: các thực thể liên quan dạng cặp (loại, giá trị) — host, tài khoản, IP, hash, URL.
 4. `assigned_team`: có playbook ⇒ đội/khách hàng theo SOP; chưa có hướng dẫn ⇒ Tier 3.
@@ -90,6 +91,10 @@ xác, không làm tròn.
 | `distinct_rules` | số rule khác nhau đã sinh cảnh báo |
 | `% xử lý đúng hạn` | case xử lý trong hạn SLA theo mức / tổng case |
 | `noisy_rules` | top-5 rule nhiễu nhất (nhiều FP nhất) — gửi Content Security tối ưu |
+
+Chốt timezone, kỳ báo cáo và `as_of`; dedupe theo ID. Tách alert với case (một case có nhiều alert), giữ nhóm
+chưa phân loại, không ép TP + FP bằng tổng. Mẫu số đúng hạn theo SOP; mẫu số 0 thì ghi không áp dụng,
+không tự báo 100%. Cùng định nghĩa severity/thời điểm verdict và quy tắc làm tròn ở mọi bảng.
 
 ```json
 {"metrics": {"total_alerts": 1284, "true_positives": 37, "false_positives": 1247, "critical_high": 92,

@@ -5,6 +5,7 @@
   "bin": { "agent-office": "bin/agent-office.js" },
   "files": ["bin", "lib", "viewer", "README.md"],
   "scripts": {
+    "test": "node --test test/*.test.js",
     "build:viewer": "node viewer-src/build.js",
     "mock": "node examples/mock-llm.js",
     "demo": "node examples/run-demo.js"

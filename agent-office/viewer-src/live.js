@@ -14,7 +14,7 @@ label('Phòng điều phối', 'zone', scene, 0.2, -5.4, -2.0);
 label('Khu làm việc', 'zone', scene, 0.2, 5.3, 0.9);
 label('Trạm Sức Khỏe', 'zone', scene, 0.2, -6.2, 7.6);
 label('Lõi LLM', 'zone gold', scene, 2.35, CORE.x, CORE.z);
-const waitL = label('Đang chờ agent đầu tiên gọi LLM…', 'tool say', scene, 2.9, CORE.x, CORE.z);
+const waitL = label('Đang chờ world hoặc sự kiện agent…', 'tool say', scene, 2.9, CORE.x, CORE.z);
 
 const boss = makeRobot('#ffd36b', { suit: true });
 boss.position.set(2.0, 0, 3.6); boss.rotation.y = Math.atan2(2.0 - CORE.x, 3.6 - CORE.z);
@@ -39,7 +39,7 @@ function createAgent(ev) {
   const slot = SLOTS.find(s => !s.used);
   if (slot) {
     slot.used = a; a.slot = slot;
-    a.desk = makeDesk(slot.x, slot.z, slot.w);
+    a.desk = slot.desk || (slot.desk = makeDesk(slot.x, slot.z, slot.w)); a.desk.g.visible = true;
     a.seat = { x: slot.x, z: slot.z + 0.78 }; a.behind = { x: slot.x, z: slot.z + 1.32 }; a.side = { x: slot.sideX, z: slot.z + 1.32 };
   } else {
     const f = FLOOR.find(s => !s.used) || FLOOR[agents.length % FLOOR.length]; f.used = a; a.floor = f;
@@ -68,7 +68,7 @@ async function brain(a, fast) {
     if (fast) a.robot.position.set(a.side.x, 0, a.side.z); else await goTo(a, [[a.side.x, a.side.z]]);
     a.faceTo = Math.atan2(-(CORE.x - a.side.x), -(CORE.z - a.side.z)); a.where = 'floor';
   }
-  for (;;) {
+  while (!a.removed) {
     const now = performance.now();
     if (a.activity !== 'idle' && now - a.lastActive > 120000) { a.activity = 'idle'; hideTool(a); a.status = 'Không có hoạt động'; }
     if (a.activity !== 'idle') {
@@ -76,7 +76,7 @@ async function brain(a, fast) {
       if (a.where === 'desk') { a.mode = 'type'; a.desk.on = true; } else if (a.where === 'floor') a.mode = 'stand';
     } else if (a.where === 'desk') {
       a.mode = 'sit'; a.desk.on = false;
-      if (now - a.lastActive > IDLE_BREAK_MS && Math.random() < 0.015 && SOFA.some(s => !s.used)) await goLounge(a);
+      if (!a.worldActor && now - a.lastActive > IDLE_BREAK_MS && Math.random() < 0.015 && SOFA.some(s => !s.used)) await goLounge(a);
     } else if (a.where === 'floor') a.mode = 'stand';
     await wait(150);
   }
@@ -99,6 +99,8 @@ function bossSays(t, ms = 4000) { bossSay.element.textContent = t.length > 40 ? 
 
 // ================= events =================
 function onEvent(ev) {
+  if (ev.type === 'world_snapshot') { receiveWorld(ev); return; }
+  if (currentWorld()) return; // world roster/counters are authoritative, separate from proxy inference.
   const a = ev.id ? byId.get(ev.id) : null, fast = !!ev.replay, now = performance.now();
   switch (ev.type) {
     case 'agent':
@@ -163,7 +165,8 @@ function onEvent(ev) {
 const kpi = board(4.6, 2.8, -HALF - 0.27, 0, 3.4, 1.7, (g, w, h) => {
   g.fillStyle = '#060c1f'; g.fillRect(0, 0, w, h);
   g.fillStyle = '#7f8bc4'; g.font = '600 22px system-ui'; g.fillText('AGENT OFFICE · LIVE', 22, 36);
-  const active = agents.filter(a => a.activity !== 'idle').length;
+  const wld = currentWorld();
+  const active = wld ? wld.actors.filter(a => actorActivity(wld, a) !== 'idle').length : agents.filter(a => a.activity !== 'idle').length;
   const tk = totals.tokens >= 1000 ? (totals.tokens / 1000).toFixed(1) + 'k' : String(totals.tokens);
   [[active, 'đang làm', '#4fd8ff'], [totals.calls, 'LLM call', '#ffd36b'], [totals.tools, 'tool call', '#6bf29b'], [tk, 'token', '#ff7eb6']].forEach(([v, l, c], i) => {
     const x = 26 + i * (w - 40) / 4; g.fillStyle = c; g.font = '700 66px system-ui'; g.fillText(String(v), x, 146);
@@ -172,9 +175,9 @@ const kpi = board(4.6, 2.8, -HALF - 0.27, 0, 3.4, 1.7, (g, w, h) => {
 });
 const barsBoard = board(-HALF - 0.27, 3.0, -5.6, Math.PI / 2, 3.2, 1.5, (g, w, h) => {
   g.fillStyle = '#060c1f'; g.fillRect(0, 0, w, h);
-  const list = agents.slice(0, 16), max = Math.max(1, ...list.map(a => a.calls));
-  g.fillStyle = '#7f8bc4'; g.font = '600 18px system-ui'; g.fillText('LLM calls / agent', 16, 26);
-  list.forEach((a, i) => { const bw = (w - 32) / Math.max(8, list.length), v = a.calls / max;
+  const list = agents.slice(0, 20), value = a => currentWorld() ? a.tools : a.calls, max = Math.max(1, ...list.map(value));
+  g.fillStyle = '#7f8bc4'; g.font = '600 18px system-ui'; g.fillText(currentWorld() ? 'Actions / agent (page)' : 'LLM calls / agent', 16, 26);
+  list.forEach((a, i) => { const bw = (w - 32) / Math.max(8, list.length), v = value(a) / max;
     g.fillStyle = a.color; g.fillRect(16 + i * bw + 3, h - 14 - v * (h - 56), bw - 8, Math.max(3, v * (h - 56))); });
 });
 const rate = Array.from({ length: 48 }, () => 0);
@@ -200,7 +203,7 @@ const $log = document.getElementById('log'), $cards = document.getElementById('c
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 let proc = null;
 const shortCmd = c => String(c || '').replace(/(?:[A-Za-z]:)?[^\s]*[\/\\]([^\s\/\\]+)/g, '$1');
-window.__office = { agents, byId, onEvent };
+window.__office = { agents, byId, onEvent, currentWorld, worldHealth };
 function feed(who, color, html, cls = '') {
   const d = document.createElement('div'); d.className = 'msg ' + cls;
   const tm = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -220,9 +223,10 @@ function addCard(a) {
 function ui() {
   for (const a of agents) {
     const c = a.card; c.querySelector('.st').textContent = a.status;
-    c.querySelector('.meta').textContent = `${a.calls} call · ${a.tools} tool · ${a.tokens >= 1000 ? (a.tokens / 1000).toFixed(1) + 'k' : a.tokens} tok`;
+    c.querySelector('.meta').textContent = a.worldActor ? `${a.tools} hành động · tick ${a.worldActor.last_tick ?? '—'}` : `${a.calls} call · ${a.tools} tool · ${a.tokens >= 1000 ? (a.tokens / 1000).toFixed(1) + 'k' : a.tokens} tok`;
     c.classList.toggle('on', a.activity !== 'idle'); c.classList.toggle('sel', selected === a); c.classList.toggle('rest', a.where === 'lounge');
   }
+  if (updateWorldUI()) return;
   document.getElementById('sAgents').textContent = agents.length;
   document.getElementById('sActive').textContent = agents.filter(a => a.activity !== 'idle').length;
   document.getElementById('sCalls').textContent = totals.calls;
@@ -231,7 +235,7 @@ function ui() {
   p.innerHTML = proc ? (proc.status === 'running' ? `<span class="run">●</span> <code>${esc(shortCmd(proc.cmd))}</code>` : `<span class="off">■</span> <code>${esc(shortCmd(proc.cmd))}</code> · exit ${esc(proc.code)}`) : 'Chưa có tiến trình — đang chờ…';
 }
 const $conn = document.getElementById('conn');
-function setConn(ok, text) { $conn.className = 'live ' + (ok ? 'ok' : 'bad'); $conn.textContent = text || (ok ? '● live' : '● mất kết nối'); }
+function setConn(ok, text) { $conn.className = 'live ' + (ok ? 'ok' : 'bad'); $conn.textContent = text || (ok ? '● viewer online' : '● mất kết nối viewer'); }
 let boot = null, lastSeq = 0;
 function connect() {
   const es = new EventSource('events');
@@ -241,8 +245,8 @@ function connect() {
     let ev; try { ev = JSON.parse(e.data); } catch (_) { return; }
     if (ev.type === 'hello') { if (boot && ev.boot !== boot) location.reload(); boot = ev.boot; return; }
     if (ev.type === 'replay_done') return;
-    if (ev.type !== 'agent' && ev.seq && ev.seq <= lastSeq) return;
-    if (ev.seq && ev.type !== 'agent') lastSeq = ev.seq;
+    if (!['agent', 'world_snapshot'].includes(ev.type) && ev.seq && ev.seq <= lastSeq) return;
+    if (ev.seq && ev.type !== 'agent') lastSeq = Math.max(lastSeq, ev.seq);
     try { onEvent(ev); } catch (err) { console.error(err); }
   };
 }

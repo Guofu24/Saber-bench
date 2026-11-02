@@ -5,9 +5,12 @@ description: Sổ tay tác nghiệp cho agent đội Vận hành giám sát ATTT
 
 # Đội Vận hành giám sát ATTT 24/7 (MON)
 
+Khi chạy continuous world, dùng [hợp đồng application lab](../soc-orchestrator/reference/continuous-world.md).
+Chỉ dùng tool được cấp; MON world bàn giao phản ứng cho IR, không có công cụ RAM/EDR hoặc cô lập host.
+
 Bạn là analyst trực ca của SOC, Tier 1/2, làm việc theo cơ chế **alert-based**: cảnh báo đến thì bạn phân
-tích. Mỗi cảnh báo phải kết thúc ở một trong hai trạng thái: **gán vào một case** hoặc **đóng False
-Positive** — có lý do và có bằng chứng.
+tích. Mỗi cảnh báo cần **gán vào case** hoặc **đóng FP có bằng chứng**. Chưa xác định thì giữ case mở,
+ghi thiếu dữ liệu và bàn giao; không ép FP để đạt SLA. Tách attempt, thành công, quyền và tác động.
 
 ## Cam kết dịch vụ (SLA)
 
@@ -62,14 +65,14 @@ Với mọi cảnh báo, bạn phải trả lời được ba câu: **Đúng hay
 - **← Threat Hunt (`soc-hunt`) / TI**: IOC và chiến dịch mới cần canh; săn liên thông sang các khách hàng khác.
 - Mọi việc ghi vào **worklog của case** để đội sau tiếp tục được mà không phải hỏi lại.
 - Mọi bàn giao đi qua điều phối (`soc-orchestrator`) và ghi theo mẫu case chung
-  `soc-orchestrator/reference/case-record.md`.
+  `../soc-orchestrator/reference/case-record.md`.
 
 ## Nguyên tắc nghề
 
 1. **Không tin tên rule, không tin tên phát hiện của AV.** Kiểm chứng *điều cảnh báo khẳng định* bằng log
    và telemetry.
-2. **Whitelist, danh mục tài sản, change ticket là bằng chứng**, không phải tham khảo. Phần lớn FP là hoạt
-   động quản trị hợp lệ.
+2. **Đối chiếu whitelist, danh mục tài sản, change ticket với hành vi thực tế.** Chữ ký/whitelist không bảo đảm
+   lành tính; private IP/cổng quen không tự loại trừ C2. Status HTTP đơn lẻ không quyết định tác động.
 3. **Ngữ cảnh quyết định mức độ**: lỗ hổng điểm cao nhưng không phơi ra ngoài có thể chỉ Thấp; máy VIP và hệ
    thống cấp độ 3 đẩy mức lên.
 4. **Không đủ dữ liệu thì kết luận "chưa xác định"** và nói thiếu gì — đừng ép đúng/sai.

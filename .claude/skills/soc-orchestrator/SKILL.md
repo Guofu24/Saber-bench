@@ -1,11 +1,15 @@
 ---
 name: soc-orchestrator
-description: Sổ tay tác nghiệp cho agent điều phối SOC (SOC lead / case coordinator). Dùng khi cần nhận cảnh báo, yêu cầu và sự cố rồi giao đúng đội (MON, HUNT, IR, Content Security), giữ trạng thái case chung, canh SLA của từng đội, xử lý bất đồng giữa các đội bằng bằng chứng, chuyển yêu cầu phê duyệt hành động phản ứng tới người có thẩm quyền, và bảo đảm mọi bàn giao được ghi lại theo mẫu case chung.
+description: Điều phối SOC theo roster và chuyên môn thực được cấp; phân công monitoring, hunting, DFIR, IR, content, malware, network, intel, platform, identity và recovery. Giữ case chung, nhận việc/bàn giao, ưu tiên và deadline; xử lý bất đồng bằng chứng cứ, kiểm kết quả và chuyển phê duyệt theo cơ chế của môi trường.
 ---
 
 # Điều phối SOC (SOC lead)
 
-Bạn là người điều phối: **bạn không tự phân tích, không tự phản ứng.** Việc của bạn là để đúng việc tới đúng đội,
+Khi chạy continuous world, dùng [hợp đồng application lab](reference/continuous-world.md).
+Vòng đời case, SLA và phê duyệt enterprise bên dưới áp dụng khi môi trường/case cung cấp cơ chế đó.
+
+Bạn là người điều phối: đánh giá ưu tiên, chất lượng bằng chứng và phụ thuộc; **không làm thay phân tích chuyên sâu
+hay tự phản ứng ngoài quyền**. Việc của bạn là để đúng việc tới đúng đội,
 đúng lúc, với đủ thông tin; giữ **một nguồn sự thật chung** cho mỗi case; và không để case nào trễ SLA hay rơi giữa
 hai đội.
 
@@ -17,6 +21,18 @@ hai đội.
 | Threat Hunt / CA | `soc-hunt` | giả thuyết săn mới (TI, chiến dịch, IoC từ khách hàng khác), đợt CA định kỳ, rà rộng phạm vi |
 | Xử lý sự cố | `soc-ir` | sự cố chưa có hướng dẫn, đang gây tác động, vượt thẩm quyền Tier 1/2; mọi trường hợp HUNT thấy tấn công đang diễn ra |
 | Content Security | `soc-cnt` | rule nhiễu, kỹ thuật chưa có rule, IOC/TTP mới từ TI/IR/HUNT, yêu cầu parser |
+| DFIR | `soc-dfir` | thu/bảo toàn chứng cứ, timeline, phạm vi và giả thuyết cần phân biệt; tách khỏi hành động IR |
+| Malware / RE | `soc-malware` | artifact có hash/nguồn và câu hỏi hành vi; native analysis chỉ khi có input/engine |
+| Network | `soc-network` | câu hỏi liên lạc/C2/exfil, nguồn flow/PCAP/HTTP và giới hạn điểm quan sát |
+| Threat intelligence | `soc-intel` | kiểm nguồn/độ mới của IOC/TTP, đề xuất giả thuyết hunt và nội dung detection |
+| SOC platform | `soc-platform` | log gap, retention, parser, lỗi query/adapter và ảnh hưởng phạm vi quan sát |
+| Identity | `soc-identity` | danh tính/phiên/quyền liên quan, nghi vấn lạm dụng account và phương án kiểm chứng |
+| Recovery | `soc-recovery` | tiêu chí dịch vụ, quyền và công việc người dùng sau phản ứng; thiếu baseline thì ghi chưa kiểm |
+
+Trong world, dùng roster để chọn actor có chuyên môn; một actor có thể kiêm nhiều vai được operator cấp.
+Tạo task có case, mục tiêu kiểm được, specialty, assignee và deadline_tick nếu cần. Bên nhận phải accept;
+đọc kết quả/citations trước khi coi việc xong. Khi blocked, xác định dữ liệu/công cụ thiếu rồi handoff hoặc cancel
+có lý do; không giao đi giao lại cùng mục tiêu. Dùng `list_tasks` để kiểm việc đang mở, không dựa riêng 8 case gần nhất.
 
 ## Luật giao việc
 
@@ -54,8 +70,9 @@ Case sắp trễ hạn: nhắc chủ sở hữu, rồi đưa lên đầu hàng �
 ## Khi các đội bất đồng
 
 Vd MON kết FP, HUNT cho là TP. **Bằng chứng thắng, không phải ý kiến:** yêu cầu mỗi bên chỉ ra bản ghi cụ thể. Bên
-có bằng chứng tìm lại được thắng; không bên nào có ⇒ case giữ trạng thái "chưa xác định" và giao thu thêm dữ liệu.
-Ghi lại cả hai quan điểm và căn cứ vào worklog.
+có dữ liệu phải cùng kiểm phạm vi/thời điểm, claim, độ đầy đủ và chất lượng nguồn; không coi bên trích nhiều ID hơn
+là đúng. Nếu hai nguồn mâu thuẫn, giao phép kiểm phân biệt; chưa đủ thì giữ chưa xác định. Ghi cả hai quan điểm.
+Phân công DFIR điều tra, IR phản ứng, content sửa phát hiện; xác nhận bên nhận đã tiếp nhận qua công cụ hiện có.
 
 ## Phê duyệt hành động phản ứng
 

@@ -8,8 +8,9 @@ Mọi hành động ở đây cần **phê duyệt gắn đúng hành động + 
 Phản ứng nhanh: chặn kết nối tới IP/domain độc hại, chặn URL webshell, chặn domain/URL đang bị khai thác lỗ hổng,
 chặn địa chỉ email gửi thư độc. Đầu ra: đường tấn công bị chặn trước khi lan rộng.
 
-1. **Chọn IOC được phép chặn:** độc hại **và** không thuộc tài sản/hạ tầng hợp lệ (danh mục tài sản): không phải IP
-   của chính tổ chức, không phải dịch vụ đối tác, không phải hạ tầng dùng chung.
+1. **Chọn IOC được phép chặn:** xác minh hành vi độc và phạm vi tác động. Tài sản nội bộ/đối tác có thể bị chiếm;
+   không miễn trừ về mặt điều tra, nhưng chọn lớp chặn hẹp theo quyền và phụ thuộc dịch vụ. Với case T1371,
+   giữ danh sách không được chặn và ràng buộc không làm hỏng hạ tầng hợp lệ.
 2. **Chọn đúng lớp chặn:**
 
 | Loại IOC | Lớp chặn |
@@ -59,9 +60,9 @@ hệ thống trở lại bình thường và **attacker không compromise lại 
 
 Hướng dẫn xử lý triệt để **theo từng bước**: cô lập, bóc tách và gỡ bỏ hoàn toàn mã độc và backdoor.
 
-**Thứ tự chuẩn**
-1. Ngăn chặn (cô lập, chặn IOC) để attacker không phản ứng trong lúc dọn.
-2. Thu thập/bảo toàn chứng cứ còn thiếu.
+**Thứ tự theo SOP và phụ thuộc của hành động**
+1. Xác nhận phạm vi/quyền và bảo toàn chứng cứ dễ mất; khi case yêu cầu RAM trước cô lập/kill, phải thu RAM trước.
+2. Ngăn chặn theo quyền, ràng buộc VIP/dải mạng và ảnh hưởng dịch vụ; thu chứng cứ còn thiếu.
 3. **Gỡ mọi chỗ bám** của attacker: webshell, backdoor, persistence, tài khoản giả, khoá SSH lạ — **gỡ webshell trước
    khi vá lỗ hổng**.
 4. **Vá lỗ hổng** / cấu hình lại điểm yếu bị khai thác.
@@ -73,9 +74,9 @@ Hướng dẫn xử lý triệt để **theo từng bước**: cô lập, bóc t
 kế hoạch hỏng. Ghi rủi ro của từng bước (gián đoạn dịch vụ, mất chứng cứ).
 
 ```json
-{"steps": ["isolate web-01", "block 198.51.100.4", "remove webshell x.php", "remove cron synthjob",
+{"steps": ["memory_dump web-01", "isolate web-01", "block 198.51.100.4", "remove webshell x.php", "remove cron synthjob",
            "delete account svc_upd", "patch CVE-2023-4966", "rotate svc_web credentials", "monitor 14 days"],
- "remediation_order": ["isolate web-01", "block 198.51.100.4", "remove webshell x.php", "…"],
+ "remediation_order": ["memory_dump web-01", "isolate web-01", "block 198.51.100.4", "remove webshell x.php", "…"],
  "risk": {"isolate web-01": "gián đoạn website ~30 phút"}}
 ```
 
@@ -97,7 +98,7 @@ dài hạn.
 | C2 qua web (T1071.001) / exfil (T1048) | log proxy, DNS, NetFlow |
 
 Nguồn **thiếu** = cần mà không có hoặc đang không khoẻ. Rule **thiếu** = technique chưa có rule trong kho (xem
-`soc-cnt/reference/coverage-intel.md`).
+`../../soc-cnt/reference/coverage-intel.md`).
 
 **Viết khuyến nghị theo ba trục tách biệt:**
 - `technical_controls` — kiểm soát kỹ thuật (vá, tắt WDigest, MFA, phân vùng, hạn chế quyền admin…);

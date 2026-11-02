@@ -9,6 +9,7 @@ import os
 import queue
 import threading
 import time
+import uuid
 from collections.abc import Callable
 from contextlib import AbstractContextManager
 from logging.handlers import RotatingFileHandler
@@ -16,11 +17,15 @@ from pathlib import Path
 from typing import Any, BinaryIO
 
 from saber.agents.provider import LLMProvider
+from saber.agents.skills import load_playbook
+from saber.agents.specialties import BLUE_SKILLS
 from saber.domain.errors import BudgetExceeded, IntegrationBlocked
 from saber.population.office import OfficeEmitter
-from saber.world.agents import baseline, llm_messages, parse_plan
+from saber.world import work
+from saber.world.agents import PLAYBOOKS, baseline, llm_messages, parse_plan
 from saber.world.environment import World
-from saber.world.models import Action, Actor, WorldConfig
+from saber.world.models import Action, Actor, WorldConfig, specialties_for
+from saber.world.office import deployment_profile, snapshot
 from saber.world.quota import TeamQuotaProvider
 from saber.world.service import LabServer
 from saber.world.store import Store
@@ -77,7 +82,9 @@ class Planner:
     def __init__(self, provider: LLMProvider, actors: int, workers: int = 4) -> None:
         self.provider = provider
         self.requests: queue.Queue[tuple[Actor, dict[str, Any]]] = queue.Queue(maxsize=actors)
-        self.results: queue.Queue[tuple[str, list[Action], str, int]] = queue.Queue(maxsize=actors)
+        self.results: queue.Queue[tuple[str, list[Action], str, int, int]] = queue.Queue(
+            maxsize=actors
+        )
         self.pending: set[str] = set()
         self.stopping = threading.Event()
         self.exhausted = False
@@ -123,7 +130,15 @@ class Planner:
             except Exception:
                 actions, note = [], "LLM failure; scripted fallback (error details redacted)."
             if not self.stopping.is_set():
-                self.results.put((actor.id, actions, note, int(obs["tick"])))
+                self.results.put(
+                    (
+                        actor.id,
+                        actions,
+                        note,
+                        int(obs["tick"]),
+                        int(obs.get("control", {}).get("generation", 0)),
+                    )
+                )
 
     def close(self) -> None:
         self.stopping.set()
@@ -150,6 +165,11 @@ class Runner:
         emitter: OfficeEmitter | None = None,
     ) -> None:
         self.store, self.config = store, config
+        if provider is not None:
+            for skill in {
+                PLAYBOOKS[a.team if a.team == "client" else a.role] for a in config.actors
+            } | {BLUE_SKILLS[s] for a in config.actors for s in specialties_for(a)}:
+                load_playbook(skill, mode="world")
         self.world = World(store, config)
         with store.transaction():
             store.put("meta", "engine", "hybrid" if provider else "scripted")
@@ -170,14 +190,13 @@ class Runner:
             else None
         )
         self._closed = False
+        self.run_id = uuid.uuid4().hex
+        self.profile = deployment_profile(store.root)
         self.telemetry = RotatingFileHandler(
             store.root / "access.jsonl", maxBytes=5_000_000, backupCount=3, encoding="utf-8"
         )
         self.server.start()
         self.clients = {a.id: self.server.client(a.id) for a in config.actors}
-        for a in config.actors:
-            color = {"client": "#4fd8ff", "red": "#ff5c5c", "blue": "#6bf29b"}[a.team]
-            self.emitter.agent(a.id, a.id, f"{a.team} / {a.role}", color)
         atomic_json(
             store.root / "runtime.json",
             {
@@ -187,19 +206,42 @@ class Runner:
                 "authentication": "per-agent bearer capabilities; not exported",
             },
         )
+        self._publish_office(self.world.report())
+
+    def _publish_office(self, report: dict[str, Any]) -> None:
+        event = snapshot(
+            self.store,
+            self.config,
+            report,
+            run_id=self.run_id,
+            profile=self.profile,
+            pending=set(self.planner.pending) if self.planner else set(),
+            stopped=self._closed,
+            budget_exhausted=bool(self.planner and self.planner.exhausted),
+        )
+        atomic_json(self.store.root / "office.json", event)
+        self.emitter.world_snapshot(event)
 
     def _plans(self) -> None:
         if self.planner is None:
             return
         while True:
             try:
-                aid, actions, note, at = self.planner.results.get_nowait()
+                aid, actions, note, at, generation = self.planner.results.get_nowait()
             except queue.Empty:
                 break
             self.planner.pending.discard(aid)
             # Drop stale decisions rather than executing against an unrelated world state.
             fresh = self.world.tick - at <= self.config.profile_refresh_ticks
             with self.store.transaction():
+                current = work.control(self.world, aid)
+                if (
+                    not fresh
+                    or current["status"] != "ACTIVE"
+                    or current["generation"] != generation
+                ):
+                    self.world._metric("discarded_plans", 1)
+                    continue
                 self.store.put("plans", aid, [a.model_dump() for a in actions] if fresh else [])
                 memory = self.store.get("memory", aid, {})
                 memory.update(
@@ -210,7 +252,6 @@ class Runner:
                     }
                 )
                 self.store.put("memory", aid, memory)
-            self.emitter.llm_end(aid, 0, note, {"in": 0, "out": 0})
 
     def step(self) -> dict[str, Any]:
         self._plans()
@@ -219,6 +260,13 @@ class Runner:
         actors = self.config.actors
         offset = (tick + self.config.seed) % len(actors)
         for actor in actors[offset:] + actors[:offset]:
+            with self.store.transaction():
+                control = work.control(self.world, actor.id)
+                if control["status"] == "WAITING" and tick >= control["until_tick"]:
+                    work.set_control(self.world, actor.id, "ACTIVE", "Wait completed.")
+                    control = work.control(self.world, actor.id)
+            if control["status"] != "ACTIVE":
+                continue
             if tick % actor.interval_ticks or (
                 actor.team == "red" and tick < self.config.red_start_tick
             ):
@@ -230,19 +278,22 @@ class Runner:
             if self.planner is not None and tick >= int(memory.get("next_plan", 0)):
                 self.planner.request(actor, obs)
                 memory["next_plan"] = tick + self.config.profile_refresh_ticks
-                self.emitter.llm_start(actor.id, self.planner.provider.model_id)
+                with self.store.transaction():
+                    self.store.put("memory", actor.id, memory)
             plan = self.store.get("plans", actor.id, [])
             source = "llm" if plan else ("scripted-fallback" if self.planner else "scripted")
             chosen = Action.model_validate(plan.pop(0)) if plan else baseline(actor, obs, turns)
-            self.emitter.status(actor.id, "tool", chosen.tool)
-            self.emitter.tool(actor.id, chosen.tool)
             result = client.act(chosen)
             # Persist a bounded private agent journal; never expose other teams' plans.
             with self.store.transaction():
+                if work.control(self.world, actor.id)["generation"] != control["generation"]:
+                    plan = []
+                memory = self.store.get("memory", actor.id, memory)
                 memory.update(
                     {
                         "turns": turns + 1,
                         "last_tool": chosen.tool,
+                        "last_tick": tick,
                         "last_status": result.get("status"),
                         "source": source,
                     }
@@ -260,7 +311,6 @@ class Runner:
                 )
                 self.store.put("journals", actor.id, journal[-100:])
                 self.world._metric("actions_" + source.replace("-", "_"), 1)
-            self.emitter.status(actor.id, "idle")
         report = self.world.report()
         cursor = int(self.store.get("meta", "telemetry_cursor", 0))
         events = self.store.events(after=cursor, through_tick=tick, limit=2000)
@@ -273,6 +323,7 @@ class Runner:
             with self.store.transaction():
                 self.store.put("meta", "telemetry_cursor", events[-1]["id"])
         atomic_json(self.store.root / "report.json", report)
+        self._publish_office(report)
         if tick % 20 == 0:
             self.store.archive(self.config.retention_events, self.config.archive_bytes)
             self.store.checkpoint()
@@ -332,3 +383,4 @@ class Runner:
         self.telemetry.close()
         self.store.checkpoint()
         atomic_json(self.store.root / "runtime.json", {"status": "stopped", "pid": os.getpid()})
+        self._publish_office(self.world.report())

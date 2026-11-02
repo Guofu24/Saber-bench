@@ -8,12 +8,11 @@ Blue agents receive ONLY the public access log (never the server-derived truth).
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from functools import lru_cache
 from typing import Any
 
 from saber.agents.provider import LLMProvider
+from saber.agents.skills import load_playbook as load_playbook
 from saber.baselines.prompt import extract_answer_json
-from saber.catalog.loader import repo_root
 from saber.population.menus import expand_actions, menu_for
 
 # Which skill each role loads. Red/blue are chosen per family/scenario so different scenarios
@@ -31,20 +30,6 @@ BLUE_SKILL = {
     "persistence": "soc-hunt",
 }
 BLUE_TEAM = {"soc-mon": "MON", "soc-hunt": "HUNT", "soc-ir": "IR", "soc-cnt": "CNT"}
-
-
-@lru_cache(maxsize=16)
-def load_playbook(skill_name: str) -> str:
-    """Load a skill's SKILL.md body (YAML frontmatter stripped). Empty string if absent."""
-    path = repo_root() / ".claude" / "skills" / skill_name / "SKILL.md"
-    if not path.exists():
-        return ""
-    text = path.read_text(encoding="utf-8")
-    if text.startswith("---"):
-        end = text.find("\n---", 3)
-        if end != -1:
-            text = text[end + 4 :]
-    return text.strip()
 
 
 @dataclass

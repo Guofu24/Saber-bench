@@ -1,6 +1,87 @@
 # agent-office
 
-Xem đội multi-agent của bạn làm việc trong một văn phòng 3D. Không cần sửa code của repo, chỉ cần chạy nó **qua** `agent-office`:
+Viewer 3D cho các agent. Với SABER continuous world, viewer nhận roster và số liệu
+từ runtime, kể cả khi chạy scripted và không gọi LLM. Cần **Node.js 18+** trên máy
+mở viewer; bản HTML đã build sẵn, không cần `npm install` để xem.
+
+## Xem SABER world hiện tại
+
+Chạy từ thư mục gốc repo, ở terminal riêng:
+
+```powershell
+node agent-office/bin/agent-office.js watch --world runs/world --open
+```
+
+Thay `runs/world` bằng đúng thư mục `--out` của runtime. Lệnh này xem world đang chạy
+hoặc đã dừng; không khởi động agent, không gọi Gemini. Mở URL được in ra, mặc định
+`http://127.0.0.1:7788`. Nếu cổng bận, viewer thử cổng tiếp theo. Ctrl+C dừng viewer.
+
+| Môi trường | Lệnh / vị trí chạy viewer |
+|---|---|
+| Local | `node agent-office/bin/agent-office.js watch --world runs/world` |
+| Sandbox | `node agent-office/bin/agent-office.js watch --bundle runs/my-sandbox` trên Docker host |
+| VM tự dựng | `watch --world PATH_TO_WORLD` trong VM có Node.js |
+| Server lab | `watch --world PATH_TO_WORLD` trên server có Node.js |
+
+Sandbox lấy `/data/office.json` bằng `docker cp`, chọn đúng container theo Compose
+project của bundle. Không mở cổng container, không đổi `network_mode: none`, không
+đọc key mount. Cần Docker daemon và container đã được tạo; container đã dừng vẫn đọc
+được, nhưng `env down` xóa container thì cần `env up` lại. Bundle cũ cần runtime mới
+để sinh `office.json`; bản export mới kèm viewer bên ngoài Docker build context.
+
+Với VM/server, truy cập viewer loopback qua SSH tunnel trên máy của bạn:
+
+```bash
+ssh -N -L 7788:127.0.0.1:7788 user@lab-host
+```
+
+Thay cổng đích bằng cổng viewer thực tế. Hoặc đồng bộ **chỉ `office.json`** về một
+thư mục local rồi dùng `watch --world` với thư mục đó.
+
+Có thể khởi động world và nhận snapshot trực tiếp trong một lệnh:
+
+```powershell
+node agent-office/bin/agent-office.js run -- .venv/Scripts/python.exe -m saber.cli.main world run --out runs/world --forever
+```
+
+`run` đặt `AGENT_OFFICE_URL` cho runtime. Với viewer `serve` có sẵn, dùng
+`world run --office-url http://127.0.0.1:7788`. Gemini dùng snapshot trực tiếp,
+không đi qua proxy OpenAI/Anthropic. Các cờ `--llm`, `--key-pool`, `--call-budget`
+thuộc lệnh SABER sau `--`; xem [hướng dẫn world](../docs/CONTINUOUS_WORLD_VI.md).
+
+## Đọc giao diện world
+
+- Chọn world, lọc Clients/Red Team/Blue Team; tối đa 200 agent, 20 agent mỗi trang.
+- Mỗi actor hiện chuyên môn đã cấu hình, chuyên môn/task đang xử lý và số task
+  offered/active/blocked/done. `WAITING` hiện tick thức dậy; `DONE` giữ idle dù request
+  suy luận cũ chưa về. Đây là trạng thái actor, khác trạng thái dừng của cả world.
+  Snapshot cũ thiếu các trường này vẫn hiển thị được với giá trị mặc định.
+- Profile `local/sandbox/vm/remote` là nơi triển khai được khai báo. `Scripted` dùng
+  hành vi có sẵn; `Gemini + fallback` có suy luận bất đồng bộ và fallback scripted.
+- Tổng LLM attempts, successes và token lấy từ ledger provider của world, cộng dồn
+  qua resume. Hàng đợi suy luận không được tính thành một API attempt. Quota và usage
+  là theo đội; không tự chia token cho từng agent.
+- Key hiển thị **số thứ tự** trong pool đã loại trùng: client 1–200, red 201–400,
+  blue phần còn lại theo cấu hình. `ready`, `in_flight`, `cooling_down`,
+  `at_local_limit`, `disabled`, `waiting_for_quota` là trạng thái ghi nhận gần nhất;
+  viewer không thử key hay kiểm chứng quota Google.
+- Mỗi agent có tool cuối, HTTP status, tick và nguồn `llm`, `scripted` hoặc
+  `scripted-fallback`. “Hoạt động tick” gồm agent vừa có hành động hoặc chờ suy luận;
+  hoạt ảnh 3D chỉ minh họa. Log bên phải theo trang đang xem, giữ tối đa 200 dòng.
+- `viewer online` chỉ xác nhận trình duyệt nối được viewer. Runtime có trạng thái
+  riêng: đang chạy, đã dừng, hoặc mất cập nhật/chưa rõ. Mất heartbeat quá
+  `max(30 giây, 3 × tick_seconds + 5 giây)` được đánh dấu cũ. Watch đọc mỗi 2 giây.
+
+`office.json` được ghi nguyên tử khi khởi động, sau mỗi tick và lúc dừng; chứa roster,
+counter và chỉ số quota. Không chứa raw key, bearer, prompt, nội dung tài liệu hay
+plan riêng. Đây là màn hình **operator**, không cấp endpoint này cho agent. `watch`
+chỉ đọc, tắt proxy/ingest; không điều khiển world, SIEM/SOAR hay desktop máy thật.
+Nếu xem world cũ không có snapshot, chạy/resume bằng code mới. Khi render bundle mới,
+giữ nguyên dữ liệu cũ và làm theo [hướng dẫn môi trường](../docs/ENVIRONMENTS_VI.md).
+
+## Proxy cho repo khác / population cũ
+
+Luồng proxy và sự kiện population cũ vẫn dùng được:
 
 ```bash
 agent-office run -- python main.py
@@ -24,7 +105,7 @@ repo multi-agent ──HTTP──▶ agent-office (proxy local) ──▶ API th
 | `OPENAI_BASE_URL`, `OPENAI_API_BASE` | `http://127.0.0.1:7788/openai` |
 | `ANTHROPIC_BASE_URL` | `http://127.0.0.1:7788/anthropic` |
 
-Request vẫn được chuyển nguyên vẹn lên API thật, kể cả streaming. Nếu trước đó bạn đã đặt `OPENAI_BASE_URL`, ví dụ trỏ tới OpenRouter, vLLM, LiteLLM hay Ollama (endpoint `/v1`), thì địa chỉ đó sẽ được dùng làm upstream. API key không bị đọc hay lưu lại.
+Request vẫn được chuyển lên API thật, kể cả streaming. Nếu trước đó bạn đã đặt `OPENAI_BASE_URL`, ví dụ trỏ tới OpenRouter, vLLM, LiteLLM hay Ollama (endpoint `/v1`), thì địa chỉ đó sẽ được dùng làm upstream. Proxy chuyển tiếp header xác thực; không có chức năng quản lý hay lưu key pool. Chế độ proxy phân tích prompt/response để suy ra hoạt động và có thể hiển thị đoạn nội dung đó; cơ chế này khác snapshot đã lọc của world.
 
 Từ traffic đi qua, proxy suy ra:
 
@@ -107,25 +188,53 @@ curl -X POST $AGENT_OFFICE_URL/ingest -H 'content-type: application/json' -d '[
 ]'
 ```
 
-`AGENT_OFFICE_URL` đã có sẵn trong môi trường của lệnh con. Các loại sự kiện: `agent`, `task`, `llm_start`, `tool`, `llm_end`, `llm_error`, `handoff`, `message`, `status`, `process`.
+`AGENT_OFFICE_URL` đã có sẵn trong môi trường của lệnh con. Các loại sự kiện: `agent`, `task`, `llm_start`, `tool`, `llm_end`, `llm_error`, `handoff`, `message`, `status`, `process`. World dùng thêm `world_snapshot` schema v1; server giữ snapshot mới nhất cho tối đa 16 world, replay khi tải lại trang. Xem `lib/snapshot.js` để biết các trường được chấp nhận. Khi có world, UI ưu tiên roster/counter của world; dùng viewer riêng để xem proxy cùng lúc.
 
-## Giới hạn
+## Giới hạn riêng của proxy
 
 - Chỉ thấy được những gì đi qua HTTP tới LLM. Agent nói chuyện với nhau qua queue hoặc biến nội bộ thì chỉ được suy ra, không thấy trực tiếp.
 - Repo hardcode URL API, hoặc SDK không đọc `*_BASE_URL`, sẽ đi thẳng ra ngoài mà không qua proxy. Trường hợp này cần thêm cấu hình hoặc chế độ HTTPS proxy, chưa làm.
-- Mới hỗ trợ định dạng API của OpenAI và Anthropic. Gemini native và Ollama `/api/chat` chưa hỗ trợ. Nếu chúng có endpoint tương thích OpenAI thì vẫn dùng được qua endpoint đó.
+- Proxy hỗ trợ định dạng API của OpenAI và Anthropic. Gemini native và Ollama `/api/chat` không qua proxy này; **SABER Gemini vẫn hiển thị bằng snapshot runtime**.
 - Tên agent và giao việc là suy đoán. Dùng `agent-office.json` hoặc header `X-Agent-Name` để chính xác hơn.
-- Văn phòng có 20 bàn. Agent thứ 21 trở đi sẽ đứng ở khu trống.
+- Proxy legacy có 20 bàn và khu đứng. World dùng phân trang 20 agent để xem đủ roster.
 
 ## Cấu trúc
 
 ```
-bin/agent-office.js     CLI: run / serve
-lib/server.js           proxy + SSE + /ingest
+bin/agent-office.js     CLI: run / serve / watch
+lib/server.js           proxy + SSE + /ingest + /state
 lib/analyzer.js         suy ra agent, task, tool, handoff từ traffic
+lib/snapshot.js         schema snapshot đã lọc, giới hạn 200 actor
+lib/watch.js            đọc file local hoặc snapshot container
 viewer/index.html       văn phòng 3D đã build (three.js inline, chạy offline)
-viewer-src/             mã nguồn viewer. Build lại: npm i && npm run build:viewer
+viewer-src/             mã nguồn viewer; world-state.js chứa selector có kiểm thử
+test/                   test protocol, watcher, trạng thái và browser smoke tùy chọn
 examples/               mock LLM + repo demo multi-agent
 ```
 
 Phần chạy (`bin`, `lib`, `viewer`) không có dependency nào. `three` và `esbuild` chỉ cần khi build lại viewer.
+
+## Sửa code và kiểm thử
+
+```powershell
+cd agent-office
+npm ci
+npm run build:viewer
+npm test
+```
+
+Commit cả `viewer-src` và `viewer/index.html` sau khi build. `npm test` không gọi API
+LLM, không cần Docker hay trình duyệt. Test Docker dùng adapter giả; không thay thế
+kiểm tra container thật. Test Python: `uv run pytest tests/world/test_office.py
+tests/population/test_office.py tests/environments -q` từ root repo.
+
+Smoke Chrome tùy chọn dùng `playwright-core` cài riêng: đặt `PLAYWRIGHT_MODULE` thành
+đường dẫn package và `CHROME_PATH` thành đường dẫn Chrome, rồi từ root chạy:
+
+```powershell
+node agent-office/test/browser-smoke.cjs runs/world/office.json runs/office-browser-check
+```
+
+Đầu vào cần snapshot của world **đã dừng**. Test kiểm tra roster đó rồi dùng dữ liệu
+thử để kiểm tra 200 agent, filter, quota, stale, resume và mobile; lưu ảnh cùng
+`verification.json`. Dữ liệu thử không phải bằng chứng 200 agent đã chạy workload.

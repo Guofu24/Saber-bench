@@ -17,12 +17,12 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from datetime import datetime
-from functools import lru_cache
 from typing import Any
 
 from saber.agents.provider import LLMProvider
+from saber.agents.skills import load_playbook
 from saber.baselines.prompt import extract_answer_json
-from saber.catalog.loader import repo_root
+from saber.domain.errors import IntegrationBlocked
 from saber.episodes.builder import BuiltEpisode
 from saber.episodes.runner import EpisodeResult, run_stub
 
@@ -34,21 +34,12 @@ GENERIC_ROLE = (
 )
 
 
-@lru_cache(maxsize=8)
 def load_skill_playbook(service: str) -> str:
-    """Load a service's operational SKILL.md (frontmatter stripped). Empty string if absent."""
+    """Load a complete specialist playbook, or fail before any provider request."""
     name = SERVICE_SKILL.get(service)
     if not name:
-        return ""
-    path = repo_root() / ".claude" / "skills" / name / "SKILL.md"
-    if not path.exists():
-        return ""
-    text = path.read_text(encoding="utf-8")
-    if text.startswith("---"):  # strip YAML frontmatter
-        end = text.find("\n---", 3)
-        if end != -1:
-            text = text[end + 4 :]
-    return text.strip()
+        raise IntegrationBlocked("Unknown specialist service.")
+    return load_playbook(name)
 
 
 def build_messages(episode: BuiltEpisode, *, use_skill: bool) -> list[dict[str, str]]:
@@ -59,7 +50,7 @@ def build_messages(episode: BuiltEpisode, *, use_skill: bool) -> list[dict[str, 
     )
     schema_json = json.dumps(episode.manifest.output_schema, ensure_ascii=False, default=str)
     if use_skill:
-        playbook = load_skill_playbook(service) or GENERIC_ROLE
+        playbook = load_skill_playbook(service)
         system = (
             playbook
             + "\n\n---\nYou are now working ONE benchmark case. Apply the playbook above, but output "

@@ -9,7 +9,8 @@ kho dữ liệu nhóm APT). Đầu ra: TTP được nhận diện và ánh xạ 
 1. Đọc **ý đồ** của lệnh/hành vi, không đọc tên tool: cùng `powershell` có thể là Execution, Discovery hay Defense
    Evasion tuỳ tham số.
 2. Chọn **sub-technique** khi bằng chứng đủ cụ thể; chỉ dùng technique cha khi không xác định được biến thể.
-3. Không chắc technique thì ít nhất phải đúng **tactic**.
+3. Không chắc technique/tactic thì ghi chưa xác định. Ghi phiên bản mapping được cấp; một technique có thể gắn
+   nhiều tactic. Lệnh quản trị khớp kỹ thuật không tự chứng minh mục đích độc hại.
 
 **Ví dụ chuẩn**
 
@@ -23,7 +24,7 @@ kho dữ liệu nhóm APT). Đầu ra: TTP được nhận diện và ánh xạ 
 | `net group "Domain Admins" /domain` | T1069.002 Domain Groups | discovery |
 | `wmic process call create app.exe` | T1047 WMI | execution |
 | `vssadmin delete shadows /all` | T1490 Inhibit System Recovery | impact |
-| `rundll32 comsvcs.dll MiniDump …` | T1003.001 LSASS Memory | credential-access |
+| `rundll32 comsvcs.dll MiniDump …` với đích đã xác minh là LSASS | T1003.001 LSASS Memory | credential-access |
 | `bitsadmin /transfer job http://… out.bin` | T1197 BITS Jobs | defense-evasion |
 
 **Chuỗi nhiều hành vi:** ánh xạ **từng** hành vi, kể cả hành vi "nhỏ" (discovery).
@@ -45,7 +46,8 @@ ngang**, cơ chế **persistence**, truy cập dữ liệu nhạy cảm, exfiltr
 - Logon type **3** (network: SMB/PsExec/WMI) hoặc **10** (RDP), event 4624/4648, từ máy **không phải jump host/PAM**,
   ngoài lịch quản trị, bằng tài khoản vừa bị chiếm hoặc không thường đăng nhập vào máy đích.
 - Đi kèm thực thi từ xa trên máy đích (service mới 7045, `psexesvc`, `wmiprvse` sinh tiến trình lạ).
-- Cạnh có hướng `src → dst`; host dùng tên ngắn; account bỏ domain. Không đưa phiên quản trị hợp lệ.
+- Cạnh có hướng `src → dst`; giữ host ID/FQDN, domain/tenant account, chỉ rút gọn nếu contract yêu cầu và không
+  mất định danh. Jump host cũng có thể bị chiếm; kiểm quyền và hành vi, không chỉ vị trí nguồn. Loại phiên hợp lệ có căn cứ.
 
 **Persistence:** `{kind, location}` — kind: run_key, service, scheduled_task, wmi, startup, systemd, cron…; location
 là đường dẫn/khoá registry.

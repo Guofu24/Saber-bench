@@ -7,16 +7,16 @@ Kiểm kết nối mạng **đang mở** trên máy đích để phát hiện **
 
 1. Lấy bảng kết nối (`ss`, `netstat`, `lsof`) — **chỉ đọc**, không kill tiến trình, không đóng socket.
 2. **Mỗi kết nối nhìn ở đầu xa**: IP đích + cổng đích, và **tiến trình** mở nó.
-3. **Bất thường** khi: kết nối **ra địa chỉ ngoài** trên **cổng lạ** (4444, 1337, 6667, 9001, 8081, 53413…) từ
-   **tiến trình không nên mở socket ra ngoài**. **Lành tính**: lưu lượng nội bộ RFC1918, endpoint SaaS/cập nhật đã
-   biết trên 80/443, dịch vụ hạ tầng (53, 123, 389, 445).
-4. **Gắn đúng tiến trình** — không biết tiến trình thì không chặn đúng chỗ. Loại kết nối khớp whitelist (đúng tiến
-   trình **và** đúng đích).
+3. Đối chiếu đích, chiều, cổng, giao thức, tiến trình/chủ sở hữu và baseline. Địa chỉ RFC1918 hay cổng 80/443/53/445
+   không bảo đảm lành tính: vẫn có thể là C2 hoặc di chuyển ngang. Cổng lạ cũng không tự chứng minh độc hại.
+4. **Gắn đúng tiến trình và thời điểm**; PID có thể được tái sử dụng. Kiểm whitelist đúng tiến trình, đích, vai và
+   lịch, đồng thời xem hành vi thực tế. Thiếu process mapping thì ghi hạn chế, không tự đoán để chặn.
 5. **Kênh C2/tunnel trên máy đang chạy:**
    - **reverse shell** — `bash`/`sh`/`nc` có socket ra ngoài;
    - **`ssh -R`** — ssh có remote forward tới host ngoài;
    - **DNS tunnel** — tiến trình lạ gửi nhiều truy vấn DNS dài tới một domain (đối chiếu log DNS);
    - flow ra đều đặn tới một đích lạ.
+   Đây là đầu mối cần xác minh mục đích/quyền và dữ liệu liên quan; C2 không bắt buộc dùng cổng lạ hay nhịp đều.
 
 ```json
 {"abnormal": [{"ip": "203.0.113.9", "port": 4444, "process": "bash"},
@@ -55,7 +55,8 @@ Chỉ ra cụ thể điểm yếu/lỗ hổng mà attacker **đã lợi dụng**
 **Ưu tiên theo rủi ro, không theo CVSS thuần**
 1. Mức nghiêm trọng kỹ thuật: CVSS, có exploit công khai/đang bị khai thác ngoài thực tế.
 2. **Phơi nhiễm:** có đường từ vùng không tin cậy tới dịch vụ không (sơ đồ mạng: internet → DMZ → host; firewall,
-   NAT, phân vùng)? **CVSS 9.8 nhưng không phơi ra ngoài thì ưu tiên đúng có thể chỉ là Thấp.**
+   NAT, phân vùng)? Xét cả đường từ máy nội bộ đã bị chiếm. CVSS 9.8 có thể được hạ ưu tiên theo ma trận và
+   kiểm soát bù trừ đã kiểm chứng; không tự xếp Thấp chỉ vì không phơi internet.
 3. **Giá trị tài sản** (cấp độ hệ thống, core, VIP) và kiểm soát bù trừ đang có.
 4. Ghi rõ **đường tiếp cận** đã xác định (`exposure_path`), hoặc "không phơi".
 
@@ -74,7 +75,7 @@ Chỉ ra cụ thể điểm yếu/lỗ hổng mà attacker **đã lợi dụng**
 
 ## Sai lầm thường gặp
 
-- Báo đầu gần (địa chỉ local) thay vì đầu xa; báo cả kết nối nội bộ RFC1918.
+- Nhầm đầu gần với đầu xa; bỏ qua kết nối nội bộ chỉ vì là RFC1918.
 - Kill tiến trình hay sửa cấu hình trong lúc rà.
 - Liệt kê mọi cấu hình "nghe có vẻ yếu" thay vì mục thực sự sai trong bản xuất.
 - Xếp ưu tiên theo CVSS mà bỏ qua phơi nhiễm và giá trị tài sản.

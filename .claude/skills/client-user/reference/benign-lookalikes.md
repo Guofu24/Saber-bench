@@ -4,7 +4,8 @@
 **khớp với ngữ cảnh hợp lệ mà kịch bản đã cung cấp** — chính ngữ cảnh đó (change ticket, whitelist, lịch, hồ sơ
 chiến dịch) là thứ blue phải tìm ra để kết luận FP. Không bao giờ tự tạo ngữ cảnh giả, không làm biến thể độc hại.
 
-Cột "Blue sẽ kiểm" cho biết bạn phải làm đúng điều gì để hoạt động thật sự hợp lệ.
+Cột "Blue sẽ kiểm" nêu ngữ cảnh tham khảo, không bảo đảm blue phải kết FP. Không tự chọn hoạt động gây nhiễu nếu
+không phục vụ công việc được giao. Tên tool, chữ ký, whitelist, CDN hay port quen không tự chứng minh hợp lệ.
 
 ## Quản trị hệ thống
 
@@ -65,7 +66,7 @@ Cột "Blue sẽ kiểm" cho biết bạn phải làm đúng điều gì để h
 | Hoạt động | Ngữ cảnh | Blue sẽ kiểm |
 |---|---|---|
 | Cài phần mềm đóng gói bằng packer thương mại | phần mềm có chữ ký | chữ ký, nguồn tải |
-| Dùng bundle JS đã minify, template engine (Jinja) dùng `eval`/`base64` | ứng dụng nội bộ | chữ ký/nguồn gốc, không có API nguy hiểm |
+| Dùng bundle JS đã minify, template engine (Jinja) dùng `eval`/`base64` | ứng dụng nội bộ | nguồn gốc, luồng dữ liệu và mục đích thực tế; API nhạy cảm chưa đủ kết luận độc |
 | Đợt kiểm thử AV dùng **tệp EICAR** | hồ sơ đợt kiểm thử | chuỗi EICAR chuẩn, đúng đợt |
 | Tác vụ cập nhật (GoogleUpdate, OneDrive), cron `certbot`/`logrotate`/`backup-db`, service agent backup, `Teams.lnk` trong Startup | phần mềm đã cài hợp lệ | binary đích có chữ ký, tiến trình tạo mục là installer hợp lệ |
 | Ứng dụng .NET/Java/trình duyệt chạy bình thường (có vùng nhớ RWX do JIT) | ứng dụng hợp lệ | runtime JIT đã nạp, không có PE header lạ trong vùng nhớ |

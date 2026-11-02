@@ -4,11 +4,16 @@ Thu thập và xử lý chứng cứ số; phân tích artifact hệ điều hà
 log, memory dump). Khách hàng phối hợp cung cấp memory dump và disk image theo yêu cầu. Đầu ra: bộ artifact đã xử
 lý phục vụ dựng lại hành vi thực thi.
 
-## Thu theo order of volatility (RFC 3227)
+## Thu theo SOP và độ dễ mất của chứng cứ
 
-**Thứ tự thu — dễ mất nhất trước:**
+**Thứ tự trong SOP của các case tương ứng:**
 `ram` → `network_connections` → `processes` → `disk_images` → `local_logs` → `archived_logs`
 (RAM → kết nối đang mở → tiến trình → disk → log tại chỗ → log tập trung/lưu trữ).
+
+Đây là thứ tự case, không phải danh sách nguyên văn áp dụng cho mọi máy trong RFC 3227.
+Kiểm retention, trạng thái máy và quyền trước khi thu; yêu cầu RAM trước cô lập của case vẫn phải giữ.
+[RFC 3227 §2](https://www.rfc-editor.org/rfc/rfc3227.html#section-2) nêu nguyên tắc ưu tiên dữ liệu dễ mất và
+ghi nhận ảnh hưởng của việc thu. Live acquisition có thể đổi trạng thái; không hứa "không dấu vết".
 
 **Cách bảo toàn từng loại**
 
@@ -36,7 +41,8 @@ Thu dấu vết trên toàn hệ thống, **kể cả dấu vết attacker cố 
 AV ghi nhận mã độc từng bị phát hiện nhưng xử lý không thành công.
 
 1. Đưa bản sao về kho bằng chứng (vd `/workspace/evidence/`) **không làm đổi hash và timestamp của bản gốc** — đọc và
-   sao chép; **không** di chuyển, **không** sửa bản gốc.
+   sao chép; **không** di chuyển, **không** sửa bản gốc. Dùng image/read-only mount/write-blocker phù hợp;
+   nếu không bảo đảm ràng buộc bất biến của case thì báo thiếu công cụ, không tự nới yêu cầu.
 2. Thu đúng order of volatility, không chỉ thu đủ.
 3. Chính hành vi chống điều tra là một dấu vết phải thu: sự kiện 1102, trạng thái service EDR, mục log AV "xử lý thất bại".
 
@@ -51,8 +57,9 @@ AV ghi nhận mã độc từng bị phát hiện nhưng xử lý không thành 
 Dựng lại hành vi **đã xảy ra trong quá khứ** từ log AV lịch sử, log hệ thống và artifact còn sót.
 
 - **Phát hiện nhưng xử lý thất bại:** mục AV có hành động *quarantine/delete/clean failed*, *access denied*, *left
-  alone*, *pending reboot* không hoàn tất; hoặc cùng hash bị phát hiện lặp lại trên cùng máy (nghĩa là chưa gỡ được).
-  Ghi `{hash, host}`; phát hiện đã xử lý thành công thì không tính.
+  alone*, *pending reboot* chưa có kết quả hoàn tất. Phát hiện lặp cùng hash có thể do tái nhiễm hoặc quét kho cách ly;
+  đối chiếu action ID, path, trạng thái kết thúc và thời gian. Ghi `{hash, host}` khi có bằng chứng xử lý thất bại;
+  trạng thái thành công phải kiểm theo đúng lần xử lý, không suy máy đã sạch hoàn toàn.
 - **Sự kiện quá khứ** (thực thi, tạo tệp, persistence) từ log hệ thống + AV, sắp theo thời gian thật.
 - **Khoảng log bị xoá hẳn:** ghi rõ là **`khong_du_du_kien`** (không đủ dữ kiện) cho khoảng đó — "không quan sát được"
   khác "không có gì xảy ra". Không lấp khoảng trống bằng suy đoán.
@@ -68,9 +75,9 @@ Rà **Run, RunOnce, Scheduled Tasks, Services, WMI Event Consumers**; trên Linu
 `.bash_profile`**. Đầu ra: danh sách cơ chế duy trì truy cập bị cài cắm.
 
 - Loại: `run_key` · `service` · `scheduled_task` · `wmi` · `startup` · `systemd`. Ghi đúng **vị trí** và đúng **loại**.
-- **Độc** khi: trỏ tới binary ở thư mục người dùng/Temp/ProgramData lạ, không chữ ký, tên giả, tham số mã hoá, tạo gần
-  thời điểm sự cố, hash khớp IOC. **Lành tính** điển hình: `Teams.lnk` trong Startup, service của phần mềm đã ký, task
-  cập nhật của hãng.
+- **Đầu mối:** binary trong Temp/ProgramData lạ, không chữ ký, tên giả, tham số mã hoá, thời điểm tạo bất thường.
+  Kết luận bằng target/command, hash, creator và hành vi. `Teams.lnk`, service đã ký hoặc task cập nhật vẫn cần
+  kiểm baseline; tên và chữ ký không tự chứng minh hợp lệ.
 - **WMI Event Consumer** (`ROOT\subscription:CommandLineEventConsumer=…` + filter + binding) là chỗ **hầu hết công cụ
   bỏ sót** — luôn kiểm namespace `ROOT\subscription`.
 - Ghi kèm dấu vết chống điều tra liên quan (mục bị xoá, sửa thời gian).
@@ -84,13 +91,15 @@ Rà **Run, RunOnce, Scheduled Tasks, Services, WMI Event Consumers**; trên Linu
 ## Phân tích bộ nhớ (fileless, process injection)
 
 Phân tích memory dump để phát hiện **mã độc fileless** và **process injection** — mã chạy thẳng trong bộ nhớ để né
-phát hiện dựa trên tệp. Công cụ: Volatility (`malfind`, `ldrmodules`, `hollowfind`, `netscan`…).
+phát hiện dựa trên tệp. Chỉ dùng plugin Volatility có trong môi trường và tương thích phiên bản/symbols của ảnh;
+ghi phiên bản, lệnh và lỗi. Các tên như `malfind`, `ldrmodules`, `hollowfind`, `netscan` không bảo đảm đã được cài.
 
 **Dấu hiệu inject**
 - Vùng nhớ **private, không gắn tệp image**, quyền **RWX/RX**, chứa **PE header (`MZ`)** hoặc shellcode.
 - Thread bắt đầu tại địa chỉ **không thuộc module nào** đã nạp.
-- Module có trong bộ nhớ nhưng **bị gỡ khỏi danh sách PEB** (DLL unlinked) — reflective loading.
-- Image base/nội dung khác bản trên đĩa ⇒ **process hollowing**.
+- Module không khớp danh sách PEB: điều tra unlink/loading, không tự quy thành reflective loading.
+- Image base/nội dung khác bản trên đĩa: kiểm relocation, hotpatch và tính tương thích ảnh trước khi nghi hollowing.
+  Kết hợp vùng nhớ, entry point/thread, backing file và dấu vết tạo tiến trình; một khác biệt chưa đủ kết luận.
 
 **Kỹ thuật:** DLL injection (CreateRemoteThread + LoadLibrary) · PE injection (T1055.002) · thread execution
 hijacking (T1055.003) · APC injection (T1055.004) · process hollowing (T1055.012) · reflective DLL loading.

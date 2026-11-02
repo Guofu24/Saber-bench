@@ -13,7 +13,7 @@ bất kỳ trạng thái nào ─► ESCALATED (đang chờ tier/đội cao hơn
 ```
 
 - Chỉ chủ sở hữu hiện tại chuyển trạng thái; mỗi lần chuyển ghi một mục worklog nêu lý do.
-- Không đóng case khi còn thiếu mục bắt buộc của hồ sơ (xem `soc-ir/reference/triage-coordination.md`).
+- Không đóng case khi còn thiếu mục bắt buộc của hồ sơ (xem `../../soc-ir/reference/triage-coordination.md`).
 
 ## Cấu trúc bản ghi
 
@@ -51,6 +51,12 @@ bất kỳ trạng thái nào ─► ESCALATED (đang chờ tier/đội cao hơn
 
 ## Quy tắc ghi
 
+Áp dụng schema, phạm vi tenant và thời điểm chốt (`t0`/`as_of`) của nhiệm vụ; JSON ở đây là mẫu, không ghi đè
+contract hoặc thêm field không được nhận. SLA/RASCI/VIP/thứ tự thu trong handbook là SOP của case tương ứng,
+không phải mặc định cho mọi tổ chức. Thiếu chính sách thì ghi thiếu, không tự bịa.
+Case là hồ sơ phối hợp có thể chứa sai sót: phân biệt quan sát, giả thuyết, quyết định và kết quả kiểm chứng;
+không coi kết luận của đồng đội là bằng chứng độc lập. Trích nguồn gốc và giữ lịch sử đính chính.
+
 1. **Worklog chỉ ghi thêm.** Không sửa, không xoá mục cũ; sai thì ghi mục mới đính chính.
 2. **Mọi khẳng định có `evidence`** — ID bản ghi thật trong dữ liệu giám sát. Không bịa ID.
 3. **Mỗi mục ghi rõ `by` và `at`** (đội và thời điểm UTC).
@@ -58,6 +64,9 @@ bất kỳ trạng thái nào ─► ESCALATED (đang chờ tier/đội cao hơn
 5. **Hành động phản ứng** luôn có người đề xuất, mã phê duyệt, người thực thi, kết quả kiểm chứng.
 6. **Điều chưa biết ghi vào `open_questions`**, không lấp bằng suy đoán.
 7. **Không ghi thông tin của khách hàng khác** vào case.
+8. Bàn giao kèm phạm vi/thời điểm chốt, bằng chứng, việc đã làm, kết quả, câu hỏi mở, owner kế và hạn theo SOP.
+   DFIR thu/phân tích, IR quyết định phản ứng theo quyền; không coi tool điều tra là quyền cô lập/gỡ bỏ.
+   Khẩn cấp thì chuyển ngay phần đã biết và ghi thiếu, không chờ hoàn thiện mọi trường mới báo.
 
 ## Ghi chú bàn giao (mẫu)
 

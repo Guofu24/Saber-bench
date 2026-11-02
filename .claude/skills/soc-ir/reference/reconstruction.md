@@ -8,16 +8,18 @@ Firewall, hệ thống xác thực, Cloud. Đầu ra: timeline chi tiết trình
 **Chuẩn hoá thời gian — làm trước mọi thứ**
 1. Mỗi sự kiện có **giờ địa phương + offset UTC** (vd `+07:00`, `+00:00`, `-05:00`). Giờ UTC = giờ địa phương **trừ**
    offset: `10:00+07:00` = `03:00Z`.
-2. Nguồn không ghi offset: lấy múi giờ **cấu hình của nguồn log** (danh mục log source), không đoán theo vị trí máy.
+2. Nguồn không ghi offset: lấy múi giờ **cấu hình của nguồn log**, xét ngày/DST; không có thì giữ giờ gốc và ghi chưa
+   biết offset, không đoán theo vị trí máy hoặc ép một thứ tự tuyệt đối.
 3. Tính đến lệch đồng hồ giữa các nguồn nếu có thông tin clock skew.
 4. **Không bao giờ sắp theo chuỗi giờ địa phương**: hai sự kiện ở hai múi giờ có thể trông theo một thứ tự nhưng thứ
    tự UTC thật lại ngược.
 
 **Dựng timeline**
 - Sắp **mọi** sự kiện theo UTC; mỗi sự kiện kèm giờ UTC chuẩn (`YYYY-MM-DDTHH:MM:SSZ`), thẳng hàng với thứ tự.
-- **Sáu mốc bắt buộc** của một timeline sự cố: **initial access · leo thang đặc quyền · lateral movement · persistence
-  · exfiltration · phát hiện**. Mỗi mốc là sự kiện **sớm nhất có bằng chứng** cho giai đoạn đó; sai lệch quá ±5 phút
-  coi như sai mốc. "Phát hiện" là lúc hệ thống/analyst phát hiện (cảnh báo đầu tiên), không phải lúc attacker hành động.
+- Rà sáu mốc nếu case yêu cầu: **initial access · leo thang đặc quyền · lateral movement · persistence · exfiltration
+  · phát hiện**. Chỉ điền mốc có bằng chứng; thiếu thì ghi chưa quan sát/không xác định theo schema, không tạo sự kiện.
+  Ghi độ chính xác thời gian thực tế, không dùng dung sai chấm điểm làm quy tắc nghiệp vụ.
+  "Phát hiện" là lúc hệ thống/analyst phát hiện, khác thời điểm hành vi xảy ra.
 
 ```json
 {"event_order": ["evt-07", "evt-02", "evt-11"],
@@ -38,12 +40,15 @@ và tài khoản bị chiếm quyền. Đầu ra: Attack Path & Lateral Movement
 3. **Timestamp sớm nhất không phải tiêu chí.** Một máy có thể có dấu vết sớm hơn nhưng do **quét lỗ hổng hợp lệ**
    (đúng lịch quét, scanner trong whitelist, có ticket lỗ hổng) — loại nó. Tiêu chí là **hoạt động độc đầu tiên có chuỗi
    nhân quả nối tới phần còn lại**.
+4. Máy đầu tiên **quan sát được** chưa chắc là điểm vào thật nếu thiếu log. Đồ thị có thể có chu trình hoặc nhiều
+   điểm vào; ghi giả thuyết/giới hạn, không ép một Patient Zero duy nhất khi chưa đủ căn cứ.
 
 **Bản đồ lây nhiễm**
 - Cạnh = attacker đi từ `src` sang `dst` bằng `account`, kèm `logon_type` (3 network, 10 RDP…).
-- Chỉ cạnh **độc**: tài khoản bị chiếm, nguồn không phải jump host/PAM, có thực thi từ xa đi kèm. Không đưa phiên quản
-  trị hợp lệ.
-- Hướng cạnh theo chiều di chuyển của attacker; host dùng tên ngắn; account bỏ domain.
+- Chỉ cạnh có bằng chứng attacker di chuyển: liên kết tài khoản, phiên, máy nguồn/đích và hoạt động trái phép.
+  Jump host/PAM cũng có thể bị chiếm; nguồn ngoài jump host không tự thành độc hại.
+- Hướng cạnh theo chiều di chuyển của attacker. Giữ host ID/FQDN và domain/tenant của account để tránh gộp nhầm;
+  chỉ dùng tên ngắn cho đầu ra khi contract yêu cầu, có mapping về danh tính gốc.
 
 ```json
 {"patient_zero": "web-01",

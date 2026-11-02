@@ -6,8 +6,8 @@ TI; đóng gói theo phiên bản; quản trị vòng đời. Gói Advanced: **t
 
 ## Mục tiêu khi tối ưu
 
-Giảm tối đa FP **mà không mất TP**. Ví dụ tham chiếu: giảm 80% FP nhưng mất 10% TP là kết quả trung bình khá;
-**mất bất kỳ TP mức Nghiêm trọng/Cao nào là thất bại**, dù FP giảm bao nhiêu.
+Giảm FP **mà không mất TP**, đặc biệt TP mức Nghiêm trọng/Cao theo yêu cầu case. Báo số đo trên corpus đã kiểm;
+không coi tỷ lệ mất TP nào là mặc định chấp nhận được hoặc suy ra chất lượng production từ corpus nhỏ.
 
 ## Quy trình tối ưu một rule
 
@@ -16,8 +16,8 @@ Giảm tối đa FP **mà không mất TP**. Ví dụ tham chiếu: giảm 80% F
 2. **Đặt từng cụm cạnh các TP**: điều kiện lọc phải **đúng với FP và sai với mọi TP**. Nếu TP cũng có đặc điểm đó
    (vd "đọc rất nhiều tệp" — ransomware thật cũng vậy), thêm điều kiện thu hẹp (tiến trình hợp lệ + tài khoản dịch
    vụ + host backup).
-3. **Ưu tiên điều kiện "danh tính hợp lệ"** (tiến trình có chữ ký, tài khoản dịch vụ, host thuộc nhóm chức năng,
-   lịch chạy) hơn điều kiện "hành vi" — hành vi thì attacker cũng làm được.
+3. Kết hợp danh tính, hành vi, đích và lịch có căn cứ; chữ ký/tài khoản dịch vụ cũng có thể bị lạm dụng.
+   Không allowlist rộng theo tên process/nhà phát hành; kiểm cả trường hợp attacker dùng chính công cụ hợp lệ.
 4. **Kiểm từng TP Nghiêm trọng/Cao** bằng tay qua bộ lọc; dùng sơ đồ mạng để tránh lọc theo dải mạng chứa máy
    quan trọng.
 5. **Không xoá rule, không nới rule tới mức vô dụng.** Bộ lọc chỉ loại đúng nhóm FP; rule gốc giữ nguyên.

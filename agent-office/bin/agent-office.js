@@ -4,6 +4,7 @@ const { spawn, exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const { createOffice } = require('../lib/server');
+const { snapshotSource, watchSnapshots } = require('../lib/watch');
 
 const HELP = `
 agent-office — xem đội multi-agent của bạn làm việc trong một văn phòng 3D
@@ -11,6 +12,8 @@ agent-office — xem đội multi-agent của bạn làm việc trong một văn
 Cách dùng:
   agent-office run [tuỳ chọn] -- <lệnh chạy repo của bạn>
   agent-office serve [tuỳ chọn]          chỉ bật viewer + proxy, tự set biến môi trường
+  agent-office watch --world <dir>       xem office.json của world local/VM/server
+  agent-office watch --bundle <dir>      đọc snapshot sandbox qua Docker, không mở mạng
 
 Ví dụ:
   agent-office run -- python main.py
@@ -38,6 +41,8 @@ function parse(argv) {
     else if (a === '--openai-upstream') { o.openai = v; i++; }
     else if (a === '--anthropic-upstream') { o.anthropic = v; i++; }
     else if (a === '--config') { o.config = v; i++; }
+    else if (a === '--world') { o.world = v; i++; }
+    else if (a === '--bundle') { o.bundle = v; i++; }
     else if (a === '--open') o.open = true;
     else if (a === '--exit') o.exit = true;
     else if (a === '--quiet') o.quiet = true;
@@ -58,7 +63,7 @@ function listen(server, port) {
 
 async function main() {
   const o = parse(process.argv.slice(2));
-  if (!['run', 'serve'].includes(o.mode) || (o.mode === 'run' && !o.cmd.length)) { process.stdout.write(HELP); process.exit(o.mode ? 1 : 0); }
+  if (!['run', 'serve', 'watch'].includes(o.mode) || (o.mode === 'run' && !o.cmd.length)) { process.stdout.write(HELP); process.exit(o.mode ? 1 : 0); }
   const say = (...a) => { if (!o.quiet) console.error('\x1b[33m[agent-office]\x1b[0m', ...a); };
 
   let config = {};
@@ -69,7 +74,8 @@ async function main() {
     openai: o.openai || process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1',
     anthropic: o.anthropic || process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com',
   };
-  const { server, emit } = createOffice({ upstreams, config, log: say });
+  const { server, emit } = createOffice({ upstreams, config, log: say, readOnly: o.mode === 'watch' });
+  const readSnapshot = o.mode === 'watch' ? await snapshotSource(o) : null;
   const port = await listen(server, o.port);
   const base = `http://127.0.0.1:${port}`;
   const env = {
@@ -79,8 +85,16 @@ async function main() {
     AGENT_OFFICE_URL: base,
   };
   say(`viewer: \x1b[36m${base}\x1b[0m`);
-  say(`OpenAI → ${upstreams.openai} · Anthropic → ${upstreams.anthropic}`);
+  if (!readSnapshot) say(`OpenAI → ${upstreams.openai} · Anthropic → ${upstreams.anthropic}`);
   if (o.open) exec(`${process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start ""' : 'xdg-open'} ${base}`);
+
+  if (readSnapshot) {
+    say('Read-only world monitor. No LLM calls or runtime control.');
+    const stop = watchSnapshots(readSnapshot, emit, { log: say });
+    const close = () => { stop(); server.close(); server.closeAllConnections(); process.exit(0); };
+    process.on('SIGINT', close); process.on('SIGTERM', close);
+    return;
+  }
 
   if (o.mode === 'serve') {
     say('set các biến này cho repo của bạn:');

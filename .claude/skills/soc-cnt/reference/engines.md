@@ -5,7 +5,8 @@ pattern) trên corpus trước khi phát hành. Rule **không parse được** h
 Không bao giờ chạy rule thử nghiệm trực tiếp trên hệ thống production.
 
 Nếu SIEM/NSM đích có cú pháp riêng (Sigma, SPL, KQL, Suricata…) và môi trường cấp engine tương ứng, viết theo
-cú pháp đó. Ba định dạng dưới đây là định dạng mà engine kiểm thử của môi trường luôn hiểu.
+cú pháp đó. Ba định dạng dưới đây thuộc adapter kiểm thử SABER khi task cấp adapter tương ứng; không phải cú pháp
+native được mọi SIEM/YARA engine hiểu. Kiểm schema/engine/version được cấp; thiếu engine thì báo chưa kiểm thử.
 
 ## 1. Rule regex trên log — `{"engine": "regex", "pattern": "...", "ignore_case": true}`
 
