@@ -37,6 +37,9 @@ Các checkpoint trên branch `feat/environment-profiles`:
 | `729546f` | Snapshot notebook khi đóng episode, chặn note viết muộn cùng tick |
 | `cb1db65` | CLI inspect/export/retry/rollback, suite mẫu, learning-only và office counters |
 | `5ef203d` | Báo cáo usage sau learning batch và tránh cắt mất counters trên UI |
+| `646c1aa` | Hướng dẫn luồng học, replay gate và vòng đời phiên bản |
+| `2fa2123` | Harness Gemini thật có budget, lập kế hoạch/reflection/replay và log chỉ có metadata |
+| `725740d` | Probe replay có nguồn operator, giữ nguyên NO_LESSON và budget tích lũy |
 
 Các commit tài liệu/kiểm thử tiếp theo xem bằng:
 
