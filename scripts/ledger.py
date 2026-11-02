@@ -27,13 +27,16 @@ PROGRESS = ROOT / "docs" / "PROGRESS.md"
 RECEIPTS = ROOT / ".saber-autonomous" / "receipts"
 VALID = {
     # Engineering/bridge lifecycle:
-    "PENDING", "DONE_DEV", "PARTIAL", "BLOCKED",
+    "PENDING",
+    "DONE_DEV",
+    "PARTIAL",
+    "BLOCKED",
     # Mandated benchmark-subtask readiness tiers (never equate DEV with validated):
-    "SPECIFIED",            # contract exists in the frozen catalog; no runnable implementation yet
+    "SPECIFIED",  # contract exists in the frozen catalog; no runnable implementation yet
     "IMPLEMENTED_OFFLINE",  # scorer + fixture + tests written; not independently re-run here
-    "VERIFIED_OFFLINE",     # implementation + tests ran green (deterministic, synthetic DEV data)
+    "VERIFIED_OFFLINE",  # implementation + tests ran green (deterministic, synthetic DEV data)
     "BLOCKED_INTEGRATION",  # needs a real SIEM/hypervisor/forensic dataset/provider to proceed
-    "READY_BENCHMARK",      # independently validated gold + execution evidence (never auto-set)
+    "READY_BENCHMARK",  # independently validated gold + execution evidence (never auto-set)
     # Back-compat alias kept so old receipts still load:
     "IMPLEMENTED_DEV",
 }
@@ -54,8 +57,7 @@ def load() -> dict:
     if LEDGER.exists():
         return json.loads(LEDGER.read_text(encoding="utf8"))
     items = {
-        w["id"]: {"kind": w["kind"], "phase": w["phase"], "status": "PENDING"}
-        for w in work_items()
+        w["id"]: {"kind": w["kind"], "phase": w["phase"], "status": "PENDING"} for w in work_items()
     }
     return {"schema_version": 1, "updated_at": now(), "items": items}
 
@@ -133,7 +135,13 @@ def render(data: dict | None = None) -> None:
     for kind in ("engineering", "bridge", "domain"):
         row = summary.get(kind, {})
         lines.append(f"| {kind} | " + " | ".join(str(row.get(s, 0)) for s in sorted(VALID)) + " |")
-    lines += ["", "## Items", "", "| ID | Kind | Phase | Status | Tests | Blockers / notes |", "|---|---|---|---|---|---|"]
+    lines += [
+        "",
+        "## Items",
+        "",
+        "| ID | Kind | Phase | Status | Tests | Blockers / notes |",
+        "|---|---|---|---|---|---|",
+    ]
     for item_id, item in data["items"].items():
         tests = "<br>".join(f"`{t['command']}`" for t in item.get("tests", []))
         notes = "; ".join(item.get("blockers", []))
@@ -165,11 +173,16 @@ def coverage() -> dict:
             # A domain subtask with no real implementation is SPECIFIED; legacy DEV = VERIFIED_OFFLINE.
             status = "SPECIFIED" if status == "PENDING" else "VERIFIED_OFFLINE"
         tally[status] = tally.get(status, 0) + 1
-        rows.append({
-            "id": s.id, "service": s.service, "environment": s.environment,
-            "aggregate": s.aggregate.kind.value if s.aggregate else "?",
-            "split": split.split_of(s.id).value, "status": status,
-        })
+        rows.append(
+            {
+                "id": s.id,
+                "service": s.service,
+                "environment": s.environment,
+                "aggregate": s.aggregate.kind.value if s.aggregate else "?",
+                "split": split.split_of(s.id).value,
+                "status": status,
+            }
+        )
     return {"tally": tally, "rows": rows}
 
 
@@ -191,16 +204,32 @@ def render_coverage() -> None:
         "| Status | Count |",
         "|---|---|",
     ]
-    for status in ("SPECIFIED", "IMPLEMENTED_OFFLINE", "VERIFIED_OFFLINE", "BLOCKED_INTEGRATION", "READY_BENCHMARK"):
+    for status in (
+        "SPECIFIED",
+        "IMPLEMENTED_OFFLINE",
+        "VERIFIED_OFFLINE",
+        "BLOCKED_INTEGRATION",
+        "READY_BENCHMARK",
+    ):
         lines.append(f"| {status} | {cov['tally'].get(status, 0)} |")
-    lines += ["", "## Subtasks", "", "| ID | Service | Env | Aggregate | Split | Status |", "|---|---|---|---|---|---|"]
+    lines += [
+        "",
+        "## Subtasks",
+        "",
+        "| ID | Service | Env | Aggregate | Split | Status |",
+        "|---|---|---|---|---|---|",
+    ]
     for r in cov["rows"]:
-        lines.append(f"| {r['id']} | {r['service']} | {r['environment']} | {r['aggregate']} | {r['split']} | {r['status']} |")
+        lines.append(
+            f"| {r['id']} | {r['service']} | {r['environment']} | {r['aggregate']} | {r['split']} | {r['status']} |"
+        )
     out.write_text("\n".join(lines) + "\n", encoding="utf8")
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     sub = parser.add_subparsers(dest="cmd", required=True)
     s = sub.add_parser("set")
     s.add_argument("id")
@@ -215,7 +244,9 @@ def main() -> int:
     m = sub.add_parser("summary")
     m.set_defaults(func=lambda a: (print(json.dumps(summarize(load()), indent=2)), 0)[1])
     c = sub.add_parser("coverage")
-    c.set_defaults(func=lambda a: (render_coverage(), print(json.dumps(coverage()["tally"], indent=2)), 0)[2])
+    c.set_defaults(
+        func=lambda a: (render_coverage(), print(json.dumps(coverage()["tally"], indent=2)), 0)[2]
+    )
     args = parser.parse_args()
     return int(args.func(args))
 
