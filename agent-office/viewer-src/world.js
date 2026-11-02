@@ -62,6 +62,7 @@ function renderWorld() {
   document.getElementById('empty').style.display = page.count ? 'none' : 'block';
   for (const actor of page.items) {
     const a = byId.get(`${w.world_id}/${actor.id}`);
+    a.card.classList.add('world-card');
     const changed = a.worldActor && actor.turns > a.worldActor.turns;
     a.worldActor = actor; a.tools = actor.turns;
     a.activity = actorActivity(w, actor);

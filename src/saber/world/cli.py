@@ -242,6 +242,9 @@ def run_world(
                     raise click.ClickException("Learning is disabled in this world's config.")
                 runner.learner.flush(limit=learning_jobs)
                 runner.close()
+                atomic_json(
+                    out / "report.json", runner.world.report() | {"stop_reason": "learning_batch"}
+                )
                 click.echo("Learning batch finished or deferred; actor tick was not advanced.")
                 return
             click.echo(

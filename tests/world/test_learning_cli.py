@@ -110,4 +110,6 @@ def test_learning_cli_registers_suite_exports_and_retries_without_provider(tmp_p
     after = (
         json.loads((out / "report.json").read_text()) if (out / "report.json").exists() else None
     )
-    assert after == before
+    assert after["tick"] == 0 and after["stop_reason"] == "learning_batch"
+    if before:
+        assert after["metrics"]["requests"] == before["metrics"]["requests"]
