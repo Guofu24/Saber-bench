@@ -22,7 +22,7 @@ def principal(actor_id: str) -> str:
 def compose(spec: LabSpec) -> dict[str, Any]:
     services: dict[str, Any] = {}
     volumes: dict[str, Any] = {}
-    secret_names = ["app", "controller", "collector", "client", "red", "blue"]
+    secret_names = ["app", "controller", "collector", "client", "red", "blue", "network"]
 
     def service(name: str, role: str, networks: list[str], memory: str = "512m") -> dict[str, Any]:
         volumes[name] = {}
@@ -124,6 +124,46 @@ def compose(spec: LabSpec) -> dict[str, Any]:
         },
     }
     volumes["indexer"] = {}
+    volumes["network-logs"] = {}
+    services["network-sensor"] = {
+        "image": "zeek/zeek:8.0.11",
+        "entrypoint": ["/usr/local/zeek/bin/zeek"],
+        "command": ["-C", "-i", "any", "/config/local.zeek"],
+        "working_dir": "/logs",
+        "network_mode": "service:app",
+        "depends_on": ["app"],
+        "cap_drop": ["ALL"],
+        "cap_add": ["NET_RAW", "NET_ADMIN"],
+        "security_opt": ["no-new-privileges:true"],
+        "read_only": True,
+        "volumes": ["network-logs:/logs", "./sensors/local.zeek:/config/local.zeek:ro"],
+        "tmpfs": ["/tmp:rw,nosuid,size=64m"],
+        "mem_limit": "1g",
+        "cpus": 2,
+        "pids_limit": 64,
+        "restart": "unless-stopped",
+    }
+    shipper = service("network", "collector", ["telemetry"], "512m")
+    shipper["command"] = [
+        "python",
+        "-m",
+        "saber.lab.logship",
+        "--source",
+        "zeek",
+        "--logs",
+        "/logs",
+        "--data",
+        "/data",
+        "--credentials",
+        "/run/secrets/network",
+        "--collector",
+        "http://collector:8080",
+        "--host",
+        "network",
+    ]
+    shipper["volumes"].append("network-logs:/logs:ro")
+    shipper["secrets"] = ["network"]
+    shipper.pop("healthcheck")
     services["dashboards"] = {
         "image": f"opensearchproject/opensearch-dashboards:{spec.opensearch_version}",
         "environment": {
@@ -186,15 +226,36 @@ def initialize_secrets(bundle: Path, spec: LabSpec) -> None:
         for a in spec.actors
     }
     read_token = secrets.token_urlsafe(32)
+    response_token = secrets.token_urlsafe(32)
+    relay_token = secrets.token_urlsafe(32)
     rpc_tokens = {t: secrets.token_urlsafe(32) for t in ("client", "red", "blue")}
     ingestion = {
         n: secrets.token_urlsafe(32)
-        for n in ("app", "client", "red", "blue", *[w.name for w in spec.windows])
+        for n in (
+            "app",
+            "client",
+            "red",
+            "blue",
+            "network",
+            "linux-audit",
+            *[w.name for w in spec.windows],
+        )
     }
     configs = {
+        "network": {"ingest_token": ingestion["network"]},
+        "linux-audit": {"ingest_token": ingestion["linux-audit"]},
         "app": {"accounts": accounts, "ingest_token": ingestion["app"]},
         "controller": {"workers": rpc_tokens, "read_token": read_token},
-        "collector": {"sources": ingestion, "read_token": read_token},
+        "collector": {
+            "sources": ingestion,
+            "read_token": read_token,
+            "response_token": response_token,
+            "relay_token": relay_token,
+        },
+        "relay": {
+            "relay_token": relay_token,
+            "sources": {w.name: ingestion[w.name] for w in spec.windows},
+        },
     }
     for team in ("client", "red", "blue"):
         configs[team] = {
@@ -202,6 +263,7 @@ def initialize_secrets(bundle: Path, spec: LabSpec) -> None:
             "read_token": read_token if team == "blue" else "",
             "rpc_token": rpc_tokens[team],
             "ingest_token": ingestion[team],
+            "response_token": response_token if team == "blue" else "",
         }
     for name, value in configs.items():
         path = folder / f"{name}.json"

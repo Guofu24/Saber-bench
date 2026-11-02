@@ -13,7 +13,16 @@ from saber.lab.transport import request
 TOOLS = {
     "client": {"login", "browse", "read_document", "write_document"},
     "red": {"login", "browse", "read_document", "collect"},
-    "blue": {"query_events", "query_siem", "investigate", "contain", "release", "patch", "unpatch"},
+    "blue": {
+        "query_events",
+        "query_siem",
+        "investigate",
+        "contain",
+        "release",
+        "patch",
+        "unpatch",
+        "contain_domain_user",
+    },
 }
 
 
@@ -89,6 +98,14 @@ def execute(job: dict[str, Any]) -> dict[str, Any]:
                 "sha256": hashlib.sha256(Path("collected.txt").read_bytes()).hexdigest(),
             },
         )
+    elif tool == "contain_domain_user":
+        status, result = request(
+            collector + "/guest/actions",
+            token=job["response_token"],
+            body={"case_id": args.get("case_id", ""), "action": tool},
+        )
+        if status == 200 and result.get("state") in ("QUEUED", "DISPATCHED"):
+            status = 202
     elif tool in ("query_events", "query_siem"):
         status, result = request(
             collector + ("/search" if tool == "query_events" else "/siem/search"),

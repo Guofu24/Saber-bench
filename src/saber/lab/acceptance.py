@@ -24,6 +24,15 @@ def verify_live(bundle: Path, endpoint: str = "http://127.0.0.1:7789") -> dict[s
     recent = datetime.now(UTC) - timedelta(minutes=5)
     events = [e for e in events if datetime.fromisoformat(e["ts"]) >= recent]
     checks["fresh_raw_evidence"] = bool(events)
+    code, network = request(
+        endpoint + "/search", token=token, body={"host": "network", "limit": 100}
+    )
+    checks["zeek_network_evidence"] = code == 200 and any(
+        e["sensor"] == "zeek-log-v1"
+        and e["kind"] in ("network.conn", "network.http")
+        and datetime.fromisoformat(e["ts"]) >= recent
+        for e in network.get("events", [])
+    )
     for team in ("client", "red", "blue"):
         checks[f"{team}_real_processes"] = any(
             e["host"].startswith(team + "-")

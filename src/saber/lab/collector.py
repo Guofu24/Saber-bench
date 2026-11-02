@@ -11,6 +11,7 @@ from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
 from saber.lab.events import SensorEvent
+from saber.lab.guest import routes as guest_routes
 from saber.lab.ledger import Ledger, now
 from saber.lab.transport import request
 
@@ -69,6 +70,7 @@ def create_collector(
     ledger: Ledger, credentials: dict[str, Any], indexer: str = "", index: str = "saber-lab"
 ) -> FastAPI:
     app = FastAPI(title="SABER SOC evidence gateway")
+    guest_routes(app, ledger, credentials)
 
     def require_read(auth: str) -> None:
         if not secrets.compare_digest(auth, "Bearer " + credentials["read_token"]):
@@ -123,6 +125,25 @@ def create_collector(
                 raise HTTPException(409, "Conflicting evidence ID") from None
             if fresh:
                 ledger.put("source_seen:" + event.host, now())
+                if (
+                    source.startswith("soc-")
+                    and event.kind == "windows.event"
+                    and event.data.get("event_id") == 4625
+                    and event.data.get("fields", {}).get("TargetUserName", "").lower()
+                    == "saber-red"
+                ):
+                    ledger.put(
+                        "case-" + event.id,
+                        {
+                            "id": "case-" + event.id,
+                            "status": "OPEN",
+                            "opened_at": now(),
+                            "rule": "lab-domain-failed-logon",
+                            "evidence_ids": [event.id],
+                            "principal": "saber-red",
+                            "responses": [],
+                        },
+                    )
                 # A transparent rule over service-observed evidence, never actor team labels.
                 if (
                     source == "app"

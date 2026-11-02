@@ -26,6 +26,8 @@ def test_complete_bundle_has_isolated_roles_no_credentials_and_detects_changes(t
         "indexer",
         "dashboards",
         "office",
+        "network",
+        "network-sensor",
     } == set(doc["services"])
     assert all(n["internal"] for n in doc["networks"].values())
     assert "soc" not in doc["services"]["red"]["networks"]

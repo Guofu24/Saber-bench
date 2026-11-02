@@ -69,7 +69,13 @@ def create_worker(
         account = accounts.get(job.actor)
         if account is None or account["team"] != team or job.tool not in TOOLS[team]:
             raise HTTPException(403, "Actor/tool not available on this executor")
-        if job.tool in ("contain", "release", "patch", "unpatch") and account["role"] not in (
+        if job.tool in (
+            "contain",
+            "release",
+            "patch",
+            "unpatch",
+            "contain_domain_user",
+        ) and account["role"] not in (
             "ir",
             "content",
             "lead",
@@ -104,6 +110,7 @@ def create_worker(
                 "app": app_url,
                 "collector": collector_url,
                 "read_token": credentials.get("read_token", ""),
+                "response_token": credentials.get("response_token", ""),
                 "browser": browser,
             }
             argv = [sys.executable, "-m", "saber.lab.task"]
@@ -144,7 +151,7 @@ def create_worker(
                     else {"status": 502, "error": "OutputLimit"}
                 )
             except subprocess.TimeoutExpired:
-                if os.name == "posix":
+                if sys.platform != "win32":
                     os.killpg(process.pid, signal.SIGKILL)
                 else:
                     process.kill()

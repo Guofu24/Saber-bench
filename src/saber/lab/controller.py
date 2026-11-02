@@ -65,7 +65,7 @@ class Controller:
     def choose(self, actor: Any, obs: dict[str, Any]) -> tuple[str, dict[str, Any], str]:
         allowed = set(TOOLS[actor.team])
         if actor.role not in ("ir", "content", "lead"):
-            allowed -= {"contain", "release", "patch", "unpatch"}
+            allowed -= {"contain", "release", "patch", "unpatch", "contain_domain_user"}
         if self.provider:
             try:
                 response = self.provider.generate_for(
@@ -103,6 +103,8 @@ class Controller:
         if actor.team == "blue":
             cases = [c for c in obs.get("cases", []) if not c.get("responses")]
             if cases and actor.role in ("ir", "content"):
+                if cases[0].get("rule") == "lab-domain-failed-logon":
+                    return "contain_domain_user", {"case_id": cases[0]["id"]}, source
                 return (
                     ("contain" if actor.role == "ir" else "patch"),
                     {"case_id": cases[0]["id"]},
