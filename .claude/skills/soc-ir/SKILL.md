@@ -1,6 +1,6 @@
 ---
 name: soc-ir
-description: Sổ tay tác nghiệp cho agent đội Xử lý sự cố ATTT (Incident Response / DFIR). Dùng khi agent tiếp nhận và triage sự cố, điều phối IRT, khoanh phạm vi; thu và bảo toàn chứng cứ theo order of volatility; phân tích registry, bộ nhớ, lưu lượng mạng/PCAP, phân tích mã độc tĩnh/động và dịch ngược (Ghidra/IDA); dựng timeline, Patient Zero, bản đồ lây nhiễm; quy kết nhóm tấn công thận trọng; chặn IOC, diệt trừ và khôi phục; lập kế hoạch khắc phục, khuyến nghị gia cố và báo cáo sự cố.
+description: "Xử lý sự cố: triage, chọn containment theo rủi ro/quyền, diệt trừ nguyên nhân, phối hợp DFIR và xác minh phục hồi. Dùng khi cần quyết định hoặc thực thi phản ứng có evidence; theo dõi job/SOAR, tác động dịch vụ và handoff. Không tự cấp công cụ acquisition hay thay chuyên môn DFIR/malware."
 ---
 
 # Đội Xử lý sự cố ATTT (IR / DFIR)
@@ -14,6 +14,9 @@ timeline, root cause, scope of compromise — rồi **ngăn chặn, diệt trừ
 phải dựa trên bằng chứng kỹ thuật và được kiểm chứng nội bộ trước khi phát hành.
 
 ## Cam kết dịch vụ (SLA)
+
+Các mốc sau chỉ áp dụng khi được case/SOP/hợp đồng quy định. Runtime dùng deadline đã cấp;
+không tự đặt SLA, và không chờ hết hạn khi đang có tác hại cần escalation.
 
 - Phản hồi **Critical ≤ 15 phút**, **High ≤ 30 phút**.
 - Bắt đầu thu thập và phân tích sơ bộ **≤ 10 phút** sau khi xác nhận phạm vi.
@@ -31,6 +34,9 @@ phải dựa trên bằng chứng kỹ thuật và được kiểm chứng nội
 | Hành động phản ứng | chặn IOC (firewall/proxy/email gateway/WAF), cô lập, gỡ bỏ — chỉ qua kênh được cấp quyền |
 
 ## Quy trình xử lý sự cố trong playbook này
+
+Quyết định containment, job/SOAR, idempotency và postconditions:
+[response-decisions](reference/response-decisions.md).
 
 ```
 1. Tiếp nhận, triage, điều phối, khoanh phạm vi ......... reference/triage-coordination.md
@@ -56,8 +62,8 @@ phải dựa trên bằng chứng kỹ thuật và được kiểm chứng nội
 
 ## Nguyên tắc nghề
 
-1. **Bảo toàn chứng cứ trước, phân tích sau.** Thu theo order of volatility, hash từng tệp, biên bản, chuỗi bàn giao;
-   **thu ảnh bộ nhớ trước khi cô lập**.
+1. **Bảo toàn theo rủi ro và khả năng thực tế.** Ghi hash/provenance/partial và phối hợp DFIR;
+   RAM trước cô lập chỉ là bắt buộc khi case/SOP yêu cầu. Ngoài ra cân ongoing harm và tác động thu.
 2. **Chỉ dùng dữ kiện có tại thời điểm ra quyết định.** Triage dựa trên những gì biết tại t0, không dựa trên kết
    luận về sau.
 3. **Không quan sát được ≠ không xảy ra.** Thiếu log ghi chưa biết; nguy cơ exfil cần căn cứ truy cập/kênh truyền,
@@ -71,8 +77,9 @@ phải dựa trên bằng chứng kỹ thuật và được kiểm chứng nội
 
 ## Rào chắn
 
-- Hành động phản ứng chỉ thực hiện khi có **phê duyệt gắn đúng hành động + đúng đích**, dùng một lần, có thể đảo
-  ngược, và được **kiểm chứng từ trạng thái thật** sau khi làm. Người đề xuất hành động không tự cấp phê duyệt.
+- Phản ứng trong capability/authorization hiện có, đúng đích và thời hạn; approval token dùng một lần nếu
+  contract yêu cầu. Không tự cấp quyền; không xin lại quyền còn hiệu lực. Kiểm tác động/rollback trước và
+  xác minh trạng thái sau; có hành động không đảo ngược được nên không được mặc định mọi thao tác reversible.
 - Chỉ hành động trong phạm vi được giao (lab/khách hàng đang phục vụ).
 - Mẫu mã độc chỉ chạy trong **sandbox cô lập, không mạng**; công cụ dịch ngược chạy read-only, không mạng; không tự
   tải mã độc từ bên ngoài.

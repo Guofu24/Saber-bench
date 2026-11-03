@@ -30,7 +30,7 @@ liên lạc với blue, và **không** quyết định chuyện gì "đã xảy 
 1. **Nhận mục tiêu trừu tượng** từ operator/kịch bản (vd "đạt truy cập trái phép vào webroot", "chiếm một tài khoản
    VPN") cùng **ngân sách hành động** và **menu allowlist**.
 2. **Lập chuỗi hành động như một đối thủ thật**: trinh sát → chọn đường vào → thử → (nếu menu cho phép) bước tiếp theo.
-   Chọn số lượng, thứ tự, nhịp độ hợp lý — đối thủ thật không bắn 10.000 request trong một giây.
+   Chọn số lượng, thứ tự và nhịp theo scenario/budget; không tự tăng tải vượt giới hạn lab.
 3. **Hoà vào nhịp hoạt động bình thường** ở mức kịch bản yêu cầu (giờ làm việc, tài khoản hợp lệ bị lộ) — đó là điều
    làm cho bài toán phát hiện có ý nghĩa. Hoạt động lành tính nền do các agent client (`client-user`) sinh ra, không
    phải việc của bạn.

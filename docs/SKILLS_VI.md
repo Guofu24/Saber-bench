@@ -1,7 +1,7 @@
 # Skills: phạm vi, cách nạp và kiểm tra
 
 Repo có **18 skills** trong `.claude/skills`: **15 sổ tay nghiệp vụ** cho agent và
-**3 workflow phát triển**. Có **39 tài liệu tham chiếu** trong audit nghiệp vụ, gồm
+**3 workflow phát triển**. Có **56 tài liệu tham chiếu** trong audit nghiệp vụ, gồm
 contract world/range và 13 reference DFIR. Skill là hướng dẫn cho model; quyền thực thi do runtime/tool server kiểm
 soát, không do nội dung Markdown cấp.
 
@@ -10,6 +10,7 @@ và 55 nhóm NICE / 175 subtask, ghi các suy luận sai đã sửa, quy trình 
 khả năng runtime/model chưa kiểm chứng. Không coi audit PASS là SOC đã hoàn chỉnh.
 Đợt mở rộng tiếp theo bổ sung [12 chuyên môn blue và công cụ runtime](SOC_SPECIALISTS_VI.md),
 gồm task có nhận việc, chứng cứ, notebook, vòng đời actor, rule và phục hồi.
+Đợt mới nhất đã rà nguồn và bổ sung toàn bộ 15 skill nghiệp vụ; xem [coverage từng vai](ALL_SKILLS_COVERAGE_VI.md).
 
 ## Vai nào dùng skill nào
 
@@ -46,8 +47,8 @@ continuous world và SOC lab đều dùng loader này, với ngữ cảnh khác 
 | Chế độ | Nội dung model nhận | Giới hạn |
 |---|---|---|
 | `case` — population / benchmark B2 | Body `SKILL.md` và nội dung các tài liệu được tham chiếu, đi theo liên kết, loại trùng; bỏ hướng dẫn riêng của world | 64.000 ký tự |
-| `world` — continuous world có model | Body theo vai, hợp đồng application lab; blue tra cứu reference bằng `consult_skill` | Base 18.000 ký tự |
-| `range` — SOC lab | Body theo vai, hợp đồng executor/collector/analysis/SOAR; blue tra cứu reference bằng `consult_skill` | Base 18.000 ký tự |
+| `world` — continuous world có model | Body theo vai, hợp đồng application lab; mỗi đội tra cứu reference bằng `consult_skill` | Base 18.000 ký tự |
+| `range` — SOC lab | Body theo vai, hợp đồng executor/collector/analysis/SOAR; mỗi đội tra cứu reference bằng `consult_skill` | Base 18.000 ký tự |
 
 World không có filesystem tool để model tự mở file tham chiếu. Loader đưa trực tiếp
 [hợp đồng world](../.claude/skills/soc-orchestrator/reference/continuous-world.md)
@@ -112,7 +113,9 @@ hướng dẫn đó. `{}` liệt kê, `{"topic":""}` bỏ chọn. Mỗi lần ch
 index tối đa 5.000; không nạp cả thư viện vào mọi request. Base/lessons vẫn có trần 18.000 riêng.
 Scripted policy không tự đổi hành vi khi sửa Markdown.
 
-Library lấy từ các file đã khai báo thuộc skill đó, hash từng nội dung và nằm trong immutable skill version.
+Library lấy từ file đã khai báo thuộc skill đó và tài liệu dùng chung cùng đội, hash từng nội dung và nằm
+trong immutable skill version. Topic dùng chung có tiền tố owner, ví dụ `soc-ir--malware-analysis`;
+client/red cũng được consult nhưng không có quyền đọc hướng dẫn/case state của blue qua tool này.
 Restart, lesson release và rollback giữ đúng library; selection của version/specialty cũ không được áp sang bản khác.
 Model không cung cấp đường dẫn/file/URL; văn bản chèn trong observation không thay được nội dung library.
 World ghi receipt tra cứu; range xử lý tại controller và đánh dấu `guidance_only`, không giả PID hay evidence thu máy.

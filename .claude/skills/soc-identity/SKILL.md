@@ -7,6 +7,11 @@ description: Điều tra danh tính, đăng nhập, phiên và lạm dụng quy�
 
 Trong world, theo [hợp đồng lab](../soc-orchestrator/reference/continuous-world.md).
 
+User/workload identity, session/grant và handoff revoke:
+[identity-investigation](reference/identity-investigation.md). Với DC/object pivots, tra
+[Windows/AD](../soc-dfir/reference/windows-ad-investigation.md). Dùng `consult_skill` theo index;
+không tự giả có AD/cloud connector.
+
 - Nhận principal/account/session và thời điểm cần đánh giá. Giữ tenant/domain/ID, không gộp account vì cùng tên ngắn.
   Chỉ dùng danh tính trong observation; không đọc key pool, password, token hoặc database nội bộ.
 - Nối login, kết quả truy cập, quyền tài nguyên và thay đổi theo thời gian bằng event ID. Chuỗi fail → success,

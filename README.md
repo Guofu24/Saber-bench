@@ -249,8 +249,9 @@ start container hoặc triển khai trong guest/server riêng. Không có `READY
 
 ## Kiểm thử và rollback
 
-Skills có kiểm tra riêng: 18 skills, 15 sổ tay nghiệp vụ và 39 tài liệu tham chiếu.
-World/range nạp hướng dẫn cốt lõi, contract và cho blue tra cứu chuyên đề bằng `consult_skill`;
+Skills có kiểm tra riêng: 18 skills, 15 sổ tay nghiệp vụ và 56 tài liệu tham chiếu.
+Đã rà nguồn và bổ sung cả client/red/12 chuyên môn blue: [bảng nội dung, nguồn và kiểm chứng](docs/ALL_SKILLS_COVERAGE_VI.md).
+World/range nạp hướng dẫn cốt lõi, contract và cho mỗi đội tra cứu chuyên đề bằng `consult_skill`;
 population/benchmark nạp tài liệu theo case.
 Bundle mang theo các reference cần thiết. Xem [hướng dẫn skills](docs/SKILLS_VI.md).
 DFIR có 13 chuyên đề, 12 playbook và 12 nhóm hồ sơ; xem [bảng đối chiếu năng lực, nguồn và kiểm thử](docs/DFIR_CAPABILITY_COVERAGE_VI.md)

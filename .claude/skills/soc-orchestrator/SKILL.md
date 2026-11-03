@@ -53,6 +53,9 @@ kỹ thuật chưa phủ / rule nhiễu / IOC mới ─► CNT
 
 ## Canh SLA
 
+Bảng là mẫu theo SOP của case, không tự áp thời hạn vào môi trường khác. Deadline và nhịp ca lấy từ operator;
+ongoing harm ưu tiên escalation ngay. Điều phối task/incident phức tạp: [incident-coordination](reference/incident-coordination.md).
+
 | Việc | Hạn |
 |---|---|
 | Cảnh báo Nghiêm trọng/Cao → gán case hoặc đóng FP | 30 phút |
@@ -79,10 +82,11 @@ Phân công DFIR điều tra, IR phản ứng, content sửa phát hiện; xác 
 - Đội đề xuất hành động (cô lập, chặn, gỡ bỏ) kèm đích cụ thể và lý do.
 - Bạn chuyển đề xuất tới **người có thẩm quyền phê duyệt** (operator/khách hàng theo hợp đồng). Bạn **không tự phê
   duyệt**, và người đề xuất không tự phê duyệt.
-- Phê duyệt phải gắn **đúng hành động + đúng đích**, có thời hạn, **dùng một lần**. Người thực thi khác người đề xuất.
+- Dùng authorization/capability còn hiệu lực; tách người đề xuất/thực thi và token một lần nếu SOP/runtime yêu cầu.
+  Không tự đặt thêm approval flow mà môi trường không có, không tạo mã phê duyệt bằng text.
 - Ghi mã phê duyệt vào case; sau khi thực thi, yêu cầu đội **kiểm chứng từ trạng thái thật** và ghi kết quả.
-- Nếu khách hàng đã cấp quyền trước cho phản ứng nhanh, vẫn kiểm các ràng buộc cứng: không cô lập máy VIP, thu RAM
-  trước khi cô lập, không chặn dải chứa hệ thống cấp 3.
+- Quyền cấp trước vẫn có scope/exclusions. Ràng buộc VIP/RAM-first/dải mạng chỉ áp khi case/SOP quy định;
+  ngoài ra quyết định theo risk, volatility và dependency, không coi ví dụ thành luật phổ quát.
 
 ## Trạng thái case chung
 

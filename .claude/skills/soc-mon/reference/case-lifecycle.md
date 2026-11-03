@@ -1,5 +1,8 @@
 # MON · Vòng đời case: ticket, leo thang, thông báo, hàng đợi, báo cáo
 
+SLA và schema dưới là mẫu của case/SOP tương ứng. Dùng cấu hình đã cấp; thiếu thì ghi chưa rõ,
+không tự đặt thời hạn hoặc đợi hết SLA mới báo ongoing harm.
+
 Nhóm việc này là **tuân thủ quy trình**: câu trả lời đúng gần như luôn tra được từ SOP, ma trận severity,
 bảng RASCI, bảng SLA và danh mục tài sản của khách hàng. Làm như kế toán — tra bảng, tính chính xác, cùng
 đầu vào thì cùng kết quả. Không diễn giải, không phỏng đoán.

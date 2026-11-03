@@ -45,8 +45,9 @@ hệ thống trở lại bình thường và **attacker không compromise lại 
 4. **Dịch vụ phải còn sống.** Không xoá trang index/document root, không làm hỏng cấu hình web. Đây là khác biệt giữa
    IR thật và "xoá cho sạch".
 5. **Cấu hình khớp baseline sạch** — chỉ sửa cấu hình khi bằng chứng cho thấy attacker đã sửa nó và có bản sạch để khôi phục.
-6. **Xoá hẳn, không di chuyển** — chuyển webshell sang thư mục khác (vd `/var/www/html/.backup_blob`) không phải là gỡ.
-7. **Kiểm chứng sau khi làm:** không còn hash độc ở đâu trên máy; tệp sạch nguyên byte; cấu hình khớp baseline;
+6. Case yêu cầu remove thì giữ yêu cầu đó; phương pháp thực tế theo SOP là quarantine/removal/rebuild và giữ
+   evidence. Chuyển webshell sang thư mục còn thực thi được chưa là xử lý; kho pháp y/quarantine có thể giữ hash độc.
+7. **Kiểm chứng trong phạm vi đã rà:** đường thực thi/tái tạo bị ngăn; tệp hợp lệ và cấu hình theo baseline;
    dịch vụ web trả lời bình thường.
 
 ```json
@@ -98,7 +99,7 @@ dài hạn.
 | C2 qua web (T1071.001) / exfil (T1048) | log proxy, DNS, NetFlow |
 
 Nguồn **thiếu** = cần mà không có hoặc đang không khoẻ. Rule **thiếu** = technique chưa có rule trong kho (xem
-`../../soc-cnt/reference/coverage-intel.md`).
+chuyên môn CNT/intel; giữ raw value, loại, nguồn và ngữ cảnh).
 
 **Viết khuyến nghị theo ba trục tách biệt:**
 - `technical_controls` — kiểm soát kỹ thuật (vá, tắt WDigest, MFA, phân vùng, hạn chế quyền admin…);

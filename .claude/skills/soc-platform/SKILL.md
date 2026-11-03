@@ -7,6 +7,10 @@ description: "Kiểm sức khoẻ telemetry và công cụ SOC trong phạm vi �
 
 Trong world, theo [hợp đồng lab](../soc-orchestrator/reference/continuous-world.md).
 
+Kiểm pipeline, SIEM/SOAR, queue/backfill, onboarding/parser và rollback:
+[telemetry-operations](reference/telemetry-operations.md). Dùng `consult_skill` lấy toàn văn theo topic index;
+không suy tool/connector sẵn sàng từ tên trong tài liệu.
+
 1. Dùng `telemetry_health` khi có để kiểm dữ liệu đang giữ, khoảng tick, lỗi và khả năng adapter.
    Số event ít không tự là mất log; đối chiếu lịch hoạt động/baseline đã cấp. Không có baseline thì ghi chưa đủ.
 2. Kiểm phạm vi query, cutoff, pagination và retention trước khi báo hunt sạch. Archive sealed không phải nguồn

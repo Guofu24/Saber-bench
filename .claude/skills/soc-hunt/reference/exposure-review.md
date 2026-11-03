@@ -40,8 +40,8 @@ này nằm ngoài gói Giám sát 24/7 — thuộc CA.)
    thì không ghi).
 2. **Xếp mức rủi ro** theo ma trận rủi ro của khách hàng: khả năng bị khai thác × tác động (vd machine key lộ trên
    máy chủ web phơi internet là cao nhất).
-3. Trên máy thật: **chỉ đọc**, không "sửa luôn cho an toàn" — cấu hình cây trước và sau phải giống hệt. Sửa là việc
-   của kế hoạch khắc phục (IR).
+3. Trên máy thật: **chỉ đọc**, không sửa cấu hình; ghi dấu chân collection có thể phát sinh dù chỉ đọc.
+   Sửa là việc của kế hoạch khắc phục (IR) theo quyền được cấp.
 
 ```json
 {"insecure": ["WDigest\\UseLogonCredential", "IFEO\\sethc.exe\\Debugger"],

@@ -80,10 +80,14 @@ restart/lesson/rollback giữ đúng bản. World cũ chưa có library cần ba
 Render/rebuild lại bundle khi chuyển máy; không sửa Markdown bên trong bundle để né manifest.
 
 Range xử lý tra cứu tại controller. Receipt ghi `guidance_only`, không có PID hay artifact acquisition giả.
-Client/red không được cấp tool này. Nội dung observation, đường dẫn và URL do model đưa vào không thay library.
+Client/red hiện cũng có tool này cho tài liệu thuộc phạm vi của họ; không đọc được library DFIR.
+Nội dung observation, đường dẫn và URL do model đưa vào không thay library.
 Hướng dẫn TSK/Velociraptor/cloud không tự cài các công cụ hay mở quyền thực thi chúng.
 
 ## Kiểm tra và cách tái lập
+
+Các số đo bên dưới thuộc checkpoint DFIR `bd5f3ff`. Đợt mở rộng toàn bộ đội và kết quả hiện tại nằm ở
+[ALL_SKILLS_COVERAGE_VI](ALL_SKILLS_COVERAGE_VI.md); không dùng số reference lịch sử làm tổng hiện tại.
 
 ```powershell
 uv run python scripts/check_skills.py --out runs/dfir-reference-expanded-audit.json

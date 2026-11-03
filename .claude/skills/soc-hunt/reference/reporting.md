@@ -1,5 +1,7 @@
 # HUNT · Technical Report
 
+Các mốc thời gian/schema dưới áp dụng khi được case/SOP quy định; không tự đặt SLA nếu chưa được cấp.
+
 Ghi lại **toàn bộ những gì đã xác định được** về cuộc xâm nhập. Threat Hunting và Compromise Assessment lập
 **Technical Report kèm đầy đủ bằng chứng số**; IR lập báo cáo kỹ thuật chi tiết cho sự cố. Hạn: báo cáo sơ bộ ≤ 24
 giờ; báo cáo chính thức ≤ 24 giờ sau khi xong phân tích **và peer review**.

@@ -16,6 +16,9 @@ remote service, dựng Patient Zero + bản đồ lây nhiễm + timeline, lập
 
 ## Chu kỳ và quy tắc chuyển giao
 
+Assume breach là cách đặt giả thuyết, không phải verdict. Chu kỳ dưới là ví dụ kế hoạch;
+lịch/trigger/scope thực lấy từ operator, không tự áp cho mọi hệ thống.
+
 - Săn tìm: khuyến nghị **6 tháng/lần** toàn hệ thống, **3 tháng/lần** với hệ thống quan trọng.
 - Rà soát chuyên sâu (CA): **12 tháng/lần** toàn hệ thống, **6 tháng/lần** với hệ thống quan trọng.
 - **Phát hiện tấn công đang diễn ra ⇒ chuyển IR ngay.** Hunter không tự xử lý sự cố.
@@ -32,6 +35,9 @@ remote service, dựng Patient Zero + bản đồ lây nhiễm + timeline, lập
 | Công cụ quan sát trên máy | `ss`/`netstat`/`lsof`, liệt kê tiến trình, đọc registry/cron/systemd — **chỉ đọc** |
 
 ## Một đợt săn tìm
+
+Trước query và lúc kết thúc, dùng [hypothesis-workflow](reference/hypothesis-workflow.md)
+để xác định điều kiện bác bỏ, coverage, controls và đầu ra chuyển CNT/IR.
 
 ```
 giả thuyết (TI, TTP mới, IOC mới, sự cố ở khách hàng khác)
@@ -53,8 +59,8 @@ giả thuyết (TI, TTP mới, IOC mới, sự cố ở khách hàng khác)
 ## Nguyên tắc nghề
 
 1. **Quan sát, không đụng.** Khi săn trên máy đang chạy: chỉ đọc — không xoá, không cách ly, không ghi tệp báo
-   cáo lên máy khách, không "tiện tay" kill tiến trình. Trạng thái máy trước và sau phải giống hệt. Gỡ bỏ là việc
-   của IR.
+   cáo lên máy khách, không "tiện tay" kill tiến trình. Live read vẫn có thể sinh logs/cache/CPU/IO;
+   ghi dấu chân collection, không cam kết máy giữ nguyên mọi bit. Gỡ bỏ là việc của IR có quyền.
 2. **Whitelist là ngữ cảnh cần kiểm chứng.** Tên/chữ ký/API nhạy cảm không tự chứng minh lành hay độc;
    IP nội bộ/cổng quen vẫn cần điều tra khi có dấu hiệu. Xét cả giả thuyết hợp lệ và độc hại.
 3. **Không bỏ qua dấu vết quá khứ.** Tệp đã bị xoá nhưng còn log AV, prefetch hoặc event log

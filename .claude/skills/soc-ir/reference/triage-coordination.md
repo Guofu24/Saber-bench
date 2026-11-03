@@ -1,5 +1,8 @@
 # IR · Tiếp nhận, triage, điều phối, khoanh phạm vi, theo dõi và hồ sơ sự cố
 
+Các mốc SLA dưới là mẫu cho case/SOP tương ứng; dùng deadline đã cấp, không tự áp vào mọi môi trường.
+Thiếu cấu hình thì ghi chưa xác định; ongoing harm phải báo ngay.
+
 ## Triage ban đầu
 
 Triage nhanh **dựa trên thông tin ban đầu** để quyết định phản ứng khẩn cấp: loại sự cố có khả năng xảy ra, mức

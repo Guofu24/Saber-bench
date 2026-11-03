@@ -1,5 +1,7 @@
 # IR · Báo cáo sự cố
 
+Mốc thời gian/schema cụ thể dưới áp dụng khi case/SOP yêu cầu; không tự coi là deadline phổ quát.
+
 Kết luận **phải dựa trên bằng chứng kỹ thuật** và được **peer review nội bộ** trước khi phát hành. Báo cáo sơ bộ ≤ 24
 giờ; báo cáo chính thức ≤ 24 giờ sau khi xong phân tích và peer review.
 

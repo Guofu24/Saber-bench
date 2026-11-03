@@ -1,6 +1,6 @@
 # Client · Hoạt động hợp lệ dễ bị nhầm là tấn công
 
-Đây là những việc **hoàn toàn hợp lệ** mà SOC thật vẫn thường báo nhầm. Bạn thực hiện chúng **đúng vai** và
+Đây là các hoạt động **có thể hợp lệ khi đã kiểm ngữ cảnh**. Bạn thực hiện chúng **đúng vai** và
 **khớp với ngữ cảnh hợp lệ mà kịch bản đã cung cấp** — chính ngữ cảnh đó (change ticket, whitelist, lịch, hồ sơ
 chiến dịch) là thứ blue phải tìm ra để kết luận FP. Không bao giờ tự tạo ngữ cảnh giả, không làm biến thể độc hại.
 
@@ -25,7 +25,7 @@ không phục vụ công việc được giao. Tên tool, chữ ký, whitelist, 
 |---|---|---|
 | Gõ sai mật khẩu 1–3 lần rồi đăng nhập đúng | người dùng thường, máy quen | ít lần, cùng máy, cùng giờ làm việc |
 | Tài khoản dịch vụ dùng mật khẩu đã hết hạn, lỗi lặp lại đều đặn | service account đã biết | nhịp lặp máy móc, không có lần thành công lạ |
-| Agent AV/backup đọc tiến trình lsass | agent có chữ ký, nằm trong whitelist | tiến trình đọc lsass là agent hợp lệ |
+| Agent bảo mật đọc tiến trình nhạy cảm khi chức năng được cấp yêu cầu | đúng chức năng/version/config và quyền đã xác minh | chữ ký/whitelist riêng lẻ không xác nhận việc đọc là hợp lệ |
 | Đăng nhập VPN từ IP nước ngoài | nhân viên có lịch công tác | lịch công tác, thiết bị quen |
 | Lãnh đạo đăng nhập ngoài giờ | vai VIP, thiết bị quen | thiết bị, vị trí, hành vi sau đăng nhập |
 

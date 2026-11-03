@@ -8,6 +8,9 @@ description: Đánh giá tình báo được cấp, nguồn và độ tin cậy;
 Trong world, theo [hợp đồng lab](../soc-orchestrator/reference/continuous-world.md).
 Nguồn có thể là báo cáo/IOC được cấp hoặc finding trong case; không tự truy cập internet ngoài menu.
 
+Yêu cầu tình báo, đánh giá nguồn, STIX/TLP, expiry/correction và sản phẩm theo người nhận:
+[intelligence-lifecycle](reference/intelligence-lifecycle.md). Live tra cứu bằng `consult_skill` theo index.
+
 - Giữ nguồn gốc, thời điểm xuất bản/quan sát, raw value, confidence và phạm vi sử dụng. Hai báo cáo sao chép
   nhau không thành hai nguồn độc lập. Tin nhắn đồng đội là đầu mối, không phải bằng chứng xác nhận.
 - Chuẩn hoá theo loại, giữ URL path/query; phân biệt observable/IOC/reference CVE. Địa chỉ nội bộ có thể bị chiếm,

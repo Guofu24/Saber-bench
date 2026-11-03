@@ -8,6 +8,10 @@ description: Điều tra luồng mạng, PCAP/DNS/HTTP/TLS và liên kết endpo
 Trong world, theo [hợp đồng lab](../soc-orchestrator/reference/continuous-world.md).
 Nhận câu hỏi, điểm quan sát, thời gian chốt và dữ liệu flow/PCAP nếu có.
 
+DNS/HTTP/TLS, Zeek/Suricata, PCAP limits, NAT và kiểm exfil:
+[protocol-investigation](reference/protocol-investigation.md). Dùng `consult_skill` theo topic index trước
+pivot chuyên sâu; tài liệu dùng chung có tiền tố skill sở hữu, không truyền path/URL.
+
 1. Kiểm nguồn/retention và packet loss, TLS, NAT, clock offset. Trong application lab chỉ có HTTP event nội bộ;
    không gọi đó là PCAP hay khẳng định đã thấy DNS/TLS nếu nguồn không được cấp.
 2. Truy vấn hẹp theo principal/target/thời gian, phân trang; nối các phiên với endpoint/process bằng dữ liệu thật.
