@@ -6,6 +6,32 @@ on:
 permissions:
   contents: read
 jobs:
+  office:
+    name: Agent Office (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: agent-office
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: agent-office/package-lock.json
+      - name: Install locked viewer build dependencies
+        run: npm ci
+      - name: Validate snapshots, evidence, HTTP service and viewer behavior
+        run: npm test
+      - name: Require the committed viewer to match its sources
+        run: |
+          npm run build:viewer
+          git diff --exit-code -- viewer/index.html
   quality:
     runs-on: ubuntu-latest
     timeout-minutes: 30
