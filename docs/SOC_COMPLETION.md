@@ -5,6 +5,10 @@ native analysis adapters, SOAR orchestration and cold recovery tooling. The thre
 presets share this implementation; Windows presets add actual Hyper-V/AD guests.
 Target acceptance is a separate evidence requirement, not a substitute for code.
 
+The [latest end-to-end audit](END_TO_END_AUDIT_VI.md) records subsequent skill,
+capability, Office and CI fixes with their validation. Counts below identify the
+earlier completion checkpoint rather than the latest test inventory.
+
 | Requirement | Implemented behavior | Acceptance boundary |
 |---|---|---|
 | Three deployment sizes | Manifest-bound source/skills/viewer/Compose/guest bundles; 13 service definitions, scaled workers | Build and boot each selected size on a sufficiently sized host |

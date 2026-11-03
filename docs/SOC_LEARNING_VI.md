@@ -11,9 +11,15 @@ Candidate phải vượt toàn bộ repair/regression và cải thiện lỗi so
 2–3 lần lặp mỗi case. Đây là kiểm tra quyết định kế tiếp, không chứng nhận toàn bộ
 khả năng điều tra hay đảm bảo bài học sẽ đúng ở mọi tình huống.
 
+Replay dùng cùng tập công cụ khả dụng với planner của lab: tắt analysis/SOAR thì
+các tool của dịch vụ đó bị loại; lab không có Windows cũng không nhận tác vụ AD.
+Suite cũ yêu cầu tool đã tắt vẫn không thể làm candidate được phát hành.
+
 Case mở, worker/guest/analysis/SOAR job đang dở giữ nguyên phiên bản skill hiện tại.
 Restart cũng giữ pin. Bài học chỉ thêm hướng dẫn; không mở rộng tool/quyền thực thi.
 Office hiển thị số episode, proposal và publication; nội dung notebook vẫn riêng.
+`consult_skill` là tra cứu hướng dẫn ở controller. Office hiển thị kết quả/topic,
+không gắn tra cứu này với process launch/exit hoặc bằng chứng từ máy đích.
 
 ## Lệnh trong bundle trên máy đích
 

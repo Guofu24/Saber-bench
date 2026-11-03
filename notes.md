@@ -416,6 +416,13 @@ uv run python scripts/ledger.py summary
 # Kiểm thử offline của world và harness learning
 uv run pytest -o addopts= tests/world -q
 
+# Kiểm tra toàn repo trước khi bàn giao/push
+uv run pytest --junitxml=runs/quality-tests.xml
+uv run ruff check src tests scripts
+uv run ruff format --check src tests scripts
+uv run mypy --platform linux
+uv run mypy --platform win32
+
 # Kiểm thử viewer, không gọi model
 npm --prefix agent-office test
 ```
@@ -435,6 +442,27 @@ không phải lệnh vận hành client/red/blue. Hướng dẫn riêng:
 Tài liệu chi tiết: [world](docs/CONTINUOUS_WORLD_VI.md),
 [môi trường](docs/ENVIRONMENTS_VI.md), [Agent Office](agent-office/README.md),
 [learning](docs/AGENT_LEARNING_VI.md), [rollback](docs/ROLLBACK_VI.md).
+
+Kiểm tra ba bundle mà không khởi động Docker/VM (cần Docker CLI để parse Compose,
+không cần engine; dùng một đường dẫn output mới):
+
+```powershell
+uv run python scripts/validate_soc_bundles.py --out runs/bundle-check-new
+```
+
+Để dùng baseline skill vừa cập nhật, tạo world mới; resume giữ nguyên phiên bản
+đã ghim. Scripted mode dùng hành vi có sẵn; sửa Markdown không tự đổi policy đó.
+
+```powershell
+uv run saber world init --out runs/skills-current --clients 2 --blue-specialists
+uv run saber world run --out runs/skills-current --ticks 18
+node agent-office/bin/agent-office.js watch --world runs/skills-current --open
+```
+
+World mẫu có 2 client, 3 red, 12 blue. Với SOC range, render bundle mới trước khi
+chuyển máy; không chép skill đè lên bundle đã có manifest. `consult_skill` chọn
+topic cho lần suy luận tiếp theo, không tự khởi chạy công cụ phân tích.
+Xem [báo cáo rà soát và mức kiểm chứng](docs/END_TO_END_AUDIT_VI.md).
 
 ## 11. Chạy workload native và xem process/file/DNS/network
 

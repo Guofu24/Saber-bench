@@ -10,6 +10,7 @@ Office đã có bằng chứng từng job và ảnh Chromium kiểm hash; blue c
 Windows có queue tác vụ do agent điều phối. Range đã nối **learning có replay/pin/rollback,
 vault phân tích Ghidra/IDA/Volatility/YARA/PCAP, SOAR có xác minh hiệu ứng và backup/restore**.
 Xem [phạm vi hoàn thiện và bằng chứng kiểm thử](docs/SOC_COMPLETION.md).
+Đợt rà soát xuyên suốt gần nhất: [các lỗi đã sửa, kiểm chứng và phần còn cần máy đích](docs/END_TO_END_AUDIT_VI.md).
 
 | Nhu cầu trên máy lớn | Hướng dẫn |
 |---|---|
@@ -261,12 +262,14 @@ chứng và bổ sung công việc/bàn giao qua nhiều lượt. PASS cấu tr�
 hoặc tích hợp công cụ SOC thật.
 
 ```powershell
-uv run pytest tests/environments tests/world
+uv run pytest --junitxml=runs/quality-tests.xml
 uv run python scripts/check_skills.py --out runs/skills-check/audit.json
 uv run ruff check src tests scripts
-uv run ruff format --check src tests
-uv run mypy
+uv run ruff format --check src tests scripts
+uv run mypy --platform linux
+uv run mypy --platform win32
 uv run python scripts/validate_catalog.py
+npm --prefix agent-office test
 git log --oneline --decorate -15
 ```
 
@@ -275,6 +278,9 @@ Test offline không dùng key thật/gọi LLM. Live check là thao tác opt-in 
 [checkpoint và cách dùng git revert/worktree](docs/ROLLBACK_VI.md).
 Git revert chỉ hoàn tác code: dừng runtime, backup data/volume trước khi đổi phiên bản.
 `env down` không xóa volume. Snapshot VM được quản lý ở hypervisor.
+CI kiểm tra Office trên Linux và Windows, đồng thời build lại để phát hiện
+`viewer/index.html` chưa cập nhật theo source. Khi sửa viewer, chạy
+`npm --prefix agent-office run build:viewer` với dependencies đã cài từ lockfile.
 
 ## Workflow khác
 
