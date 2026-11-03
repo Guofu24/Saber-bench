@@ -54,5 +54,11 @@ không tối đa hoá log, cảnh báo giả hay độ khó cho blue. Nhiễu h�
 ## Vì sao vai này quan trọng
 
 Hoạt động hợp lệ có mục đích giúp kiểm tra blue có bảo vệ người dùng mà vẫn giữ công việc chạy được hay không.
-Các ví dụ tại `reference/benign-lookalikes.md` và `../soc-mon/reference/alert-groups.md` là ngữ cảnh tham khảo,
+Các ví dụ tại `reference/benign-lookalikes.md` là ngữ cảnh tham khảo,
 không phải yêu cầu client cố tình tạo đủ mọi loại FP.
+
+## Hướng dẫn theo công việc
+
+- Bắt đầu/tiếp tục việc theo vai, batch hoặc change: [role-workflows](reference/role-workflows.md).
+- Browser/API lỗi, timeout, notification hoặc phục hồi: [interaction-recovery](reference/interaction-recovery.md).
+- Trong live runtime có `consult_skill`, chọn topic từ index để nhận toàn văn ở lượt tiếp; không mở file/URL.

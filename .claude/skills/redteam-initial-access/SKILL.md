@@ -62,3 +62,9 @@ Dùng kỹ thuật nào chỉ khi menu của range có hành động tương ứ
 ## Sau giai đoạn này
 
 Khi đã có chỗ đứng (theo quan sát của range), chuyển sang `redteam-post-exploitation` nếu kịch bản yêu cầu.
+
+## Chuyên đề tác nghiệp
+
+- Nhận mục tiêu, chia việc, ngân sách và stop conditions: [campaign-planning](reference/campaign-planning.md).
+- Recon/auth/access, failed/inconclusive và bàn giao capability: [access-validation](reference/access-validation.md).
+- Khi runtime cấp `consult_skill`, chọn topic trong index để đọc trước bước cần chuyên đề; không xin shell/URL.
