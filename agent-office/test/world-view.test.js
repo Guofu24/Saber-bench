@@ -2,7 +2,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { worldHealth, actorActivity, actorStatus } = require('../viewer-src/world-state');
-const { actorTrace, httpOutcome } = require('../viewer-src/trace-view');
+const { actorTrace, httpOutcome, describeTool, rangeEvidenceSummary } = require('../viewer-src/trace-view');
 const { TEAM_ORDER, TEAM_ZONES, teamSeat, rosterPage } = require('../viewer-src/office-layout');
 
 test('frozen telemetry becomes unknown, stopped remains stopped, resume becomes live', () => {
@@ -93,4 +93,15 @@ test('actor detail links only case evidence, explicit case actions and direct ta
   assert.equal(actorTrace({}, 'red'), null);
   assert.match(httpOutcome(403), /từ chối/);
   assert.doesNotMatch(httpOutcome(200), /tấn công|xâm nhập/);
+});
+
+test('skill lookup receipts never claim remote execution, including legacy exports and failures', () => {
+  for (const status of [200, 400, 404, 409]) {
+    const entry = { tool: 'consult_skill', result: { status, guidance_only: true }, evidence_complete: true };
+    assert.match(rangeEvidenceSummary(entry), /Tra cứu hướng dẫn tại controller/);
+    assert.doesNotMatch(rangeEvidenceSummary(entry), /Đã nhận và kiểm hash/);
+  }
+  assert.match(describeTool('consult_skill'), /không tự thực hiện/);
+  assert.match(rangeEvidenceSummary({ tool: 'login', evidence_complete: true }), /Đã nhận và kiểm hash/);
+  assert.match(rangeEvidenceSummary({ tool: 'login', evidence_complete: false }), /chưa đầy đủ/);
 });

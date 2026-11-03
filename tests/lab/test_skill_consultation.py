@@ -6,6 +6,7 @@ from saber.agents.provider import LLMResponse
 from saber.lab.capabilities import allowed, planner_allowed
 from saber.lab.controller import Controller
 from saber.lab.learning import messages
+from saber.lab.office import publish_actor
 from saber.world import learning
 
 
@@ -54,7 +55,17 @@ def test_range_consults_locally_and_next_provider_prompt_contains_pinned_guide(
         assert result["status"] == 200 and result["guidance_only"]
         assert "pid" not in result and "execution_evidence" not in result
         assert next(iter(controller.store.items("lab-jobs").values()))["status"] == "COMPLETED"
-        assert controller.store.get("lab-office", actor.id)[-1]["evidence_complete"]
+        entry = controller.store.get("lab-office", actor.id)[-1]
+        assert not entry["evidence_complete"] and entry["result"]["guidance_only"]
+
+        def no_process_evidence(*args, **kwargs):
+            raise AssertionError("Guidance has no remote process evidence to fetch")
+
+        monkeypatch.setattr("saber.lab.office.request", no_process_evidence)
+        publish_actor(controller.store, actor, "unused", "unused", "unused", "unused")
+        exported = json.loads((root / "range-office" / (actor.id + ".json")).read_text())
+        assert exported["entries"][-1]["evidence"] == []
+        assert exported["entries"][-1]["result"]["skill_reference"]["topic"] == topic
         controller.actor_step(actor, 2)
         assert guide in provider.prompts[1][0]["content"]
     finally:

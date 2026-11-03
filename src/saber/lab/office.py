@@ -36,7 +36,10 @@ def publish_actor(
     for entry in reversed(history):
         if time.monotonic() >= deadline:
             break
-        if entry.get("evidence_complete"):
+        if entry.get("evidence_complete") or (
+            entry.get("tool") == "consult_skill"
+            and entry.get("result", {}).get("guidance_only") is True
+        ):
             continue
         try:
             status, page = fetch(
@@ -170,7 +173,7 @@ def record(
                 result[k] for k in ("evidence_id", "execution_evidence") if result.get(k)
             ],
             "evidence": [],
-            "evidence_complete": tool == "consult_skill" and result.get("guidance_only") is True,
+            "evidence_complete": False,
         }
     )
     store.put("lab-office", actor.id, history[-12:])

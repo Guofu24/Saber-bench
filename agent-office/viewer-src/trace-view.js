@@ -13,6 +13,7 @@ function actorTrace(world, actorId) {
 }
 
 const descriptions = {
+  consult_skill: 'Tra cứu hướng dẫn skill đã ghim cho agent; không tự thực hiện thao tác trong hệ thống đích.',
   browse: 'Khám phá các đường dẫn trong ứng dụng lab.',
   login: 'Đăng nhập vào ứng dụng lab.',
   search: 'Tìm tài liệu trong ứng dụng.',
@@ -56,6 +57,14 @@ const descriptions = {
   contain_domain_user: 'Yêu cầu khóa tài khoản thử nghiệm; chờ xác minh AD và lịch rollback.',
 };
 function describeTool(tool) { return descriptions[tool] || 'Thực thi công cụ được cấp quyền trong môi trường lab; xem bằng chứng bên dưới.'; }
+function rangeEvidenceSummary(entry) {
+  if (entry.tool === 'consult_skill' && entry.result?.guidance_only === true) {
+    return 'Tra cứu hướng dẫn tại controller. Xem status và topic trong kết quả; thao tác này không tạo process hay bằng chứng thực thi trên máy đích.';
+  }
+  return entry.evidence_complete
+    ? 'Đã nhận và kiểm hash log khởi chạy/kết thúc cùng bằng chứng được dẫn chiếu.'
+    : 'Bằng chứng chưa đầy đủ trong cửa sổ này; không suy ra thao tác thành công.';
+}
 function httpOutcome(status) {
   if (status === 403) return 'Yêu cầu bị từ chối';
   if (status === 401) return 'Chưa xác thực thành công';
@@ -64,4 +73,4 @@ function httpOutcome(status) {
   if (status === 202) return 'Đã nhận yêu cầu; đang chờ thực thi hoặc kết quả';
   return 'Yêu cầu thành công';
 }
-module.exports = { actorTrace, describeTool, httpOutcome };
+module.exports = { actorTrace, describeTool, httpOutcome, rangeEvidenceSummary };
