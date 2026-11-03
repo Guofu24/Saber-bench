@@ -1,8 +1,8 @@
 # Skills: phạm vi, cách nạp và kiểm tra
 
 Repo có **18 skills** trong `.claude/skills`: **15 sổ tay nghiệp vụ** cho agent và
-**3 workflow phát triển**. Có **34 tài liệu tham chiếu** trong audit nghiệp vụ, gồm
-contract world/range và 8 reference DFIR mới. Skill là hướng dẫn cho model; quyền thực thi do runtime/tool server kiểm
+**3 workflow phát triển**. Có **39 tài liệu tham chiếu** trong audit nghiệp vụ, gồm
+contract world/range và 13 reference DFIR. Skill là hướng dẫn cho model; quyền thực thi do runtime/tool server kiểm
 soát, không do nội dung Markdown cấp.
 
 Rà cấu trúc không đủ để xác nhận nghiệp vụ. [Báo cáo rà nội dung](SKILLS_REVIEW_VI.md) đối chiếu yêu cầu client/red/blue
@@ -82,11 +82,13 @@ Bundle là bản chụp source lúc render. Sửa skill trong checkout không c�
 container/bundle đang dùng bản cũ; cần export/rebuild theo quy trình môi trường.
 Bundle mới có Compose project/volume mới: không tự chuyển dữ liệu world cũ.
 
-## DFIR mở rộng từ handbook
+## DFIR: handbook và đối chiếu nguồn chính thức
 
 [Review handbook](DFIR_HANDBOOK_REVIEW_VI.md) ghi lỗi xác nhận được, nguồn đối chiếu và phần không thể
 suy thành năng lực thực thi. [Skill DFIR](../.claude/skills/soc-dfir/SKILL.md) có luồng nhận case →
-giả thuyết → thu/QC → phân tích → scope/impact → handoff → learning. Tám reference gồm:
+giả thuyết → thu/QC → phân tích → scope/impact → handoff → learning.
+[Bảng năng lực DFIR](DFIR_CAPABILITY_COVERAGE_VI.md) ghi câu hỏi/đầu ra theo nghiệp vụ, nguồn nghiên cứu
+và mức kiểm chứng. Mười ba reference gồm:
 
 | Reference | Nội dung |
 |---|---|
@@ -98,8 +100,13 @@ giả thuyết → thu/QC → phân tích → scope/impact → handoff → learn
 | `timeline-reporting` | Time uncertainty, entity graph, confidence, 12 nhóm hồ sơ và bàn giao |
 | `incident-playbooks` | 12 tình huống, dữ liệu cần thu, giả thuyết đối lập và tiêu chí kết luận |
 | `queries-validation` | Query tái lập, pagination, parser/negative controls và tiêu chí đánh giá hành vi |
+| `disk-filesystems` | Partition/sector offset, TSK, deleted/carved data, filesystem caveats, Plaso |
+| `remote-collection` | Collection plan, Velociraptor/offline collector, resource caps, partial/completion proof |
+| `windows-ad-investigation` | Session/process graph, AD objects, audit/SACL, trust scope, Defender KQL |
+| `cloud-query-recipes` | AWS CLI, Entra KQL, GCP filter với schema/time/entity/pagination cụ thể |
+| `antiforensics-validation` | Tamper/timestomp/log gaps, corroboration, parser validation và negative evidence |
 
-`case` nạp cả tám reference. `world`/`range` nhận bản cốt lõi, contract và danh mục topic của skill active.
+`case` nạp cả 13 reference. `world`/`range` nhận bản cốt lõi, contract và danh mục topic của skill active.
 Blue gọi `consult_skill` với `{"topic":"memory-malware"}` (ví dụ); lần suy luận tiếp theo nhận toàn văn
 hướng dẫn đó. `{}` liệt kê, `{"topic":""}` bỏ chọn. Mỗi lần chọn một tài liệu, tối đa 12.000 ký tự,
 index tối đa 5.000; không nạp cả thư viện vào mọi request. Base/lessons vẫn có trần 18.000 riêng.
@@ -130,7 +137,7 @@ CI chạy cùng lệnh kiểm tra này trước các kiểm tra code.
 Kiểm thử phần nạp prompt, xuất bundle và runtime:
 
 ```powershell
-uv run pytest tests/unit/test_skills.py tests/unit/test_llm_solver.py tests/world tests/population tests/environments
+uv run pytest tests/unit tests/world tests/lab tests/population tests/environments
 uv run ruff check src tests scripts
 uv run ruff format --check src tests scripts
 uv run mypy

@@ -93,7 +93,10 @@ không chuyển thành quyền mới, thời hạn pháp lý mặc định hay c
 - Kiểm tra cấu trúc/prompt không phải kiểm thử chất lượng suy luận của Gemini. Cần case hợp lệ và
   golden datasets/negative controls để đánh giá từng domain trước khi tuyên bố năng lực đầy đủ.
 
-## Kết quả triển khai và kiểm tra
+## Kết quả triển khai và kiểm tra tại checkpoint `3eb864c`
+
+Các số dưới đây ghi nhận đợt chuyển handbook thành skill ban đầu. Đợt tiếp theo bổ sung tra cứu live,
+5 chuyên đề và đối chiếu tài liệu công cụ; xem [bảng năng lực và kết quả hiện tại](DFIR_CAPABILITY_COVERAGE_VI.md).
 
 Đã mở rộng [soc-dfir](../.claude/skills/soc-dfir/SKILL.md) với 8 reference chuyên sâu,
 12 thẻ tình huống và 12 nhóm hồ sơ; thêm quy trình xử lý hash mismatch, partial acquisition,
