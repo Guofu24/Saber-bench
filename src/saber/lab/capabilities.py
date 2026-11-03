@@ -74,4 +74,4 @@ def allowed(team: str, role: str, specialties: tuple[str, ...] = ()) -> set[str]
 
 def planner_allowed(team: str, role: str, specialties: tuple[str, ...] = ()) -> set[str]:
     """Guidance reads are controller-local; executors retain their original capabilities."""
-    return allowed(team, role, specialties) | ({"consult_skill"} if team == "blue" else set())
+    return allowed(team, role, specialties) | {"consult_skill"}

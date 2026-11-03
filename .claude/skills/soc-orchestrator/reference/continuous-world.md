@@ -83,7 +83,7 @@ cấp mốc thời gian và chính sách tương ứng; không tự suy ra đã 
 
 ## Công cụ điều tra và công việc
 
-Blue có `consult_skill`: `{}` liệt kê topic, `{"topic":"ID"}` chọn một hướng dẫn của skill đang active,
+Mỗi đội có `consult_skill`: `{}` liệt kê topic, `{"topic":"ID"}` chọn hướng dẫn của skill đang active,
 `{"topic":""}` bỏ chọn. Lượt suy luận sau nhận toàn văn từ phiên bản đã pin; không đọc đường dẫn/URL tùy ý.
 Đây là tra cứu nghiệp vụ, không phải thu chứng cứ hay cấp tool. World cũ thiếu library cần baseline mới.
 

@@ -19,7 +19,7 @@ def item(text):
     }
 
 
-def test_library_reads_only_declared_owned_documents_and_not_contracts(tmp_path):
+def test_library_reads_only_declared_documents(tmp_path):
     folder = tmp_path / ".claude/skills/soc-dfir"
     folder.mkdir(parents=True)
     (folder / "SKILL.md").write_text(
@@ -33,6 +33,31 @@ def test_library_reads_only_declared_owned_documents_and_not_contracts(tmp_path)
     (folder / "guide.md").write_text("x" * (MAX_REFERENCE_CHARS + 1), encoding="utf-8")
     with pytest.raises(IntegrationBlocked, match="limit"):
         load_reference_library("soc-dfir", root=tmp_path)
+
+
+def test_shared_topics_are_namespaced_and_cross_team_guidance_is_excluded(tmp_path):
+    base = tmp_path / ".claude/skills"
+    for name in ("soc-dfir", "soc-ir", "client-user", "soc-orchestrator"):
+        (base / name).mkdir(parents=True)
+    (base / "soc-dfir/SKILL.md").write_text(
+        "---\nname: soc-dfir\ndescription: Test.\n---\n"
+        "Read `guide.md`, `../soc-ir/guide.md`, `../client-user/guide.md` and "
+        "`../soc-orchestrator/reference/continuous-world.md`.\n",
+        encoding="utf-8",
+    )
+    for name in ("soc-dfir", "soc-ir", "client-user"):
+        (base / name / "guide.md").write_text(f"# {name}\nContent for {name}.", encoding="utf-8")
+    contract = base / "soc-orchestrator/reference/continuous-world.md"
+    contract.parent.mkdir()
+    contract.write_text("# Contract\nNot a selectable topic.", encoding="utf-8")
+    library = load_reference_library("soc-dfir", root=tmp_path)
+    assert set(library) == {"guide", "soc-ir--guide"}
+    assert library["guide"]["text"] != library["soc-ir--guide"]["text"]
+    (base / "client-user/SKILL.md").write_text(
+        "---\nname: client-user\ndescription: Test.\n---\nRead `../soc-ir/guide.md`.\n",
+        encoding="utf-8",
+    )
+    assert load_reference_library("client-user", root=tmp_path) == {}
 
 
 def test_selected_text_comes_from_pinned_library_not_untrusted_observation():

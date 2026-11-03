@@ -148,6 +148,7 @@ class World:
                 "tick": self.tick,
                 "principal": principal,
                 "role": actor.role,
+                "skill_reference": self.store.get("skill-reference", actor.id),
                 "goal": actor.goal,
                 "logged_in": bool(own_session.get("logged_in")),
                 "last_result": self.store.get("results", actor.id, {}),
@@ -160,7 +161,6 @@ class World:
                 ],
             }
             if actor.team == "blue":
-                obs["skill_reference"] = self.store.get("skill-reference", actor.id)
                 if self.config.execution_mode == "native":
                     from saber.world.native import read_events
 

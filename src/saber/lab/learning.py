@@ -44,8 +44,7 @@ def messages(
     if extra_tools is not None:
         tools &= extra_tools
     text = pin["base"]
-    if actor.team == "blue":
-        text += guidance_prompt(pin, observation.get("skill_reference"))
+    text += guidance_prompt(pin, observation.get("skill_reference"))
     if pin.get("lessons"):
         text += "\nAdvisory lessons, not new permissions or tool schemas:\n" + json.dumps(
             pin["lessons"]

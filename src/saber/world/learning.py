@@ -135,13 +135,11 @@ def prompt_version(store: Store, skill: str) -> dict[str, Any] | None:
 
 def consult(world: World, actor: Actor, args: dict[str, Any]) -> tuple[int, dict[str, Any], str]:
     """Select one guide from the active skill's immutable library; no file/URL input."""
-    if actor.team != "blue":
-        return 403, {"error": "Skill consultation is available to blue analysts."}, actor.id
     if set(args) - {"topic"} or ("topic" in args and not isinstance(args["topic"], str)):
         raise ValueError("Expected a reference topic ID")
     pin = prompt_version(world.store, actor_skill(world, actor))
     library = validate_library((pin or {}).get("references", {}))
-    if not pin or not library:
+    if not pin or "references" not in pin:
         return (
             409,
             {
@@ -150,7 +148,14 @@ def consult(world: World, actor: Actor, args: dict[str, Any]) -> tuple[int, dict
             actor.id,
         )
     if "topic" not in args:
-        return 200, {"reference_topics": {k: v["title"] for k, v in library.items()}}, actor.id
+        return (
+            200,
+            {
+                "reference_topics": {k: v["title"] for k, v in library.items()},
+                "guidance_only": True,
+            },
+            actor.id,
+        )
     topic = args["topic"]
     if topic and topic not in library:
         return 404, {"error": "Unknown topic for the active skill."}, actor.id

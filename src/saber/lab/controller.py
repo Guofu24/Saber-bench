@@ -76,9 +76,10 @@ class Controller:
             },
             activate_now=False,
             reference_libraries={
-                PLAYBOOKS[a.role]: load_reference_library(PLAYBOOKS[a.role])
+                PLAYBOOKS["client" if a.team == "client" else a.role]: load_reference_library(
+                    PLAYBOOKS["client" if a.team == "client" else a.role]
+                )
                 for a in spec.actors
-                if a.team == "blue"
             },
         )
         with self.store.transaction():
@@ -87,14 +88,12 @@ class Controller:
 
     def observe(self, actor: Any) -> dict[str, Any]:
         own: dict[str, Any] = self.store.get("lab-memory", actor.id, {"turn": 0, "result": {}})
+        own = own | {"skill_reference": self.store.get("skill-reference", actor.id)}
         if actor.team == "blue":
             status, cases = request(self.collector + "/cases", token=self.credentials["read_token"])
             if status != 200:
                 raise ConnectionError("SOC observation unavailable")
-            return own | {
-                "cases": cases["cases"],
-                "skill_reference": self.store.get("skill-reference", actor.id),
-            }
+            return own | {"cases": cases["cases"]}
         return own
 
     def choose(self, actor: Any, obs: dict[str, Any]) -> tuple[str, dict[str, Any], str]:

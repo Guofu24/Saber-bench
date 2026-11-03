@@ -152,9 +152,9 @@ BLUE_TOOLS = {
 
 def tools_for(actor: Actor) -> frozenset[str]:
     if actor.team == "client":
-        return CLIENT_TOOLS | PERSONAL_TOOLS
+        return CLIENT_TOOLS | PERSONAL_TOOLS | {"consult_skill"}
     if actor.team == "red":
-        return RED_TOOLS | PERSONAL_TOOLS
+        return RED_TOOLS | PERSONAL_TOOLS | {"consult_skill"}
     return (
         frozenset().union(*(BLUE_TOOLS[s] for s in specialties_for(actor)))
         | READ_TOOLS

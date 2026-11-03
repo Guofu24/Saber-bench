@@ -4,7 +4,7 @@ This contract applies to `saber lab`, with independent services/containers and o
 The tool list supplied by the controller is authoritative. Other skill examples are guidance,
 not additional executable tools. Return one JSON object `{"tool":"name","args":{}}`.
 
-Blue can `consult_skill` with `topic` from the pinned reference index; `{}` lists topics and
+Each team can `consult_skill` with `topic` from its pinned reference index; `{}` lists topics and
 an empty topic clears selection. The next model call receives the complete selected guide.
 This is a controller-local guidance read, not a worker process or forensic acquisition.
 It never accepts paths/URLs or changes execution permissions. Old versions without a library require a new baseline.

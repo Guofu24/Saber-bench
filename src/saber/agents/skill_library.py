@@ -40,20 +40,26 @@ def validate_library(value: Any) -> dict[str, dict[str, str]]:
 
 
 def load_reference_library(name: str, *, root: Path | None = None) -> dict[str, dict[str, str]]:
-    """Capture declared resources owned by this skill, excluding execution contracts."""
+    """Capture declared same-team guidance; namespace shared topics, exclude contracts."""
     root = (root or repo_root()).resolve()
     base = root / ".claude/skills"
     result: dict[str, dict[str, str]] = {}
     for path in skill_resources(name, root=root):
         relative = path.relative_to(base)
+        owner = relative.parts[0]
+        same_team = (
+            owner == name
+            or (name.startswith("soc-") and owner.startswith("soc-"))
+            or (name.startswith("redteam-") and owner.startswith("redteam-"))
+        )
         if (
-            relative.parts[0] != name
+            not same_team
             or path.name == "SKILL.md"
             or relative in (WORLD_REFERENCE, RANGE_REFERENCE)
         ):
             continue
         text = read_markdown(path, root).strip()
-        topic = path.stem
+        topic = path.stem if owner == name else f"{owner}--{path.stem}"
         if topic in result:
             raise IntegrationBlocked("Duplicate skill reference topic")
         result[topic] = {
