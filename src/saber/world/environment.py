@@ -299,7 +299,12 @@ class World:
             return 409, {"error": "Actor is waiting or finished; resume before acting."}, actor.id
         p = self.principals[actor.id]
         if tool == "consult_skill":
-            return learning.consult(self, actor, args)
+            status, data, target = learning.consult(self, actor, args)
+            if status == 200:
+                work.set_control(
+                    self, actor.id, "ACTIVE", "Skill consultation requires a fresh plan."
+                )
+            return status, data, target
         state = self.store.get("service", "state")
         if actor.team != "blue" and tool not in {"share", "acknowledge"}:
             if self._blocked(p):

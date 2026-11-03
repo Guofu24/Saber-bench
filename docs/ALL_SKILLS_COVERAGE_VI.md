@@ -108,6 +108,23 @@ Tests consultation kiểm mọi skill nghiệp vụ qua world, cả ba đội qu
 cross-team rejection, next prompt, pinned hash/version, restart và không dispatch guidance tới worker.
 Đây là HTTP/controller/provider-fixture tests, không phải đánh giá chất lượng suy luận Gemini.
 
+Kết quả kiểm tra local:
+
+| Kiểm tra | Kết quả |
+|---|---|
+| Audit repository | PASS: 18 skills, 15 nghiệp vụ, 56 references; không file nghiệp vụ bị bỏ rơi |
+| Validator skill-creator | PASS cho 15/15 skill nghiệp vụ, Python `-X utf8`; workflow Claude giữ optional fields riêng |
+| Unit/world/lab/population/environments | 332 passed, 1 skipped, 0 failures/errors; khoảng 294 giây |
+| Hồi quy sau sửa replanning | 132 passed, 0 failures/errors/skips; world + skill loader + range consultation, khoảng 161 giây |
+| Test Chrome thật | Skip vì chưa đặt `SABER_TEST_CHROME`; không xác nhận browser integration trong đợt này |
+| Ruff lint / format | PASS; 309 file đúng format |
+| Mypy Windows / Linux | PASS; 201 source files mỗi nền tảng |
+| Frozen catalog | PASS: 55 nhóm NICE / 175 subtasks, không đổi scorer/đáp án |
+
+Artifacts local: `runs/skills-all-expanded.json`, `runs/skills-all-regression.xml`.
+Bản sửa replanning được kiểm thêm bằng suite world/skill/range-consultation tại
+`runs/skills-all-replan-regression.xml`. Hai suite có tests trùng nhau, không cộng số để gọi là số ca độc lập.
+
 Các ca phản chứng ở từng chuyên đề dùng cho review/corpus tiếp theo: thiếu dữ liệu, stale prerequisites,
 malformed/partial outputs, benign near-match, job uncertainty và prompt injection trong evidence.
 Không lấy verdict do agent tự viết làm gold, không dùng câu “đủ skills” để suy mọi tool đã tích hợp hoặc
