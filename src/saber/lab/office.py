@@ -145,6 +145,10 @@ def record(
         "count",
         "source",
         "next_cursor",
+        "guidance_only",
+        "skill_reference",
+        "reference_topics",
+        "message",
     )
     output = redact({k: result[k] for k in fields if k in result})
     if len(json.dumps(output).encode()) > 16_000:
@@ -166,7 +170,7 @@ def record(
                 result[k] for k in ("evidence_id", "execution_evidence") if result.get(k)
             ],
             "evidence": [],
-            "evidence_complete": False,
+            "evidence_complete": tool == "consult_skill" and result.get("guidance_only") is True,
         }
     )
     store.put("lab-office", actor.id, history[-12:])

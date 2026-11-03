@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from saber.agents.skill_library import load_reference_library, reference_index
 from saber.agents.skills import (
     MD_REFERENCE,
     RUNTIME_SKILLS,
@@ -51,6 +52,12 @@ def audit(root: Path) -> dict[str, Any]:
                     range_chars=len(load_playbook(name, mode="range", root=root)),
                 )
                 resources.add((base / RANGE_REFERENCE).resolve())
+                library = load_reference_library(name, root=root)
+                row.update(
+                    reference_topics=len(library),
+                    reference_index_chars=len(reference_index(library)),
+                    reference_library_chars=sum(len(item["text"]) for item in library.values()),
+                )
             else:
                 # Development instructions intentionally refer to repository-root docs/tasks.
                 for ref in MD_REFERENCE.findall(body):

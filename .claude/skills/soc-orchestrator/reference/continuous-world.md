@@ -83,6 +83,10 @@ cấp mốc thời gian và chính sách tương ứng; không tự suy ra đã 
 
 ## Công cụ điều tra và công việc
 
+Blue có `consult_skill`: `{}` liệt kê topic, `{"topic":"ID"}` chọn một hướng dẫn của skill đang active,
+`{"topic":""}` bỏ chọn. Lượt suy luận sau nhận toàn văn từ phiên bản đã pin; không đọc đường dẫn/URL tùy ý.
+Đây là tra cứu nghiệp vụ, không phải thu chứng cứ hay cấp tool. World cũ thiếu library cần baseline mới.
+
 `query_events` phân trang lịch sử đang giữ, cần world_id và as_of_tick không vượt tick hiện tại. `get_evidence`
 lấy event còn giữ hoặc snapshot trong case; retention gap không chứng minh không có hành vi. `get_case` lấy case
 ngoài cửa sổ gần đây. `append_evidence`/`record_finding` dùng expected_revision; lỗi revision thì đọc lại trước khi sửa.

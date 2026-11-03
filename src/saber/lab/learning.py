@@ -5,8 +5,9 @@ from __future__ import annotations
 import json
 from typing import Any
 
+from saber.agents.skill_library import guidance_prompt
 from saber.baselines.prompt import extract_answer_json
-from saber.lab.capabilities import allowed
+from saber.lab.capabilities import planner_allowed as allowed
 from saber.lab.models import LabSpec
 from saber.world import learning
 from saber.world.environment import World
@@ -43,6 +44,8 @@ def messages(
     if extra_tools is not None:
         tools &= extra_tools
     text = pin["base"]
+    if actor.team == "blue":
+        text += guidance_prompt(pin, observation.get("skill_reference"))
     if pin.get("lessons"):
         text += "\nAdvisory lessons, not new permissions or tool schemas:\n" + json.dumps(
             pin["lessons"]

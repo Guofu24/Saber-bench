@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any, BinaryIO
 
 from saber.agents.provider import LLMProvider
+from saber.agents.skill_library import load_reference_library
 from saber.agents.skills import load_playbook
 from saber.agents.specialties import BLUE_SKILLS
 from saber.domain.errors import BudgetExceeded, IntegrationBlocked
@@ -180,6 +181,11 @@ class Runner:
                 PLAYBOOKS[a.team if a.team == "client" else a.role] for a in config.actors
             } | {BLUE_SKILLS[s] for a in config.actors for s in specialties_for(a)}:
                 load_playbook(skill, mode="world")
+        libraries = {
+            BLUE_SKILLS[s]: load_reference_library(BLUE_SKILLS[s])
+            for a in config.actors
+            for s in specialties_for(a)
+        }
         self.world = World(store, config)
         learning.initialize(
             self.world,
@@ -190,6 +196,7 @@ class Runner:
                 }
                 | {BLUE_SKILLS[s] for a in config.actors for s in specialties_for(a)}
             },
+            reference_libraries=libraries,
         )
         with store.transaction():
             store.put("meta", "engine", "hybrid" if provider else "scripted")

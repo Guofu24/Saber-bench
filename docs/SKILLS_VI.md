@@ -46,8 +46,8 @@ continuous world và SOC lab đều dùng loader này, với ngữ cảnh khác 
 | Chế độ | Nội dung model nhận | Giới hạn |
 |---|---|---|
 | `case` — population / benchmark B2 | Body `SKILL.md` và nội dung các tài liệu được tham chiếu, đi theo liên kết, loại trùng; bỏ hướng dẫn riêng của world | 64.000 ký tự |
-| `world` — continuous world có model | Body theo vai và hợp đồng application lab dùng chung | 18.000 ký tự |
-| `range` — SOC lab | Body theo vai và hợp đồng executor/collector/analysis/SOAR của lab | 18.000 ký tự |
+| `world` — continuous world có model | Body theo vai, hợp đồng application lab; blue tra cứu reference bằng `consult_skill` | Base 18.000 ký tự |
+| `range` — SOC lab | Body theo vai, hợp đồng executor/collector/analysis/SOAR; blue tra cứu reference bằng `consult_skill` | Base 18.000 ký tự |
 
 World không có filesystem tool để model tự mở file tham chiếu. Loader đưa trực tiếp
 [hợp đồng world](../.claude/skills/soc-orchestrator/reference/continuous-world.md)
@@ -99,9 +99,16 @@ giả thuyết → thu/QC → phân tích → scope/impact → handoff → learn
 | `incident-playbooks` | 12 tình huống, dữ liệu cần thu, giả thuyết đối lập và tiêu chí kết luận |
 | `queries-validation` | Query tái lập, pagination, parser/negative controls và tiêu chí đánh giá hành vi |
 
-`case` nạp cả tám reference. `world`/`range` nhận bản cốt lõi trong entrypoint và contract tương ứng;
-runtime không có filesystem tool để tự đọc tám tài liệu sâu. Không quảng cáo chỉ thêm liên kết là model
-đã được nạp toàn bộ handbook. Scripted policy không tự đổi hành vi khi sửa Markdown.
+`case` nạp cả tám reference. `world`/`range` nhận bản cốt lõi, contract và danh mục topic của skill active.
+Blue gọi `consult_skill` với `{"topic":"memory-malware"}` (ví dụ); lần suy luận tiếp theo nhận toàn văn
+hướng dẫn đó. `{}` liệt kê, `{"topic":""}` bỏ chọn. Mỗi lần chọn một tài liệu, tối đa 12.000 ký tự,
+index tối đa 5.000; không nạp cả thư viện vào mọi request. Base/lessons vẫn có trần 18.000 riêng.
+Scripted policy không tự đổi hành vi khi sửa Markdown.
+
+Library lấy từ các file đã khai báo thuộc skill đó, hash từng nội dung và nằm trong immutable skill version.
+Restart, lesson release và rollback giữ đúng library; selection của version/specialty cũ không được áp sang bản khác.
+Model không cung cấp đường dẫn/file/URL; văn bản chèn trong observation không thay được nội dung library.
+World ghi receipt tra cứu; range xử lý tại controller và đánh dấu `guidance_only`, không giả PID hay evidence thu máy.
 
 World đang chạy giữ epoch/skill version đã chụp; cập nhật source không thay prompt giữa case.
 Muốn thử baseline mới, tạo world/bundle mới; với learning release dùng quy trình activation/rollback hiện có.

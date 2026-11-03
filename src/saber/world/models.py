@@ -159,7 +159,7 @@ def tools_for(actor: Actor) -> frozenset[str]:
         frozenset().union(*(BLUE_TOOLS[s] for s in specialties_for(actor)))
         | READ_TOOLS
         | CASE_TOOLS
-        | {"telemetry_health"}
+        | {"telemetry_health", "consult_skill"}
         | PERSONAL_TOOLS
         | WORKER_TOOLS
         | ({"reopen_case", *LEAD_TOOLS} if "lead" in specialties_for(actor) else set())

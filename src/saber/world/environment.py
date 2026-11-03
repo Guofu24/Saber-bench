@@ -18,6 +18,7 @@ from saber.world.models import Action, Actor, WorldConfig, safe_name, specialtie
 from saber.world.store import Store, utc_now
 
 TOOL_HELP = {
+    "consult_skill": "Select pinned guidance for your active specialty. args: topic ID; {} lists topics, empty topic clears. No files/URLs or new execution permissions.",
     **operations.HELP,
     **work.HELP,
     **lab_tools.HELP,
@@ -159,6 +160,7 @@ class World:
                 ],
             }
             if actor.team == "blue":
+                obs["skill_reference"] = self.store.get("skill-reference", actor.id)
                 if self.config.execution_mode == "native":
                     from saber.world.native import read_events
 
@@ -296,6 +298,8 @@ class World:
         ):
             return 409, {"error": "Actor is waiting or finished; resume before acting."}, actor.id
         p = self.principals[actor.id]
+        if tool == "consult_skill":
+            return learning.consult(self, actor, args)
         state = self.store.get("service", "state")
         if actor.team != "blue" and tool not in {"share", "acknowledge"}:
             if self._blocked(p):

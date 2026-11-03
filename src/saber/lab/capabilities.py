@@ -70,3 +70,8 @@ def allowed(team: str, role: str, specialties: tuple[str, ...] = ()) -> set[str]
     if role == "lead":
         result.update({"contain", "release", "patch", "unpatch", "contain_domain_user"})
     return result
+
+
+def planner_allowed(team: str, role: str, specialties: tuple[str, ...] = ()) -> set[str]:
+    """Guidance reads are controller-local; executors retain their original capabilities."""
+    return allowed(team, role, specialties) | ({"consult_skill"} if team == "blue" else set())
