@@ -1,5 +1,13 @@
 """Executable role capabilities; the planner and executor use the same registry."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from saber.lab.models import LabSpec
+    from saber.world.models import Actor
+
 CLIENT = {
     "login",
     "browse",
@@ -59,6 +67,9 @@ ARTIFACTS = (
     "rule-evaluation.json",
 )
 TOOLS = {"client": CLIENT, "red": RED, "blue": READ | set().union(*SPECIALIST.values())}
+WINDOWS_TOOLS = {t for group in TOOLS.values() for t in group if t.startswith("windows_")} | {
+    "contain_domain_user"
+}
 
 
 def allowed(team: str, role: str, specialties: tuple[str, ...] = ()) -> set[str]:
@@ -75,3 +86,15 @@ def allowed(team: str, role: str, specialties: tuple[str, ...] = ()) -> set[str]
 def planner_allowed(team: str, role: str, specialties: tuple[str, ...] = ()) -> set[str]:
     """Guidance reads are controller-local; executors retain their original capabilities."""
     return allowed(team, role, specialties) | {"consult_skill"}
+
+
+def configured_tools(actor: Actor, spec: LabSpec) -> set[str]:
+    """Use the same deployment capabilities for live planning and learning evaluation."""
+    tools = planner_allowed(actor.team, actor.role, actor.specialties)
+    if not spec.windows:
+        tools -= WINDOWS_TOOLS
+    if not spec.analysis.enabled:
+        tools -= {"list_samples", "tool_status", "analyze_sample", "analysis_status"}
+    if not spec.soar.enabled:
+        tools -= {"run_playbook", "soar_status"}
+    return tools

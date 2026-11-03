@@ -7,6 +7,7 @@ from typing import Any
 
 from saber.agents.skill_library import guidance_prompt
 from saber.baselines.prompt import extract_answer_json
+from saber.lab.capabilities import WINDOWS_TOOLS, configured_tools
 from saber.lab.capabilities import planner_allowed as allowed
 from saber.lab.models import LabSpec
 from saber.world import learning
@@ -40,7 +41,7 @@ def messages(
 ) -> list[dict[str, Any]]:
     tools = allowed(actor.team, actor.role, actor.specialties)
     if not windows_nodes:
-        tools = {t for t in tools if not t.startswith("windows_")}
+        tools -= WINDOWS_TOOLS
     if extra_tools is not None:
         tools &= extra_tools
     text = pin["base"]
@@ -90,20 +91,20 @@ class RangeLearner(Learner):
         base = learning.version(self.store, proposal["base_version"])
         candidate = learning.candidate_version(base, proposal)
         checks, models = [], set()
-        tools = allowed(actor.team, actor.role, actor.specialties)
+        tools = configured_tools(actor, self.controller.spec)
         nodes = [
             n.name
             for n in self.controller.spec.windows
             if actor.team == "blue" or n.role == "workstation"
         ]
-        if not nodes:
-            tools = {t for t in tools if not t.startswith("windows_")}
         for repeat in range(suite.repetitions):
             for case in suite.cases:
                 outcomes = {}
                 pairs = (("base", base), ("candidate", candidate))
                 for label, pin in pairs if repeat % 2 == 0 else reversed(pairs):
-                    response = self.generate(actor, messages(actor, case.observation, pin, nodes))
+                    response = self.generate(
+                        actor, messages(actor, case.observation, pin, nodes, tools)
+                    )
                     models.add(response.model_id)
                     try:
                         plan, _ = extract_answer_json(response.text)

@@ -12,7 +12,7 @@ from typing import Any
 
 from saber.agents.skill_library import load_reference_library
 from saber.agents.skills import load_playbook
-from saber.lab.capabilities import planner_allowed as role_tools
+from saber.lab.capabilities import configured_tools
 from saber.lab.deployment import principal
 from saber.lab.learning import LearningWorld, RangeLearner
 from saber.lab.learning import messages as planning_messages
@@ -97,13 +97,7 @@ class Controller:
         return own
 
     def choose(self, actor: Any, obs: dict[str, Any]) -> tuple[str, dict[str, Any], str]:
-        allowed = role_tools(actor.team, actor.role, actor.specialties)
-        if not self.spec.windows:
-            allowed = {t for t in allowed if not t.startswith("windows_")}
-        if not self.spec.analysis.enabled:
-            allowed -= {"list_samples", "tool_status", "analyze_sample", "analysis_status"}
-        if not self.spec.soar.enabled:
-            allowed -= {"run_playbook", "soar_status"}
+        allowed = configured_tools(actor, self.spec)
         previous = obs.get("result", {}).get("guest_work", {})
         soar = obs.get("result", {}).get("soar_job", {})
         if soar.get("state") in ("QUEUED", "DISPATCHING", "RUNNING", "VERIFYING") or (

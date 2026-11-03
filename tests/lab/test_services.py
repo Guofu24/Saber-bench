@@ -170,3 +170,21 @@ def test_transport_failure_retains_outbox_and_replay_is_idempotent(lab):
         assert emit.flush() == 0
     assert len(collected.events()) == 1
     assert collected.events()[0]["data"]["api_key"] == "[REDACTED]"
+
+
+def test_linux_worker_rejects_domain_actions_before_dispatch(lab, tmp_path):
+    _, creds, *_ = lab
+    store = Ledger(tmp_path / "worker")
+    try:
+        emit = Emitter(store, "blue-test", "", creds["blue"]["ingest_token"])
+        worker = TestClient(create_worker(store, creds["blue"], "blue", "unused", "unused", emit))
+        assert "contain_domain_user" not in worker.get("/health").json()["tools"]
+        result = worker.post(
+            "/execute",
+            headers={"Authorization": "Bearer " + creds["blue"]["rpc_token"]},
+            json={"id": str(uuid.uuid4()), "actor": "blue-ir", "tool": "contain_domain_user"},
+        )
+        assert result.status_code == 403
+        assert store.events() == []
+    finally:
+        store.close()

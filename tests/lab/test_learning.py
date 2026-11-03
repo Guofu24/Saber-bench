@@ -1,11 +1,14 @@
 import json
 
+import pytest
 from click.testing import CliRunner
 
 from saber.agents.provider import LLMResponse
 from saber.cli.main import cli
+from saber.lab.capabilities import configured_tools
 from saber.lab.controller import Controller
 from saber.lab.learning import RangeLearner, messages
+from saber.lab.models import preset_spec
 from saber.world import learning
 from saber.world.learning_eval import install_suite, rollback
 
@@ -124,3 +127,97 @@ def test_range_capture_reflection_replay_publication_pinning_and_rollback(
     )
     assert result.exit_code == 0, result.output
     assert json.loads(result.output)["released"] == base["id"]
+
+
+@pytest.mark.parametrize(
+    "role,tool", [("dfir", "analyze_sample"), ("ir", "run_playbook"), ("ir", "contain_domain_user")]
+)
+def test_learning_rejects_unavailable_tools_even_when_replay_expects_them(
+    lab, tmp_path, role, tool
+):
+    spec, creds, *_ = lab
+    spec.analysis.enabled = False
+    spec.soar.enabled = False
+    actor = next(a for a in spec.actors if a.role == role)
+    assert tool not in configured_tools(actor, spec)
+    assert tool in configured_tools(actor, preset_spec("windows-ad"))
+
+    class DisabledToolProvider:
+        def generate_for(self, team, prompt, **kwargs):
+            allowed = (
+                prompt[0]["content"].split("Allowed tools: ", 1)[1].split("\n", 1)[0].split(",")
+            )
+            assert tool not in allowed
+            assert "consult_skill" in allowed
+            observation = json.loads(prompt[1]["content"])["observation"]
+            learned = "Advisory lessons" in prompt[0]["content"]
+            action = tool if learned and observation.get("repair") else "query_events"
+            return LLMResponse(
+                text=json.dumps({"tool": action, "args": {}}),
+                model_id="fixture",
+                input_tokens=0,
+                output_tokens=0,
+            )
+
+    controller = Controller(
+        spec, tmp_path / "control", creds["controller"], {}, "unused", DisabledToolProvider()
+    )
+    learner = RangeLearner(controller)
+    try:
+        skill = learning.actor_skill(controller.learning_world, actor)
+        base = learning.prompt_version(controller.store, skill)
+        assert base
+        controller.choose(actor, {"turn": 0, "result": {}})
+        with controller.store.transaction():
+            eid = controller.store.event(1, "fixture", "query_events", "collector", 200, {}, {})
+            learning.capture(
+                controller.learning_world,
+                actor,
+                {"event_id": eid, "tool": "query_events", "status": 200},
+                "collector",
+                skill,
+            )
+            episode = learning.seal(controller.learning_world, actor, "finish")
+            assert episode
+            proposal = learning.propose(
+                controller.learning_world,
+                actor,
+                episode,
+                {
+                    "failure_kind": "tool_contract",
+                    "applicability": "When choosing a response in the current deployment",
+                    "guidance": "Check the deployment capabilities before selecting a tool.",
+                    "limitations": "Unavailable tools cannot be executed in this deployment.",
+                    "evidence_ids": [eid],
+                },
+            )
+        suite_id = install_suite(
+            controller.store,
+            {
+                "skill": skill,
+                "description": "Reject unavailable tools from a stale replay suite",
+                "cases": [
+                    {
+                        "id": "repair",
+                        "split": "repair",
+                        "observation": {"repair": True},
+                        "expected": [{"tool": tool, "args": {}}],
+                    },
+                    *[
+                        {
+                            "id": f"regression-{i}",
+                            "split": "regression",
+                            "observation": {"turn": i},
+                            "expected": [{"tool": "query_events", "args": {}}],
+                        }
+                        for i in (1, 2)
+                    ],
+                ],
+            },
+        )
+        learner.evaluate(proposal, suite_id)
+        assert controller.store.get("learning-proposals", proposal["id"])["status"] == "REJECTED"
+        assert controller.store.get("skill-heads", skill) == base["id"]
+    finally:
+        learner.close()
+        controller.close()
