@@ -368,3 +368,14 @@ data: stop the runtime and back up the data/volume before changing versions.
   development through Claude Code; it does not start the client/red/blue world.
 - [Environment-first policy](docs/ENVIRONMENT_FIRST.md): reuse compatible infrastructure.
 - [Security boundaries](docs/SECURITY.md): lab scope and execution permissions.
+
+## License
+
+SABER retains its existing **proprietary** licensing status. See [LICENSE](LICENSE)
+for the notice and licensing contact. This repository is not offered under an
+open-source license as a whole.
+
+The separately licensed [agent-office component](agent-office/LICENSE) retains
+its MIT license, as declared in its package metadata. Third-party dependencies,
+datasets, detection rules and external tools retain their own terms; see the
+[dataset provenance report](docs/EVAL_DATA_PROVENANCE.md) where applicable.

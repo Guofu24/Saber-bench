@@ -1,5 +1,8 @@
 # agent-office
 
+Giấy phép: [MIT](LICENSE). Thành phần này có giấy phép riêng với SABER.
+Notice của Three.js được nhúng trong viewer: [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt).
+
 Viewer 3D cho các agent. Với SABER continuous world, viewer nhận roster và số liệu
 từ runtime, kể cả khi chạy scripted và không gọi LLM. Cần **Node.js 18+** trên máy
 mở viewer; bản HTML đã build sẵn, không cần `npm install` để xem.

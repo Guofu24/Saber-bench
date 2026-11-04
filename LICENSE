@@ -1,0 +1,17 @@
+SABER Proprietary License Notice
+
+Copyright (c) 2026 SABER contributors. All rights reserved.
+
+Except for components expressly distributed under a separate license, no
+permission to use, copy, modify, distribute, sublicense, or sell this software
+or its associated documentation is granted by making this repository available.
+Obtain permission from the relevant copyright holders for those activities.
+Existing written permissions and applicable statutory rights are unaffected.
+
+Separately licensed components retain their own terms. In particular,
+agent-office is distributed under the MIT License in agent-office/LICENSE.
+Third-party dependencies, datasets, detection rules, tools and other materials
+remain subject to their respective licenses and notices.
+
+For licensing inquiries, contact the repository maintainers through:
+https://github.com/Guofu24/Saber-bench

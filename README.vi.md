@@ -298,3 +298,13 @@ CI kiểm tra Office trên Linux và Windows, đồng thời build lại để p
 - [Environment first](docs/ENVIRONMENT_FIRST.md): tái sử dụng hạ tầng hiện có.
 - [Security](docs/SECURITY.md): phạm vi lab và quyền thực thi.
 - [ADR environment profiles](docs/adr/0003-environment-profiles.md): quyết định thiết kế.
+
+## Giấy phép
+
+SABER giữ trạng thái **Proprietary** như metadata hiện có. Xem [LICENSE](LICENSE)
+để biết thông báo quyền và đầu mối liên hệ. Toàn bộ repository chưa được phát hành
+dưới một giấy phép mã nguồn mở.
+
+Thành phần [agent-office](agent-office/LICENSE) giữ giấy phép MIT riêng như đã khai báo
+trong package. Dependency, dataset, detection rule và công cụ bên thứ ba giữ điều khoản
+của chúng; xem thêm [nguồn gốc dữ liệu](docs/EVAL_DATA_PROVENANCE.md).

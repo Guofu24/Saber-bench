@@ -375,7 +375,15 @@ def render(spec: LabSpec, out: Path) -> dict[str, Any]:
     out.mkdir(parents=True)
     (out / "tools").mkdir()
     source = out / "source"
-    for name in ("pyproject.toml", "uv.lock", "README.md", "notes.md", "catalog/subtasks.json"):
+    for name in (
+        "pyproject.toml",
+        "uv.lock",
+        "LICENSE",
+        "README.md",
+        "README.vi.md",
+        "notes.md",
+        "catalog/subtasks.json",
+    ):
         dest = source / name
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(root / name, dest)

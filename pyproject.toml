@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "SABER: reproducible SOC benchmark platform (175 NICE-derived subtasks, offline-first)."
 readme = "README.md"
 requires-python = ">=3.12"
-license = { text = "Proprietary" }
+license = { file = "LICENSE" }
 dependencies = [
   "pydantic>=2.9,<3",
   "click>=8.1",
