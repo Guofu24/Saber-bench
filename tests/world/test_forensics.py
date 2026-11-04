@@ -8,6 +8,48 @@ from saber.world.runtime import Runner
 from saber.world.store import Store
 
 
+def test_200_actor_office_keeps_events_when_forensic_previews_exceed_transport(tmp_path):
+    from saber.world.environment import World
+    from saber.world.models import Actor, WorldConfig
+    from saber.world.office import snapshot
+    from saber.world.runtime import atomic_json
+
+    config = WorldConfig(
+        actors=[Actor(id=f"blue-{i}", team="blue", role="dfir") for i in range(200)]
+    )
+    store = Store(tmp_path)
+    try:
+        world = World(store, config)
+        with store.transaction():
+            for actor in config.actors:
+                eid = store.event(
+                    0, world.principals[actor.id], "forensic_query", "session", 200, {}, {}
+                )
+                store.put(
+                    "forensic-office",
+                    actor.id,
+                    [{"event_id": eid, "result": {"summary": "x" * 7800}}],
+                )
+        value = snapshot(
+            store,
+            config,
+            world.report(),
+            run_id="stress",
+            profile="local",
+            pending=set(),
+            stopped=True,
+            budget_exhausted=False,
+        )
+        atomic_json(tmp_path / "office.json", value)
+        assert (tmp_path / "office.json").stat().st_size <= 250000
+        assert len(value["actors"]) == len(value["trace"]["events"]) == 200
+        assert any(e.get("forensics", {}).get("detail_omitted") for e in value["trace"]["events"])
+        assert value["trace"]["events"][-1]["forensics"]["summary"] == "x" * 7800
+        assert store.get("forensic-office", "blue-180")[0]["result"]["summary"] == "x" * 7800
+    finally:
+        store.close()
+
+
 def test_world_http_investigation_visible_to_blue_and_office_only(tmp_path):
     source = tmp_path / "access.log"
     source.write_text('192.0.2.8 - - [03/Nov/2026:10:00:00 +0700] "GET /portal HTTP/1.1" 200 23\n')

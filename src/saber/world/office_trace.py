@@ -15,7 +15,10 @@ SOURCES = {"llm", "scripted", "scripted-fallback"}
 
 
 def trace(store: Store, config: WorldConfig, through_tick: int) -> dict[str, Any]:
-    """Never export action args, result bodies, notebooks or evaluator labels.
+    """Export no private plans/notebooks or evaluator labels.
+
+    Imported-log tools have an explicit bounded, masked query/evidence preview;
+    other action arguments and result bodies remain private.
 
     Call under the snapshot's store lock. Direct HTTP calls lack a planner journal;
     their source stays unknown rather than being attributed to Gemini.
