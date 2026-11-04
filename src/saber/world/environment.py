@@ -13,12 +13,15 @@ import json
 import uuid
 from typing import Any
 
+from saber.forensics import tools as forensics
 from saber.world import lab_tools, learning, operations, work
 from saber.world.models import Action, Actor, WorldConfig, safe_name, specialties_for, tools_for
 from saber.world.store import Store, utc_now
 
 TOOL_HELP = {
+    "consult_skill": "Select pinned guidance for your active specialty. args: topic ID; {} lists topics, empty topic clears. No files/URLs or new execution permissions.",
     **operations.HELP,
+    **forensics.HELP,
     **work.HELP,
     **lab_tools.HELP,
     "browse": "Open the local portal; returns document links and application health.",
@@ -147,6 +150,7 @@ class World:
                 "tick": self.tick,
                 "principal": principal,
                 "role": actor.role,
+                "skill_reference": self.store.get("skill-reference", actor.id),
                 "goal": actor.goal,
                 "logged_in": bool(own_session.get("logged_in")),
                 "last_result": self.store.get("results", actor.id, {}),
@@ -159,6 +163,7 @@ class World:
                 ],
             }
             if actor.team == "blue":
+                obs["forensics"] = forensics.overview(self.store.root, actor.id)
                 if self.config.execution_mode == "native":
                     from saber.world.native import read_events
 
@@ -279,6 +284,10 @@ class World:
                 )
                 self._metric("verified_incidents", 1)
             result = {"status": status, "event_id": eid, "tool": action.tool, **data}
+            if action.tool in forensics.TOOLS and status == 200:
+                history = self.store.get("forensic-office", actor.id, [])
+                history.append({"event_id": eid, "result": forensics.trace_result(result)})
+                self.store.put("forensic-office", actor.id, history[-12:])
             self.store.put("results", actor.id, result)
             self._apply_rules(eid, action.tool, status)
             learning.capture(self, actor, result, target, skill)
@@ -296,6 +305,17 @@ class World:
         ):
             return 409, {"error": "Actor is waiting or finished; resume before acting."}, actor.id
         p = self.principals[actor.id]
+        if tool == "consult_skill":
+            status, data, target = learning.consult(self, actor, args)
+            if status == 200:
+                work.set_control(
+                    self, actor.id, "ACTIVE", "Skill consultation requires a fresh plan."
+                )
+            return status, data, target
+        if tool in forensics.TOOLS:
+            result = forensics.execute(self.store.root, actor, tool, args)
+            body = result.get("forensics", {})
+            return result["status"], result, body.get("session_id", body.get("id", "forensics"))
         state = self.store.get("service", "state")
         if actor.team != "blue" and tool not in {"share", "acknowledge"}:
             if self._blocked(p):

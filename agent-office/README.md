@@ -51,6 +51,20 @@ thuộc lệnh SABER sau `--`; xem [hướng dẫn world](../docs/CONTINUOUS_WOR
 
 ## Đọc giao diện world
 
+SOC lab (`saber lab`) có viewer trong bundle, mặc định tại `http://127.0.0.1:7788`;
+kiểm tra dịch vụ bằng `saber lab status --bundle PATH_TO_BUNDLE`.
+Với controller chạy local, hoặc bản export đã chép về, dùng:
+
+```powershell
+node agent-office/bin/agent-office.js watch --world PATH_TO_CONTROLLER_OUTPUT --open
+```
+
+Thư mục này cần `office.json` và `range-office/` để mở bằng chứng từng job. Bấm
+agent rồi mở job: PID/exit code, kết quả, hash bằng chứng và ảnh Chromium gần nhất
+nếu có. 12 job là cửa sổ riêng của mỗi agent; ảnh có tick/job ID, không phải desktop
+stream. `consult_skill` hiện rõ là tra cứu tại controller và không có log process
+trên máy đích. Xem [triển khai SOC và chuyển máy](../docs/SOC_LAB_VI.md).
+
 World tạo bằng `--execution native` có thêm **Process · File · DNS · Network** khi
 bấm agent. Viewer `watch` đọc 100 bản ghi riêng từ `native-office/<actor>.json`,
 local hoặc `docker cp` từ sandbox; không đọc key hay DB evaluator. Mở từng dòng để
@@ -62,7 +76,7 @@ Nếu đồng bộ snapshot từ VM, cần thêm thư mục `native-office/` cù
 này. `run`/`serve` hiện chỉ nhận snapshot, chưa tự tải cửa sổ native. Backend Node cũ
 cần restart sau cập nhật code; refresh trình duyệt chỉ nạp lại phần giao diện.
 
-Đầu trang, danh sách world và tên tab ghi **Native workload**, **Application lab**
+Đầu trang, danh sách world và tên tab ghi **Native workload**, **Application lab**, **SOC lab · remote executors**
 hoặc **Chưa rõ chế độ**. Trường hợp chưa rõ có thể do snapshot/backend cũ thiếu
 metadata, không chứng minh rằng log native không tồn tại. Nếu mở nhiều viewer,
 đối chiếu cổng trên URL và world ID; mỗi viewer `watch` trỏ vào thư mục riêng.
@@ -306,6 +320,10 @@ Commit cả `viewer-src` và `viewer/index.html` sau khi build. `npm test` khôn
 LLM, không cần Docker hay trình duyệt. Test Docker dùng adapter giả; không thay thế
 kiểm tra container thật. Test Python: `uv run pytest tests/world/test_office.py
 tests/population/test_office.py tests/environments -q` từ root repo.
+
+CI chạy bộ test Node trên Linux/Windows và yêu cầu build lại không làm thay đổi
+`viewer/index.html`. Kết quả kiểm tra mới nhất ở [báo cáo rà soát](../docs/END_TO_END_AUDIT_VI.md);
+các con số kiểm chứng bên dưới ghi lại từng checkpoint trước đó.
 
 Smoke Chrome tùy chọn dùng `playwright-core` cài riêng: đặt `PLAYWRIGHT_MODULE` thành
 đường dẫn package và `CHROME_PATH` thành đường dẫn Chrome, rồi từ root chạy:

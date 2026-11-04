@@ -11,6 +11,7 @@ from typing import Any
 
 import click
 
+from saber.forensics.cli import forensics_cli
 from saber.lab.analysis_cli import analysis_cli
 from saber.lab.backup_cli import backup_cli
 from saber.lab.deployment import initialize_secrets, render, verify_bundle
@@ -32,6 +33,7 @@ lab.add_command(learning_cli)
 lab.add_command(analysis_cli)
 lab.add_command(soar_cli)
 lab.add_command(backup_cli)
+lab.add_command(forensics_cli)
 
 
 @lab.command("list")

@@ -1,8 +1,8 @@
 # Skills: phạm vi, cách nạp và kiểm tra
 
 Repo có **18 skills** trong `.claude/skills`: **15 sổ tay nghiệp vụ** cho agent và
-**3 workflow phát triển**. Có **25 tài liệu tham chiếu** được liên kết từ các skills
-nghiệp vụ. Skill là hướng dẫn cho model; quyền thực thi do runtime/tool server kiểm
+**3 workflow phát triển**. Có **56 tài liệu tham chiếu** trong audit nghiệp vụ, gồm
+contract world/range và 13 reference DFIR. Skill là hướng dẫn cho model; quyền thực thi do runtime/tool server kiểm
 soát, không do nội dung Markdown cấp.
 
 Rà cấu trúc không đủ để xác nhận nghiệp vụ. [Báo cáo rà nội dung](SKILLS_REVIEW_VI.md) đối chiếu yêu cầu client/red/blue
@@ -10,6 +10,7 @@ và 55 nhóm NICE / 175 subtask, ghi các suy luận sai đã sửa, quy trình 
 khả năng runtime/model chưa kiểm chứng. Không coi audit PASS là SOC đã hoàn chỉnh.
 Đợt mở rộng tiếp theo bổ sung [12 chuyên môn blue và công cụ runtime](SOC_SPECIALISTS_VI.md),
 gồm task có nhận việc, chứng cứ, notebook, vòng đời actor, rule và phục hồi.
+Đợt mới nhất đã rà nguồn và bổ sung toàn bộ 15 skill nghiệp vụ; xem [coverage từng vai](ALL_SKILLS_COVERAGE_VI.md).
 
 ## Vai nào dùng skill nào
 
@@ -38,15 +39,16 @@ và `gate-review` giữ `disable-model-invocation: true`: đây là trường h�
 Validator dành riêng cho định dạng Codex có thể không nhận trường này; không xóa
 chính sách gọi skill chỉ để làm validator khác hệ thống báo xanh.
 
-## Hai chế độ nạp
+## Ba chế độ nạp
 
-Loader chung là `src/saber/agents/skills.py`. Population, benchmark specialist và
-continuous world đều dùng loader này, với ngữ cảnh khác nhau:
+Loader chung là `src/saber/agents/skills.py`. Population, benchmark specialist,
+continuous world và SOC lab đều dùng loader này, với ngữ cảnh khác nhau:
 
 | Chế độ | Nội dung model nhận | Giới hạn |
 |---|---|---|
 | `case` — population / benchmark B2 | Body `SKILL.md` và nội dung các tài liệu được tham chiếu, đi theo liên kết, loại trùng; bỏ hướng dẫn riêng của world | 64.000 ký tự |
-| `world` — continuous world có model | Body theo vai và hợp đồng application lab dùng chung | 18.000 ký tự |
+| `world` — continuous world có model | Body theo vai, hợp đồng application lab; mỗi đội tra cứu reference bằng `consult_skill` | Base 18.000 ký tự |
+| `range` — SOC lab | Body theo vai, hợp đồng executor/collector/analysis/SOAR; mỗi đội tra cứu reference bằng `consult_skill` | Base 18.000 ký tự |
 
 World không có filesystem tool để model tự mở file tham chiếu. Loader đưa trực tiếp
 [hợp đồng world](../.claude/skills/soc-orchestrator/reference/continuous-world.md)
@@ -72,14 +74,55 @@ tool; chúng không chứng minh model hiểu hoặc làm theo skill một cách
 
 ## Bundle local / sandbox / VM / remote
 
-`env render` xuất 15 entrypoint và toàn bộ 25 tài liệu tham chiếu nghiệp vụ được khai
-báo, theo đường dẫn tương đối. Hash được ghi vào manifest. File Markdown không được
+`env render` xuất 15 entrypoint và toàn bộ tài liệu tham chiếu nghiệp vụ được khai
+báo; `lab render` bổ sung contract range. Các đường dẫn giữ tương đối, hash được ghi vào manifest. File Markdown không được
 tham chiếu, workflow phát triển, key pool và dữ liệu run không được tự động đóng gói.
 Thiếu tài liệu bắt buộc thì export thất bại thay vì sinh bundle thiếu chuyên môn.
 
 Bundle là bản chụp source lúc render. Sửa skill trong checkout không cập nhật một
 container/bundle đang dùng bản cũ; cần export/rebuild theo quy trình môi trường.
 Bundle mới có Compose project/volume mới: không tự chuyển dữ liệu world cũ.
+
+## DFIR: handbook và đối chiếu nguồn chính thức
+
+[Review handbook](DFIR_HANDBOOK_REVIEW_VI.md) ghi lỗi xác nhận được, nguồn đối chiếu và phần không thể
+suy thành năng lực thực thi. [Skill DFIR](../.claude/skills/soc-dfir/SKILL.md) có luồng nhận case →
+giả thuyết → thu/QC → phân tích → scope/impact → handoff → learning.
+[Bảng năng lực DFIR](DFIR_CAPABILITY_COVERAGE_VI.md) ghi câu hỏi/đầu ra theo nghiệp vụ, nguồn nghiên cứu
+và mức kiểm chứng. Mười ba reference gồm:
+
+| Reference | Nội dung |
+|---|---|
+| `acquisition` | Chọn phương pháp, volatility/risk, manifest/hash/custody, xử lý partial/mismatch |
+| `host-forensics` | Windows/Linux/macOS, execution/session/persistence, artifact caveats |
+| `memory-malware` | Symbols/plugin, injection alternatives, static/dynamic boundary và analysis receipts |
+| `network-identity` | DNS/PCAP/flow/email, AD/Entra, session/token/grant và impact |
+| `cloud-containers` | AWS/Azure/GCP/SaaS/Kubernetes/CI-CD; phạm vi OT/mobile/appliance |
+| `timeline-reporting` | Time uncertainty, entity graph, confidence, 12 nhóm hồ sơ và bàn giao |
+| `incident-playbooks` | 12 tình huống, dữ liệu cần thu, giả thuyết đối lập và tiêu chí kết luận |
+| `queries-validation` | Query tái lập, pagination, parser/negative controls và tiêu chí đánh giá hành vi |
+| `disk-filesystems` | Partition/sector offset, TSK, deleted/carved data, filesystem caveats, Plaso |
+| `remote-collection` | Collection plan, Velociraptor/offline collector, resource caps, partial/completion proof |
+| `windows-ad-investigation` | Session/process graph, AD objects, audit/SACL, trust scope, Defender KQL |
+| `cloud-query-recipes` | AWS CLI, Entra KQL, GCP filter với schema/time/entity/pagination cụ thể |
+| `antiforensics-validation` | Tamper/timestomp/log gaps, corroboration, parser validation và negative evidence |
+
+`case` nạp cả 13 reference. `world`/`range` nhận bản cốt lõi, contract và danh mục topic của skill active.
+Blue gọi `consult_skill` với `{"topic":"memory-malware"}` (ví dụ); lần suy luận tiếp theo nhận toàn văn
+hướng dẫn đó. `{}` liệt kê, `{"topic":""}` bỏ chọn. Mỗi lần chọn một tài liệu, tối đa 12.000 ký tự,
+index tối đa 5.000; không nạp cả thư viện vào mọi request. Base/lessons vẫn có trần 18.000 riêng.
+Scripted policy không tự đổi hành vi khi sửa Markdown.
+
+Library lấy từ file đã khai báo thuộc skill đó và tài liệu dùng chung cùng đội, hash từng nội dung và nằm
+trong immutable skill version. Topic dùng chung có tiền tố owner, ví dụ `soc-ir--malware-analysis`;
+client/red cũng được consult nhưng không có quyền đọc hướng dẫn/case state của blue qua tool này.
+Restart, lesson release và rollback giữ đúng library; selection của version/specialty cũ không được áp sang bản khác.
+Model không cung cấp đường dẫn/file/URL; văn bản chèn trong observation không thay được nội dung library.
+World ghi receipt tra cứu; range xử lý tại controller và đánh dấu `guidance_only`, không giả PID hay evidence thu máy.
+
+World đang chạy giữ epoch/skill version đã chụp; cập nhật source không thay prompt giữa case.
+Muốn thử baseline mới, tạo world/bundle mới; với learning release dùng quy trình activation/rollback hiện có.
+Bundle đã render cần render/rebuild lại để mang theo skill mới. Không chép skill đè vào bundle có manifest hash.
 
 ## Một lệnh kiểm tra
 
@@ -97,9 +140,9 @@ CI chạy cùng lệnh kiểm tra này trước các kiểm tra code.
 Kiểm thử phần nạp prompt, xuất bundle và runtime:
 
 ```powershell
-uv run pytest tests/unit/test_skills.py tests/unit/test_llm_solver.py tests/world tests/population tests/environments
+uv run pytest tests/unit tests/world tests/lab tests/population tests/environments
 uv run ruff check src tests scripts
-uv run ruff format --check src tests
+uv run ruff format --check src tests scripts
 uv run mypy
 uv run python scripts/validate_catalog.py
 ```

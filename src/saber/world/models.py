@@ -8,6 +8,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from saber.agents.specialties import BLUE_SKILLS, DEFAULT_BLUE_ROLES
+from saber.forensics.tools import allowed as forensic_tools
 from saber.world.lab_tools import ARTIFACT_TOOLS, RULE_TOOLS
 from saber.world.operations import CASE_TOOLS, READ_TOOLS
 from saber.world.work import LEAD_TOOLS, PERSONAL_TOOLS, WORKER_TOOLS
@@ -152,14 +153,15 @@ BLUE_TOOLS = {
 
 def tools_for(actor: Actor) -> frozenset[str]:
     if actor.team == "client":
-        return CLIENT_TOOLS | PERSONAL_TOOLS
+        return CLIENT_TOOLS | PERSONAL_TOOLS | {"consult_skill"}
     if actor.team == "red":
-        return RED_TOOLS | PERSONAL_TOOLS
+        return RED_TOOLS | PERSONAL_TOOLS | {"consult_skill"}
     return (
         frozenset().union(*(BLUE_TOOLS[s] for s in specialties_for(actor)))
         | READ_TOOLS
+        | forensic_tools(actor.team, actor.role, actor.specialties)
         | CASE_TOOLS
-        | {"telemetry_health"}
+        | {"telemetry_health", "consult_skill"}
         | PERSONAL_TOOLS
         | WORKER_TOOLS
         | ({"reopen_case", *LEAD_TOOLS} if "lead" in specialties_for(actor) else set())

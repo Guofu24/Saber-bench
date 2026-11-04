@@ -13,6 +13,7 @@ from pydantic import ValidationError
 from saber.agents.gemini import KeyPool
 from saber.agents.provider import LLMProvider
 from saber.domain.errors import SaberError
+from saber.forensics.cli import forensics_cli
 from saber.population.office import OfficeEmitter
 from saber.world.environment import World
 from saber.world.key_layout import TeamKeyLayout
@@ -32,6 +33,7 @@ def world() -> None:
 
 
 world.add_command(learning_cli)
+world.add_command(forensics_cli)
 
 
 @world.command("init", help="Create an editable actor roster and world configuration.")

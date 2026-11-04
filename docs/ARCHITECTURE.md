@@ -2,6 +2,33 @@
 
 # SABER architecture — implementation design
 
+## Current implementation map (2026-11-02)
+
+Choose the runtime before following a deployment guide. These entry points share
+skills but have different execution and evidence contracts:
+
+| Entry point | Implementation | Persistence and execution | Operator guide |
+|---|---|---|---|
+| `saber world` | `src/saber/world/` | SQLite, loopback application, actor state and bounded HTTP tools; optional fixed native subprocess per action | [Continuous world](CONTINUOUS_WORLD_VI.md), [native telemetry](NATIVE_TELEMETRY_VI.md) |
+| `saber env` | `src/saber/environments/` | Packages that world for local/Docker/user-built VM/remote use; preserves its execution model | [Environment profiles](ENVIRONMENTS_VI.md) |
+| `saber lab` | `src/saber/lab/` | Controller and worker SQLite ledgers, separate business/collector services, OpenSearch, browser workers, analysis/SOAR and optional Windows/AD guests | [SOC deployment](SOC_LAB_VI.md) |
+| Benchmark commands | `src/saber/benchmark/`, scenario and scoring modules | Frozen subtask contracts, agent-visible evidence and separate evaluator truth | [Readiness](READINESS.md), [grader contract](GRADER_CONTRACT.md) |
+
+`agent-office/` consumes bounded public snapshots. World exports native receipts
+under `native-office/`; SOC range exports job evidence and browser images under
+`range-office/`. The viewer has no provider credentials or evaluator truth.
+`consult_skill` reads a pinned reference library. In range mode it runs inside the
+controller, so its receipt carries `guidance_only`, without target process evidence.
+
+Live range planning and learning replay use the same configuration-filtered tool
+set. Workers independently enforce role capabilities; Markdown never grants tools.
+See [skill coverage](ALL_SKILLS_COVERAGE_VI.md), [acceptance ledger](SOC_COMPLETION.md)
+and the [latest audit](END_TO_END_AUDIT_VI.md).
+
+The sections below preserve the original benchmark architecture design, including
+proposed PostgreSQL/MinIO/Proxmox components. Use the implementation map and linked
+runbooks for current startup commands and deployed components.
+
 ## Objective
 
 SABER evaluates autonomous and coordinated **defensive SOC workflows** against replayable scenarios involving realistic benign workload and **authorized, isolated** attack emulation. Separate: (1) real lab, (2) agent/data plane, (3) independent benchmark control and evaluator.

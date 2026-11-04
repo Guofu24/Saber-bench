@@ -8,6 +8,9 @@ description: "Xác minh phục hồi sau phản ứng: tình trạng dịch vụ
 Trong world, theo [hợp đồng lab](../soc-orchestrator/reference/continuous-world.md).
 Nhận case, hành động IR đã thực hiện và tiêu chí chấp nhận; nhiệm vụ là kiểm, không tự sửa hệ thống.
 
+Dependency, backup/restore provenance, acceptance, cutover/rollback và observation window:
+[recovery-acceptance](reference/recovery-acceptance.md). Live đọc bằng `consult_skill` trước việc chuyên sâu.
+
 1. Lấy trạng thái và bằng chứng sau phản ứng bằng `verify_recovery` khi có; xác nhận dịch vụ hoạt động, quyền
    người dùng hợp lệ không bị chặn và biện pháp giảm thiểu còn hiệu lực. Không dùng báo cáo evaluator hay plan red.
 2. Kiểm event công việc từng client bị ảnh hưởng sau mốc phản ứng: read/write/call_app phù hợp mục tiêu;

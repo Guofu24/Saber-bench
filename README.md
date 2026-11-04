@@ -10,6 +10,7 @@ Office đã có bằng chứng từng job và ảnh Chromium kiểm hash; blue c
 Windows có queue tác vụ do agent điều phối. Range đã nối **learning có replay/pin/rollback,
 vault phân tích Ghidra/IDA/Volatility/YARA/PCAP, SOAR có xác minh hiệu ứng và backup/restore**.
 Xem [phạm vi hoàn thiện và bằng chứng kiểm thử](docs/SOC_COMPLETION.md).
+Đợt rà soát xuyên suốt gần nhất: [các lỗi đã sửa, kiểm chứng và phần còn cần máy đích](docs/END_TO_END_AUDIT_VI.md).
 
 | Nhu cầu trên máy lớn | Hướng dẫn |
 |---|---|
@@ -227,6 +228,11 @@ profile, scripted/Gemini, nguồn hành động và quota theo đội; chỉ đ�
 Bấm robot, màn hình/bàn hoặc thẻ agent để xem timeline thao tác, mục tiêu, HTTP status
 và phản ứng blue gắn với bằng chứng của case. Lịch sử trên viewer là cửa sổ có giới hạn;
 HTTP thành công không tự chứng minh tấn công thành công. Xem [notes](notes.md) để chạy demo.
+
+Blue có thêm điều tra log nhập (EDR CSV, Apache/IIS, text): giữ bản gốc/hash, truy vấn theo
+timeline/IP/process, ghi nhận định dẫn chứng, lưu tiến độ và rà thiếu sót phản ứng. Office hiện
+query, mẫu log và gaps; `REVIEWED` không phải xác minh mitigation. Xem
+[lệnh nhập log, chạy demo và dùng Gemini](docs/FORENSICS_VI.md).
 Office chia ba khu Clients/Red/Blue, chọn 12 hoặc 24 bàn mỗi đội (36/72 slots).
 Phân trang theo từng đội để xem đủ roster 200 agent; nút phía trên zoom từng khu.
 Thêm slots không tạo thêm agent. Sandbox giữ mạng cô lập;
@@ -249,20 +255,26 @@ start container hoặc triển khai trong guest/server riêng. Không có `READY
 
 ## Kiểm thử và rollback
 
-Skills có kiểm tra riêng: 18 skills, 15 sổ tay nghiệp vụ và 25 tài liệu tham chiếu.
-World nạp hướng dẫn application lab; population/benchmark nạp tài liệu theo case.
+Skills có kiểm tra riêng: 18 skills, 15 sổ tay nghiệp vụ và 56 tài liệu tham chiếu.
+Đã rà nguồn và bổ sung cả client/red/12 chuyên môn blue: [bảng nội dung, nguồn và kiểm chứng](docs/ALL_SKILLS_COVERAGE_VI.md).
+World/range nạp hướng dẫn cốt lõi, contract và cho mỗi đội tra cứu chuyên đề bằng `consult_skill`;
+population/benchmark nạp tài liệu theo case.
 Bundle mang theo các reference cần thiết. Xem [hướng dẫn skills](docs/SKILLS_VI.md).
+DFIR có 13 chuyên đề, 12 playbook và 12 nhóm hồ sơ; xem [bảng đối chiếu năng lực, nguồn và kiểm thử](docs/DFIR_CAPABILITY_COVERAGE_VI.md)
+và [review handbook](docs/DFIR_HANDBOOK_REVIEW_VI.md). World cũ giữ skill đã pin; dùng world/bundle mới để nhận baseline mới.
 Đã có [rà soát nội dung theo yêu cầu và catalog](docs/SKILLS_REVIEW_VI.md): sửa các quy tắc kết luận thiếu bằng
 chứng và bổ sung công việc/bàn giao qua nhiều lượt. PASS cấu trúc chưa chứng minh chất lượng suy luận model
 hoặc tích hợp công cụ SOC thật.
 
 ```powershell
-uv run pytest tests/environments tests/world
+uv run pytest --junitxml=runs/quality-tests.xml
 uv run python scripts/check_skills.py --out runs/skills-check/audit.json
 uv run ruff check src tests scripts
-uv run ruff format --check src tests
-uv run mypy
+uv run ruff format --check src tests scripts
+uv run mypy --platform linux
+uv run mypy --platform win32
 uv run python scripts/validate_catalog.py
+npm --prefix agent-office test
 git log --oneline --decorate -15
 ```
 
@@ -271,6 +283,9 @@ Test offline không dùng key thật/gọi LLM. Live check là thao tác opt-in 
 [checkpoint và cách dùng git revert/worktree](docs/ROLLBACK_VI.md).
 Git revert chỉ hoàn tác code: dừng runtime, backup data/volume trước khi đổi phiên bản.
 `env down` không xóa volume. Snapshot VM được quản lý ở hypervisor.
+CI kiểm tra Office trên Linux và Windows, đồng thời build lại để phát hiện
+`viewer/index.html` chưa cập nhật theo source. Khi sửa viewer, chạy
+`npm --prefix agent-office run build:viewer` với dependencies đã cài từ lockfile.
 
 ## Workflow khác
 

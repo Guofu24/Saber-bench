@@ -15,7 +15,10 @@ SOURCES = {"llm", "scripted", "scripted-fallback"}
 
 
 def trace(store: Store, config: WorldConfig, through_tick: int) -> dict[str, Any]:
-    """Never export action args, result bodies, notebooks or evaluator labels.
+    """Export no private plans/notebooks or evaluator labels.
+
+    Imported-log tools have an explicit bounded, masked query/evidence preview;
+    other action arguments and result bodies remain private.
 
     Call under the snapshot's store lock. Direct HTTP calls lack a planner journal;
     their source stays unknown rather than being attributed to Gemini.
@@ -27,6 +30,16 @@ def trace(store: Store, config: WorldConfig, through_tick: int) -> dict[str, Any
     actor_ids = {a.id for a in config.actors}
     events = store.events(through_tick=through_tick, limit=TRACE_LIMIT)
     visible_ids = {e["id"] for e in events}
+    forensic_rows = sorted(
+        (
+            row
+            for actor in config.actors
+            for row in store.get("forensic-office", actor.id, [])
+            if row["event_id"] in visible_ids
+        ),
+        key=lambda row: row["event_id"],
+    )[-20:]
+    forensic_results = {row["event_id"]: row["result"] for row in forensic_rows}
     journals: dict[int, tuple[str, dict[str, Any]]] = {
         row["event_id"]: (actor.id, row)
         for actor in config.actors
@@ -57,6 +70,11 @@ def trace(store: Store, config: WorldConfig, through_tick: int) -> dict[str, Any
                 "status": event["status"],
                 "source": source if source in SOURCES else "unknown",
                 "case_id": case_id,
+                **(
+                    {"forensics": forensic_results[event["id"]]}
+                    if event["id"] in forensic_results
+                    else {}
+                ),
             }
         )
     referenced = {row["case_id"] for row in rows if row["case_id"]}

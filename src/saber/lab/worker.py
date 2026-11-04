@@ -18,7 +18,7 @@ from typing import Any
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
-from saber.lab.capabilities import ARTIFACTS, TOOLS, allowed
+from saber.lab.capabilities import ARTIFACTS, TOOLS, WINDOWS_TOOLS, allowed
 from saber.lab.events import Emitter
 from saber.lab.ledger import Ledger
 from saber.lab.sensor import sensor_coverage
@@ -81,9 +81,7 @@ def create_worker(
     @app.get("/health")
     def health() -> dict[str, Any]:
         available = {
-            t
-            for t in TOOLS[team]
-            if credentials.get("windows_nodes") or not t.startswith("windows_")
+            t for t in TOOLS[team] if credentials.get("windows_nodes") or t not in WINDOWS_TOOLS
         }
         return {"ok": True, "team": team, "tools": sorted(available), "sensor": sensor_coverage()}
 
@@ -92,7 +90,7 @@ def create_worker(
         if not secrets.compare_digest(authorization, "Bearer " + credentials["rpc_token"]):
             raise HTTPException(403, "Executor capability required")
         account = accounts.get(job.actor)
-        if job.tool.startswith("windows_") and not credentials.get("windows_nodes"):
+        if job.tool in WINDOWS_TOOLS and not credentials.get("windows_nodes"):
             raise HTTPException(403, "No Windows guests configured")
         if (
             account is None

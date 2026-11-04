@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import time
 from pathlib import Path
 from typing import Any
@@ -98,7 +99,7 @@ def snapshot(
                     ),
                 }
             )
-    return {
+    result: dict[str, Any] = {
         "type": "world_snapshot",
         "schema_version": 1,
         "world_id": report["world_id"],
@@ -131,3 +132,16 @@ def snapshot(
         },
         "budget_exhausted": budget_exhausted,
     }
+    # The watch transport caps the indented UTF-8 snapshot at 256 KiB. Long
+    # imported-log previews must not hide the entire office at a 200-actor roster.
+    for event in (row for row in activity_trace["events"] if "forensics" in row):
+        wire = (json.dumps(result, ensure_ascii=False, indent=2) + "\n").replace("\n", os.linesep)
+        if len(wire.encode()) <= 250000:
+            break
+        previous = event["forensics"]
+        event["forensics"] = {
+            "session_id": previous.get("session_id", previous.get("id")),
+            "state": previous.get("state"),
+            "detail_omitted": "Office snapshot budget: older preview omitted; operator forensics inspect/evidence retains the record.",
+        }
+    return result

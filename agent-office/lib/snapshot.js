@@ -63,6 +63,7 @@ function normalizeTrace(v, actors, tick) {
     target_actor_id: e.target_actor_id == null ? null : actor(e.target_actor_id),
     source: choice(e.source, ['unknown', 'llm', 'scripted', 'scripted-fallback']),
     case_id: e.case_id == null ? null : word(e.case_id),
+    ...(e.forensics == null ? {} : { forensics: normalizeForensics(e.forensics) }),
   }));
   if (events.some((e, i) => e.status > 599 || (i && (e.id <= events[i - 1].id || e.tick < events[i - 1].tick)))) throw new Error('Invalid trace order/status');
   const eventIds = new Set(events.map(e => e.id));
@@ -131,6 +132,11 @@ function publicData(value, depth = 0) {
   if (typeof value === 'string') return value.replace(/AIza[\w-]{25,}/g, '[REDACTED]').replace(/((?:password|token|api[_-]?key|secret)[\s=:]+)\S+/gi, '$1[REDACTED]').slice(0, 16384);
   if (value == null || typeof value === 'boolean' || (typeof value === 'number' && Number.isFinite(value))) return value;
   throw new Error('Invalid evidence value');
+}
+function normalizeForensics(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value) || Buffer.byteLength(JSON.stringify(value)) > 8000) throw new Error('Invalid forensic preview');
+  const keys = ['session_id', 'id', 'state', 'step_count', 'step_limit', 'query', 'gaps', 'residual_risk', 'advisory_only', 'response_verified', 'finding', 'summary', 'groups', 'next_after', 'coverage', 'evidence', 'preview_limit', 'detail_omitted'];
+  return publicData(Object.fromEntries(Object.entries(value).filter(([key]) => keys.includes(key))));
 }
 function normalizeRangePage(v) {
   const actor = word(v.actor_id, 48), tick = integer(v.through_tick);

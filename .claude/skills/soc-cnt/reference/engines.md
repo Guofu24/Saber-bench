@@ -1,6 +1,6 @@
 # CNT · Viết rule chạy được: định dạng và kiểm thử
 
-Rule do bạn viết luôn được **chạy thử trong sandbox** (có timeout, giới hạn tài nguyên, giới hạn độ dài
+Rule cần được **chạy thử bằng engine được cấp** (có timeout, giới hạn tài nguyên, giới hạn độ dài
 pattern) trên corpus trước khi phát hành. Rule **không parse được** hoặc **chạy quá thời gian** coi như hỏng.
 Không bao giờ chạy rule thử nghiệm trực tiếp trên hệ thống production.
 

@@ -10,8 +10,10 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+from saber.agents.skill_library import load_reference_library
 from saber.agents.skills import load_playbook
-from saber.lab.capabilities import allowed as role_tools
+from saber.forensics import tools as forensics
+from saber.lab.capabilities import configured_tools
 from saber.lab.deployment import principal
 from saber.lab.learning import LearningWorld, RangeLearner
 from saber.lab.learning import messages as planning_messages
@@ -74,6 +76,12 @@ class Controller:
                 for a in spec.actors
             },
             activate_now=False,
+            reference_libraries={
+                PLAYBOOKS["client" if a.team == "client" else a.role]: load_reference_library(
+                    PLAYBOOKS["client" if a.team == "client" else a.role]
+                )
+                for a in spec.actors
+            },
         )
         with self.store.transaction():
             if self.store.get("learning-meta", "epoch") is None:
@@ -81,21 +89,19 @@ class Controller:
 
     def observe(self, actor: Any) -> dict[str, Any]:
         own: dict[str, Any] = self.store.get("lab-memory", actor.id, {"turn": 0, "result": {}})
+        own = own | {"skill_reference": self.store.get("skill-reference", actor.id)}
         if actor.team == "blue":
             status, cases = request(self.collector + "/cases", token=self.credentials["read_token"])
             if status != 200:
                 raise ConnectionError("SOC observation unavailable")
-            return own | {"cases": cases["cases"]}
+            return own | {
+                "cases": cases["cases"],
+                "forensics": forensics.overview(self.store.root, actor.id),
+            }
         return own
 
     def choose(self, actor: Any, obs: dict[str, Any]) -> tuple[str, dict[str, Any], str]:
-        allowed = role_tools(actor.team, actor.role, actor.specialties)
-        if not self.spec.windows:
-            allowed = {t for t in allowed if not t.startswith("windows_")}
-        if not self.spec.analysis.enabled:
-            allowed -= {"list_samples", "tool_status", "analyze_sample", "analysis_status"}
-        if not self.spec.soar.enabled:
-            allowed -= {"run_playbook", "soar_status"}
+        allowed = configured_tools(actor, self.spec)
         previous = obs.get("result", {}).get("guest_work", {})
         soar = obs.get("result", {}).get("soar_job", {})
         if soar.get("state") in ("QUEUED", "DISPATCHING", "RUNNING", "VERIFYING") or (
@@ -261,6 +267,14 @@ class Controller:
             return "collect", {}, source
         return "browse", {}, source
 
+    def _consult_job(self, actor: Any, job: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+        with self.store.transaction():
+            try:
+                status, data, _ = learning.consult(self.learning_world, actor, job["args"])
+            except (ValueError, TypeError, KeyError):
+                status, data = 400, {"error": "Invalid skill consultation"}
+        return 200, {"status": status, **data, "guidance_only": True, "executor_host": "controller"}
+
     def actor_step(self, actor: Any, tick: int) -> None:
         if self.stop.is_set():
             return
@@ -270,13 +284,21 @@ class Controller:
             if pending:
                 job, source = pending["job"], pending["source"]
                 tool = job["tool"]
-                status, receipt = request(
-                    self.workers[actor.team] + "/jobs/" + job["id"],
-                    token=self.credentials["workers"][actor.team],
-                )
-                if status != 200 or receipt.get("state") != "COMPLETED":
-                    return  # Keep this actor paused; never replace an uncertain job with a new one.
-                result = receipt["result"]
+                if tool == "consult_skill":
+                    status, result = self._consult_job(actor, job)
+                elif tool in forensics.TOOLS:
+                    status, result = (
+                        200,
+                        forensics.execute(self.store.root, actor, tool, job["args"], job["id"]),
+                    )
+                else:
+                    status, receipt = request(
+                        self.workers[actor.team] + "/jobs/" + job["id"],
+                        token=self.credentials["workers"][actor.team],
+                    )
+                    if status != 200 or receipt.get("state") != "COMPLETED":
+                        return  # Keep this actor paused; never replace an uncertain job with a new one.
+                    result = receipt["result"]
             else:
                 tool, args, source = self.choose(actor, obs)
                 job = {"id": str(uuid.uuid4()), "actor": actor.id, "tool": tool, "args": args}
@@ -287,12 +309,20 @@ class Controller:
                         job["id"],
                         {"actor": actor.id, "tick": tick, "tool": tool, "status": "DISPATCHED"},
                     )
-                status, result = request(
-                    self.workers[actor.team] + "/execute",
-                    token=self.credentials["workers"][actor.team],
-                    body=job,
-                    timeout=40,
-                )
+                if tool == "consult_skill":
+                    status, result = self._consult_job(actor, job)
+                elif tool in forensics.TOOLS:
+                    status, result = (
+                        200,
+                        forensics.execute(self.store.root, actor, tool, job["args"], job["id"]),
+                    )
+                else:
+                    status, result = request(
+                        self.workers[actor.team] + "/execute",
+                        token=self.credentials["workers"][actor.team],
+                        body=job,
+                        timeout=40,
+                    )
                 if status >= 500 or status == 409:
                     return
             if status == 429:  # no job accepted: do not advance the actor's plan or claim execution
@@ -331,7 +361,10 @@ class Controller:
                     "actor": actor.id,
                     "tick": tick,
                     "tool": tool,
-                    "status": "COMPLETED" if result.get("exit_code") == 0 else "FAILED",
+                    "status": "COMPLETED"
+                    if result.get("exit_code") == 0
+                    or (tool in {"consult_skill", *forensics.TOOLS} and result.get("status") == 200)
+                    else "FAILED",
                     "result": result,
                 },
             )

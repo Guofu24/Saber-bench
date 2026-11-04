@@ -1,6 +1,6 @@
 # Notes — các lệnh chạy SABER
 
-Cập nhật: 2026-11-02. Dùng để tra lệnh vận hành client / red team / blue team.
+Cập nhật: 2026-11-03. Dùng để tra lệnh vận hành client / red team / blue team.
 Các ví dụ chạy trong PowerShell; chọn chế độ cần dùng, không chạy toàn bộ file như script.
 
 | Muốn làm gì | Xem mục |
@@ -16,6 +16,7 @@ Các ví dụ chạy trong PowerShell; chọn chế độ cần dùng, không ch
 | Kiểm tra skills, catalog và viewer | 10 |
 | Process, file, DNS/TCP thật và log riêng từng agent | 11 |
 | SOC lab nhiều dịch vụ, SIEM, Windows/AD, lab mở rộng | 12 |
+| Nhập log, điều tra DFIR nhiều lượt, rà phản ứng trên Office | 13 |
 
 ## 1. Chuẩn bị
 
@@ -416,6 +417,13 @@ uv run python scripts/ledger.py summary
 # Kiểm thử offline của world và harness learning
 uv run pytest -o addopts= tests/world -q
 
+# Kiểm tra toàn repo trước khi bàn giao/push
+uv run pytest --junitxml=runs/quality-tests.xml
+uv run ruff check src tests scripts
+uv run ruff format --check src tests scripts
+uv run mypy --platform linux
+uv run mypy --platform win32
+
 # Kiểm thử viewer, không gọi model
 npm --prefix agent-office test
 ```
@@ -435,6 +443,27 @@ không phải lệnh vận hành client/red/blue. Hướng dẫn riêng:
 Tài liệu chi tiết: [world](docs/CONTINUOUS_WORLD_VI.md),
 [môi trường](docs/ENVIRONMENTS_VI.md), [Agent Office](agent-office/README.md),
 [learning](docs/AGENT_LEARNING_VI.md), [rollback](docs/ROLLBACK_VI.md).
+
+Kiểm tra ba bundle mà không khởi động Docker/VM (cần Docker CLI để parse Compose,
+không cần engine; dùng một đường dẫn output mới):
+
+```powershell
+uv run python scripts/validate_soc_bundles.py --out runs/bundle-check-new
+```
+
+Để dùng baseline skill vừa cập nhật, tạo world mới; resume giữ nguyên phiên bản
+đã ghim. Scripted mode dùng hành vi có sẵn; sửa Markdown không tự đổi policy đó.
+
+```powershell
+uv run saber world init --out runs/skills-current --clients 2 --blue-specialists
+uv run saber world run --out runs/skills-current --ticks 18
+node agent-office/bin/agent-office.js watch --world runs/skills-current --open
+```
+
+World mẫu có 2 client, 3 red, 12 blue. Với SOC range, render bundle mới trước khi
+chuyển máy; không chép skill đè lên bundle đã có manifest. `consult_skill` chọn
+topic cho lần suy luận tiếp theo, không tự khởi chạy công cụ phân tích.
+Xem [báo cáo rà soát và mức kiểm chứng](docs/END_TO_END_AUDIT_VI.md).
 
 ## 11. Chạy workload native và xem process/file/DNS/network
 
@@ -559,3 +588,39 @@ AD cần export toàn bộ guest bằng `windows/Backup-Lab.ps1` và truyền
 
 Hướng dẫn [learning trong volume controller](docs/SOC_LEARNING_VI.md),
 [Ghidra/IDA/Volatility/PCAP](docs/SOC_ANALYSIS_VI.md), [Shuffle/webhook](docs/SOC_SOAR_VI.md).
+
+## 13. Điều tra log nhập và rà soát phản ứng
+
+Demo nhẹ, không Docker/API key; dùng output mới mỗi lần:
+
+```powershell
+uv run --no-sync python scripts/smoke_forensics.py --out runs/forensics-demo
+node agent-office/bin/agent-office.js watch --world runs/forensics-demo --open
+```
+
+Chọn Blue Team → blue-dfir, mở `forensic_query` để xem bộ lọc/mẫu log/ID/hash,
+`response_review` để xem thiếu sót. Demo dùng HTTP thật và lịch scripted, không phải Gemini.
+
+Nhập log vào world riêng để blue dùng với planner Gemini:
+
+```powershell
+uv run --no-sync saber world init --out runs/ir-world --clients 1
+uv run --no-sync saber world forensics import --out runs/ir-world --file .\logs\edr.csv --format csv --label "EDR export"
+uv run --no-sync saber world forensics sources --out runs/ir-world
+```
+
+Sửa goal của `blue-dfir` trong config trước lần chạy đầu: điều tra log nhập, dẫn chứng,
+rà thiếu sót phản ứng; sau đó dùng lệnh Gemini ở mục 3 với `--out runs/ir-world`.
+Các format khác: `apache`, `iis`, `text`; khi biết offset của timestamp thiếu zone,
+thêm `--assume-offset +07:00`. Giữ nguyên file nguồn; kho tạo bản sao và SHA-256.
+
+```powershell
+uv run --no-sync saber world forensics sessions --out runs/ir-world
+uv run --no-sync saber world forensics inspect --out runs/ir-world --session SESSION_ID
+uv run --no-sync saber world forensics evidence --out runs/ir-world --id RECORD_ID
+uv run --no-sync saber world forensics verify --out runs/ir-world --source SOURCE_ID
+```
+
+`PARTIAL` là còn vướng; `REVIEWED` chỉ là đã rà hồ sơ, không tự xác nhận phòng thủ thành công.
+ID log nhập tách khỏi case/event live. SOC lab dùng cùng lệnh `lab forensics` tại data directory
+của controller. Chi tiết quyền, giới hạn, export raw và Compose: [FORENSICS_VI.md](docs/FORENSICS_VI.md).

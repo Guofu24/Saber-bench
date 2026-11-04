@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from saber.agents.skill_library import validate_library
 from saber.agents.skills import MAX_WORLD_CHARS
 from saber.agents.specialties import BLUE_SKILLS
 
@@ -55,13 +56,21 @@ class Lesson(BaseModel):
     limitations: str = Field(min_length=5, max_length=500)
 
 
-def initialize(world: World, playbooks: dict[str, str], *, activate_now: bool = True) -> None:
+def initialize(
+    world: World,
+    playbooks: dict[str, str],
+    *,
+    activate_now: bool = True,
+    reference_libraries: dict[str, dict[str, dict[str, str]]] | None = None,
+) -> None:
     """Keep the original base even when checkout files change across a restart."""
     with world.store.transaction():
         for skill, base in playbooks.items():
             if world.store.get("skill-heads", skill) is not None:
                 continue
             version: dict[str, Any] = {"skill": skill, "base": base, "lessons": [], "parent": None}
+            if reference_libraries and skill in reference_libraries:
+                version["references"] = validate_library(reference_libraries[skill])
             vid = digest(version)
             world.store.put("skill-versions", vid, version | {"id": vid})
             world.store.put("skill-heads", skill, vid)
@@ -124,6 +133,45 @@ def prompt_version(store: Store, skill: str) -> dict[str, Any] | None:
     return version(store, vid) if vid else None
 
 
+def consult(world: World, actor: Actor, args: dict[str, Any]) -> tuple[int, dict[str, Any], str]:
+    """Select one guide from the active skill's immutable library; no file/URL input."""
+    if set(args) - {"topic"} or ("topic" in args and not isinstance(args["topic"], str)):
+        raise ValueError("Expected a reference topic ID")
+    pin = prompt_version(world.store, actor_skill(world, actor))
+    library = validate_library((pin or {}).get("references", {}))
+    if not pin or "references" not in pin:
+        return (
+            409,
+            {
+                "error": "This skill version has no reference library. Use a new world/bundle baseline."
+            },
+            actor.id,
+        )
+    if "topic" not in args:
+        return (
+            200,
+            {
+                "reference_topics": {k: v["title"] for k, v in library.items()},
+                "guidance_only": True,
+            },
+            actor.id,
+        )
+    topic = args["topic"]
+    if topic and topic not in library:
+        return 404, {"error": "Unknown topic for the active skill."}, actor.id
+    selection = {"version": pin["id"], "topic": topic}
+    world.store.put("skill-reference", actor.id, selection)
+    return (
+        200,
+        {
+            "skill_reference": selection | ({"sha256": library[topic]["sha256"]} if topic else {}),
+            "message": "Skill guidance selected; no forensic evidence collected.",
+            "guidance_only": True,
+        },
+        topic or actor.id,
+    )
+
+
 def candidate_version(base: dict[str, Any], proposal: dict[str, Any]) -> dict[str, Any]:
     # Duplicate ideas do not grow the prompt indefinitely.
     lesson = {k: proposal["lesson"][k] for k in ("applicability", "guidance", "limitations")}
@@ -142,6 +190,8 @@ def candidate_version(base: dict[str, Any], proposal: dict[str, Any]) -> dict[st
         "lessons": lessons,
         "parent": base["id"],
     }
+    if "references" in base:
+        result["references"] = validate_library(base["references"])
     return result | {"id": digest(result)}
 
 

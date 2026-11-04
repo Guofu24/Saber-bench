@@ -7,6 +7,7 @@ acceptance still owns Docker isolation, OpenSearch, Zeek and Windows/AD validati
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import json
 import socket
 import threading
@@ -22,11 +23,12 @@ from saber.lab.analysis_service import AnalysisQueue, create_analysis
 from saber.lab.application import create_application
 from saber.lab.collector import create_collector
 from saber.lab.controller import Controller
-from saber.lab.deployment import initialize_secrets, render
+from saber.lab.deployment import initialize_secrets, principal, render
 from saber.lab.events import Emitter
 from saber.lab.ledger import Ledger
 from saber.lab.models import preset_spec
 from saber.lab.soar import SoarRunner, create_soar
+from saber.lab.transport import request
 from saber.lab.worker import create_worker
 
 
@@ -120,12 +122,50 @@ def run(out: Path, chrome: Path, ticks: int) -> dict[str, Any]:
             urls[team] = stack.enter_context(served(worker))
         controller = Controller(spec, out / "controller", creds["controller"], urls, collector)
         stack.callback(controller.close)
-        controller.run(ticks=ticks)
+        # Observe each verified response while its TTL can still be active. A
+        # short run may not schedule another red read; a slow run can legitimately
+        # outlive session containment. Neither should replace a real access check.
+        owner, red = principal("client-1"), principal("red-access")
+        probes: list[dict[str, Any]] = []
+        checked_responses: set[str] = set()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as scheduler:
+            running = scheduler.submit(controller.run, ticks=ticks)
+            while True:
+                for response in stores["soar"].events(kind="soar.completed", limit=100):
+                    if response["id"] in checked_responses or not response["data"].get("verified"):
+                        continue
+                    checked_responses.add(response["id"])
+                    previous_events = {e["id"] for e in stores["app"].events(limit=1000)}
+                    probe = {
+                        "response_event_id": response["id"],
+                        "playbook": response["data"]["playbook"],
+                    }
+                    for team, user in (("red", red), ("client", owner)):
+                        status, _ = request(
+                            app + "/documents/" + owner,
+                            token=creds["app"]["accounts"][user]["token"],
+                        )
+                        probe[team + "_status"] = status
+                    probe["evidence_ids"] = [
+                        e["id"]
+                        for e in stores["app"].events(limit=1000)
+                        if e["id"] not in previous_events
+                    ]
+                    probes.append(probe)
+                if running.done():
+                    running.result()
+                    break
+                time.sleep(0.1)
         for value in emitters:
             while value.flush():
                 pass
         controller.publish(stopped=True)
         events = stores["collector"].events(limit=1000)
+        verified_probes = [
+            p for p in probes if p["red_status"] == 403 and p["client_status"] == 200
+        ]
+        probe_ids = {eid for p in verified_probes for eid in p["evidence_ids"]}
+        probe_events = [e for e in events if e["host"] == "app-loopback" and e["id"] in probe_ids]
         checks = {
             "all_agents_executed": all(
                 controller.store.get("lab-memory", a.id, {}).get("turn", 0) > 0 for a in spec.actors
@@ -134,7 +174,15 @@ def run(out: Path, chrome: Path, ticks: int) -> dict[str, Any]:
                 e["kind"] == "soar.completed" and e["data"].get("verified") for e in events
             ),
             "enforced_denial": any(
-                e["kind"] in ("auth.denied", "file.access_denied") for e in events
+                e["kind"] in ("auth.denied", "file.access_denied")
+                and e["data"].get("principal") == red
+                for e in probe_events
+            ),
+            "benign_access_preserved": any(
+                e["kind"] == "file.read"
+                and e["data"].get("principal") == owner
+                and e["data"].get("owner") == owner
+                for e in probe_events
             ),
             "native_yara": any(
                 e["kind"] == "analysis.completed"
@@ -153,6 +201,8 @@ def run(out: Path, chrome: Path, ticks: int) -> dict[str, Any]:
             "checks": checks,
             "actors": len(spec.actors),
             "ticks": ticks,
+            "response_probes": probes,
+            "probe_origin": "operator verification during agent execution; no policy changes",
             "scope": "real loopback services/processes/browser/YARA, scripted planning; no Docker/AD acceptance",
             "office_world": str(out / "controller"),
         }

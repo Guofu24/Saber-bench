@@ -8,6 +8,8 @@ import json
 import time
 from typing import Any
 
+from saber.forensics.tools import TOOLS as FORENSIC_TOOLS
+from saber.forensics.tools import trace_result
 from saber.lab.events import redact
 from saber.lab.transport import request
 from saber.world.runtime import atomic_json
@@ -36,7 +38,17 @@ def publish_actor(
     for entry in reversed(history):
         if time.monotonic() >= deadline:
             break
-        if entry.get("evidence_complete"):
+        if (
+            entry.get("evidence_complete")
+            or (
+                entry.get("tool") in FORENSIC_TOOLS
+                and entry.get("result", {}).get("analysis_only") is True
+            )
+            or (
+                entry.get("tool") == "consult_skill"
+                and entry.get("result", {}).get("guidance_only") is True
+            )
+        ):
             continue
         try:
             status, page = fetch(
@@ -145,8 +157,15 @@ def record(
         "count",
         "source",
         "next_cursor",
+        "guidance_only",
+        "analysis_only",
+        "skill_reference",
+        "reference_topics",
+        "message",
     )
     output = redact({k: result[k] for k in fields if k in result})
+    if tool in FORENSIC_TOOLS:
+        output["forensics"] = trace_result(result)
     if len(json.dumps(output).encode()) > 16_000:
         output = {
             k: result[k] for k in ("status", "pid", "exit_code", "executor_host") if k in result
