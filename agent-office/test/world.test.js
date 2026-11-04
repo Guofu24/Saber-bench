@@ -48,6 +48,19 @@ function nativeFixture(overrides = {}) {
       data: { command_line: 'python -I -B native_worker.py', ppid: 12, token: 'SECRET' } }], ...overrides };
 }
 
+test('forensic previews retain queries and citation hashes without exporting private fields', () => {
+  const event = { id: 1, tick: 8, actor_id: 'client-1', tool: 'forensic_query', target: 'session', status: 200, source: 'scripted',
+    forensics: { session_id: 'a'.repeat(32), state: 'INVESTIGATING', query: { args: { text: '/portal' } },
+      evidence: [{ id: 1, sha256: 'b'.repeat(64), fields: { status: '200' } }], private_notebook: 'PRIVATE' } };
+  const input = fixture({ trace: { limit: 200, events: [event], cases: [] } });
+  const value = normalizeSnapshot(input).trace.events[0].forensics;
+  assert.equal(value.query.args.text, '/portal');
+  assert.equal(value.evidence[0].fields.status, '200');
+  assert.doesNotMatch(JSON.stringify(value), /PRIVATE/);
+  event.forensics.summary = 'x'.repeat(8001);
+  assert.throws(() => normalizeSnapshot(input));
+});
+
 test('range evidence validates screen hashes, isolates actors and strips credentials', async t => {
   const crypto = require('node:crypto');
   const id = '12345678-1234-1234-1234-123456789abc';

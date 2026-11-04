@@ -10,6 +10,7 @@ import sqlite3
 import time
 import uuid
 from collections import Counter
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -56,7 +57,7 @@ class Query(BaseModel):
     group_by: str = Field(
         default="image", pattern=r"^(host|image|process_guid|pid|ip|event_id|status)$"
     )
-    after: int = Field(default=0, ge=0)
+    after: int = Field(default=0, ge=0, le=1600000)
     limit: int = Field(default=10, ge=1, le=20)
 
 
@@ -134,6 +135,7 @@ class Vault:
         if not path.is_file() or path.is_symlink() or path.stat().st_size > MAX_SOURCE_BYTES:
             raise ValueError("Use a regular file up to 128 MiB")
         source_id = uuid.uuid4().hex
+        initial_stat = path.stat()
         destination = self.original(source_id)
         try:
             self.db.execute("BEGIN IMMEDIATE")
@@ -200,7 +202,7 @@ class Vault:
                 except (UnicodeError, csv.Error, ValueError):
                     indexed_complete = False
                     warnings["parse_stopped"] += 1
-            manifest = {
+            manifest: dict[str, Any] = {
                 "id": source_id,
                 "label": label,
                 "format": fmt,
@@ -213,7 +215,15 @@ class Vault:
                 "original_preserved": True,
                 "encoding": "utf-8",
                 "parser_version": 1,
+                "imported_at": datetime.now(UTC).isoformat(),
+                "origin_name": path.name[:120],
             }
+            final_stat = path.stat()
+            if (initial_stat.st_mtime_ns, initial_stat.st_size) != (
+                final_stat.st_mtime_ns,
+                final_stat.st_size,
+            ):
+                manifest["warnings"]["source_changed_during_copy"] = 1
             self.db.execute("INSERT INTO sources VALUES (?,?)", (source_id, json.dumps(manifest)))
             self.db.commit()
             return manifest
@@ -264,7 +274,14 @@ class Vault:
                     (*params, query.limit),
                 ).fetchall()
                 return {
-                    "groups": [dict(r) for r in rows],
+                    "groups": [
+                        {
+                            "value": display(str(r["value"]))[:256],
+                            "count": r["count"],
+                            **({"value_truncated": True} if len(str(r["value"])) > 256 else {}),
+                        }
+                        for r in rows
+                    ],
                     "group_by": query.group_by,
                     "scope": "indexed matching records; top groups only",
                     "evidence": [],
@@ -275,11 +292,20 @@ class Vault:
                 f"SELECT * FROM records WHERE {clause} ORDER BY {order} LIMIT ? OFFSET ?",
                 (*params, query.limit + 1, query.after),
             ).fetchall()
-            evidence = [self.evidence(r) for r in rows[: query.limit]]
+            evidence: list[dict[str, Any]] = []
+            preview_bytes = 0
+            for row in rows[: query.limit]:
+                item = self.evidence(row)
+                item_bytes = len(json.dumps(item).encode())
+                if evidence and preview_bytes + item_bytes > 16000:
+                    break
+                evidence.append(item)
+                preview_bytes += item_bytes
             return {
                 "evidence": evidence,
-                "next_after": query.after + query.limit if len(rows) > query.limit else None,
-                "page_complete": len(rows) <= query.limit,
+                "next_after": query.after + len(evidence) if len(rows) > len(evidence) else None,
+                "page_complete": len(rows) <= len(evidence),
+                "preview_budget_bytes": 16000,
                 "scope": "indexed records only",
                 "unknown_times_excluded": query.mode == "timeline"
                 or bool(query.since or query.until),
@@ -308,7 +334,12 @@ class Vault:
             "length": row["length"],
             "sha256": row["sha256"],
             "record_integrity_verified": True,
-            "fields": display(fields),
+            "fields": {
+                k: (v[:256] if isinstance(v, str) else v) for k, v in display(fields).items()
+            },
+            "fields_preview_truncated": any(
+                isinstance(v, str) and len(v) > 256 for v in fields.values()
+            ),
             "preview": display(row["text"])[:600],
             "preview_is_original": False,
         }

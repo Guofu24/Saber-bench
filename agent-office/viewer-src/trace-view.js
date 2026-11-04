@@ -13,6 +13,13 @@ function actorTrace(world, actorId) {
 }
 
 const descriptions = {
+  forensic_sources: 'Liệt kê log do operator nhập vào kho bằng chứng.',
+  forensic_open: 'Mở phiên điều tra trên các bản log đã lưu và đối chiếu SHA-256.',
+  forensic_status: 'Đọc tiến độ và phát hiện đã lưu của phiên điều tra.',
+  forensic_query: 'Truy vấn log theo từ khóa, timeline, IP hoặc tiến trình; kết quả có ID và hash bản ghi.',
+  forensic_record: 'Ghi nhận định của analyst kèm ID bằng chứng đã đọc. Trích dẫn hợp lệ chưa chứng minh nhận định đúng.',
+  response_review: 'Rà soát thiếu sót về phạm vi, cô lập, loại bỏ, khôi phục và rủi ro còn lại; không tự đóng case.',
+  forensic_finish: 'Lưu kết luận điều tra với trạng thái REVIEWED hoặc PARTIAL; không xác nhận hệ thống đã an toàn.',
   consult_skill: 'Tra cứu hướng dẫn skill đã ghim cho agent; không tự thực hiện thao tác trong hệ thống đích.',
   browse: 'Khám phá các đường dẫn trong ứng dụng lab.',
   login: 'Đăng nhập vào ứng dụng lab.',
@@ -58,6 +65,9 @@ const descriptions = {
 };
 function describeTool(tool) { return descriptions[tool] || 'Thực thi công cụ được cấp quyền trong môi trường lab; xem bằng chứng bên dưới.'; }
 function rangeEvidenceSummary(entry) {
+  if ((entry.tool.startsWith('forensic_') || entry.tool === 'response_review') && entry.result?.analysis_only === true) {
+    return 'Phân tích log nhập tại controller. Hash xác nhận bản ghi lưu giữ, không xác nhận nội dung log là thật hay phản ứng đã thành công. Không tạo tiến trình trên máy đích.';
+  }
   if (entry.tool === 'consult_skill' && entry.result?.guidance_only === true) {
     return 'Tra cứu hướng dẫn tại controller. Xem status và topic trong kết quả; thao tác này không tạo process hay bằng chứng thực thi trên máy đích.';
   }

@@ -314,3 +314,37 @@ def test_step_limit_stays_partial_and_cli_works(tmp_path):
         ],
     )
     assert response.exit_code == 0, response.output
+
+
+def test_large_query_pages_keep_cursor_and_prompt_budget(tmp_path):
+    source = "UtcTime,Computer,Image,CommandLine\n" + "".join(
+        f"2026-11-03T00:00:{i:02d}," + "h" * 500 + "," + "i" * 500 + "," + "x" * 9000 + "\n"
+        for i in range(20)
+    )
+    _, manifest = ingest(tmp_path, source)
+    sid = start(tmp_path, manifest)
+    after, ids = 0, []
+    while after is not None:
+        result = call(tmp_path, "forensic_query", {"session_id": sid, "limit": 20, "after": after})
+        assert len(json.dumps(result).encode()) < 20000
+        page = result["forensics"]
+        ids.extend(e["id"] for e in page["evidence"])
+        assert all(e["fields_preview_truncated"] for e in page["evidence"])
+        after = page["next_after"]
+    assert len(ids) == len(set(ids)) == 20
+
+
+def test_source_catalog_is_paged_and_unknown_time_blocks_review(tmp_path):
+    _, manifest = ingest(tmp_path, "Nov 3 10:00:00 unzoned\n", "text")
+    with Vault(tmp_path / "world") as vault, vault.db:
+        for _ in range(11):
+            clone = dict(manifest, id=uuid.uuid4().hex)
+            vault.db.execute("INSERT INTO sources VALUES (?,?)", (clone["id"], json.dumps(clone)))
+    page = call(tmp_path, "forensic_sources")["forensics"]
+    assert len(page["sources"]) == 10 and page["next_after"] == 10
+    assert len(call(tmp_path, "forensic_sources", {"after": 10})["forensics"]["sources"]) == 2
+    sid = start(tmp_path, manifest)
+    result = call(
+        tmp_path, "response_review", {"session_id": sid, "residual_risk": "Unknown timezone"}
+    )
+    assert "source_coverage_or_time_uncertainty" in result["forensics"]["gaps"]

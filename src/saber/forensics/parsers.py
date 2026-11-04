@@ -58,7 +58,7 @@ def utc(value: str, assumed_offset: str | None = None) -> str | None:
 def normalize(row: dict[str, str], assumed_offset: str | None) -> dict[str, Any]:
     lookup = {k.strip().casefold(): v for k, v in row.items()}
     out: dict[str, Any] = {
-        field: next((lookup[a.casefold()] for a in aliases if a.casefold() in lookup), "")
+        field: next((lookup[a.casefold()] for a in aliases if lookup.get(a.casefold())), "")
         for field, aliases in FIELDS.items()
     }
     # UtcTime explicitly declares UTC; a plain Timestamp does not.

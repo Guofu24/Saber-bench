@@ -12,6 +12,7 @@ from typing import Any
 
 from saber.agents.skill_library import load_reference_library
 from saber.agents.skills import load_playbook
+from saber.forensics import tools as forensics
 from saber.lab.capabilities import configured_tools
 from saber.lab.deployment import principal
 from saber.lab.learning import LearningWorld, RangeLearner
@@ -93,7 +94,10 @@ class Controller:
             status, cases = request(self.collector + "/cases", token=self.credentials["read_token"])
             if status != 200:
                 raise ConnectionError("SOC observation unavailable")
-            return own | {"cases": cases["cases"]}
+            return own | {
+                "cases": cases["cases"],
+                "forensics": forensics.overview(self.store.root, actor.id),
+            }
         return own
 
     def choose(self, actor: Any, obs: dict[str, Any]) -> tuple[str, dict[str, Any], str]:
@@ -282,6 +286,11 @@ class Controller:
                 tool = job["tool"]
                 if tool == "consult_skill":
                     status, result = self._consult_job(actor, job)
+                elif tool in forensics.TOOLS:
+                    status, result = (
+                        200,
+                        forensics.execute(self.store.root, actor, tool, job["args"], job["id"]),
+                    )
                 else:
                     status, receipt = request(
                         self.workers[actor.team] + "/jobs/" + job["id"],
@@ -302,6 +311,11 @@ class Controller:
                     )
                 if tool == "consult_skill":
                     status, result = self._consult_job(actor, job)
+                elif tool in forensics.TOOLS:
+                    status, result = (
+                        200,
+                        forensics.execute(self.store.root, actor, tool, job["args"], job["id"]),
+                    )
                 else:
                     status, result = request(
                         self.workers[actor.team] + "/execute",
@@ -349,7 +363,7 @@ class Controller:
                     "tool": tool,
                     "status": "COMPLETED"
                     if result.get("exit_code") == 0
-                    or (tool == "consult_skill" and result.get("status") == 200)
+                    or (tool in {"consult_skill", *forensics.TOOLS} and result.get("status") == 200)
                     else "FAILED",
                     "result": result,
                 },

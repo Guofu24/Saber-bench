@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from saber.forensics.tools import allowed as forensic_tools
+
 if TYPE_CHECKING:
     from saber.lab.models import LabSpec
     from saber.world.models import Actor
@@ -85,7 +87,11 @@ def allowed(team: str, role: str, specialties: tuple[str, ...] = ()) -> set[str]
 
 def planner_allowed(team: str, role: str, specialties: tuple[str, ...] = ()) -> set[str]:
     """Guidance reads are controller-local; executors retain their original capabilities."""
-    return allowed(team, role, specialties) | {"consult_skill"}
+    return (
+        allowed(team, role, specialties)
+        | {"consult_skill"}
+        | set(forensic_tools(team, role, specialties))
+    )
 
 
 def configured_tools(actor: Actor, spec: LabSpec) -> set[str]:
