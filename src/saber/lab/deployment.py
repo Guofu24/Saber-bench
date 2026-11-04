@@ -379,6 +379,7 @@ def render(spec: LabSpec, out: Path) -> dict[str, Any]:
         "pyproject.toml",
         "uv.lock",
         "LICENSE",
+        "NOTICE",
         "README.md",
         "README.vi.md",
         "notes.md",

@@ -371,9 +371,10 @@ data: stop the runtime and back up the data/volume before changing versions.
 
 ## License
 
-SABER retains its existing **proprietary** licensing status. See [LICENSE](LICENSE)
-for the notice and licensing contact. This repository is not offered under an
-open-source license as a whole.
+SABER's original code and documentation are licensed under the **Apache License
+2.0** (`Apache-2.0`). See [LICENSE](LICENSE) for the full terms and [NOTICE](NOTICE)
+for attribution and separately licensed components. The license text comes from
+the [Apache Software Foundation](https://www.apache.org/licenses/LICENSE-2.0).
 
 The separately licensed [agent-office component](agent-office/LICENSE) retains
 its MIT license, as declared in its package metadata. Third-party dependencies,

@@ -301,9 +301,10 @@ CI kiểm tra Office trên Linux và Windows, đồng thời build lại để p
 
 ## Giấy phép
 
-SABER giữ trạng thái **Proprietary** như metadata hiện có. Xem [LICENSE](LICENSE)
-để biết thông báo quyền và đầu mối liên hệ. Toàn bộ repository chưa được phát hành
-dưới một giấy phép mã nguồn mở.
+Mã nguồn và tài liệu do dự án SABER tạo ra được phát hành theo **Apache License 2.0**
+(`Apache-2.0`). Xem toàn văn tại [LICENSE](LICENSE), thông tin ghi nhận tác giả và
+các thành phần có giấy phép riêng tại [NOTICE](NOTICE). Văn bản giấy phép lấy từ
+[Apache Software Foundation](https://www.apache.org/licenses/LICENSE-2.0).
 
 Thành phần [agent-office](agent-office/LICENSE) giữ giấy phép MIT riêng như đã khai báo
 trong package. Dependency, dataset, detection rule và công cụ bên thứ ba giữ điều khoản

@@ -183,7 +183,7 @@ def render_bundle(
         source = stage / "source"
         source.mkdir(parents=True)
         # Never copy .git, .env, keys_pool, runs, private fixtures, or the user's venv.
-        for name in ("pyproject.toml", "uv.lock", "LICENSE", "catalog/subtasks.json"):
+        for name in ("pyproject.toml", "uv.lock", "LICENSE", "NOTICE", "catalog/subtasks.json"):
             _copy_public(root / name, source / name, root)
         for path in (root / "src" / "saber").rglob("*.py"):
             _copy_public(path, source / path.relative_to(root), root)

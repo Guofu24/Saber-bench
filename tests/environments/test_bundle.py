@@ -20,6 +20,7 @@ def test_bundle_is_portable_and_contains_only_allowlisted_inputs(tmp_path, profi
     (root / "pyproject.toml").write_text("")
     (root / "uv.lock").write_text("")
     (root / "LICENSE").write_text("Synthetic license notice for export verification.")
+    (root / "NOTICE").write_text("Synthetic attribution notice for export verification.")
     for name in RUNTIME_SKILLS:
         skill = root / ".claude/skills" / name / "SKILL.md"
         skill.parent.mkdir(parents=True, exist_ok=True)
@@ -48,6 +49,7 @@ def test_bundle_is_portable_and_contains_only_allowlisted_inputs(tmp_path, profi
     assert not (out / "source/agent-office").exists()
     assert (out / "source/.claude/skills/soc-ir/reference/public.md").is_file()
     assert (out / "source/LICENSE").read_bytes() == (root / "LICENSE").read_bytes()
+    assert (out / "source/NOTICE").read_bytes() == (root / "NOTICE").read_bytes()
     assert (out / "agent-office/LICENSE").read_bytes() == (
         root / "agent-office/LICENSE"
     ).read_bytes()

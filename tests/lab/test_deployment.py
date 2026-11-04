@@ -17,7 +17,7 @@ def test_complete_bundle_has_isolated_roles_no_credentials_and_detects_changes(t
     render(spec, root)
     assert (root / "SOC_COMPLETION.md").is_file()
     assert (root / "source/docs/SOC_LAB_VI.md").is_file()
-    for name in ("LICENSE", "README.vi.md"):
+    for name in ("LICENSE", "NOTICE", "README.vi.md"):
         assert (root / "source" / name).read_bytes() == (repo_root() / name).read_bytes()
     assert (root / "agent-office/LICENSE").read_bytes() == (
         repo_root() / "agent-office/LICENSE"
