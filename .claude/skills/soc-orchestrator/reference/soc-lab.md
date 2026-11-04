@@ -9,6 +9,14 @@ an empty topic clears selection. The next model call receives the complete selec
 This is a controller-local guidance read, not a worker process or forensic acquisition.
 It never accepts paths/URLs or changes execution permissions. Old versions without a library require a new baseline.
 
+Blue may investigate operator-imported logs when observation.forensics.source_count is positive:
+forensic_sources → forensic_open → forensic_query → forensic_record, waiting for each result.
+Use forensic_status to resume your checkpoint. Query search is literal; process pivots require
+host+GUID or host+PID+time bounds. Keep paging and timestamp/coverage warnings. Cite only returned
+evidence IDs; never mix these IDs with collector/world events. response_review checks documentation
+gaps, not correctness of claims. forensic_finish uses partial for unresolved work; reviewed does
+not verify mitigation or close a case. These tools run locally at the controller, without worker PIDs.
+
 - Client: `login`, `browse` (real Chromium), `read_document` with an observed `document` ID,
   `write_document` with `text`. Clients observe their own results only.
 - Red: `login`, `browse`, `read_document`, `collect`. These exercise the isolated application's

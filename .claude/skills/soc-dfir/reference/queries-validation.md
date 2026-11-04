@@ -4,6 +4,10 @@ Mỗi query cần engine/workspace, nguồn/schema, phạm vi entity/timezone, e
 thời điểm chạy, số dòng/pages, truncation/error, raw export/hash và diễn giải có giới hạn.
 Đổi query giữ revision, không ghi đè căn cứ của finding trước. Ghi cả kết quả rỗng và coverage cần để diễn giải nó.
 
+Log nhập qua `forensic_*`: giữ source/session ID; query trả offset, hash và preview, không phải raw.
+`next_after` tiếp tục cùng bộ lọc. Timestamp thiếu zone vẫn unknown; pivot PID cần host/time và xét PID reuse.
+Finding chỉ kiểm citation; REVIEWED không phải ground truth.
+
 ## Ví dụ cho operator, không phải tool mới của agent
 
 PowerShell sau đọc **bản EVTX đã thu**, chỉ ở máy phân tích và đường dẫn case được cấp.

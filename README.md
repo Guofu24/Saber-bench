@@ -228,6 +228,11 @@ profile, scripted/Gemini, nguồn hành động và quota theo đội; chỉ đ�
 Bấm robot, màn hình/bàn hoặc thẻ agent để xem timeline thao tác, mục tiêu, HTTP status
 và phản ứng blue gắn với bằng chứng của case. Lịch sử trên viewer là cửa sổ có giới hạn;
 HTTP thành công không tự chứng minh tấn công thành công. Xem [notes](notes.md) để chạy demo.
+
+Blue có thêm điều tra log nhập (EDR CSV, Apache/IIS, text): giữ bản gốc/hash, truy vấn theo
+timeline/IP/process, ghi nhận định dẫn chứng, lưu tiến độ và rà thiếu sót phản ứng. Office hiện
+query, mẫu log và gaps; `REVIEWED` không phải xác minh mitigation. Xem
+[lệnh nhập log, chạy demo và dùng Gemini](docs/FORENSICS_VI.md).
 Office chia ba khu Clients/Red/Blue, chọn 12 hoặc 24 bàn mỗi đội (36/72 slots).
 Phân trang theo từng đội để xem đủ roster 200 agent; nút phía trên zoom từng khu.
 Thêm slots không tạo thêm agent. Sandbox giữ mạng cô lập;

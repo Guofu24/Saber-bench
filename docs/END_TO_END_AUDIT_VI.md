@@ -5,6 +5,9 @@ runtime world/range, learning, bằng chứng/Office, CI và hướng dẫn vậ
 Đây là kiểm chứng code và lab local; chưa nghiệm thu toàn bộ Docker/Windows AD
 hoặc đo chất lượng quyết định Gemini trên bộ dữ liệu độc lập.
 
+Bổ sung ngày 2026-11-03: [điều tra log nhập và rà soát phản ứng](FORENSICS_VI.md),
+kèm kết quả kiểm thử mới. Các số liệu dưới đây giữ nguyên theo lần audit ngày 2026-11-02.
+
 ## Các vấn đề đã sửa
 
 | Vấn đề tìm thấy | Thay đổi | Bằng chứng |
