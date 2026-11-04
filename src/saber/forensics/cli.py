@@ -87,6 +87,41 @@ def sessions(out: Path) -> None:
         )
 
 
+@forensics_cli.command("evidence")
+@click.option("--out", type=click.Path(path_type=Path, exists=True), required=True)
+@click.option("--id", "evidence_id", type=click.IntRange(1, 9223372036854775807), required=True)
+@click.option(
+    "--export",
+    "destination",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Write the exact original record to a NEW file; contains unredacted evidence.",
+)
+def evidence(out: Path, evidence_id: int, destination: Path | None) -> None:
+    try:
+        with Vault(out) as vault:
+            row = vault.db.execute("SELECT * FROM records WHERE id=?", (evidence_id,)).fetchone()
+            if row is None:
+                raise click.ClickException("Unknown evidence ID")
+            result = vault.evidence(row)
+            if destination is not None:
+                import hashlib
+
+                with vault.original(row["source"]).open("rb") as stream:
+                    stream.seek(row["offset"])
+                    raw = stream.read(row["length"])
+                if hashlib.sha256(raw).hexdigest() != row["sha256"]:
+                    raise click.ClickException("Original record hash mismatch")
+                with destination.open("xb") as output:
+                    output.write(raw)
+                result["original_exported"] = True
+            emit(result)
+    except (OSError, ValueError):
+        raise click.ClickException(
+            "Cannot read/export evidence; verify its integrity and choose a new output file."
+        ) from None
+
+
 @forensics_cli.command("inspect")
 @click.option("--out", type=click.Path(path_type=Path, exists=True), required=True)
 @click.option("--session", "session_id", required=True)

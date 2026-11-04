@@ -98,7 +98,7 @@ class Vault:
     def sources(self) -> list[dict[str, Any]]:
         return [
             json.loads(r[0])
-            for r in self.db.execute("SELECT manifest FROM sources ORDER BY rowid DESC LIMIT 100")
+            for r in self.db.execute("SELECT manifest FROM sources ORDER BY rowid LIMIT 100")
         ]
 
     def source(self, source_id: str) -> dict[str, Any]:

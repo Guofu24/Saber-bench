@@ -52,7 +52,10 @@ def utc(value: str, assumed_offset: str | None = None) -> str | None:
         parsed = parsed.replace(
             tzinfo=timezone(timedelta(minutes=minutes * (-1 if assumed_offset[0] == "-" else 1)))
         )
-    return parsed.astimezone(UTC).isoformat(timespec="microseconds")
+    try:
+        return parsed.astimezone(UTC).isoformat(timespec="microseconds")
+    except OverflowError:
+        return None
 
 
 def normalize(row: dict[str, str], assumed_offset: str | None) -> dict[str, Any]:
@@ -62,7 +65,7 @@ def normalize(row: dict[str, str], assumed_offset: str | None) -> dict[str, Any]
         for field, aliases in FIELDS.items()
     }
     # UtcTime explicitly declares UTC; a plain Timestamp does not.
-    out["ts"] = utc(out["timestamp_raw"], "+00:00" if "utctime" in lookup else assumed_offset)
+    out["ts"] = utc(out["timestamp_raw"], "+00:00" if lookup.get("utctime") else assumed_offset)
     return out
 
 

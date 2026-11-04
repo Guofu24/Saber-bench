@@ -26,14 +26,17 @@ async function main() {
     await page.locator(`#traceTimeline [data-event-id="${query.id}"]`).click();
     assert.match(await page.locator('.forensic-detail').textContent(), /\/portal/);
     assert.match(await page.locator('.forensic-detail').textContent(), new RegExp(query.forensics.evidence[0].sha256));
+    await page.locator('.forensic-detail').scrollIntoViewIfNeeded();
     await page.screenshot({ path: path.join(out, 'forensic-query.png') });
     const review = source.trace.events.find(e => e.tool === 'response_review');
     await page.locator(`#traceTimeline [data-event-id="${review.id}"]`).click();
-    assert.match(await page.locator('.forensic-detail').textContent(), /containment/);
+    assert.match(await page.locator('.forensic-detail').textContent(), /Bằng chứng cô lập/);
+    await page.locator('.forensic-detail').scrollIntoViewIfNeeded();
     await page.screenshot({ path: path.join(out, 'response-gaps.png') });
     const hostile = structuredClone(source);
     hostile.world_id = 'forensic-escaping-test';
     hostile.trace.events.find(e => e.id === query.id).forensics.summary = '<img src=x onerror="window.__forensicXss=1">';
+    hostile.trace.events.find(e => e.id === query.id).forensics.step_count = '<img src=x onerror="window.__forensicXss=1">';
     emit(hostile);
     await page.locator('#worldSelect option[value="forensic-escaping-test"]').waitFor({ state: 'attached' });
     await page.selectOption('#worldSelect', hostile.world_id);

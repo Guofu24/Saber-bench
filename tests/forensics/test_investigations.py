@@ -348,3 +348,54 @@ def test_source_catalog_is_paged_and_unknown_time_blocks_review(tmp_path):
         tmp_path, "response_review", {"session_id": sid, "residual_risk": "Unknown timezone"}
     )
     assert "source_coverage_or_time_uncertainty" in result["forensics"]["gaps"]
+
+
+def test_operator_retrieves_exact_record_without_overwriting_files(tmp_path):
+    source, manifest = ingest(tmp_path)
+    sid = start(tmp_path, manifest)
+    row = call(tmp_path, "forensic_query", {"session_id": sid})["forensics"]["evidence"][0]
+    destination = tmp_path / "record.bin"
+    args = [
+        "world",
+        "forensics",
+        "evidence",
+        "--out",
+        str(tmp_path / "world"),
+        "--id",
+        str(row["id"]),
+        "--export",
+        str(destination),
+    ]
+    runner = CliRunner()
+    assert runner.invoke(cli, args).exit_code == 0
+    raw = source.read_bytes()[row["offset"] : row["offset"] + row["length"]]
+    assert destination.read_bytes() == raw
+    assert runner.invoke(cli, args).exit_code != 0
+    assert destination.read_bytes() == raw
+
+
+def test_blank_utc_column_does_not_assign_zone_to_naive_fallback(tmp_path):
+    _, manifest = ingest(
+        tmp_path, "UtcTime,Timestamp,Image,ProcessName\n,2026-11-03T10:00:00,,fallback.exe\n"
+    )
+    sid = start(tmp_path, manifest)
+    row = call(tmp_path, "forensic_query", {"session_id": sid})["forensics"]["evidence"][0]
+    assert row["fields"]["ts"] is None
+    assert row["fields"]["image"] == "fallback.exe"
+
+
+def test_extreme_dates_and_citation_ids_are_validation_errors(tmp_path):
+    _, manifest = ingest(tmp_path, "Timestamp,Image\n0001-01-01T00:00:00+14:00,worker.exe\n")
+    sid = start(tmp_path, manifest)
+    assert manifest["warnings"]["unknown_timestamp"] == 1
+    result = call(
+        tmp_path,
+        "forensic_record",
+        {
+            "session_id": sid,
+            "category": "hypothesis",
+            "text": "Untrusted model citation",
+            "evidence_ids": [10**100],
+        },
+    )
+    assert result["status"] == 400

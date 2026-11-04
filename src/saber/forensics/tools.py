@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
@@ -52,7 +52,9 @@ class FindingArgs(SessionArgs):
         pattern=r"^(scope|observation|hypothesis|containment|eradication|recovery)$"
     )
     text: str = Field(min_length=1, max_length=1000)
-    evidence_ids: list[int] = Field(min_length=1, max_length=20)
+    evidence_ids: list[Annotated[int, Field(ge=1, le=9223372036854775807)]] = Field(
+        min_length=1, max_length=20
+    )
 
 
 class ReviewArgs(SessionArgs):
@@ -318,7 +320,18 @@ def trace_result(result: dict[str, Any]) -> dict[str, Any]:
     for short, row in zip(out["evidence"][:3], body.get("evidence", [])[:3], strict=True):
         short["fields"] = {
             k: str(row["fields"].get(k, ""))[:160]
-            for k in ("ts", "host", "image", "event_id", "ip", "status")
+            for k in (
+                "ts",
+                "timestamp_raw",
+                "host",
+                "image",
+                "event_id",
+                "ip",
+                "status",
+                "command_line",
+                "process_guid",
+                "pid",
+            )
         }
         short["preview"] = row["preview"][:240]
     out["preview_limit"] = 3
