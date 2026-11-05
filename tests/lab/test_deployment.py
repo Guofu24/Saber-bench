@@ -4,6 +4,7 @@ import pytest
 import yaml
 from click.testing import CliRunner
 
+from saber.catalog.loader import repo_root
 from saber.cli.main import cli
 from saber.lab.deployment import compose, initialize_secrets, render, verify_bundle
 from saber.lab.models import LabSpec, preset_spec
@@ -16,6 +17,14 @@ def test_complete_bundle_has_isolated_roles_no_credentials_and_detects_changes(t
     render(spec, root)
     assert (root / "SOC_COMPLETION.md").is_file()
     assert (root / "source/docs/SOC_LAB_VI.md").is_file()
+    for name in ("LICENSE", "NOTICE", "README.vi.md"):
+        assert (root / "source" / name).read_bytes() == (repo_root() / name).read_bytes()
+    assert (root / "agent-office/LICENSE").read_bytes() == (
+        repo_root() / "agent-office/LICENSE"
+    ).read_bytes()
+    assert (root / "agent-office/THIRD_PARTY_NOTICES.txt").read_bytes() == (
+        repo_root() / "agent-office/THIRD_PARTY_NOTICES.txt"
+    ).read_bytes()
     assert verify_bundle(root) == spec
     doc = yaml.safe_load((root / "compose.yaml").read_text())
     assert {

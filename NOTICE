@@ -1,0 +1,16 @@
+SABER — Client / Red Team / Blue Team Lab
+Copyright (c) 2026 SABER contributors
+
+SABER's original code and documentation are licensed under the Apache License,
+Version 2.0. See LICENSE for the full terms.
+
+Separately licensed components retain their own terms:
+- agent-office: MIT License; see agent-office/LICENSE.
+- Three.js bundled with the viewer: MIT License; see
+  agent-office/THIRD_PARTY_NOTICES.txt.
+
+Third-party dependencies, datasets, detection rules and external tools retain
+their respective licenses and attribution notices. See
+docs/EVAL_DATA_PROVENANCE.md for the recorded dataset provenance.
+
+These notices are informational and do not modify the Apache License, Version 2.0.

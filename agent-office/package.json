@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Xem đội multi-agent của bạn làm việc trong một văn phòng 3D — không cần sửa code, chỉ cần chạy qua agent-office.",
   "bin": { "agent-office": "bin/agent-office.js" },
-  "files": ["bin", "lib", "viewer", "README.md"],
+  "files": ["bin", "lib", "viewer", "README.md", "LICENSE", "THIRD_PARTY_NOTICES.txt"],
   "scripts": {
     "test": "node --test test/*.test.js",
     "build:viewer": "node viewer-src/build.js",

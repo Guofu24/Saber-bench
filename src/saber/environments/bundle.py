@@ -23,6 +23,8 @@ from saber.world.agents import PLAYBOOKS
 OFFICE_FILES = (
     "package.json",
     "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.txt",
     "bin/agent-office.js",
     "lib/server.js",
     "lib/analyzer.js",
@@ -181,7 +183,7 @@ def render_bundle(
         source = stage / "source"
         source.mkdir(parents=True)
         # Never copy .git, .env, keys_pool, runs, private fixtures, or the user's venv.
-        for name in ("pyproject.toml", "uv.lock", "catalog/subtasks.json"):
+        for name in ("pyproject.toml", "uv.lock", "LICENSE", "NOTICE", "catalog/subtasks.json"):
             _copy_public(root / name, source / name, root)
         for path in (root / "src" / "saber").rglob("*.py"):
             _copy_public(path, source / path.relative_to(root), root)

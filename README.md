@@ -1,78 +1,103 @@
 # SABER — Client / Red Team / Blue Team Lab
 
-**Mới: bộ SOC lab nhiều dịch vụ và VM** đã có mã triển khai cho ba preset
-`linux-small`, `windows-ad`, `expanded`. Bắt đầu ở [SOC Lab — triển khai và nghiệm thu](docs/SOC_LAB_VI.md).
-Nhóm lệnh là **`saber lab`**: business app, worker từng đội, Chromium, collector, OpenSearch,
-Zeek, agent-office; bản AD có script Hyper-V/domain/Sysmon và phản ứng có rollback.
-Đã kiểm thử local bằng HTTP, subprocess và Chromium thật. **Chưa chạy nghiệm thu toàn bộ Docker/AD
-trên máy phát triển này**; `lab verify` phải đạt trên máy đích mới xác nhận runtime.
-Office đã có bằng chứng từng job và ảnh Chromium kiểm hash; blue có hunt/DFIR và handoff,
-Windows có queue tác vụ do agent điều phối. Range đã nối **learning có replay/pin/rollback,
-vault phân tích Ghidra/IDA/Volatility/YARA/PCAP, SOAR có xác minh hiệu ứng và backup/restore**.
-Xem [phạm vi hoàn thiện và bằng chứng kiểm thử](docs/SOC_COMPLETION.md).
-Đợt rà soát xuyên suốt gần nhất: [các lỗi đã sửa, kiểm chứng và phần còn cần máy đích](docs/END_TO_END_AUDIT_VI.md).
+**English** | [Tiếng Việt](README.vi.md)
 
-| Nhu cầu trên máy lớn | Hướng dẫn |
-|---|---|
-| Dựng ba cỡ lab, chỉnh agents, mở Office | [Triển khai SOC](docs/SOC_LAB_VI.md) |
-| Phân tích binary/memory/PCAP, kiểm tra công cụ | [Analysis](docs/SOC_ANALYSIS_VI.md) |
-| Playbook và tích hợp Shuffle/webhook | [SOAR](docs/SOC_SOAR_VI.md) |
-| Agent học từ lỗi và rollback skill | [Learning](docs/SOC_LEARNING_VI.md) |
-| Sao lưu, chuyển máy, khôi phục | [Recovery](docs/SOC_RECOVERY_VI.md) |
+SABER is a persistent multi-agent security lab: clients carry out ordinary work,
+red-team agents test weaknesses in the lab, and blue-team agents investigate logs
+and respond to incidents. Run scripted agents or enable Gemini planning through
+team-specific provider and quota controls.
 
-Ghidra/IDA và symbols do operator đặt vào `tools/`; IDA cần bản có quyền headless.
-Mặc định SOAR dùng backend tích hợp; adapter Shuffle dành cho instance riêng của lab.
-Bundle có 13 service definitions, không tự cài mọi sản phẩm SOC thương mại.
+The repository also contains a separate SOC benchmark framework with a frozen
+catalog of **175 subtasks across 55 NICE tasks**.
 
-`saber world` / `saber env` dưới đây vẫn là chế độ nhẹ. Chọn profile `vm` trong `env`
-không đồng nghĩa đã dựng SOC lab hoặc domain; muốn các bộ mới hãy dùng `saber lab`.
+## What is available
 
-SABER chạy một thế giới ứng dụng liên tục: client làm việc, red team thử điểm yếu
-trong lab, blue team quan sát log và xử lý case. Có thể dùng baseline scripted hoặc
-bật Gemini cho các agent lập kế hoạch. Project còn có bộ lõi benchmark SOC riêng.
+- **Lightweight world:** real HTTP requests and durable application effects, with
+  synthetic accounts and workloads. Native execution adds a fixed child process
+  per action and measured process, command-line, file, DNS and TCP evidence.
+- **Deployment choices:** local execution, a Docker sandbox, an operator-built VM,
+  or a separate server. These profiles package the lightweight world.
+- **SOC lab presets:** `linux-small`, `windows-ad` and `expanded`, with separate
+  services, team workers, Chromium, a collector, OpenSearch, Zeek and Agent Office.
+  Windows presets include provisioning, Sysmon collection and scoped AD responses
+  with rollback.
+- **Blue-team workflows:** twelve specialties, evidence-cited cases and findings,
+  task assignment and handoff, private notebooks, detection-rule versions and
+  recovery checks.
+- **Analysis and response:** adapters for Ghidra, IDA, Volatility, YARA and PCAP
+  tools; durable SOAR jobs; versioned learning with replay and rollback; backup
+  and restore workflows.
+- **Imported-log investigations:** preserve original files and hashes, query
+  timelines/IPs/processes, checkpoint investigations and review response gaps.
+- **Agent Office:** separate client/red/blue areas, per-agent activity, evidence,
+  quota counters and supported browser screenshots.
 
-**Phạm vi chế độ world/env:** HTTP và thay đổi trạng thái ứng dụng được thực thi thật;
-tài khoản, dữ liệu và kỹ thuật trong world là mô phỏng. Các actor chia sẻ một runtime
-Python, chưa phải desktop/VM riêng. Chế độ **`--execution native`** bổ sung process
-con cho mỗi thao tác cùng bằng chứng PID/command line, file, DNS và TCP thật của
-workload. Sensor chưa giám sát toàn OS; xem [phạm vi và lệnh chạy](docs/NATIVE_TELEMETRY_VI.md).
-Kết quả mang nhãn `DEV_SIMULATION_ONLY`.
+**Validation status:** local HTTP, subprocess and Chromium execution have been
+tested. Full Docker/Windows AD acceptance has not been completed on the development
+machine; run the target acceptance checks before treating a deployment as verified.
+Synthetic benchmark fixtures remain `DEV_SIMULATION_ONLY`, not `READY_BENCHMARK`.
+See the [implementation status](docs/SOC_COMPLETION.md) and
+[verification record](docs/END_TO_END_AUDIT_VI.md).
 
-## Chọn môi trường
+## Quick start
 
-| Profile | Dành cho | Nơi thực thi | Điều kiện |
-|---|---|---|---|
-| `local` | Chạy thử nhanh, phát triển | Process Python trên máy hiện tại | Python 3.12+ |
-| `sandbox` | Muốn container có thể tái tạo | Một Linux container chứa world | Docker Linux engine + Compose |
-| `vm` | Người dùng tự dựng VM | Chạy bundle bên trong guest | VM có Python 3.12+ và uv |
-| `remote` | Muốn dùng máy lab/server khác | Chuyển bundle và chạy trên server | Server có Python 3.12+ và uv |
-
-VM có thể do Hyper-V, VMware hoặc KVM/Proxmox quản lý. SABER không tự tạo VM hay
-kết nối SSH. Profile không tự thêm trình duyệt, Windows/AD, shell hoặc điều khiển snapshot.
-Cấu hình SIEM/SOAR có sẵn hiện hỗ trợ **inventory và kiểm tra HTTP health**; chưa tự
-kết nối luồng log hay hành động phòng thủ với sản phẩm bên ngoài.
-
-- [Hướng dẫn đầy đủ từng môi trường](docs/ENVIRONMENTS_VI.md)
-- [Notes — tra nhanh các lệnh chạy](notes.md)
-- [Log native và xem riêng từng agent](docs/NATIVE_TELEMETRY_VI.md)
-- [Cấu hình mẫu](config/environments/)
-- [Commit và rollback](docs/ROLLBACK_VI.md)
-
-## Chuẩn bị
-
-Dùng terminal ở thư mục project với Python 3.12+ và uv. Tái sử dụng virtualenv đã có.
-Không cần Docker để chạy local hoặc test offline.
+Run commands from the repository root with **Python 3.12+** and **uv**.
+Docker is not required for the local world or offline tests. Node.js 18+ is required
+for Agent Office.
 
 ```powershell
 uv sync --locked
 uv run saber --help
-uv run saber env list
+uv run saber world init --out runs/my-world --clients 2 --execution native
+uv run saber world run --out runs/my-world --ticks 30
 ```
 
-Với virtualenv có sẵn, có thể thay `uv run saber` bằng
-`.\.venv\Scripts\python.exe -m saber.cli.main` trên Windows.
+Open the viewer from another terminal, during or after the run:
 
-## Option 1 — sandbox
+```powershell
+node agent-office/bin/agent-office.js watch --world runs/my-world --open
+```
+
+The committed viewer works without installing npm dependencies. Actors share the
+world runtime; native mode does not create a desktop or VM for each agent, and its
+sensors measure fixed workloads rather than the entire host OS.
+
+To keep running, inspect status or request a stop:
+
+```powershell
+uv run saber world run --out runs/my-world --forever
+uv run saber world status --out runs/my-world
+uv run saber world stop --out runs/my-world
+```
+
+Use `--resume` after a STOP request. Edit the roster before the first run; an
+existing world rejects a different configuration. Use a new output directory
+for a different roster. `world supervise` can restart a failed process within a
+bounded restart policy.
+
+When reusing an environment with optional dependencies, use `uv run --no-sync ...`.
+On Windows, the installed CLI is also available through
+`.\.venv\Scripts\python.exe -m saber.cli.main`.
+
+## Choose a deployment
+
+The lightweight `saber world` / `saber env` runtime and the multi-service
+`saber lab` deployment are separate options. Selecting `env --profile vm` does not
+provision a SOC stack or an AD domain.
+
+| Lightweight profile | Execution location | Requirements |
+|---|---|---|
+| `local` | Python process on the current machine | Python 3.12+ and uv |
+| `sandbox` | One Linux container containing the world | Docker Linux engine and Compose |
+| `vm` | Exported bundle inside a VM you build | Guest with Python 3.12+ and uv |
+| `remote` | Exported bundle on a separate lab/server | Server with Python 3.12+ and uv |
+
+VMs can be managed with Hyper-V, VMware, KVM or Proxmox. The `env` profiles do not
+create VMs, connect over SSH or manage hypervisor snapshots. Their service
+inventory and HTTP health checks do not automatically connect external SIEM/SOAR
+telemetry or response actions.
+
+### Docker sandbox
 
 ```powershell
 uv run saber env init --profile sandbox --name sandbox-demo --clients 4 --out runs/env-sandbox.json
@@ -84,26 +109,31 @@ uv run saber env report --bundle runs/bundle-sandbox --out runs/sandbox-report-1
 uv run saber env down --bundle runs/bundle-sandbox
 ```
 
-`init` tạo cấu hình, `render` xuất source/bundle, `up` mới yêu cầu build/start container.
-Đường dẫn tạo mới phải chưa tồn tại. `doctor` không tự mở Docker Desktop.
-Container mặc định không có mạng ngoài, không publish cổng, chạy non-root và có giới
-hạn RAM/CPU/PID. Dữ liệu ở named volume; `down` giữ dữ liệu. Tiếp tục bằng:
+`init` writes the configuration; `render` exports the bundle; `up` builds and starts
+the container. Use new output paths. `doctor` does not start Docker Desktop.
+
+By default the container runs as a non-root user, has no external network or
+published ports, and has RAM/CPU/PID limits. Data lives in a named volume;
+`down` retains it. Resume with:
 
 ```powershell
 uv run saber env up --bundle runs/bundle-sandbox --resume
 ```
 
-## Option 2 — VM do người dùng tự dựng
+The default 2 GiB sandbox limit covers the application runtime, not a Windows
+desktop, SIEM, SOAR stack or malware-analysis environment.
 
-Tạo VM bằng hypervisor đang dùng, sau đó xuất bundle trên máy phát triển:
+### Operator-built VM or separate server
+
+Build the VM using your hypervisor, then export a bundle:
 
 ```powershell
 uv run saber env init --profile vm --name vm-demo --clients 8 --out runs/env-vm.json
 uv run saber env render --config runs/env-vm.json --out runs/bundle-vm
 ```
 
-Chuyển `bundle-vm` vào guest. **Các lệnh tiếp theo chạy trong terminal VM**, tại
-thư mục `bundle-vm/source`:
+Copy the bundle to the guest. Run the following **inside the guest**, from
+`bundle-vm/source`:
 
 ```powershell
 uv sync --frozen --no-dev
@@ -111,16 +141,14 @@ uv run --no-sync saber env run --config ../environment.json --out ../world --tic
 uv run --no-sync saber env run --config ../environment.json --out ../world --forever --on-target
 ```
 
-`--on-target` xác nhận vị trí terminal; không tạo hoặc truy cập VM từ xa. Người dùng
-quản lý tài nguyên guest, mạng và snapshot. [Runbook VM/server](docs/ENVIRONMENTS_VI.md).
+For a separate server, initialize with `--profile remote` and follow the same
+export-and-run workflow. `--on-target` confirms where the command is being run;
+it does not access another machine. You manage guest resources, networking and
+snapshots. The control plane does not need to be exposed to the Internet/LAN.
 
-## Option 3 — máy lab/server riêng
+### Local deployment profile
 
-Dùng `--profile remote` khi init, render bundle rồi chuyển sang server. Chạy các lệnh
-bên trong `source` giống VM, với `--on-target`. Dữ liệu và agents chạy trên server đó.
-Không cần expose HTTP control plane ra Internet/LAN để xem báo cáo.
-
-## Option 4 — local
+Use `env` when you want an explicit local deployment configuration:
 
 ```powershell
 uv run saber env init --profile local --clients 4 --out runs/env-local.json
@@ -128,143 +156,183 @@ uv run saber env run --config runs/env-local.json --out runs/world-local --ticks
 uv run saber env run --config runs/env-local.json --out runs/world-local --forever
 ```
 
-Từ terminal thứ hai:
+See the [environment guide](docs/ENVIRONMENTS_VI.md) and
+[example configurations](config/environments/).
+
+## Multi-service SOC lab
+
+These presets provide deployment code for a larger target machine:
+
+| Preset | Initial target resource budget | Clients / red / blue | Windows guests |
+|---|---|---|---|
+| `linux-small` | 32 GB RAM, 6 CPUs, 250 GB free disk | 2 / 3 / 6 | None |
+| `windows-ad` | 64 GB RAM, 8 CPUs, 500 GB free disk | 4 / 3 / 6 | 1 DC, 2 workstations, 1 file server |
+| `expanded` | 128 GB RAM, 16 CPUs, 1 TB free disk | 12 / 3 / 6 | 1 DC, 6 workstations, 1 file server |
+
+These are planning allocations, not measured capacity guarantees. Logical agents
+share their team's workers; an agent is not a separate machine. `expanded`
+increases worker/guest capacity rather than providing an HA SIEM cluster.
+
+Prepare and validate a bundle without starting the lab:
 
 ```powershell
-uv run saber world status --out runs/world-local
-uv run saber world stop --out runs/world-local
+uv run saber lab list
+uv run saber lab init --preset linux-small --name soc-small --out runs/soc-small.json
+uv run saber lab render --config runs/soc-small.json --out runs/soc-small-bundle
+uv run saber lab validate --bundle runs/soc-small-bundle
 ```
 
-Thêm `--resume` khi muốn chạy lại sau STOP. Sửa roster trước lần chạy đầu; world đã có
-sẽ từ chối cấu hình khác. Dùng thư mục mới để thử cấu hình khác.
-Các lệnh `world init/run/supervise/status/stop` vẫn được giữ nguyên; `world supervise`
-có thể restart process lỗi với số lần giới hạn.
+Edit the actor roster, workers, timing, storage and VM settings before rendering.
+The bundle has 13 service definitions. Optional Ghidra/IDA installations and
+symbols belong in `tools/`; IDA requires an appropriately licensed headless
+installation. SOAR defaults to its built-in backend; the Shuffle adapter targets
+an operator-managed lab instance.
 
-## Đội blue có 12 chuyên môn
+| Task | Guide |
+|---|---|
+| Provision, start and verify the target; configure agents and Office | [SOC deployment](docs/SOC_LAB_VI.md) |
+| Analyze binaries, memory images and PCAPs | [Analysis](docs/SOC_ANALYSIS_VI.md) |
+| Run playbooks or connect Shuffle/webhooks | [SOAR](docs/SOC_SOAR_VI.md) |
+| Replay, publish or roll back skill lessons | [Learning](docs/SOC_LEARNING_VI.md) |
+| Back up, move and restore the lab | [Recovery](docs/SOC_RECOVERY_VI.md) |
 
-Tạo world mới có đủ chuyên môn (mặc định cũ vẫn là 6 vai blue):
+These detailed operating guides are currently in Vietnamese.
+
+## Blue-team specialties and skills
+
+The default world has six blue roles. Create a new world with all twelve:
 
 ```powershell
 uv run saber world init --out runs/soc-specialists --clients 4 --blue-specialists
 uv run saber world run --out runs/soc-specialists --ticks 30
-# Chạy liên tục sau khi xem kết quả:
-uv run saber world run --out runs/soc-specialists --forever
 ```
 
-| Nhóm | Chuyên môn |
+| Area | Specialties |
 |---|---|
-| Điều phối / phát hiện | Lead, monitoring, threat hunting |
-| Điều tra | DFIR, malware/RE, network, threat intelligence, identity |
-| Phòng thủ / vận hành | Incident response, detection engineering, SOC platform, recovery |
+| Coordination and detection | Lead, monitoring, threat hunting |
+| Investigation | DFIR, malware/reverse engineering, network, threat intelligence, identity |
+| Response and operations | Incident response, detection engineering, SOC platform, recovery |
 
-Có thể tạo nhiều actor cùng chuyên môn hoặc cấu hình `specialties` để một actor kiêm nhiệm.
-Blue có query log phân trang, case/finding có dẫn chứng, task có nhận việc/bàn giao,
-notebook riêng, snapshot chứng cứ có hash, kiểm thử/version/rollback rule và kiểm tra
-client phục hồi. `wait`/`finish` thực sự ngừng hành động của actor. Agent-office hiển thị
-chuyên môn, task và trạng thái này.
+Configure multiple actors with the same role, or add `specialties` to an actor.
+Tools include paginated log queries, evidence-cited cases/findings, task acceptance
+and handoff, hashed artifacts, rule testing/versioning/rollback and client recovery
+checks. `wait` and `finish` stop the actor's actions as specified by the runtime;
+Office displays those states.
 
-Baseline scripted thu thập/xử lý theo policy có sẵn; nhiệm vụ chuyên môn có mục tiêu tự do
-cần planner hoặc operator đánh giá và kết luận. Công cụ chạy trên application lab;
-Ghidra/IDA/EDR/SIEM ngoài lab vẫn cần adapter và dữ liệu thực. Xem
-[cách dùng, quyền công cụ và giới hạn](docs/SOC_SPECIALISTS_VI.md).
+The repository has **18 skill definitions, 15 operational playbooks and 56 reference
+documents**. World/range planners load core guidance and the execution contract,
+then use `consult_skill` for specialist references. Case workflows load their
+declared references. DFIR includes thirteen reference topics, twelve incident
+playbooks and twelve artifact groups.
 
-## Bật Gemini
+Skills describe how to use available capabilities; mentioning a product does not
+make it an executable tool. Structural checks do not establish model reasoning
+quality. See [skill usage](docs/SKILLS_VI.md),
+[coverage and sources](docs/ALL_SKILLS_COVERAGE_VI.md),
+[DFIR coverage](docs/DFIR_CAPABILITY_COVERAGE_VI.md), the
+[handbook review](docs/DFIR_HANDBOOK_REVIEW_VI.md),
+[skill review](docs/SKILLS_REVIEW_VI.md) and
+[specialist tool contracts](docs/SOC_SPECIALISTS_VI.md).
 
-Agent có [luồng rút kinh nghiệm](docs/AGENT_LEARNING_VI.md): ghi kết quả riêng → tổng kết
-theo task/case/chu kỳ → đề xuất bài học → replay so bản cũ/mới → phát hành phiên bản skill
-cục bộ khi qua gate. Worker dùng chung budget/pool của đội. Mặc định scripted chỉ ghi
-nhận; reflection cần model. Cần suite do operator cấp để tự đánh giá/phát hành; có
-[mẫu phát triển cho client](config/learning/client-session.json). Agent-office hiển thị
-counters học; case đang chạy giữ phiên bản skill ổn định. Đây chưa phải bằng chứng
-Gemini tự cải thiện chất lượng SOC đầu cuối.
+## Enable Gemini
 
-Mọi profile mặc định scripted, không gọi API. Model mặc định: `gemini-3.5-flash-lite`.
-File key do chương trình nạp; không đưa vào Git/bundle.
+All profiles default to scripted execution with no model API calls. The current
+configured default model is `gemini-3.5-flash-lite`; use `--model` to select another
+supported model. The program loads the key pool from a file excluded from Git and
+deployment bundles.
 
-| Nhóm | Vị trí key trong file |
+| Team | Key positions in the file |
 |---|---|
-| Client | 1–200 |
+| Clients | 1–200 |
 | Red | 201–400 |
-| Blue | 401 đến cuối |
+| Blue | 401 onward |
 
-Key chuyển trong đúng pool khi chạm giới hạn hoặc gặp lỗi. Cursor, usage và cooldown
-tồn tại qua restart. Khi API lỗi/hết budget, scripted fallback tiếp tục. Đây là **HYBRID**.
-Local/VM/server: thêm `--llm --key-pool PATH --call-budget 200` vào `env run`. Sandbox:
+Rotation stays within the team's pool. Cursors, usage and cooldowns survive
+restarts. API failures or an exhausted call budget can lead to scripted fallback;
+this is a hybrid runtime. Inspect `llm.successes`, per-team usage, pool state and
+the action source (`llm`, `scripted`, `scripted-fallback`).
+
+For a local world:
+
+```powershell
+uv run saber world run --out runs/my-world --llm --key-pool keys_pool.txt --call-budget 200 --ticks 60
+```
+
+For local/VM/server profiles, add `--llm --key-pool PATH --call-budget 200` to
+`env run`. For a sandbox:
 
 ```powershell
 uv run saber env up --bundle runs/bundle-sandbox --llm --key-pool keys_pool.txt --call-budget 200 --resume
 ```
 
-Sandbox Gemini dùng manifest riêng bật outbound cho controller và mount key chỉ đọc.
-Egress chưa lọc theo domain. Budget `200` là **200 lượt HTTP tổng trong vòng đời world**,
-gồm retry/restart, không phải mỗi key. Lệnh không đổi billing tier.
-Xem `llm.successes`, `llm.by_team`, `llm_pools` và nguồn hành động `llm` để xác nhận.
-[Hướng dẫn world/Gemini](docs/CONTINUOUS_WORLD_VI.md).
+The Gemini sandbox manifest enables outbound connectivity for the controller and
+mounts the key file read-only. Egress is not restricted by domain. The call budget
+is cumulative across the world's lifetime, including retries and restarts; it is
+not a per-key allowance and does not change the provider's billing tier.
 
-## Quan sát và dữ liệu
+The [learning pipeline](docs/AGENT_LEARNING_VI.md) records outcomes, proposes
+lessons, evaluates replays and publishes gated local skill versions. It shares
+the team's provider budget. Reflection needs a model; evaluation/publication
+needs an operator-provided suite. An existing case keeps its pinned skill version.
+This is not proof of autonomous improvement in end-to-end SOC performance.
+See the [world/Gemini guide](docs/CONTINUOUS_WORLD_VI.md) and
+[development replay example](config/learning/client-session.json).
 
-| File trong thư mục world | Nội dung |
-|---|---|
-| `config.json` | Cấu hình giữ ổn định cho world |
-| `report.json` | Tick, kết quả, usage và trạng thái pool |
-| `office.json` | Snapshot cho viewer: roster, nguồn hành động, counter, chỉ số quota |
-| `learning.json` | Trạng thái học, version IDs và epoch; không có nội dung notebook/lesson |
-| `access.jsonl` | Log thao tác ứng dụng, có rotation |
-| `world.sqlite3` | Trạng thái, case, journal và ledger đánh giá |
-| `STOP` | Yêu cầu dừng; tiếp tục bằng resume rõ ràng |
+## Inspect activity in Agent Office
 
-Thư mục world là đường dẫn `--out`; sandbox dùng `/data` trong named volume. Không
-cấp database/ground truth cho agents. Xem world từ terminal thứ hai (Node.js 18+,
-không cần cài npm dependencies):
+Click an agent, desk, monitor or roster card to inspect executed actions, targets,
+HTTP results and linked case responses. The viewer separates clients, red and
+blue into their own areas, with 12 or 24 seats per team and roster pagination up
+to 200 agents. Adding seats does not create agents.
+
+World snapshots show bounded event windows. Supported SOC jobs also expose
+verified evidence and Chromium screenshots. Successful HTTP responses alone do
+not prove compromise or effective defense.
 
 ```powershell
-node agent-office/bin/agent-office.js watch --world runs/world --open
-# Sandbox: thay bằng đường dẫn bundle đã env up
-node agent-office/bin/agent-office.js watch --bundle runs/my-sandbox --open
+node agent-office/bin/agent-office.js watch --world runs/my-world --open
+node agent-office/bin/agent-office.js watch --bundle runs/bundle-sandbox --open
 ```
 
-Thay `runs/world` bằng thư mục `--out` thực tế. Viewer hiển thị Client/Red/Blue,
-profile, scripted/Gemini, nguồn hành động và quota theo đội; chỉ đọc chỉ số key.
-Bấm robot, màn hình/bàn hoặc thẻ agent để xem timeline thao tác, mục tiêu, HTTP status
-và phản ứng blue gắn với bằng chứng của case. Lịch sử trên viewer là cửa sổ có giới hạn;
-HTTP thành công không tự chứng minh tấn công thành công. Xem [notes](notes.md) để chạy demo.
+Use your actual output/bundle path. On a VM/server, run the viewer on the target
+and forward its loopback port. See [Agent Office](agent-office/README.md) and the
+[native telemetry guide](docs/NATIVE_TELEMETRY_VI.md).
 
-Blue có thêm điều tra log nhập (EDR CSV, Apache/IIS, text): giữ bản gốc/hash, truy vấn theo
-timeline/IP/process, ghi nhận định dẫn chứng, lưu tiến độ và rà thiếu sót phản ứng. Office hiện
-query, mẫu log và gaps; `REVIEWED` không phải xác minh mitigation. Xem
-[lệnh nhập log, chạy demo và dùng Gemini](docs/FORENSICS_VI.md).
-Office chia ba khu Clients/Red/Blue, chọn 12 hoặc 24 bàn mỗi đội (36/72 slots).
-Phân trang theo từng đội để xem đủ roster 200 agent; nút phía trên zoom từng khu.
-Thêm slots không tạo thêm agent. Sandbox giữ mạng cô lập;
-VM/server chạy viewer tại máy đích rồi forward cổng loopback. Xem
-[hướng dẫn Agent Office](agent-office/README.md) và
-[hướng dẫn world](docs/CONTINUOUS_WORLD_VI.md).
-`env doctor --probe-services` chỉ gọi GET health của dịch vụ đã được cho phép trong
-inventory. Một HTTP 200 không xác nhận SIEM/SOAR adapter hoạt động.
+### Imported-log investigations
 
-## RAM và mức sẵn sàng
+Blue agents can investigate EDR CSV, Apache/IIS access logs and generic text logs.
+The vault preserves original bytes and hashes; queries return bounded previews
+and evidence IDs. Investigations persist across restart. Response review identifies
+documentation/coverage gaps; `REVIEWED` does not mean mitigation was independently
+verified and does not close a live case.
 
-Giới hạn mặc định 2 GiB trong sandbox dành cho **runtime ứng dụng hiện tại**, chưa gồm
-trình duyệt, desktop Windows, SIEM, SOAR hoặc bộ phân tích mã độc. Những thành phần đó
-cần tài nguyên và tích hợp riêng.
+Run a small demo without Docker or provider keys, using a new output directory:
 
-Đã kiểm tra runtime local và source export bằng subprocess thật, STOP/resume và HTTP
-health bằng server test thật. Compose được kiểm tra cấu hình khi có CLI.
-**Docker Linux engine trên máy phát triển hiện chưa chạy**, nên chưa xác minh build/
-start container hoặc triển khai trong guest/server riêng. Không có `READY_BENCHMARK`.
+```powershell
+uv run --no-sync python scripts/smoke_forensics.py --out runs/forensics-demo
+node agent-office/bin/agent-office.js watch --world runs/forensics-demo --open
+```
 
-## Kiểm thử và rollback
+Select **Blue Team → blue-dfir → forensic_query / response_review**.
+See the [import, query, export and Gemini workflow](docs/FORENSICS_VI.md).
 
-Skills có kiểm tra riêng: 18 skills, 15 sổ tay nghiệp vụ và 56 tài liệu tham chiếu.
-Đã rà nguồn và bổ sung cả client/red/12 chuyên môn blue: [bảng nội dung, nguồn và kiểm chứng](docs/ALL_SKILLS_COVERAGE_VI.md).
-World/range nạp hướng dẫn cốt lõi, contract và cho mỗi đội tra cứu chuyên đề bằng `consult_skill`;
-population/benchmark nạp tài liệu theo case.
-Bundle mang theo các reference cần thiết. Xem [hướng dẫn skills](docs/SKILLS_VI.md).
-DFIR có 13 chuyên đề, 12 playbook và 12 nhóm hồ sơ; xem [bảng đối chiếu năng lực, nguồn và kiểm thử](docs/DFIR_CAPABILITY_COVERAGE_VI.md)
-và [review handbook](docs/DFIR_HANDBOOK_REVIEW_VI.md). World cũ giữ skill đã pin; dùng world/bundle mới để nhận baseline mới.
-Đã có [rà soát nội dung theo yêu cầu và catalog](docs/SKILLS_REVIEW_VI.md): sửa các quy tắc kết luận thiếu bằng
-chứng và bổ sung công việc/bàn giao qua nhiều lượt. PASS cấu trúc chưa chứng minh chất lượng suy luận model
-hoặc tích hợp công cụ SOC thật.
+## Runtime data
+
+The world data directory is the `--out` path; the sandbox uses `/data` in its named
+volume. Agents receive filtered observations, not the database or sealed ground truth.
+
+| File/directory | Contents |
+|---|---|
+| `config.json` | Configuration fixed for this world |
+| `report.json` | Tick, results, usage and pool state |
+| `office.json` | Public viewer snapshot: roster, activity, counters and quota indices |
+| `learning.json` | Learning status, version IDs and epoch; no notebook/lesson bodies |
+| `access.jsonl` | Rotating application activity log |
+| `world.sqlite3` | State, cases, journals and evaluator ledger |
+| `forensics/` | Imported originals, index and investigation checkpoints |
+| `STOP` | Stop request; explicit resume is required |
+
+## Validation and rollback
 
 ```powershell
 uv run pytest --junitxml=runs/quality-tests.xml
@@ -278,21 +346,37 @@ npm --prefix agent-office test
 git log --oneline --decorate -15
 ```
 
-Test offline không dùng key thật/gọi LLM. Live check là thao tác opt-in riêng trong
-`scripts/smoke_world_gemini.py`. Thay đổi được chia commit theo chức năng; xem
-[checkpoint và cách dùng git revert/worktree](docs/ROLLBACK_VI.md).
-Git revert chỉ hoàn tác code: dừng runtime, backup data/volume trước khi đổi phiên bản.
-`env down` không xóa volume. Snapshot VM được quản lý ở hypervisor.
-CI kiểm tra Office trên Linux và Windows, đồng thời build lại để phát hiện
-`viewer/index.html` chưa cập nhật theo source. Khi sửa viewer, chạy
-`npm --prefix agent-office run build:viewer` với dependencies đã cài từ lockfile.
+Offline tests do not use real provider keys. Live Gemini checks are an explicit
+opt-in through `scripts/smoke_world_gemini.py`. Office CI runs on Linux and Windows
+and rebuilds the viewer to detect stale committed output. When editing the viewer,
+install its locked build dependencies with `npm --prefix agent-office ci`, then
+run `npm --prefix agent-office run build:viewer`.
 
-## Workflow khác
+Changes are committed by feature. [Rollback instructions](docs/ROLLBACK_VI.md)
+cover checkpoints, `git revert` and worktrees. A code revert does not restore runtime
+data: stop the runtime and back up the data/volume before changing versions.
+`env down` preserves its volume; VM snapshots belong to the hypervisor.
 
-- [Benchmark readiness](docs/READINESS.md): trạng thái dữ liệu, scorer và tích hợp.
-- `saber task`, `smoke`, `experiment`: benchmark offline, độc lập với deployment profile.
-- [Development supervisor](docs/DEVELOPMENT_SUPERVISOR.md): `run.sh` điều phối công việc
-  phát triển bằng Claude Code; không phải lệnh bật thế giới client/red/blue.
-- [Environment first](docs/ENVIRONMENT_FIRST.md): tái sử dụng hạ tầng hiện có.
-- [Security](docs/SECURITY.md): phạm vi lab và quyền thực thi.
-- [ADR environment profiles](docs/adr/0003-environment-profiles.md): quyết định thiết kế.
+## Documentation and other workflows
+
+- [Vietnamese README](README.vi.md) and [command notes](notes.md).
+- [Environment guide](docs/ENVIRONMENTS_VI.md) and
+  [environment design decision](docs/adr/0003-environment-profiles.md).
+- [Benchmark readiness](docs/READINESS.md): data, scorers and integrations.
+  `saber task`, `smoke` and `experiment` are separate from deployment profiles.
+- [Development supervisor](docs/DEVELOPMENT_SUPERVISOR.md): `run.sh` coordinates
+  development through Claude Code; it does not start the client/red/blue world.
+- [Environment-first policy](docs/ENVIRONMENT_FIRST.md): reuse compatible infrastructure.
+- [Security boundaries](docs/SECURITY.md): lab scope and execution permissions.
+
+## License
+
+SABER's original code and documentation are licensed under the **Apache License
+2.0** (`Apache-2.0`). See [LICENSE](LICENSE) for the full terms and [NOTICE](NOTICE)
+for attribution and separately licensed components. The license text comes from
+the [Apache Software Foundation](https://www.apache.org/licenses/LICENSE-2.0).
+
+The separately licensed [agent-office component](agent-office/LICENSE) retains
+its MIT license, as declared in its package metadata. Third-party dependencies,
+datasets, detection rules and external tools retain their own terms; see the
+[dataset provenance report](docs/EVAL_DATA_PROVENANCE.md) where applicable.
