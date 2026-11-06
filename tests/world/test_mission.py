@@ -83,8 +83,8 @@ def test_targeted_defender_beats_passive_and_indiscriminate(tmp_path):
     assert blunt["client_denied_collateral"] == 20
     assert blunt["work_availability"] < idle["work_availability"]
     assert blunt["false_containment_rate"] > 0
-    assert good["mission_score"] > blunt["mission_score"]
-    assert good["mission_score"] > idle["mission_score"]
+    # Detection cannot buy back the work a blunt defender destroyed.
+    assert good["mission_score"] > idle["mission_score"] > blunt["mission_score"]
 
 
 def test_quiet_world_charges_blocking_users_without_any_attack(tmp_path):

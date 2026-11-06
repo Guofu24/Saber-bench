@@ -1,8 +1,10 @@
 """Private mission outcome: protected client work weighed against detection.
 
 Follows the CAGE Challenge 4 idea that a defender is judged by the legitimate
-work it keeps running, not only by alerts. Inputs are evaluator counters that
-never reach agents. The weights are a provisional DEV choice, not a benchmark score.
+work it keeps running, not only by alerts. Detection can raise the value of the
+work that survives but never buys back work a defender destroyed. Inputs are
+evaluator counters that never reach agents. The detection weight is a provisional
+DEV choice, not a benchmark score.
 """
 
 from __future__ import annotations
@@ -10,7 +12,7 @@ from __future__ import annotations
 import math
 from typing import Any
 
-WEIGHTS = {"work_availability": 0.5, "detection_quality": 0.5}
+DETECTION_WEIGHT = 0.5
 
 
 def wilson(successes: int, n: int, z: float = 1.96) -> list[float] | None:
@@ -62,7 +64,7 @@ def mission_outcome(metrics: dict[str, Any]) -> dict[str, Any]:
     elif quality is None:
         score = availability
     else:
-        score = WEIGHTS["work_availability"] * availability + WEIGHTS["detection_quality"] * quality
+        score = availability * (1 - DETECTION_WEIGHT + DETECTION_WEIGHT * quality)
     return {
         "labels": ["DEV_SIMULATION_ONLY", "PROVISIONAL_WEIGHTS"],
         "client_requests": requests,
@@ -76,9 +78,9 @@ def mission_outcome(metrics: dict[str, Any]) -> dict[str, Any]:
         "detection_quality": _round(quality),
         "false_containment_rate": _round(false_rate),
         "mission_score": _round(score),
-        "weights": WEIGHTS,
+        "detection_weight": DETECTION_WEIGHT,
         "formula": "work_availability alone without incidents; otherwise "
-        "0.5*work_availability + 0.5*F1(incident_recall, case_precision)",
+        "work_availability * (0.5 + 0.5*F1(incident_recall, case_precision))",
         "note": "Avoidable loss = client requests denied by outage or by containing a "
         "non-offender. Evaluator-only; not shown to agents and not a benchmark score.",
     }
