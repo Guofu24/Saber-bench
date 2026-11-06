@@ -624,3 +624,43 @@ uv run --no-sync saber world forensics verify --out runs/ir-world --source SOURC
 `PARTIAL` là còn vướng; `REVIEWED` chỉ là đã rà hồ sơ, không tự xác nhận phòng thủ thành công.
 ID log nhập tách khỏi case/event live. SOC lab dùng cùng lệnh `lab forensics` tại data directory
 của controller. Chi tiết quyền, giới hạn, export raw và Compose: [FORENSICS_VI.md](docs/FORENSICS_VI.md).
+
+## 14. Bài thực hành tham khảo Hack The Box
+
+Xem 9 nhóm bài và chạy demo bằng log tổng hợp; không cần tài khoản HTB/Gemini:
+
+```powershell
+uv run --no-sync saber training catalog
+uv run --no-sync saber training catalog --team red
+uv run --no-sync python scripts/smoke_training.py --out runs/training-demo
+node agent-office/bin/agent-office.js watch --world runs/training-demo/world --open
+```
+
+Chọn **Blue Team → blue-dfir**, xem `consult_skill`, `forensic_query`, `response_review`.
+Kết quả `PARTIAL` trong demo là có chủ ý: HTTP 200 chưa chứng minh xâm nhập/phục hồi.
+
+Nhập chứng cứ được phép sử dụng vào một bài riêng:
+
+```powershell
+uv run --no-sync saber training init --track blue-dfir --exercise my-investigation --out runs/my-investigation
+uv run --no-sync saber training attach --run runs/my-investigation --file .\data\external\events.csv --format csv --label "Event export" --rights-note "Authorized private practice" --conversion-note "Original UTF-8 CSV bytes"
+uv run --no-sync saber training prepare-world --run runs/my-investigation
+uv run --no-sync saber world run --out runs/my-investigation/world --ticks 30 --llm --key-pool .\keys_pool.txt --call-budget 60
+node agent-office/bin/agent-office.js watch --world runs/my-investigation/world --open
+uv run --no-sync saber training report --run runs/my-investigation
+```
+
+Lệnh `--llm` mới gọi Gemini. `prepare-world` chỉ tạo đội blue cho bài offline, tắt
+learning tự động; không kết nối/khởi động HTB hay dựng VM. Dùng thư mục mới cho mỗi bài.
+Giữ dữ liệu, đáp án và review ngoài git; không nhập đáp án vào kho forensic của agent.
+
+Copy `review-template.json` thành `review.json`, điền người review, nhận xét và ID
+bản ghi đã kiểm tra rồi xuất báo cáo:
+
+```powershell
+uv run --no-sync saber training report --run runs/my-investigation --review runs/my-investigation/review.json --out runs/my-investigation/report.json
+```
+
+`REVIEW_RECORDED` nghĩa là đã ghi nhận review, không phải tự chấm đạt hay xác nhận
+phòng thủ thành công. CLI kiểm hash và ID chứng cứ, không tự kiểm đúng nghĩa nội dung.
+Chi tiết định dạng, giới hạn và phần kết nối live chưa có: [HTB_TRAINING.md](docs/HTB_TRAINING.md).

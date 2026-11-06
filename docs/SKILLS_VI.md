@@ -1,7 +1,7 @@
 # Skills: phạm vi, cách nạp và kiểm tra
 
 Repo có **18 skills** trong `.claude/skills`: **15 sổ tay nghiệp vụ** cho agent và
-**3 workflow phát triển**. Có **56 tài liệu tham chiếu** trong audit nghiệp vụ, gồm
+**3 workflow phát triển**. Có **58 tài liệu tham chiếu** trong audit nghiệp vụ, gồm
 contract world/range và 13 reference DFIR. Skill là hướng dẫn cho model; quyền thực thi do runtime/tool server kiểm
 soát, không do nội dung Markdown cấp.
 
@@ -46,7 +46,7 @@ continuous world và SOC lab đều dùng loader này, với ngữ cảnh khác 
 
 | Chế độ | Nội dung model nhận | Giới hạn |
 |---|---|---|
-| `case` — population / benchmark B2 | Body `SKILL.md` và nội dung các tài liệu được tham chiếu, đi theo liên kết, loại trùng; bỏ hướng dẫn riêng của world | 64.000 ký tự |
+| `case` — population / benchmark B2 | Body `SKILL.md` và tài liệu được liên kết trong body; loại trùng, bỏ contract world và tài liệu tùy chọn trong `metadata.saber-library` | 64.000 ký tự |
 | `world` — continuous world có model | Body theo vai, hợp đồng application lab; mỗi đội tra cứu reference bằng `consult_skill` | Base 18.000 ký tự |
 | `range` — SOC lab | Body theo vai, hợp đồng executor/collector/analysis/SOAR; mỗi đội tra cứu reference bằng `consult_skill` | Base 18.000 ký tự |
 
@@ -55,6 +55,13 @@ World không có filesystem tool để model tự mở file tham chiếu. Loader
 vào prompt, giải thích rõ role/tool, thông báo người dùng, bằng chứng và phạm vi hiệu
 ứng ứng dụng. Hướng dẫn enterprise/OS không được coi là công cụ đã tích hợp. Phần
 `observation.tools` và JSON contract của runtime quyết định hành động hợp lệ.
+
+`metadata.saber-library` khai báo tài liệu chỉ tra cứu khi cần, vẫn được kiểm tra,
+hash, pin và đóng gói nhưng không nối vào prompt case. Hai guide thực hành HTB dùng
+cơ chế này để giữ giới hạn DFIR. Red và 12 vai blue có topic `external-practice`
+với tiền tố skill sở hữu khi dùng chung; client không được đọc guide của đội khác.
+Xem [workflow thực hành](HTB_TRAINING.md). World cũ giữ phiên bản đã pin; dùng world
+mới để thử tài liệu vừa bổ sung.
 
 Case nhận tài liệu nghiệp vụ đầy đủ hơn nên input token có thể tăng so với bản cũ
 chỉ nạp entrypoint. Giới hạn tính bằng **ký tự**, không phải token. Vượt giới hạn,

@@ -257,7 +257,7 @@ start container hoặc triển khai trong guest/server riêng. Không có `READY
 
 ## Kiểm thử và rollback
 
-Skills có kiểm tra riêng: 18 skills, 15 sổ tay nghiệp vụ và 56 tài liệu tham chiếu.
+Skills có kiểm tra riêng: 18 skills, 15 sổ tay nghiệp vụ và 58 tài liệu tham chiếu.
 Đã rà nguồn và bổ sung cả client/red/12 chuyên môn blue: [bảng nội dung, nguồn và kiểm chứng](docs/ALL_SKILLS_COVERAGE_VI.md).
 World/range nạp hướng dẫn cốt lõi, contract và cho mỗi đội tra cứu chuyên đề bằng `consult_skill`;
 population/benchmark nạp tài liệu theo case.
@@ -288,6 +288,23 @@ Git revert chỉ hoàn tác code: dừng runtime, backup data/volume trước kh
 CI kiểm tra Office trên Linux và Windows, đồng thời build lại để phát hiện
 `viewer/index.html` chưa cập nhật theo source. Khi sửa viewer, chạy
 `npm --prefix agent-office run build:viewer` với dependencies đã cài từ lockfile.
+
+## Bài thực hành tham khảo HTB
+
+Có 9 nhóm bài do SABER tự viết cho red, blue và đối chiếu sau diễn tập; kèm hướng dẫn
+tra cứu cho red và cả 12 chuyên môn blue. Đây là workflow offline, chưa kết nối trực
+tiếp tài khoản/lab HTB và không kèm bài học, đáp án hay dữ liệu có bản quyền của HTB.
+
+```powershell
+uv run --no-sync saber training catalog
+uv run --no-sync python scripts/smoke_training.py --out runs/training-demo
+node agent-office/bin/agent-office.js watch --world runs/training-demo/world --open
+```
+
+Demo chạy HTTP thật trong world, dùng log tổng hợp và quyết định scripted, không gọi
+Gemini/HTB. Bài điều tra kết thúc `PARTIAL` khi chưa đủ chứng cứ. Có lệnh tạo bài,
+nhập chứng cứ kèm hash, chuẩn bị đội blue và ghi nhận review; không tự chấm đúng nội
+dung hay chứng nhận năng lực. Xem [hướng dẫn và giới hạn](docs/HTB_TRAINING.md).
 
 ## Workflow khác
 

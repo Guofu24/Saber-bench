@@ -29,6 +29,9 @@ catalog of **175 subtasks across 55 NICE tasks**.
   and restore workflows.
 - **Imported-log investigations:** preserve original files and hashes, query
   timelines/IPs/processes, checkpoint investigations and review response gaps.
+- **External practice:** nine SABER-authored HTB-informed red/blue/debrief tracks,
+  on-demand skill guides, evidence registration and attributed operator reviews.
+  This is an offline workflow; no live HTB connector or course content is included.
 - **Agent Office:** separate client/red/blue areas, per-agent activity, evidence,
   quota counters and supported browser screenshots.
 
@@ -219,10 +222,10 @@ and handoff, hashed artifacts, rule testing/versioning/rollback and client recov
 checks. `wait` and `finish` stop the actor's actions as specified by the runtime;
 Office displays those states.
 
-The repository has **18 skill definitions, 15 operational playbooks and 56 reference
+The repository has **18 skill definitions, 15 operational playbooks and 58 reference
 documents**. World/range planners load core guidance and the execution contract,
 then use `consult_skill` for specialist references. Case workflows load their
-declared references. DFIR includes thirteen reference topics, twelve incident
+declared references; optional training guides stay in the on-demand library. DFIR includes thirteen domain reference topics, twelve incident
 playbooks and twelve artifact groups.
 
 Skills describe how to use available capabilities; mentioning a product does not
@@ -233,6 +236,23 @@ quality. See [skill usage](docs/SKILLS_VI.md),
 [handbook review](docs/DFIR_HANDBOOK_REVIEW_VI.md),
 [skill review](docs/SKILLS_REVIEW_VI.md) and
 [specialist tool contracts](docs/SOC_SPECIALISTS_VI.md).
+
+## External practice with HTB-informed tracks
+
+Browse the original SABER rubrics or run a local investigation demo:
+
+```powershell
+uv run --no-sync saber training catalog
+uv run --no-sync python scripts/smoke_training.py --out runs/training-demo
+node agent-office/bin/agent-office.js watch --world runs/training-demo/world --open
+```
+
+The demo uses synthetic logs and scripted decisions through real local HTTP.
+It does not call HTB or Gemini. For authorized external evidence, `training init`,
+`attach`, `prepare-world` and `report` provide the operator workflow. Reviews
+verify evidence integrity and preserve human judgments; they do not automatically
+certify correctness or promote benchmark readiness. See the
+[training guide and integration limits](docs/HTB_TRAINING.md).
 
 ## Enable Gemini
 
