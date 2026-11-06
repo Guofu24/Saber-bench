@@ -85,6 +85,10 @@ def _red(actor: Actor, obs: dict[str, Any], turn: int) -> Action:
         reads = [e for e in events if e["tool"] == "read_document"]
         if reads:
             return action("collect", document=reads[-1]["target"])
+    if last.get("tool") == "collect" and last.get("status") == 201:
+        staged = [e for e in obs.get("events", []) if e["tool"] == "collect"]
+        if staged:
+            return action("exfiltrate", document=staged[-1]["target"])
     links = last.get("links", [])
     for m in reversed(obs.get("team_messages", [])):
         try:

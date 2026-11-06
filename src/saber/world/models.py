@@ -122,7 +122,17 @@ CLIENT_TOOLS = frozenset(
     }
 )
 RED_TOOLS = frozenset(
-    {"browse", "search", "login", "read_document", "collect", "register_job", "disrupt", "share"}
+    {
+        "browse",
+        "search",
+        "login",
+        "read_document",
+        "collect",
+        "exfiltrate",
+        "register_job",
+        "disrupt",
+        "share",
+    }
 )
 BLUE_TOOLS = {
     "lead": frozenset({"open_case", "assign", "notify", "close_case", "share", "verify_recovery"}),

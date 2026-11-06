@@ -58,6 +58,55 @@ def test_silent_access_collects_actual_data_without_informing_client(lab):
     assert "collection" not in server.client("blue-dfir").observe()
 
 
+def test_exfiltration_flags_stolen_bytes_and_counts_as_an_incident(lab):
+    world, server = lab
+    red, name, _ = read_private(world, server)
+    red.act(action("collect", document=name))
+    staged = red.act(action("exfiltrate", document=name))
+    assert staged["status"] == 201 and staged["bytes"] > 0
+    assert world.report()["metrics"]["exfiltrated_bytes"] == staged["bytes"]
+    server.client("blue-monitor").act(action("open_case", evidence_ids=[staged["event_id"]]))
+    assert world.report()["metrics"]["case_tp"] == 1
+
+
+def test_exfiltration_requires_prior_collection(lab):
+    world, server = lab
+    red = server.client("red-access")
+    red.act(action("login"))
+    assert red.act(action("exfiltrate", document="welcome"))["status"] == 409
+    assert world.report()["metrics"]["exfiltrated_bytes"] == 0
+
+
+def test_client_role_cannot_exfiltrate(lab):
+    world, server = lab
+    client = server.client("client-1")
+    client.act(action("login"))
+    assert client.act(action("exfiltrate", document="welcome"))["status"] == 403
+
+
+def test_exfiltration_of_authorized_data_is_not_an_incident(lab):
+    world, server = lab
+    red = server.client("red-access")
+    red.act(action("login"))
+    red.act(action("read_document", document="welcome"))
+    red.act(action("collect", document="welcome"))
+    staged = red.act(action("exfiltrate", document="welcome"))
+    assert staged["status"] == 201 and staged["bytes"] > 0
+    assert world.report()["metrics"]["exfiltrated_bytes"] == 0
+
+
+def test_containment_before_exfiltration_prevents_it(lab):
+    world, server = lab
+    red, name, event = read_private(world, server)
+    red.act(action("collect", document=name))
+    cid = open_case(server, event["event_id"])
+    server.client("blue-ir").act(
+        action("contain", case_id=cid, principal=world.principals["red-access"])
+    )
+    assert red.act(action("exfiltrate", document=name))["status"] == 403
+    assert world.report()["metrics"]["exfiltrated_bytes"] == 0
+
+
 def test_patch_actually_denies_later_reads(lab):
     world, server = lab
     red, name, _ = read_private(world, server)
@@ -213,6 +262,7 @@ def test_http_denies_truth_and_other_roles_and_other_world_tokens(lab, tmp_path)
         "case_tp",
         "SYNTHETIC PRIVATE DOCUMENT",
         "collected_bytes",
+        "exfiltrated_bytes",
         "red-access",
     ):
         assert forbidden not in text
