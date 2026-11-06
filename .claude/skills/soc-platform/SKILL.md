@@ -1,6 +1,9 @@
 ---
 name: soc-platform
 description: "Kiểm sức khoẻ telemetry và công cụ SOC trong phạm vi được cấp: log gap, retention, parser, clock, hàng đợi và lỗi truy vấn. Phân biệt thiếu quan sát với không có tấn công; bàn giao sửa hệ thống có kiểm chứng."
+metadata:
+  saber-library:
+    - ../soc-orchestrator/reference/external-practice.md
 ---
 
 # Vận hành nền tảng SOC
@@ -23,3 +26,5 @@ không suy tool/connector sẵn sàng từ tên trong tài liệu.
    đối chiếu và đánh dấu khoảng lịch sử không khôi phục được, không xoá dấu vết gián đoạn.
 
 Hồ sơ: [case record](../soc-orchestrator/reference/case-record.md).
+
+For assigned external training, use `consult_skill` topic `soc-orchestrator--external-practice` when available. This adds guidance, not execution permissions.

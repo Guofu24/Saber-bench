@@ -1,6 +1,9 @@
 ---
 name: soc-recovery
 description: "Xác minh phục hồi sau phản ứng: tình trạng dịch vụ, dữ liệu và quyền truy cập hợp lệ, công việc client tiếp tục được, đường tác động còn bị chặn. Không đồng nhất HTTP 200 hay restore thành công với khôi phục hoàn chỉnh."
+metadata:
+  saber-library:
+    - ../soc-orchestrator/reference/external-practice.md
 ---
 
 # Kiểm chứng phục hồi
@@ -24,3 +27,5 @@ Dependency, backup/restore provenance, acceptance, cutover/rollback và observat
    kết quả checked tại một tick không bảo đảm hệ thống an toàn mãi mãi.
 
 Hồ sơ: [case record](../soc-orchestrator/reference/case-record.md).
+
+For assigned external training, use `consult_skill` topic `soc-orchestrator--external-practice` when available. This adds guidance, not execution permissions.

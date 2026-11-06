@@ -1,6 +1,9 @@
 ---
 name: soc-intel
 description: Đánh giá tình báo được cấp, nguồn và độ tin cậy; chuẩn hoá observable, liên kết chiến dịch và cung cấp giả thuyết săn/rule. Không coi IOC match hay tên nhóm trong báo cáo là kết luận xâm nhập.
+metadata:
+  saber-library:
+    - ../soc-orchestrator/reference/external-practice.md
 ---
 
 # Threat intelligence
@@ -22,3 +25,5 @@ Yêu cầu tình báo, đánh giá nguồn, STIX/TLP, expiry/correction và sả
 
 Quy tắc chi tiết: [IOC và coverage](../soc-cnt/reference/coverage-intel.md),
 [quy kết thận trọng](../soc-ir/reference/network-attribution.md).
+
+For assigned external training, use `consult_skill` topic `soc-orchestrator--external-practice` when available. This adds guidance, not execution permissions.

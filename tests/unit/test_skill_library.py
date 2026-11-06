@@ -8,6 +8,7 @@ from saber.agents.skill_library import (
     load_reference_library,
     validate_library,
 )
+from saber.agents.skills import load_playbook, skill_resources
 from saber.domain.errors import IntegrationBlocked
 
 
@@ -81,3 +82,51 @@ def test_selected_text_comes_from_pinned_library_not_untrusted_observation():
 def test_malformed_reference_library_is_rejected(value):
     with pytest.raises(ValueError):
         validate_library(value)
+
+
+def test_optional_library_guides_are_pinned_and_exported_without_inflating_case(tmp_path):
+    folder = tmp_path / ".claude/skills/soc-dfir"
+    folder.mkdir(parents=True)
+    entry = folder / "SKILL.md"
+    entry.write_text(
+        "---\nname: soc-dfir\ndescription: Test.\nmetadata:\n"
+        "  saber-library: [practice.md]\n---\nCore instructions. Read `required.md`.\n",
+        encoding="utf-8",
+    )
+    (folder / "required.md").write_text("# Required\nCase contract.", encoding="utf-8")
+    guide = folder / "practice.md"
+    guide.write_text("# Practice\nOptional training method.", encoding="utf-8")
+    assert guide in skill_resources("soc-dfir", root=tmp_path)
+    assert guide not in skill_resources("soc-dfir", root=tmp_path, include_library=False)
+    case = load_playbook("soc-dfir", root=tmp_path)
+    assert "Case contract." in case and "Optional training method." not in case
+    lib = load_reference_library("soc-dfir", root=tmp_path)
+    assert lib["practice"]["text"].endswith("Optional training method.")
+    guide.unlink()
+    with pytest.raises(IntegrationBlocked, match="Missing"):
+        load_reference_library("soc-dfir", root=tmp_path)
+
+
+@pytest.mark.parametrize("reference", ["../../private.md", "../implement-task/SKILL.md"])
+def test_optional_references_cannot_escape_operational_skills(tmp_path, reference):
+    folder = tmp_path / ".claude/skills/soc-dfir"
+    folder.mkdir(parents=True)
+    (folder / "SKILL.md").write_text(
+        "---\nname: soc-dfir\ndescription: Test.\nmetadata:\n"
+        f"  saber-library: [{reference}]\n---\nCore instructions.\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(IntegrationBlocked, match="escapes|non-operational"):
+        load_reference_library("soc-dfir", root=tmp_path)
+
+
+@pytest.mark.parametrize("metadata", ["[]", "{saber-library: text}", "{saber-library: [42]}"])
+def test_invalid_optional_metadata_fails_closed(tmp_path, metadata):
+    folder = tmp_path / ".claude/skills/soc-dfir"
+    folder.mkdir(parents=True)
+    (folder / "SKILL.md").write_text(
+        f"---\nname: soc-dfir\ndescription: Test.\nmetadata: {metadata}\n---\nCore.\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(IntegrationBlocked, match="Invalid"):
+        load_reference_library("soc-dfir", root=tmp_path)

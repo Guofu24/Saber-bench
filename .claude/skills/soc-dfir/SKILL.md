@@ -1,6 +1,9 @@
 ---
 name: soc-dfir
 description: "Điều tra DFIR theo case và chứng cứ được cấp: acquisition, host/memory/network/identity/cloud, timeline, phạm vi và tác động. Dùng khi cần tái dựng sự cố hoặc kiểm chứng giả thuyết; bàn giao cho IR, không tự cấp quyền containment hay acquisition ngoài runtime."
+metadata:
+  saber-library:
+    - ../soc-orchestrator/reference/external-practice.md
 ---
 
 # Điều tra số — DFIR

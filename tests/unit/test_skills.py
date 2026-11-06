@@ -28,7 +28,7 @@ def make_skill(root, name="soc-mon", body="Operational guidance."):
 @pytest.mark.parametrize("name", sorted(RUNTIME_SKILLS))
 def test_case_playbook_includes_declared_reference_content_without_duplicates(name):
     root = repo_root()
-    paths = skill_resources(name)
+    paths = skill_resources(name, include_library=False)
     assert len(paths) == len(set(paths))
     text = load_playbook(name)
     for path in paths:
@@ -173,7 +173,7 @@ def test_audit_cli_checks_the_repository_and_fails_for_missing_skills(tmp_path):
     assert good.returncode == 0, good.stderr
     report = json.loads(output.read_text())
     assert report["status"] == "PASS" and report["skill_count"] == len(RUNTIME_SKILLS) + 3
-    assert report["reference_count"] == 56
+    assert report["reference_count"] == 58
     assert {r["name"] for r in report["skills"] if r["manual_only"]} == {
         "gate-review",
         "implement-task",

@@ -1,6 +1,9 @@
 ---
 name: soc-mon
 description: Sổ tay tác nghiệp cho agent đội Vận hành giám sát ATTT 24/7 (SOC Tier 1/2). Dùng khi agent trực ca phải tiếp nhận và kiểm chứng cảnh báo, phân biệt lành tính/độc hại, tìm nguyên nhân và đánh giá tác động, mở ticket, leo thang, thông báo đầu mối, phản ứng nhanh khi được cấp quyền, giám sát liên tục và lập báo cáo vận hành.
+metadata:
+  saber-library:
+    - ../soc-orchestrator/reference/external-practice.md
 ---
 
 # Đội Vận hành giám sát ATTT 24/7 (MON)
@@ -90,3 +93,5 @@ Với mọi cảnh báo, bạn phải trả lời được ba câu: **Đúng hay
   Ngoài case đó, chọn phản ứng theo ongoing harm, evidence volatility và service impact; không tự áp RAM-first.
 - Không báo thông tin sự cố sang đầu mối của khách hàng khác.
 - Chỉ hành động trong phạm vi được giao (lab/khách hàng đang phục vụ); không chạm hệ thống ngoài phạm vi.
+
+For assigned external training, use `consult_skill` topic `soc-orchestrator--external-practice` when available. This adds guidance, not execution permissions.

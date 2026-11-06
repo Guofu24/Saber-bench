@@ -88,8 +88,10 @@ def referenced_paths(path: Path, text: str) -> tuple[Path, ...]:
     return tuple(path.parent / ref for ref in dict.fromkeys(MD_REFERENCE.findall(text)))
 
 
-def skill_resources(name: str, *, root: Path | None = None) -> tuple[Path, ...]:
-    """Declared operational Markdown only, including transitive references exactly once."""
+def skill_resources(
+    name: str, *, root: Path | None = None, include_library: bool = True
+) -> tuple[Path, ...]:
+    """Declared Markdown; optional metadata guides are pinned/exported but not eager case text."""
     root = (root or repo_root()).resolve()
     if name not in RUNTIME_SKILLS:
         raise IntegrationBlocked("Not an operational runtime skill.")
@@ -114,7 +116,21 @@ def skill_resources(name: str, *, root: Path | None = None) -> tuple[Path, ...]:
         if len(seen) > 64:
             raise IntegrationBlocked("Too many skill references.")
         if path.name == "SKILL.md":
-            _, text = read_skill(path.parent.name, root)
+            metadata, text = read_skill(path.parent.name, root)
+            extra = metadata.get("metadata", {})
+            if not isinstance(extra, dict):
+                raise IntegrationBlocked("Invalid skill metadata.")
+            library = extra.get("saber-library", [])
+            if (
+                not isinstance(library, list)
+                or len(library) > 32
+                or any(
+                    not isinstance(ref, str) or not MD_REFERENCE.fullmatch(ref) for ref in library
+                )
+            ):
+                raise IntegrationBlocked("Invalid on-demand skill references.")
+            if include_library:
+                queue.extend(path.parent / ref for ref in library)
         resources.append(path)
         queue.extend(referenced_paths(path, text))
     return tuple(resources)
@@ -139,7 +155,7 @@ def load_playbook(
     elif mode == "case":
         paths = tuple(
             p
-            for p in skill_resources(name, root=root)
+            for p in skill_resources(name, root=root, include_library=False)
             if p != base / name / "SKILL.md" and p != base / WORLD_REFERENCE
         )
         limit = MAX_CASE_CHARS

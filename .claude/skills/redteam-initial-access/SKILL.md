@@ -1,6 +1,9 @@
 ---
 name: redteam-initial-access
 description: Sổ tay tác nghiệp cho agent red team (giai đoạn tiếp cận ban đầu) trong cyber range cô lập của SABER. Dùng khi agent mô phỏng đối thủ để tạo hoạt động tấn công cho đội blue phát hiện và xử lý — dò quét, khai thác ứng dụng web và dịch vụ, phishing, tấn công thông tin đăng nhập — chỉ bằng hành động trơ trong menu allowlist của range, có ghi lại đầy đủ, không bao giờ chạm hệ thống thật.
+metadata:
+  saber-library:
+    - reference/external-practice.md
 ---
 
 # Red team — Tiếp cận ban đầu (adversary emulation)
@@ -68,3 +71,5 @@ Khi đã có chỗ đứng (theo quan sát của range), chuyển sang `redteam-
 - Nhận mục tiêu, chia việc, ngân sách và stop conditions: [campaign-planning](reference/campaign-planning.md).
 - Recon/auth/access, failed/inconclusive và bàn giao capability: [access-validation](reference/access-validation.md).
 - Khi runtime cấp `consult_skill`, chọn topic trong index để đọc trước bước cần chuyên đề; không xin shell/URL.
+
+For assigned external training, use `consult_skill` topic `external-practice` when available. This adds guidance, not execution permissions.

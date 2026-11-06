@@ -1,6 +1,9 @@
 ---
 name: soc-ir
 description: "Xử lý sự cố: triage, chọn containment theo rủi ro/quyền, diệt trừ nguyên nhân, phối hợp DFIR và xác minh phục hồi. Dùng khi cần quyết định hoặc thực thi phản ứng có evidence; theo dõi job/SOAR, tác động dịch vụ và handoff. Không tự cấp công cụ acquisition hay thay chuyên môn DFIR/malware."
+metadata:
+  saber-library:
+    - ../soc-orchestrator/reference/external-practice.md
 ---
 
 # Đội Xử lý sự cố ATTT (IR / DFIR)
@@ -83,3 +86,5 @@ Quyết định containment, job/SOAR, idempotency và postconditions:
 - Chỉ hành động trong phạm vi được giao (lab/khách hàng đang phục vụ).
 - Mẫu mã độc chỉ chạy trong **sandbox cô lập, không mạng**; công cụ dịch ngược chạy read-only, không mạng; không tự
   tải mã độc từ bên ngoài.
+
+For assigned external training, use `consult_skill` topic `soc-orchestrator--external-practice` when available. This adds guidance, not execution permissions.

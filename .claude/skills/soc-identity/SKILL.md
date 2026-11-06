@@ -1,6 +1,9 @@
 ---
 name: soc-identity
 description: Điều tra danh tính, đăng nhập, phiên và lạm dụng quyền từ dữ liệu được cấp; phân biệt gõ sai, tác vụ dịch vụ và truy cập trái phép. Bàn giao phương án thu hồi phiên/quyền cho IR, không tự đọc secret.
+metadata:
+  saber-library:
+    - ../soc-orchestrator/reference/external-practice.md
 ---
 
 # Điều tra danh tính và quyền truy cập
@@ -25,3 +28,5 @@ không tự giả có AD/cloud connector.
 
 Tham khảo kiểm chứng: [nhóm cảnh báo](../soc-mon/reference/alert-groups.md).
 Hồ sơ: [case record](../soc-orchestrator/reference/case-record.md).
+
+For assigned external training, use `consult_skill` topic `soc-orchestrator--external-practice` when available. This adds guidance, not execution permissions.

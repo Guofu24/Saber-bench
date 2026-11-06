@@ -1,6 +1,9 @@
 ---
 name: soc-network
 description: Điều tra luồng mạng, PCAP/DNS/HTTP/TLS và liên kết endpoint khi có nguồn tương ứng; kiểm C2, tunneling, NAT và bằng chứng exfil. Không suy lưu lượng packet từ telemetry ứng dụng.
+metadata:
+  saber-library:
+    - ../soc-orchestrator/reference/external-practice.md
 ---
 
 # Điều tra mạng
@@ -23,3 +26,5 @@ pivot chuyên sâu; tài liệu dùng chung có tiền tố skill sở hữu, kh
 
 Nguồn có PCAP: [C2/exfil](../soc-ir/reference/network-attribution.md).
 Hồ sơ: [case record](../soc-orchestrator/reference/case-record.md).
+
+For assigned external training, use `consult_skill` topic `soc-orchestrator--external-practice` when available. This adds guidance, not execution permissions.
