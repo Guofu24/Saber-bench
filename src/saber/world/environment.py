@@ -15,6 +15,7 @@ from typing import Any
 
 from saber.forensics import tools as forensics
 from saber.world import lab_tools, learning, operations, work
+from saber.world.mission import mission_outcome
 from saber.world.models import Action, Actor, WorldConfig, safe_name, specialties_for, tools_for
 from saber.world.store import Store, utc_now
 
@@ -140,6 +141,15 @@ class World:
 
     def _blocked(self, principal: str) -> bool:
         return int(self.store.get("blocks", principal, {}).get("until", 0)) > self.tick
+
+    def _client_denied(self, principal: str, cause: str) -> None:
+        """Private attribution of lost client work; agents never see these counters."""
+        self._metric(f"client_denied_{cause}", 1)
+        if cause == "containment":
+            case_id = str(self.store.get("blocks", principal, {}).get("case_id", ""))
+            offenders = self.store.get("case-evaluation", case_id, {}).get("offenders", [])
+            if principal not in offenders:
+                self._metric("client_denied_collateral", 1)
 
     def observe(self, actor: Actor) -> dict[str, Any]:
         with self.store.lock:
@@ -319,8 +329,12 @@ class World:
         state = self.store.get("service", "state")
         if actor.team != "blue" and tool not in {"share", "acknowledge"}:
             if self._blocked(p):
+                if actor.team == "client":
+                    self._client_denied(p, "containment")
                 return 403, {"error": "Session restricted by the security service."}, "portal"
             if state["down_until"] > self.tick:
+                if actor.team == "client":
+                    self._client_denied(p, "outage")
                 return 503, {"error": "Business service temporarily unavailable."}, "portal"
         if tool == "share":
             text = str(args.get("text", ""))[:1000]
@@ -672,6 +686,7 @@ class World:
                 )
                 effect["response_verified"] = not before and self._blocked(target)
                 if effect["response_verified"]:
+                    self._metric("containments", 1)
                     if self.by_principal[target].team == "client":
                         self._metric("client_containments", 1)
                     if target not in self.store.get("case-evaluation", case["id"], {}).get(
@@ -809,5 +824,6 @@ class World:
                 )
                 if metrics.get("response_cases")
                 else None,
+                "mission": mission_outcome(metrics),
                 "note": "Application effects are measured independently. Local machines/techniques are emulated; no benchmark readiness promotion.",
             }
