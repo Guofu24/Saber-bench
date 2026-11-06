@@ -30,7 +30,12 @@ def catalog(team: str | None) -> None:
             "authorship": "SABER; not official HTB content",
             "reviewed_at": "2026-11-05",
             "live_connector": False,
-            "tracks": [t.model_dump() for t in TRACKS.values() if team is None or t.team == team],
+            "tracks": [
+                t.model_dump(exclude={"guidance_topic"})
+                | {"guidance_topics": {role: t.guidance_for(role) for role in t.roles}}
+                for t in TRACKS.values()
+                if team is None or t.team == team
+            ],
         }
     )
 

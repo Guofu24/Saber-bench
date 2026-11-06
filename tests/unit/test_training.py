@@ -61,7 +61,7 @@ def test_tracks_cover_operational_roles_and_references_without_claiming_htb_exec
         assert len(ids) == len(set(ids))
         for role in selected.roles:
             library = load_reference_library(PLAYBOOKS[role])
-            assert any(k.endswith("external-practice") for k in library)
+            assert selected.guidance_for(role) in library
     assert not any(k.endswith("external-practice") for k in load_reference_library("client-user"))
     assert "soc-orchestrator--external-practice" not in load_reference_library(
         "redteam-initial-access"

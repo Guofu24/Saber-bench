@@ -18,8 +18,18 @@ class Track(BaseModel):
     title: str
     roles: tuple[str, ...]
     source_url: str
+    # Primary-role hint retained in pinned manifests; other roles use guidance_for().
     guidance_topic: str
     criteria: tuple[Criterion, ...]
+
+    def guidance_for(self, role: str) -> str:
+        if role not in self.roles:
+            raise ValueError("Role is outside this track")
+        if role == "impact":
+            return "redteam-initial-access--external-practice"
+        if role in {"recon", "access", "lead"}:
+            return "external-practice"
+        return BLUE_GUIDE
 
 
 PRO = "https://help.hackthebox.com/en/articles/5185470-how-to-play-pro-labs"
@@ -58,7 +68,7 @@ def track(
         title=title,
         roles=roles,
         source_url=url,
-        guidance_topic=RED_GUIDE if team == "red" else BLUE_GUIDE,
+        guidance_topic=RED_GUIDE if team == "red" or roles[0] == "lead" else BLUE_GUIDE,
         criteria=COMMON + tuple(Criterion(id=k, requirement=v) for k, v in requirements),
     )
 

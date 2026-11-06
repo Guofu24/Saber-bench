@@ -383,6 +383,7 @@ def render(spec: LabSpec, out: Path) -> dict[str, Any]:
         "README.md",
         "README.vi.md",
         "notes.md",
+        "scripts/smoke_training.py",
         "catalog/subtasks.json",
     ):
         dest = source / name
@@ -423,6 +424,7 @@ def render(spec: LabSpec, out: Path) -> dict[str, Any]:
         "SOC_RECOVERY_VI.md",
         "SOC_LEARNING_VI.md",
         "SOC_BUILD_CHECKLIST.md",
+        "HTB_TRAINING.md",
     ):
         shutil.copyfile(root / "docs" / name, out / name)
         (source / "docs").mkdir(exist_ok=True)
