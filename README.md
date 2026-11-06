@@ -2,6 +2,10 @@
 
 **English** | [Tiếng Việt](README.vi.md)
 
+**Continuing with another AI or engineer?** Start with the
+[project handoff](docs/HANDOFF.md): goals, implemented features, validation
+evidence, remaining work and commands to reproduce the current workflows.
+
 SABER is a persistent multi-agent security lab: clients carry out ordinary work,
 red-team agents test weaknesses in the lab, and blue-team agents investigate logs
 and respond to incidents. Run scripted agents or enable Gemini planning through

@@ -2,6 +2,9 @@
 
 [English](README.md) | **Tiếng Việt**
 
+**Bàn giao cho AI hoặc người phát triển khác:** đọc [bản bàn giao hiện tại](docs/HANDOFF.md)
+để nắm mục tiêu, phần đã triển khai, bằng chứng kiểm thử, việc còn lại và lệnh chạy.
+
 **Mới: bộ SOC lab nhiều dịch vụ và VM** đã có mã triển khai cho ba preset
 `linux-small`, `windows-ad`, `expanded`. Bắt đầu ở [SOC Lab — triển khai và nghiệm thu](docs/SOC_LAB_VI.md).
 Nhóm lệnh là **`saber lab`**: business app, worker từng đội, Chromium, collector, OpenSearch,

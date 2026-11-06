@@ -1,5 +1,10 @@
 # SABER — autonomous Claude Code instructions (v3.2)
 
+For a new AI or engineer continuing the project, first read the
+[current handoff](docs/HANDOFF.md) for the user goals, implementation status,
+validation boundaries and next steps. It supplements the instructions below;
+the archived Phase G handoff is historical.
+
 Goal: build a reproducible benchmark of **175 SOC subtasks** in the supplied HTML catalog (55 NICE tasks; 110 file, 47 SOC, 18 VM), using **whatever compatible environment and services already exist**. Engineering items T001–T038 and bridge items B001–B005 are implementation work, *not* SOC benchmark tasks.
 
 ## Supervisor mode overrides the previous one-item-only plan

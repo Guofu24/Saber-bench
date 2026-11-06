@@ -1,12 +1,18 @@
 # SABER — Thiết kế quần thể agent client / attacker / blue (DESIGN, chưa code)
 
+> **Tài liệu thiết kế lịch sử.** Các trạng thái và yêu cầu go-ahead bên dưới mô tả
+> thời điểm viết; sau đó người dùng đã yêu cầu triển khai quần thể agent.
+> Xem [bản bàn giao hiện tại](HANDOFF.md) và code để biết phần đã thực hiện,
+> thay vì coi `DESIGN_ONLY` ở đây là trạng thái hiện tại của toàn dự án.
+
 Written for: operator SABER + một reviewer độc lập + session Claude Code kế tiếp sẽ cân nhắc có
 greenlight hướng này không. Đây là **bản thiết kế để bàn**, KHÔNG phải mô tả code đã tồn tại. Không
 dòng nào trong đây được triển khai trong `src/` tại thời điểm viết. Mọi quyết định "được làm / chưa
 được làm" vẫn thuộc về operator.
 
 Trạng thái: `DESIGN_ONLY` · cần operator chốt scope trước khi viết code · khớp ghi chú ở
-`docs/HANDOFF.md` §7 ("self-operating red/blue agent population" — *cần go-ahead rõ ràng*).
+[bản bàn giao Phase G](history/HANDOFF_PHASE_G.md) §7
+("self-operating red/blue agent population" — *cần go-ahead rõ ràng* tại thời điểm đó).
 
 Liên quan: `docs/BENCHMARK_PROTOCOL.md` (luật nhãn & leakage), `docs/SECURITY.md` (isolation),
 `src/saber/range/live/` (lab live hiện có), `src/saber/soc/` (4 dịch vụ blue hiện có), `CLAUDE.md`
