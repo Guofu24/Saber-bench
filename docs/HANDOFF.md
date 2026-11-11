@@ -1,15 +1,17 @@
 # SABER — current AI / engineer handoff
 
-**Snapshot:** 2026-11-11. **Implementation baseline:** `5e81c93` (executable
-feasibility witness, Phase 4.1A), branched from `e9b0c46` (previous handoff baseline).
+**Snapshot:** 2026-11-11. **Implementation baseline:** Phase 4.1B-1 (genuine
+multi-path scenarios) on top of `5e81c93` (Phase 4.1A executable feasibility
+witness), branched from `e9b0c46` (previous handoff baseline).
 **Branch:** `feat/mission-outcome-metrics` (not merged to `main`).
 **Repository:** <https://github.com/Guofu24/Saber-bench>.
 
 **This branch adds a red-team upgrade** on top of the environment-profiles work:
 a continuous always-on client, a mission-outcome score, an inert exfiltration
 stage, a rule-based adaptive red planner, independently verified red-objective
-metrics, a stateful scenario system with an independent feasibility solver, and an
-executable feasibility witness that validates that solver at the execution level.
+metrics, a stateful scenario system with an independent feasibility solver, an executable
+feasibility witness that validates that solver at the execution level, and genuine
+multi-path scenarios (two distinct executable paths to one objective).
 See **§5a** for the current architecture, phase status and validity limits; the
 rest of this handoff still describes the shared baseline. Full red-team reference:
 [docs/REDTEAM_SYNTHESIS.md](REDTEAM_SYNTHESIS.md) §8.
@@ -255,8 +257,9 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
   containment of an offender is not charged. Provisional weights, evaluator-only.
 - [`src/saber/world/red_planner.py`](../src/saber/world/red_planner.py):
   deterministic **rule-based adaptive** red planner (belief state from own
-  observations; reacts to containment/ACL denial/outage/budget). Not learned, not
-  strategic.
+  observations; reacts to containment/ACL denial/outage/budget). Tracks per-document
+  denials and tries an alternative document, re-enumerating once when every known
+  document is denied (Phase 4.1B-1). Not learned, not strategic.
 - [`src/saber/world/red_policies.py`](../src/saber/world/red_policies.py): three
   evaluation policies — `adaptive`, `naive_greedy`, `random_valid`.
 - [`src/saber/world/red_metrics.py`](../src/saber/world/red_metrics.py):
@@ -265,19 +268,28 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
   attribution). Evaluator-only key spaces; never in any observation.
 - [`src/saber/world/scenario.py`](../src/saber/world/scenario.py) +
   [`scenario_cli.py`](../src/saber/world/scenario_cli.py): `ScenarioSpec`
-  (versioned, validated), ten family templates, `materialize()`, and the
-  independent `feasibility()` reference solver. The solver enforces two distinct
-  limits — the **action budget** (`red_action_budget`, count of red actions) and the
-  **tick budget** (`tick_budget`, episode length in ticks); `VALID_FEASIBLE` requires
-  both.
-- [`src/saber/world/witness.py`](../src/saber/world/witness.py) (Phase 4.1A):
-  **executable feasibility witness**. Runs the solver's candidate path through the
-  real `World.act()` pathway in a fresh isolated episode **with no blue**, respecting
-  prerequisites/ACLs/outages/session/action-budget, and verifies the objective
-  **only from `red_metrics` server effects**. Statuses `WITNESS_VERIFIED /
-  WITNESS_FAILED / NO_WITNESS_FOUND / INVALID_SCENARIO / UNKNOWN`; `saber world
-  scenario witness` / `witness-all` CLI. Measures structural feasibility, kept
-  separate from the blue-active runtime outcome.
+  (versioned, validated), ten single-path family templates plus six **multi-path**
+  families (`MULTIPATH_FAMILIES`, Phase 4.1B-1), `materialize()`, and the independent
+  `feasibility()` reference solver. The solver enforces two distinct limits — the
+  **action budget** (`red_action_budget`, count of red actions) and the **tick budget**
+  (`tick_budget`, episode length in ticks); `VALID_FEASIBLE` requires both. For
+  exfiltration it enumerates one candidate path per client document
+  (`exfil_candidate_paths`) and is feasible if any path is.
+- Per-document controls in [`environment.py`](../src/saber/world/environment.py)
+  `read_document` (Phase 4.1B-1): a work document may be `restricted` (per-asset access
+  control) or `requires` another document be read first (prerequisite). Inert, private
+  (only a `403 Access denied.` is observable), so one path can be blocked while another
+  stays open. Spec fields `restricted_clients` / `gated_clients` /
+  `staged_restriction_tick` carry this; none reaches an observation.
+- [`src/saber/world/witness.py`](../src/saber/world/witness.py) (Phase 4.1A + 4.1B-1):
+  **executable feasibility witness**. `run_witness` runs the solver's candidate path
+  through the real `World.act()` pathway in a fresh isolated episode **with no blue**,
+  respecting prerequisites/ACLs/outages/session/action-budget, and verifies the
+  objective **only from `red_metrics` server effects**. `witness_multipath` executes
+  each distinct path independently and runs a recovery episode (attempt a blocked path,
+  take the 403, verify the alternative). CLI `scenario witness` / `witness-all` /
+  `multipath` / `multipath-all`. Structural feasibility only, kept separate from the
+  blue-active runtime outcome.
 - Inert `exfiltrate` tool (TA0010/T1041) in
   [`environment.py`](../src/saber/world/environment.py); `WorldConfig.red_action_budget`
   in [`models.py`](../src/saber/world/models.py); `Runner(red_policy=...)` hook in
@@ -288,8 +300,10 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
   with server-measured bytes; verified objective metrics; all ten scenarios
   materialise and run under three policies; the feasibility solver and
   `saber world scenario` CLI; the executable witness over all ten families
-  (`witness-all`: 10/10 static-vs-witness agreement, 8 verified / 2 no-witness);
-  the mission score.
+  (`witness-all`: 10/10 static-vs-witness agreement, 8 verified / 2 no-witness); six
+  multi-path families with the multi-path witness (one scenario has two distinct
+  executable paths and the witness verifies the alternative after the first is blocked);
+  the adaptive planner recovering from a blocked path via re-enumeration; the mission score.
 - **Designed/not run here:** the LLM red policy (menu-based, range-only — not
   exercised); any mid-chain ATT&CK (Execution / PrivEsc / Defense Evasion / Lateral
   Movement / C2) — **no runnable inert action**, infrastructure-blocked.
@@ -302,8 +316,9 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
 | 3 — adaptive red agent | CORE COMPLETE — deterministic rule-based adaptive planner |
 | 4 — scenario spec & generation | COMPLETE for the initial single-app scope |
 | 4.1A — executable feasibility witness | COMPLETE — solver validated at execution level for the tested scenarios (positive feasibility only; see issue A) |
+| 4.1B-1 — genuine multi-path scenarios | COMPLETE — two distinct executable paths to one objective; witness verifies the alternative after the first is blocked (6 families) |
 | 5 — verified objective metrics | COMPLETE for the current verified objectives |
-| 6 — integration tests | PARTIAL — tests exist (incl. 11 witness tests); broader validity/fidelity checks remain |
+| 6 — integration tests | PARTIAL — tests exist (incl. 11 witness + 17 multi-path tests); broader validity/fidelity checks remain |
 | 7 — docs & handoff | this update |
 
 ### Validity issues to carry forward
@@ -321,25 +336,35 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
   blue**; observed reachability under an active blue policy is a separate runtime
   outcome (e.g. `blue_containment` is WITNESS_VERIFIED with no blue, yet contained at
   run time). Do not conflate them. The witness measures the structural notion only.
-- **C. Generalization.** Ten families (two held-out) do **not** establish
-  generalization; evidence covers only the tested configurations.
+- **C. Generalization.** Still not established. Phase 4.1B-1 adds genuine multi-path
+  families (two distinct executable paths to one objective, witness-validated), which
+  narrows the "single configuration" concern for the multi-path dimension, but the
+  evidence still covers only the tested configurations.
 - **D. Scenario difficulty.** `alternative_path` is easy (one-step disrupt);
-  `benign_lookalikes` has not yet produced a blue false-positive failure.
+  `benign_lookalikes` has not yet produced a blue false-positive failure. Multi-path
+  families now exercise harder path-selection (block-and-recover, budget-vs-length),
+  but only without an active blue team.
 
 ### Known limitations / blockers
 - Mid-chain ATT&CK needs a multi-machine lab + snapshots (CR-1 Docker daemon down,
   CR-3 no authorized lab network). No fabricated effects were added.
 - `red_metrics` detection/containment timing is principal-specific for containment
-  but coarse for a global ACL; `blocked_by_environment` is approximate.
+  but coarse for a global ACL; `blocked_by_environment` is approximate. It does **not**
+  yet attribute a per-document `restricted`/`requires` denial, so a blocked single-path
+  run reads `IN_PROGRESS` rather than `VERIFIED_FAILURE`; objective *verification* is
+  unaffected (the witness reads effects directly).
+- The rule-based planner cannot satisfy a prerequisite-gated path (it does not discover
+  the index read), so `gated_longer_alternative` fails for the planner though the witness
+  verifies it. Not hardcoded; reported as a limitation.
 - `recon` has no server-verifiable objective and is excluded from scored objectives.
 
 ### Suggested next research increments
-1. Close the rest of issue A: an **independent** path generator for the witness (so
-   it no longer shares the solver's generator), and multi-path / solver-completeness
-   evidence beyond a single shortest path.
-2. A capability-based red **skill** review (Phase 2).
-3. Harder benign lookalikes that actually stress blue false positives (issue D).
-4. Diverse alternative paths for exfiltration (custom assets/relationships).
+1. **Phase 4.1B-2** (not started here): multi-path under an active blue team, and/or an
+   independent path generator so the witness no longer shares the solver's generator.
+2. Attribute per-document controls in `red_metrics` (so a blocked single-path run reads
+   `VERIFIED_FAILURE` with `blocked_by_environment`).
+3. A capability-based red **skill** review (Phase 2).
+4. Harder benign lookalikes that actually stress blue false positives (issue D).
 5. Only after the above: a separate evaluation of the existing menu LLM red policy.
 
 ### Commits on this branch
@@ -353,12 +378,13 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
 | `5f3d00a`,`1203682` | Verified red-objective metrics + attribution fix (Phase 5) |
 | `86c08a1` | Stateful scenario system + feasibility solver (Phase 4) |
 | `5e81c93` | Executable feasibility witness (Phase 4.1A) |
+| _this_ | Genuine multi-path scenarios + multi-path witness (Phase 4.1B-1) |
 
-### Last verified checks (this snapshot, `5e81c93`)
+### Last verified checks (this snapshot, Phase 4.1B-1)
 `ruff check src tests`, `mypy --platform linux`, `mypy --platform win32` clean;
-`pytest tests/world tests/population tests/range` → **216 passed**. New tests:
+`pytest tests/world tests/population tests/range` → **233 passed**. New tests:
 `tests/world/test_red_planner.py`, `test_red_metrics.py`, `test_scenario.py`,
-`test_witness.py` (11).
+`test_witness.py` (11), `test_multipath.py` (17).
 
 ## 6. Validation evidence and its limits
 

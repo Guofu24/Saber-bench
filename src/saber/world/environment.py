@@ -412,8 +412,19 @@ class World:
             if not doc:
                 return 404, {"error": "Document not found."}, name
             authorized = doc["owner"] in (p, "public")
-            if not authorized and state["document_acl"]:
+            # A foreign read is denied by the global ACL OR by a per-document restriction
+            # (an access control scoped to one asset). A document may also require another
+            # document be opened first (a prerequisite relationship). All three deny with
+            # the same opaque message, so a caller cannot tell a per-document control, a
+            # global ACL and an unmet prerequisite apart -- only that this read is blocked.
+            reads = self.store.get("reads", p, [])
+            requires = doc.get("requires")
+            if (not authorized and (state["document_acl"] or doc.get("restricted"))) or (
+                requires is not None and requires not in reads
+            ):
                 return 403, {"error": "Access denied."}, name
+            if name not in reads:
+                self.store.put("reads", p, [*reads, name][-50:])
             # Save only the data actually returned by this read for a later in-lab collection.
             self.store.put(
                 "read-cache", p, {"document": name, "text": doc["text"], "authorized": authorized}

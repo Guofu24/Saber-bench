@@ -411,6 +411,7 @@ inert and `DEV_SIMULATION_ONLY`. Commits:
 | `1203682` | Phase 5 attribution corrections |
 | `86c08a1` | Phase 4 stateful scenario system + reference feasibility solver |
 | `5e81c93` | Phase 4.1A executable feasibility witness (`witness.py` + CLI) |
+| _this_ | Phase 4.1B-1 genuine multi-path scenarios + multi-path witness |
 
 ### 8.1 Rule-based adaptive planner — `src/saber/world/red_planner.py`
 Deterministic belief-state planner that reacts to real feedback (login, discovery,
@@ -557,9 +558,9 @@ saber world scenario list | show --family F | validate | run --family F --policy
 saber world scenario compare --family F | witness --family F | witness-all
 ```
 Tests: `tests/world/test_red_planner.py` (13), `test_red_metrics.py` (13),
-`test_scenario.py` (13), `test_witness.py` (11). Regression at this snapshot
-(`5e81c93`): **216 passed** across `tests/world tests/population tests/range`; ruff
-and mypy (linux + win32) clean.
+`test_scenario.py` (13), `test_witness.py` (11), `test_multipath.py` (17). Regression
+after Phase 4.1B-1: **233 passed** across `tests/world tests/population tests/range`;
+ruff and mypy (linux + win32) clean.
 
 ### 8.7 Unresolved validity issues
 - **A. Feasibility oracle — PARTIALLY RESOLVED (`5e81c93`).** Positive feasibility is
@@ -591,6 +592,74 @@ has **no runnable inert action** and needs the multi-machine lab + snapshots tha
 remain infrastructure-blocked (CR-1 Docker daemon down, CR-3 no authorized lab
 network). No fabricated effects were added for them. The LLM red policy is
 menu-based and range-only; it was not run in this work.
+
+### 8.9 Genuine multi-path scenarios (Phase 4.1B-1)
+Before this increment the only exfiltration control was the **global** `document_acl`
+(it denied every foreign read at once), so one path could not be blocked while another
+stayed open, and every exfil path was the same five-step shape. This increment adds the
+minimal, inert, private mechanics needed for **two structurally distinct paths to the
+same verified objective** (any foreign document's exfil verifies `data_exfiltration`):
+
+- **Per-document controls** (`environment.py` `read_document`): a work document may be
+  `restricted` (a per-asset access control denying foreign reads) or `requires` another
+  document be opened first (a prerequisite relationship, one extra read on that path).
+  All three denials — global ACL, per-asset restriction, unmet prerequisite — return the
+  same opaque `403 Access denied.`, so a caller learns only that a read is blocked, never
+  which control did it. These flags live in the documents store, never in an observation.
+- **Spec fields** (evaluator metadata, never materialised into any observation):
+  `restricted_clients`, `gated_clients`, and a staged `staged_restriction_tick` /
+  `staged_restricted_clients` that the reference witness applies mid-episode to model an
+  **observable intervention**.
+- **Solver** (`exfil_candidate_paths` + `feasibility`): enumerates one candidate path per
+  client document and reports the shortest that fits **both** the action budget (count of
+  red actions) **and** the tick budget (episode length); feasible if *any* path is,
+  blocked only if every path is access-controlled or none fits the budget. The original
+  ten families reclassify identically.
+- **Multi-path witness** (`witness.py` `witness_multipath`): executes each candidate path
+  **independently in a clean episode** and verifies from server effects; `after_control`
+  re-runs each path with the staged control applied; a **recovery episode** attempts a
+  blocked path, receives the 403, then walks the alternative to a verified exfiltration.
+  CLI: `saber world scenario multipath --family F` / `multipath-all`.
+
+Six families map the required cases (all dev; a separate `MULTIPATH_FAMILIES` registry so
+§8.4's ten-family witness agreement is untouched):
+
+| Family | Static | Paths | Verified | Blocked | Recovery episode |
+|---|---|---|---|---|---|
+| both_paths_open (A) | FEASIBLE | 2 | 1,2 | — | verified via path 1 |
+| first_path_blocked (B) | FEASIBLE | 2 | 2 | 1 | **403 on A → verified via B** |
+| path_blocked_after_intervention (C) | FEASIBLE | 2 | 1,2 | — | A available → control applied → verified via B |
+| gated_longer_alternative (D) | FEASIBLE | 2 | 2 | 1 | not verified: probe+gated path needs 7 > budget 6 |
+| gated_over_budget (E) | **BLOCKED** | 2 | — | 1,2 | not verified (the only alternative needs 6 > budget 5) |
+| both_paths_blocked (F) | **BLOCKED** | 2 | — | 1,2 | not verified (no path) |
+
+**Primary result:** `first_path_blocked` has two distinct executable paths to one
+objective and the independent witness verifies the alternative after the original path is
+blocked. Recovery trace (effects): `browse` → `login` → `read client-1` **403** →
+`read client-2` 200 (`unauthorized_access`) → `collect` (`collected_bytes`) →
+`exfiltrate` (`exfiltrated_bytes`, verified). `D` shows the distinction between optimal
+feasibility (the direct gated path fits budget 6) and recover-after-probe cost (7 > 6):
+an optimal red goes straight to the open path; a prober does not fit.
+
+**Adaptive-planner diagnostic (step 5).** A minimal, general fix to `red_planner._access`
+(track per-document denials; try a different document; re-enumerate once when every known
+document is denied — faithful to the belief model's existing `blocked`-vs-`contained`
+distinction, no family-specific sequence). The rule-based planner now **recovers** from a
+blocked path: on `first_path_blocked`, every seed reaches the objective, and seeds that
+force it to probe the restricted document first do so then succeed on the alternative —
+`login → browse → read client-1 403 → browse → read client-2 200 → collect → exfiltrate
+(verified) → finish` (7 steps). It still **cannot** walk a prerequisite-gated path (it
+does not discover the index read); `gated_longer_alternative` fails for the planner
+(`verified 0`, denied twice) while the witness verifies it. Reported honestly, not
+hardcoded.
+
+**Validity carried forward.** Multi-path is now representable and witness-validated for
+the tested families, narrowing issue C's "single configuration" gap for this dimension.
+Unchanged: a missing witness is not proof of impossibility; the solver and witness share
+one candidate-path generator; general solver completeness and broad generalization remain
+unproven; `red_metrics` does not yet *attribute* a per-document restriction to the
+environment (a blocked single-path run reads `IN_PROGRESS`, not `VERIFIED_FAILURE`), since
+it models only the global ACL and containment — verification itself is unaffected.
 
 ---
 

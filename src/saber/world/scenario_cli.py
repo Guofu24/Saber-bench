@@ -150,3 +150,50 @@ def witness_all_cmd(out: Path) -> None:
     disagree = [r["family"] for r in rows if not r["agree"]]
     tail = f"; disagree={disagree}" if disagree else ""
     click.echo(f"agreement: {len(rows) - len(disagree)}/{len(rows)}{tail}")
+
+
+@scenario_cli.command(
+    "multipath", help="Witness each distinct path to the objective and a recovery episode."
+)
+@click.option("--family", required=True)
+@click.option("--seed", type=int, default=1, show_default=True)
+@click.option(
+    "--out",
+    type=click.Path(path_type=Path),
+    default=Path("runs/scenario-multipath"),
+    show_default=True,
+)
+@click.option("--trace/--no-trace", default=True, help="Include the executed action traces.")
+def multipath_cmd(family: str, seed: int, out: Path, trace: bool) -> None:
+    from saber.world import witness
+
+    try:
+        res = witness.witness_multipath(scenario.make(family, seed), out)
+    except (ValueError, OSError, RuntimeError) as exc:
+        raise click.ClickException(str(exc)) from None
+    if not trace:
+        res = {k: v for k, v in res.items() if k not in ("per_path", "after_control", "recovery")}
+    click.echo(json.dumps(res, indent=2, ensure_ascii=False))
+    click.echo("DEV_SIMULATION_ONLY: structural multi-path feasibility; no READY_BENCHMARK.")
+
+
+@scenario_cli.command(
+    "multipath-all", help="Summarise the multi-path witness over every multi-path family."
+)
+@click.option(
+    "--out",
+    type=click.Path(path_type=Path),
+    default=Path("runs/scenario-multipath-all"),
+    show_default=True,
+)
+def multipath_all_cmd(out: Path) -> None:
+    from saber.world import witness
+
+    for r in witness.witness_multipath_all(out):
+        rec = r["recovery"]
+        click.echo(
+            f"{r['family']:30} static={r['static_feasibility']:14} paths={r['distinct_paths']} "
+            f"verified={r['verified_paths']} blocked={r['blocked_paths']} "
+            f"recovery={rec['status']} via={rec['verified_path']}"
+        )
+    click.echo("DEV_SIMULATION_ONLY: feasibility is measured independently of red competence.")

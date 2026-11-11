@@ -51,6 +51,7 @@ class RedBelief:
     service_down: bool
     known_docs: tuple[str, ...]
     read_foreign: frozenset[str]
+    denied: frozenset[str]
     collected: frozenset[str]
     exfiltrated: frozenset[str]
     jobs_registered: int
@@ -79,6 +80,7 @@ def observe_belief(actor: Actor, obs: dict[str, Any]) -> RedBelief:
 
     known: set[str] = set()
     read_foreign: set[str] = set()
+    denied: set[str] = set()
     collected: set[str] = set()
     exfiltrated: set[str] = set()
     jobs = 0
@@ -95,6 +97,11 @@ def observe_belief(actor: Actor, obs: dict[str, Any]) -> RedBelief:
             known.add(target)
             if owner not in (None, "public", principal):
                 read_foreign.add(target)
+        elif tool == "read_document" and status == 403:
+            # A control denied this specific document. Remember it so the actor tries a
+            # different document rather than hammering the same denied one.
+            known.add(target)
+            denied.add(target)
         elif tool == "collect" and status == 201:
             collected.add(target)
         elif tool == "exfiltrate" and status == 201:
@@ -121,6 +128,7 @@ def observe_belief(actor: Actor, obs: dict[str, Any]) -> RedBelief:
         service_down=last.get("status") == 503,
         known_docs=tuple(sorted(known)),
         read_foreign=frozenset(read_foreign),
+        denied=frozenset(denied),
         collected=frozenset(collected),
         exfiltrated=frozenset(exfiltrated),
         jobs_registered=jobs,
@@ -177,24 +185,34 @@ def _recon(b: RedBelief) -> Action:
 
 
 def _access(b: RedBelief, turn: int) -> Action:
-    # The exfiltration chain depends on reading a foreign document; an enforced
-    # document ACL denies every such read, so no alternative path remains.
-    if b.blocked:
-        return _a("finish", reason="Authorization control blocks the read path; stopping.")
-    # Move the kill chain forward: exfiltrate > collect > read new > discover.
+    # Advance the kill chain on whatever is already staged first: exfiltrate > collect.
     to_exfil = sorted(b.collected - b.exfiltrated)
     if to_exfil:
         return _a("exfiltrate", document=to_exfil[0])
     to_collect = sorted(b.read_foreign - b.collected)
     if to_collect:
         return _a("collect", document=to_collect[0])
-    unread = [d for d in b.foreign_candidates() if d not in b.read_foreign]
-    if unread:
-        return _a("read_document", document=unread[0])
-    # No target learned yet: enumerate. Reading a candidate reveals its real owner.
-    candidates = [d for d in b.known_docs if d.startswith("work-") and d != b.own_doc]
+    # Read a foreign document that is neither read nor already denied. A per-document
+    # control (a restricted asset) blocks only its own leg, so a different document is a
+    # genuine alternative path -- unlike a full session containment, handled upstream.
+    candidates = [
+        d for d in b.foreign_candidates() if d not in b.read_foreign and d not in b.denied
+    ]
     if candidates:
-        return _a("read_document", document=candidates[turn % len(candidates)])
+        return _a("read_document", document=candidates[0])
+    foreign = b.foreign_candidates()
+    if foreign and all(d in b.denied for d in foreign):
+        # Every document currently in view is access-controlled. Re-enumerate once in
+        # case an alternative exists that is not in the latest observation; only if a
+        # fresh browse still surfaces no open document is the read path truly blocked.
+        if b.last_tool != "browse":
+            return _a("browse")
+        return _a(
+            "finish", reason="Every discovered document is access-controlled; no read path remains."
+        )
+    if b.blocked and not foreign:
+        return _a("finish", reason="Authorization control blocks the read path; stopping.")
+    # No foreign target learned yet (or only our own): enumerate to discover documents.
     return _a("browse")
 
 

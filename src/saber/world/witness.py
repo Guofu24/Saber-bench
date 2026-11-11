@@ -168,3 +168,238 @@ def witness_all(root: Any) -> list[dict[str, Any]]:
         spec = scenario.make(family)
         out.append(run_witness(spec, base / family))
     return out
+
+
+# --- Multi-path witness (Phase 4.1B-1) ----------------------------------------
+# A data_exfiltration scenario can expose several structurally distinct paths to the
+# SAME verified objective (any foreign document's exfil). These functions execute each
+# candidate path INDEPENDENTLY in a clean episode and verify it from server effects, and
+# run one recovery episode that attempts a blocked path, receives the denial, then walks
+# an alternative to the verified objective. Structural feasibility only -- no blue.
+
+_EXPECT = {
+    "browse": "portal document links listed",
+    "login": "session established",
+    "read_document": "read (200) or an access denial (403)",
+    "collect": "foreign bytes staged (collected_bytes)",
+    "exfiltrate": "exfiltrated_bytes recorded (objective effect)",
+}
+
+
+def _access_actor(world: Any) -> tuple[str, Any]:
+    aid = next(a.id for a in world.config.actors if a.team == "red" and a.role == "access")
+    return aid, world.actors[aid]
+
+
+def _exfil_target(world: Any, client_index: int) -> str:
+    return f"work-{world.principals[f'client-{client_index}']}"
+
+
+def _wait_out_outage(
+    world: Any, actor: Any, spec: Any, store: Store, trace: list[dict[str, Any]]
+) -> int:
+    """Issue the single wait action that covers an initial outage; return actions spent."""
+    if spec.initial_outage_ticks > 1:
+        wait = spec.initial_outage_ticks - 1
+        args = {"ticks": wait, "reason": "wait out the scenario outage"}
+        result = world.act(actor, Action(tool="wait", args=args))
+        trace.append(_record(world, actor.id, "wait", args, "wait out the outage", result, store))
+        for _ in range(wait):
+            world.advance()
+        return 1
+    return 0
+
+
+def run_exfil_path(
+    spec: scenario.ScenarioSpec, root: Any, client_index: int, *, apply_staged: bool = False
+) -> dict[str, Any]:
+    """Execute one candidate exfiltration path in a clean episode; verify from effects.
+
+    `apply_staged=True` applies the scenario's staged per-document control before the
+    path runs, which answers whether this path remains feasible after that control.
+    """
+    store = Store(Path(root))
+    try:
+        world = scenario.materialize(store, spec)
+        actor_id, actor = _access_actor(world)
+        target = _exfil_target(world, client_index)
+        steps: list[tuple[str, dict[str, Any]]] = [("browse", {}), ("login", {})]
+        if client_index in spec.gated_clients:
+            steps.append(("read_document", {"document": scenario.INDEX_DOC}))
+        steps += [
+            ("read_document", {"document": target}),
+            ("collect", {"document": target}),
+            ("exfiltrate", {"document": target}),
+        ]
+
+        trace: list[dict[str, Any]] = []
+        budget = spec.red_action_budget
+        world.advance()
+        used = _wait_out_outage(world, actor, spec, store, trace)
+        if apply_staged:
+            scenario.apply_staged_restriction(world, spec)
+        for tool, args in steps:
+            if used >= budget:
+                break
+            world.advance()
+            result = world.act(actor, Action(tool=tool, args=args))
+            used += 1
+            trace.append(_record(world, actor_id, tool, args, _EXPECT[tool], result, store))
+
+        summary = red_metrics.summary(world)
+        obj: dict[str, Any] = next((o for o in summary["objectives"] if o["actor"] == actor_id), {})
+        read_status = next(
+            (
+                t["status"]
+                for t in trace
+                if t["tool"] == "read_document" and t["args"].get("document") == target
+            ),
+            None,
+        )
+        blocked_by = spec.document_acl or client_index in spec.restricted_clients
+        return {
+            "path_id": f"client-{client_index}",
+            "client_index": client_index,
+            "preconditions": {
+                "restricted": bool(blocked_by),
+                "gated": client_index in spec.gated_clients,
+                "outage_ticks": spec.initial_outage_ticks,
+                "staged_control_applied": apply_staged,
+            },
+            "action_budget": budget,
+            "tick_budget": spec.tick_budget,
+            "actions_used": used,
+            "read_status": read_status,
+            "verified": bool(obj.get("effect_verified")),
+            "objective_status": obj.get("status"),
+            "trace": trace,
+        }
+    finally:
+        store.close()
+
+
+def _recovery_episode(spec: scenario.ScenarioSpec, root: Any) -> dict[str, Any]:
+    """One clean episode: attempt each path in order, skip a denied one, verify the next."""
+    store = Store(Path(root))
+    try:
+        world = scenario.materialize(store, spec)
+        actor_id, actor = _access_actor(world)
+        trace: list[dict[str, Any]] = []
+        budget = spec.red_action_budget
+        world.advance()
+        used = _wait_out_outage(world, actor, spec, store, trace)
+
+        def do(tool: str, args: dict[str, Any], note: str) -> dict[str, Any]:
+            nonlocal used
+            world.advance()
+            result: dict[str, Any] = world.act(actor, Action(tool=tool, args=args))
+            used += 1
+            trace.append(_record(world, actor_id, tool, args, note, result, store))
+            return result
+
+        if used < budget:
+            do("browse", {}, "enumerate the document map")
+        if used < budget:
+            do("login", {}, "establish a session")
+
+        # Scenario C: show Path A available, then an observable control blocks it.
+        if spec.staged_restricted_clients and used < budget:
+            i = spec.staged_restricted_clients[0]
+            do(
+                "read_document",
+                {"document": _exfil_target(world, i)},
+                f"probe client-{i} (available before the intervention)",
+            )
+            scenario.apply_staged_restriction(world, spec)
+            trace.append(
+                {
+                    "tick": world.tick,
+                    "actor": actor_id,
+                    "tool": "(intervention)",
+                    "args": {},
+                    "status": None,
+                    "expected_transition": f"control applied: client-{i} document restricted",
+                    "observed_effect": {},
+                    "event_id": None,
+                }
+            )
+
+        verified_path: int | None = None
+        for p in scenario.exfil_candidate_paths(spec):
+            i = p["client_index"]
+            if used >= budget:
+                break
+            target = _exfil_target(world, i)
+            if i in spec.gated_clients and used < budget:
+                do(
+                    "read_document",
+                    {"document": scenario.INDEX_DOC},
+                    "satisfy the prerequisite index",
+                )
+            if used >= budget:
+                break
+            result = do("read_document", {"document": target}, f"attempt the client-{i} path")
+            if result.get("status") != 200:
+                continue  # denied: receive the feedback and explore the alternative
+            if used < budget:
+                do("collect", {"document": target}, "stage the foreign bytes")
+            if used < budget:
+                do("exfiltrate", {"document": target}, "exfiltrate to the local sink (objective)")
+            summary = red_metrics.summary(world)
+            obj: dict[str, Any] = next(
+                (o for o in summary["objectives"] if o["actor"] == actor_id), {}
+            )
+            if obj.get("effect_verified"):
+                verified_path = i
+                break
+
+        return {
+            "status": "RECOVERY_VERIFIED" if verified_path is not None else "RECOVERY_NOT_VERIFIED",
+            "verified_path": verified_path,
+            "actions_used": used,
+            "action_budget": budget,
+            "trace": trace,
+        }
+    finally:
+        store.close()
+
+
+def witness_multipath(spec: scenario.ScenarioSpec, root: Any) -> dict[str, Any]:
+    """Enumerate exfil paths, witness each independently, and run one recovery episode."""
+    base = Path(root)
+    static = scenario.feasibility(spec)
+    paths_meta = scenario.exfil_candidate_paths(spec)
+    per_path = [
+        run_exfil_path(spec, base / f"path-{p['client_index']}", p["client_index"])
+        for p in paths_meta
+    ]
+    after_control = None
+    if spec.staged_restricted_clients:
+        after_control = [
+            run_exfil_path(
+                spec, base / f"ctl-{p['client_index']}", p["client_index"], apply_staged=True
+            )
+            for p in paths_meta
+        ]
+    recovery = _recovery_episode(spec, base / "recovery")
+    return {
+        "scenario": spec.id,
+        "family": spec.family,
+        "objective": spec.objective,
+        "static_feasibility": static["feasibility"],
+        "static_reason": static["reason"],
+        "distinct_paths": len(paths_meta),
+        "verified_paths": [r["client_index"] for r in per_path if r["verified"]],
+        "blocked_paths": [r["client_index"] for r in per_path if not r["verified"]],
+        "per_path": per_path,
+        "after_control": after_control,
+        "recovery": recovery,
+        "note": "structural multi-path feasibility, no blue intervention",
+    }
+
+
+def witness_multipath_all(root: Any) -> list[dict[str, Any]]:
+    base = Path(root)
+    return [
+        witness_multipath(scenario.make(fam), base / fam) for fam in scenario.MULTIPATH_FAMILIES
+    ]
