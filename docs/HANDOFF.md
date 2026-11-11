@@ -1,14 +1,15 @@
 # SABER — current AI / engineer handoff
 
-**Snapshot:** 2026-11-10. **Implementation baseline:** `86c08a1` (red-team
-upgrade), branched from `e9b0c46` (previous handoff baseline).
+**Snapshot:** 2026-11-11. **Implementation baseline:** `5e81c93` (executable
+feasibility witness, Phase 4.1A), branched from `e9b0c46` (previous handoff baseline).
 **Branch:** `feat/mission-outcome-metrics` (not merged to `main`).
 **Repository:** <https://github.com/Guofu24/Saber-bench>.
 
 **This branch adds a red-team upgrade** on top of the environment-profiles work:
 a continuous always-on client, a mission-outcome score, an inert exfiltration
 stage, a rule-based adaptive red planner, independently verified red-objective
-metrics, and a stateful scenario system with an independent feasibility solver.
+metrics, a stateful scenario system with an independent feasibility solver, and an
+executable feasibility witness that validates that solver at the execution level.
 See **§5a** for the current architecture, phase status and validity limits; the
 rest of this handoff still describes the shared baseline. Full red-team reference:
 [docs/REDTEAM_SYNTHESIS.md](REDTEAM_SYNTHESIS.md) §8.
@@ -265,7 +266,18 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
 - [`src/saber/world/scenario.py`](../src/saber/world/scenario.py) +
   [`scenario_cli.py`](../src/saber/world/scenario_cli.py): `ScenarioSpec`
   (versioned, validated), ten family templates, `materialize()`, and the
-  independent `feasibility()` reference solver.
+  independent `feasibility()` reference solver. The solver enforces two distinct
+  limits — the **action budget** (`red_action_budget`, count of red actions) and the
+  **tick budget** (`tick_budget`, episode length in ticks); `VALID_FEASIBLE` requires
+  both.
+- [`src/saber/world/witness.py`](../src/saber/world/witness.py) (Phase 4.1A):
+  **executable feasibility witness**. Runs the solver's candidate path through the
+  real `World.act()` pathway in a fresh isolated episode **with no blue**, respecting
+  prerequisites/ACLs/outages/session/action-budget, and verifies the objective
+  **only from `red_metrics` server effects**. Statuses `WITNESS_VERIFIED /
+  WITNESS_FAILED / NO_WITNESS_FOUND / INVALID_SCENARIO / UNKNOWN`; `saber world
+  scenario witness` / `witness-all` CLI. Measures structural feasibility, kept
+  separate from the blue-active runtime outcome.
 - Inert `exfiltrate` tool (TA0010/T1041) in
   [`environment.py`](../src/saber/world/environment.py); `WorldConfig.red_action_budget`
   in [`models.py`](../src/saber/world/models.py); `Runner(red_policy=...)` hook in
@@ -275,7 +287,9 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
 - **Runs:** scripted/adaptive red over the inert world tools; exfiltration chain
   with server-measured bytes; verified objective metrics; all ten scenarios
   materialise and run under three policies; the feasibility solver and
-  `saber world scenario` CLI; the mission score.
+  `saber world scenario` CLI; the executable witness over all ten families
+  (`witness-all`: 10/10 static-vs-witness agreement, 8 verified / 2 no-witness);
+  the mission score.
 - **Designed/not run here:** the LLM red policy (menu-based, range-only — not
   exercised); any mid-chain ATT&CK (Execution / PrivEsc / Defense Evasion / Lateral
   Movement / C2) — **no runnable inert action**, infrastructure-blocked.
@@ -287,17 +301,26 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
 | 2 — red skills | PARTIAL — existing skills need a capability-based review |
 | 3 — adaptive red agent | CORE COMPLETE — deterministic rule-based adaptive planner |
 | 4 — scenario spec & generation | COMPLETE for the initial single-app scope |
+| 4.1A — executable feasibility witness | COMPLETE — solver validated at execution level for the tested scenarios (positive feasibility only; see issue A) |
 | 5 — verified objective metrics | COMPLETE for the current verified objectives |
-| 6 — integration tests | PARTIAL — tests exist; broader validity/fidelity checks remain |
+| 6 — integration tests | PARTIAL — tests exist (incl. 11 witness tests); broader validity/fidelity checks remain |
 | 7 — docs & handoff | this update |
 
 ### Validity issues to carry forward
-- **A. Feasibility oracle.** `feasibility()` reasons from `ScenarioSpec`; matching
-  the declared label is a **consistency check, not execution-level validation**.
-  Needs a future **witness execution** against real server-side state transitions.
+- **A. Feasibility oracle — PARTIALLY RESOLVED (`5e81c93`).** The executable witness
+  (`witness.py`) now **execution-validates positive feasibility for the tested
+  scenarios**: it walks the candidate path through real `World.act()` and verifies
+  from server effects, so all eight declared-feasible families produce a verified
+  end-to-end witness (`witness-all`: 10/10 static-vs-witness agreement). **Still
+  open:** (i) failure to find a witness does **not** prove infeasibility; (ii) the
+  solver and witness **share the same candidate-path generator**, so the witness
+  validates that generator's output, not the solver in general; (iii) general solver
+  completeness remains unproven; (iv) multi-path feasibility and generalization are
+  not established (a single shortest path is validated, not the full walkable space).
 - **B. Feasibility semantics.** The solver gives **structural feasibility without
   blue**; observed reachability under an active blue policy is a separate runtime
-  outcome. Do not conflate them.
+  outcome (e.g. `blue_containment` is WITNESS_VERIFIED with no blue, yet contained at
+  run time). Do not conflate them. The witness measures the structural notion only.
 - **C. Generalization.** Ten families (two held-out) do **not** establish
   generalization; evidence covers only the tested configurations.
 - **D. Scenario difficulty.** `alternative_path` is easy (one-step disrupt);
@@ -311,7 +334,9 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
 - `recon` has no server-verifiable objective and is excluded from scored objectives.
 
 ### Suggested next research increments
-1. Witness-execution validation of declared feasibility (issue A).
+1. Close the rest of issue A: an **independent** path generator for the witness (so
+   it no longer shares the solver's generator), and multi-path / solver-completeness
+   evidence beyond a single shortest path.
 2. A capability-based red **skill** review (Phase 2).
 3. Harder benign lookalikes that actually stress blue false positives (issue D).
 4. Diverse alternative paths for exfiltration (custom assets/relationships).
@@ -327,11 +352,13 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
 | `06e7cce` | Adaptive red planner (Phase 3) |
 | `5f3d00a`,`1203682` | Verified red-objective metrics + attribution fix (Phase 5) |
 | `86c08a1` | Stateful scenario system + feasibility solver (Phase 4) |
+| `5e81c93` | Executable feasibility witness (Phase 4.1A) |
 
-### Last verified checks (this snapshot)
+### Last verified checks (this snapshot, `5e81c93`)
 `ruff check src tests`, `mypy --platform linux`, `mypy --platform win32` clean;
-`pytest tests/world tests/population tests/range` → **205 passed**. New tests:
-`tests/world/test_red_planner.py`, `test_red_metrics.py`, `test_scenario.py`.
+`pytest tests/world tests/population tests/range` → **216 passed**. New tests:
+`tests/world/test_red_planner.py`, `test_red_metrics.py`, `test_scenario.py`,
+`test_witness.py` (11).
 
 ## 6. Validation evidence and its limits
 

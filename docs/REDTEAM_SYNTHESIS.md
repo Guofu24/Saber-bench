@@ -1,17 +1,18 @@
 # SABER red-team synthesis
 
-**Snapshot:** 2026-11-10. **Branch:** `feat/mission-outcome-metrics`.
+**Snapshot:** 2026-11-11. **Branch:** `feat/mission-outcome-metrics`.
 **Audience:** engineers/AI continuing SABER's red (adversary-emulation) component.
 **Status:** research synthesis, not a readiness claim. Nothing here promotes any
 subtask to `READY_BENCHMARK`.
 
 Sections 1–7 are the original read-only inventory (repo + external literature) as
 of the Phase 1 synthesis. **Section 8 records the red-team upgrades actually
-implemented on this branch** (Phases 3/4/5) and their validity limits; read it for
+implemented on this branch** (Phases 3/4/4.1A/5) and their validity limits; read it for
 the current state. This document collects, in one place, what the repository and
 the external literature say about SABER's **red team**: the skills, the code/tools,
 the governing docs and rules, the outside papers/tools worth learning from, and now
-the implemented adaptive planner, verified objective metrics and scenario system.
+the implemented adaptive planner, verified objective metrics, scenario system and
+executable feasibility witness.
 
 > **Framing (do not lose this).** In SABER the red team is an **inert
 > adversary-emulation activity generator** confined to an isolated lab. Its only
@@ -409,6 +410,7 @@ inert and `DEV_SIMULATION_ONLY`. Commits:
 | `5f3d00a` | Phase 5 independent verified red-objective metrics |
 | `1203682` | Phase 5 attribution corrections |
 | `86c08a1` | Phase 4 stateful scenario system + reference feasibility solver |
+| `5e81c93` | Phase 4.1A executable feasibility witness (`witness.py` + CLI) |
 
 ### 8.1 Rule-based adaptive planner — `src/saber/world/red_planner.py`
 Deterministic belief-state planner that reacts to real feedback (login, discovery,
@@ -459,7 +461,82 @@ red_action_budget, tick_budget, `attack_labels` (tactic/technique/**fidelity**),
   `random_valid` (seeded valid action). Run via the backward-compatible
   `Runner(red_policy=...)` hook.
 
-### 8.4 Observed comparison (effect-verified)
+### 8.4 Executable feasibility witness (Phase 4.1A) — `src/saber/world/witness.py`
+The reference solver (§8.3) reasons *about* feasibility from a `ScenarioSpec`. The
+witness validates that reasoning **at the execution level**: it takes the solver's
+candidate action sequence, runs it through the **real `World.act()` pathway** in a
+fresh isolated episode **with no blue intervention**, respecting prerequisites,
+ACLs, outages, session state and the action budget, and judges the objective
+**only from the independent `red_metrics` server-effect verifier** — never from the
+solver's claim, the planner, or an HTTP status. Statuses: `WITNESS_VERIFIED /
+WITNESS_FAILED / NO_WITNESS_FOUND / INVALID_SCENARIO / UNKNOWN`. Private scenario
+metadata is never written into world state, so it cannot reach any observation (a
+no-leakage test asserts this on the witnessed episode).
+
+- **What it proves and what it does not.** A `WITNESS_VERIFIED` result is positive,
+  execution-level proof that the declared-feasible path is really walkable end to
+  end for *that* scenario. `NO_WITNESS_FOUND` means only that **this** solver
+  produced no satisfying path — **a missing witness is not a proof of
+  infeasibility.** The solver and the witness share the same candidate-path
+  generator, so the witness validates that generator's output, not solver
+  completeness in general.
+- **Structural feasibility ≠ blue-active outcome.** The witness measures
+  *structural* feasibility (no blue). This is deliberately distinct from the
+  runtime outcome under an active blue policy (`compare_policies`, §8.5):
+  `blue_containment` is `WITNESS_VERIFIED` with no blue, yet a reactive blue
+  contains the same path at run time (adaptive `verified=0, blocked_by_blue=1`).
+  The two notions must not be conflated.
+- **CLI:** `saber world scenario witness --family F [--seed N] [--no-trace]` runs and
+  prints one executed trace; `saber world scenario witness-all` runs every family
+  and reports static-vs-witness agreement. Both print `DEV_SIMULATION_ONLY`.
+
+**All ten families — static solver vs executable witness (no blue):**
+
+| Family | Static | Witness | Verified | Agree |
+|---|---|---|---|---|
+| baseline | VALID_FEASIBLE | WITNESS_VERIFIED | yes | ✓ |
+| blue_containment | VALID_FEASIBLE | WITNESS_VERIFIED | yes (no blue) | ✓ |
+| alternative_path | VALID_FEASIBLE | WITNESS_VERIFIED | yes (disrupt) | ✓ |
+| temporary_disruption | VALID_FEASIBLE | WITNESS_VERIFIED | yes (waits out outage) | ✓ |
+| benign_lookalikes | VALID_FEASIBLE | WITNESS_VERIFIED | yes | ✓ |
+| multiple_red | VALID_FEASIBLE | WITNESS_VERIFIED | yes | ✓ |
+| budget_constrained | VALID_FEASIBLE | WITNESS_VERIFIED | yes (5 actions = budget) | ✓ |
+| heldout_acl_outage | VALID_FEASIBLE | WITNESS_VERIFIED | yes | ✓ |
+| environment_blocked | **VALID_BLOCKED** | NO_WITNESS_FOUND | no (read denied 403) | ✓ |
+| heldout_blocked_impact | **VALID_BLOCKED** | NO_WITNESS_FOUND | no (login denied 403) | ✓ |
+
+**Agreement 10/10.** Eight declared-feasible families produce a verified executable
+witness; the two declared-blocked families produce no witness (the would-be path is
+denied at execution by the ACL / pre-containment). Sample verified trace
+(`temporary_disruption`): tick 1 `wait` 200 → tick 7 `browse` 200 → tick 8 `login`
+200 → tick 9 `read_document` 200 (`unauthorized_access`) → tick 10 `collect` 201
+(`collected_bytes`) → tick 11 `exfiltrate` 201 (`exfiltrated_bytes`, objective
+verified).
+
+**Two solver/environment semantic mismatches found and fixed (both in `5e81c93`):**
+
+1. **Wait over-counting the action budget.** The static solver had charged one
+   action per outage tick, while the real planner and the witness issue a single
+   `wait(ticks=N)` call. The solver now models **one** wait action for a whole
+   outage (`feasibility()`: `wait_actions = 1 if outage > 1 else 0`), matching the
+   witness; `temporary_disruption` minimum actions 10→6 and `heldout_acl_outage`
+   14→6. No declared label changed (validation stays 10/10).
+2. **`wait` needs a `reason`, and the witness must enforce the action budget.** The
+   `wait` tool requires a `reason` argument (a bare `ticks` request returns HTTP
+   400); the witness now supplies it. The witness also now **caps execution at
+   `red_action_budget`** — previously it would run the full plan regardless, so a
+   below-budget scenario could wrongly verify.
+
+**Action budget vs tick budget (kept distinct).** `feasibility()` enforces two
+independent limits and `VALID_FEASIBLE` requires **both** to pass: the **action
+budget** (`red_action_budget`) caps the *count* of red actions — `actions =
+wait_actions + len(plan)` must be `≤ red_action_budget`; the **tick budget**
+(`tick_budget`) caps the *episode length in ticks* — the objective's `last_tick`
+must be `≤ tick_budget`. `budget_constrained` is bounded by the former (5 actions =
+budget 5); an outage scenario is bounded by the latter. The witness enforces the
+action budget at execution; a path that exceeds it yields `NO_WITNESS_FOUND`.
+
+### 8.5 Observed comparison (effect-verified)
 
 | Family | Feasibility | adaptive | naive | random | Note |
 |---|---|---|---|---|---|
@@ -474,19 +551,28 @@ red_action_budget, tick_budget, `attack_labels` (tactic/technique/**fidelity**),
 | heldout_acl_outage | FEASIBLE | 0/1 | 0/1 | 0/1 | outage + reactive blue |
 | heldout_blocked_impact | **BLOCKED** | 0/1 | 0/1 | 0/1 | pre-contained |
 
-### 8.5 Commands and tests
+### 8.6 Commands and tests
 ```
-saber world scenario list | show --family F | validate | run --family F --policy adaptive | compare --family F
+saber world scenario list | show --family F | validate | run --family F --policy adaptive
+saber world scenario compare --family F | witness --family F | witness-all
 ```
 Tests: `tests/world/test_red_planner.py` (13), `test_red_metrics.py` (13),
-`test_scenario.py` (13). Regression at this snapshot: **205 passed** across
-`tests/world tests/population tests/range`; ruff and mypy (linux + win32) clean.
+`test_scenario.py` (13), `test_witness.py` (11). Regression at this snapshot
+(`5e81c93`): **216 passed** across `tests/world tests/population tests/range`; ruff
+and mypy (linux + win32) clean.
 
-### 8.6 Unresolved validity issues
-- **A. Feasibility oracle.** The solver reasons from `ScenarioSpec`; agreement with
-  the declared label is a **consistency check, not execution-level validation**. A
-  future **witness execution** against actual server-side state transitions is
-  needed to prove a declared-feasible path is really walkable end to end.
+### 8.7 Unresolved validity issues
+- **A. Feasibility oracle — PARTIALLY RESOLVED (`5e81c93`).** Positive feasibility is
+  now **execution-validated for the tested scenarios**: the executable witness
+  (§8.4) walks the candidate path through real `World.act()` and verifies the
+  objective from server effects, so all eight declared-feasible families produce a
+  verified end-to-end witness. **Remaining gaps:** (i) failure to find a witness does
+  **not** prove infeasibility; (ii) the solver and witness **share the same
+  candidate-path generator**, so the witness validates that generator's output, not
+  the solver in general; (iii) **general solver completeness remains unproven**; and
+  (iv) **multi-path feasibility and generalization have not been established** — a
+  single shortest path is validated, not the full space of walkable paths, and the
+  ten families do not establish generalization (see C).
 - **B. Feasibility semantics.** The solver measures **structural feasibility without
   blue intervention**. Observed reachability under an active blue policy is a
   separate, runtime outcome (e.g. blue_containment is FEASIBLE yet contained at run
@@ -499,7 +585,7 @@ Tests: `tests/world/test_red_planner.py` (13), `test_red_metrics.py` (13),
   false-positive failure (blue correctly contains red without false-containing
   clients). Harder lookalike workloads are still needed.
 
-### 8.7 Still-unimplemented (unchanged from §5)
+### 8.8 Still-unimplemented (unchanged from §5)
 Mid-chain ATT&CK (Execution / PrivEsc / Defense Evasion / Lateral Movement / C2)
 has **no runnable inert action** and needs the multi-machine lab + snapshots that
 remain infrastructure-blocked (CR-1 Docker daemon down, CR-3 no authorized lab
