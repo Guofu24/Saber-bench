@@ -40,6 +40,7 @@ STATUSES = (
     "INVALID",
 )
 
+
 def _defense_default() -> dict[str, Any]:
     # A fresh dict with a fresh nested map each call; never a shared mutable default.
     return {"contained": {}, "document_acl": None, "job_acl": None}
@@ -112,7 +113,13 @@ def record_red_action(
 
 
 def _classify(
-    rec: dict[str, Any], *, blue_block: bool, env_block: bool, budget: bool, has_incident: bool
+    rec: dict[str, Any],
+    *,
+    blue_block: bool,
+    env_block: bool,
+    budget: bool,
+    has_incident: bool,
+    finished: bool,
 ) -> str:
     if rec["effect_verified"]:
         return "INVALID" if not rec["attempted"] else "VERIFIED_SUCCESS"
@@ -121,9 +128,9 @@ def _classify(
         return "UNKNOWN" if has_incident else "NOT_ATTEMPTED"
     if blue_block or env_block or budget:
         return "VERIFIED_FAILURE"
-    if rec["artifact_observed"] or rec["attempted"]:
-        return "IN_PROGRESS"
-    return "UNKNOWN"
+    # Attempted, not verified, with no attributable cause: ambiguous once the actor
+    # has stopped (UNKNOWN); otherwise the campaign is genuinely still in progress.
+    return "UNKNOWN" if finished else "IN_PROGRESS"
 
 
 def summary(world: World, *, client_mission_utility: float | None = None) -> dict[str, Any]:
@@ -159,25 +166,29 @@ def summary(world: World, *, client_mission_utility: float | None = None) -> dic
         detected_tick = detected.get(principal)
 
         def before(t: int | None, vt: int | None = vtick) -> bool:
+            # When the objective was verified, "before" means at or before that tick;
+            # when it never succeeded there is no completion tick, so any detection or
+            # containment of this principal counts as having happened before it could.
             return t is not None and (vt is None or t <= vt)
 
         detection_before = rec["attempted"] and before(detected_tick)
         containment_before = rec["attempted"] and before(contained_tick)
-        blue_block = (
-            rec["attempted"]
-            and not verified
-            and (contained_tick is not None or acl_tick is not None)
-        )
+        # A global ACL is only attributed to the defender when this actor was actually
+        # denied by it (rejected at least once); otherwise the control never blocked it.
+        acl_block = acl_tick is not None and int(rec["rejected"]) > 0
+        blue_block = rec["attempted"] and not verified and (contained_tick is not None or acl_block)
         env_block = (
             rec["attempted"] and not verified and not blue_block and bool(rec["env_blocked"])
         )
         budget = rec["attempted"] and not verified and int(rec["actions"]) >= RED_BUDGET
+        finished = store.get("actor-control", actor.id, {}).get("status") == "DONE"
         status = _classify(
             rec,
             blue_block=blue_block,
             env_block=env_block,
             budget=budget,
             has_incident=principal in incident_principals,
+            finished=finished,
         )
         scored.append(
             {

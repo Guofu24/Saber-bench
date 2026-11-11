@@ -149,6 +149,19 @@ def test_8_activity_without_a_recorded_attempt_is_unknown(lab):
     assert obj["attempted"] is False and obj["status"] == "UNKNOWN"
 
 
+def test_finished_attempt_without_attributable_cause_is_unknown(lab):
+    world, _ = lab
+    principal = world.principals["red-access"]
+    rec = _new_record("access", "data_exfiltration")
+    rec.update({"actions": 3, "attempted": True, "artifact_observed": True})
+    with world.store.transaction():
+        world.store.put("red-objectives", principal, rec)
+        # Actor stopped, not verified, and no containment/ACL/outage/budget cause.
+        world.store.put("actor-control", "red-access", {"status": "DONE", "generation": 1})
+    obj = objective_for(world, "red-access")
+    assert obj["status"] == "UNKNOWN" and obj["blocked_by_blue"] is False
+
+
 def test_9_multiple_red_agents_in_one_episode(lab):
     world, server = lab
     red, name, _ = exfil_chain(world, server)
