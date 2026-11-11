@@ -8,6 +8,11 @@ decisions, the private evaluator, sealed truth or another team's plan. Objective
 completion is judged from the actor's OWN server-confirmed events (an exfil 201,
 a disrupt 202), never from the planner's intent: a plan is a hypothesis, the
 recorded effect is the only proof.
+
+This is a deterministic RULE-BASED adaptive planner: a fixed per-role decision
+procedure that reacts to observed feedback (login, discovery, containment, outage,
+control denial, budget). It is not learned, search-based or strategic planning, and
+nothing here should be described as autonomous strategic reasoning.
 """
 
 from __future__ import annotations
@@ -41,6 +46,8 @@ class RedBelief:
     own_doc: str
     logged_in: bool
     blocked: bool
+    contained: bool
+    last_tool: str
     service_down: bool
     known_docs: tuple[str, ...]
     read_foreign: frozenset[str]
@@ -105,9 +112,12 @@ def observe_belief(actor: Actor, obs: dict[str, Any]) -> RedBelief:
         principal=principal,
         own_doc=own_doc,
         logged_in=bool(obs.get("logged_in")),
-        # Any 403 on a red action means a defender control (containment or an enforced
-        # ACL) now blocks this path; the kill chain cannot continue down it.
+        # A 403 means a defender control denied this action. A session containment
+        # ("restricted") blocks every path; a specific control (an enforced ACL) blocks
+        # only the denied leg, so the role planner may still have an alternative.
         blocked=last.get("status") == 403,
+        contained=last.get("status") == 403 and "restricted" in str(last.get("error", "")).lower(),
+        last_tool=str(last.get("tool", "")),
         service_down=last.get("status") == 503,
         known_docs=tuple(sorted(known)),
         read_foreign=frozenset(read_foreign),
@@ -143,10 +153,10 @@ def plan_action(actor: Actor, obs: dict[str, Any], turn: int) -> Action:
 
     if not b.logged_in:
         return _a("login")
-    # Failure recovery: a real defender control defeats this path — stop, do not
-    # keep firing blocked requests (the evaluator scores the recorded effect).
-    if b.blocked:
-        return _a("finish", reason="Defender control blocks this objective path; stopping.")
+    # A full session containment blocks every tool, so no path remains — stop. A
+    # specific control denial is left to the role planner, which may try another leg.
+    if b.contained:
+        return _a("finish", reason="Session contained by the defender; all paths blocked.")
     # A bounded outage is transient; wait rather than retry blindly against 503.
     if b.service_down and role != "impact":
         return _a("wait", ticks=2, reason="Service unavailable; retry after the outage.")
@@ -166,6 +176,10 @@ def _recon(b: RedBelief) -> Action:
 
 
 def _access(b: RedBelief, turn: int) -> Action:
+    # The exfiltration chain depends on reading a foreign document; an enforced
+    # document ACL denies every such read, so no alternative path remains.
+    if b.blocked:
+        return _a("finish", reason="Authorization control blocks the read path; stopping.")
     # Move the kill chain forward: exfiltrate > collect > read new > discover.
     to_exfil = sorted(b.collected - b.exfiltrated)
     if to_exfil:
@@ -185,8 +199,12 @@ def _access(b: RedBelief, turn: int) -> Action:
 
 def _impact(b: RedBelief) -> Action:
     # Persistence before disruption, so the job registers before the service drops.
-    if b.jobs_registered == 0:
+    # If an enforced job ACL denies registration, disruption is a separate path that
+    # is still worth attempting rather than ending the campaign prematurely.
+    register_denied = b.blocked and b.last_tool == "register_job"
+    disrupt_denied = b.blocked and b.last_tool == "disrupt"
+    if b.jobs_registered == 0 and not register_denied:
         return _a("register_job", name=f"sync-{b.principal}")
-    if not b.disrupted:
+    if not b.disrupted and not disrupt_denied:
         return _a("disrupt")
-    return _a("finish", reason="Impact objectives met; stopping further impact.")
+    return _a("finish", reason="Impact objectives met or remaining paths blocked; stopping.")

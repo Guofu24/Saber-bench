@@ -14,7 +14,7 @@ import uuid
 from typing import Any
 
 from saber.forensics import tools as forensics
-from saber.world import lab_tools, learning, operations, work
+from saber.world import lab_tools, learning, operations, red_metrics, work
 from saber.world.mission import mission_outcome
 from saber.world.models import Action, Actor, WorldConfig, safe_name, specialties_for, tools_for
 from saber.world.store import Store, utc_now
@@ -312,6 +312,7 @@ class World:
                     {"tick": self.tick, "principal": principal, "detected_tick": None},
                 )
                 self._metric("verified_incidents", 1)
+            red_metrics.record_red_action(self, actor, action, status, effect, target)
             result = {"status": status, "event_id": eid, "tool": action.tool, **data}
             if action.tool in forensics.TOOLS and status == 200:
                 history = self.store.get("forensic-office", actor.id, [])
@@ -819,6 +820,7 @@ class World:
         with self.store.lock:
             metrics = self.store.get("metrics", "total")
             clients = metrics["client_requests"]
+            mission = mission_outcome(metrics)
             return {
                 "world_id": self.store.get("meta", "world_id"),
                 "engine": self.store.get("meta", "engine", "scripted"),
@@ -848,7 +850,10 @@ class World:
                 )
                 if metrics.get("response_cases")
                 else None,
-                "mission": mission_outcome(metrics),
+                "mission": mission,
+                "red_objectives": red_metrics.summary(
+                    self, client_mission_utility=mission["work_availability"]
+                ),
                 "attack_techniques": ATTACK_MAP,
                 "note": "Application effects are measured independently. Local machines/techniques are emulated; no benchmark readiness promotion.",
             }

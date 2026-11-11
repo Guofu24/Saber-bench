@@ -86,6 +86,18 @@ def test_impact_registers_job_then_disrupts_then_stops():
     assert plan_action(IMPACT, obs(events=done), 3).tool == "finish"
 
 
+def test_impact_still_disrupts_when_persistence_is_denied():
+    # An enforced job ACL denies register_job (403), but disruption is a separate path
+    # the planner must still attempt rather than finishing prematurely.
+    denied = {"status": 403, "tool": "register_job", "error": "Automation permission required."}
+    assert plan_action(IMPACT, obs(last_result=denied), 3).tool == "disrupt"
+
+
+def test_session_containment_stops_even_impact():
+    restricted = {"status": 403, "tool": "disrupt", "error": "Session restricted by the service."}
+    assert plan_action(IMPACT, obs(last_result=restricted), 3).tool == "finish"
+
+
 def test_recon_shares_the_map_then_finishes():
     links = {"links": [{"id": "work-acct-y"}, {"id": "welcome"}]}
     assert plan_action(RECON, obs(last_result=links), 1).tool == "share"
