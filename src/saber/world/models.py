@@ -52,6 +52,7 @@ class WorldConfig(BaseModel):
     red_start_tick: int = Field(default=8, ge=1)
     response_ttl_ticks: int = Field(default=12, ge=1, le=10000)
     incident_ttl_ticks: int = Field(default=6, ge=1, le=1000)
+    red_action_budget: int = Field(default=60, ge=1, le=100000)
     profile_refresh_ticks: int = Field(default=30, ge=1, le=100000)
     llm_workers: int = Field(default=4, ge=1, le=16)
     telemetry_window: int = Field(default=200, ge=10, le=2000)

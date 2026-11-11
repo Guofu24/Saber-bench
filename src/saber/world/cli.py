@@ -21,6 +21,7 @@ from saber.world.learning_cli import learning_cli
 from saber.world.models import BLUE_ROLES, Actor, WorldConfig, default_config
 from saber.world.quota import QuotaProvider, TeamQuotaProvider
 from saber.world.runtime import Runner, WorldLock, atomic_json
+from saber.world.scenario_cli import scenario_cli
 from saber.world.store import Store
 from saber.world.work import set_control
 
@@ -34,6 +35,7 @@ def world() -> None:
 
 world.add_command(learning_cli)
 world.add_command(forensics_cli)
+world.add_command(scenario_cli)
 
 
 @world.command("init", help="Create an editable actor roster and world configuration.")

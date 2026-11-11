@@ -9,8 +9,8 @@ import pytest
 from saber.world.agents import action, llm_messages
 from saber.world.environment import World
 from saber.world.models import Actor, WorldConfig, default_config
-from saber.world.red_metrics import RED_BUDGET, _new_record
-from saber.world.red_planner import plan_action  # noqa: F401  (ensures planner import path stays valid)
+from saber.world.red_metrics import _new_record
+from saber.world.red_planner import RED_BUDGET
 from saber.world.runtime import Runner
 from saber.world.service import LabServer
 from saber.world.store import Store

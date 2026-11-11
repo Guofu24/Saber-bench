@@ -146,9 +146,10 @@ def plan_action(actor: Actor, obs: dict[str, Any], turn: int) -> Action:
     role = actor.role
 
     # Stop conditions: a verified objective or an exhausted budget ends the mission.
+    budget = int(obs.get("budget", RED_BUDGET))
     if objective_complete(role, b):
         return _a("finish", reason=f"{role} objective verified by own effects.")
-    if turn >= RED_BUDGET:
+    if turn >= budget:
         return _a("finish", reason="Action budget exhausted; ending campaign.")
 
     if not b.logged_in:

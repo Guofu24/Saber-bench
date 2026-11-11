@@ -15,8 +15,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from saber.world.red_planner import RED_BUDGET
-
 if TYPE_CHECKING:
     from saber.world.environment import World
     from saber.world.models import Action, Actor
@@ -180,7 +178,11 @@ def summary(world: World, *, client_mission_utility: float | None = None) -> dic
         env_block = (
             rec["attempted"] and not verified and not blue_block and bool(rec["env_blocked"])
         )
-        budget = rec["attempted"] and not verified and int(rec["actions"]) >= RED_BUDGET
+        budget = (
+            rec["attempted"]
+            and not verified
+            and int(rec["actions"]) >= world.config.red_action_budget
+        )
         finished = store.get("actor-control", actor.id, {}).get("status") == "DONE"
         status = _classify(
             rec,

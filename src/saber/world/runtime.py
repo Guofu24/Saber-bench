@@ -172,8 +172,11 @@ class Runner:
         *,
         provider: LLMProvider | None = None,
         emitter: OfficeEmitter | None = None,
+        red_policy: Callable[[Actor, dict[str, Any], int], Action] | None = None,
     ) -> None:
         self.store, self.config = store, config
+        # Optional alternative red policy for evaluation; None keeps the scripted baseline.
+        self.red_policy = red_policy
         if config.execution_mode == "range":
             raise ValueError("SOC range execution uses 'saber lab' deployments, not 'world run'.")
         if provider is not None:
@@ -331,7 +334,12 @@ class Runner:
                     self.store.put("memory", actor.id, memory)
             plan = self.store.get("plans", actor.id, [])
             source = "llm" if plan else ("scripted-fallback" if self.planner else "scripted")
-            chosen = Action.model_validate(plan.pop(0)) if plan else baseline(actor, obs, turns)
+            if plan:
+                chosen = Action.model_validate(plan.pop(0))
+            elif self.red_policy is not None and actor.team == "red":
+                chosen = self.red_policy(actor, obs, turns)
+            else:
+                chosen = baseline(actor, obs, turns)
             result = (
                 self.server.native_act(self.native, actor.id, tick, chosen)
                 if self.native

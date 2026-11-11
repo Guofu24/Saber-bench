@@ -260,6 +260,8 @@ class World:
                 )
                 obs["notifications"] = self.store.get("notifications", principal, [])[-10:]
                 obs["own_document"] = f"work-{principal}" if actor.team == "client" else None
+                if actor.team == "red":
+                    obs["budget"] = self.config.red_action_budget
             if actor.team in ("red", "blue"):
                 obs["team_messages"] = self.store.get("messages", actor.team, [])[-30:]
             return obs
