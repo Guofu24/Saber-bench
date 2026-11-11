@@ -1,14 +1,17 @@
 # SABER red-team synthesis
 
-**Snapshot:** 2026-11-06. **Branch:** `feat/mission-outcome-metrics`.
+**Snapshot:** 2026-11-10. **Branch:** `feat/mission-outcome-metrics`.
 **Audience:** engineers/AI continuing SABER's red (adversary-emulation) component.
 **Status:** research synthesis, not a readiness claim. Nothing here promotes any
 subtask to `READY_BENCHMARK`.
 
-This document collects, in one place, everything the repository and the external
-literature currently say about SABER's **red team**: the skills, the code/tools,
-the governing docs and rules, and the outside papers/tools worth learning from.
-It was assembled from a read-only sweep of the repo plus web research.
+Sections 1–7 are the original read-only inventory (repo + external literature) as
+of the Phase 1 synthesis. **Section 8 records the red-team upgrades actually
+implemented on this branch** (Phases 3/4/5) and their validity limits; read it for
+the current state. This document collects, in one place, what the repository and
+the external literature say about SABER's **red team**: the skills, the code/tools,
+the governing docs and rules, the outside papers/tools worth learning from, and now
+the implemented adaptive planner, verified objective metrics and scenario system.
 
 > **Framing (do not lose this).** In SABER the red team is an **inert
 > adversary-emulation activity generator** confined to an isolated lab. Its only
@@ -390,6 +393,118 @@ cross-check before it may run.
    isolated-lab-only, inert-allowlisted, with the independent verifier intact.
 5. **Keep every addition fail-closed and `DEV_SIMULATION_ONLY`.** 0 subtasks are
    READY_BENCHMARK and nothing here changes that.
+
+---
+
+## 8. Implemented red-team upgrades (this branch)
+
+Built on `feat/mission-outcome-metrics`, entirely within the single-app world,
+inert and `DEV_SIMULATION_ONLY`. Commits:
+
+| Commit | What |
+|---|---|
+| `efa951b` | Inert `exfiltrate` stage (TA0010/T1041), local sink marker, no channel |
+| `f34eb5b` | Phase 1 synthesis (this document) |
+| `06e7cce` | Phase 3 rule-based adaptive red planner |
+| `5f3d00a` | Phase 5 independent verified red-objective metrics |
+| `1203682` | Phase 5 attribution corrections |
+| `86c08a1` | Phase 4 stateful scenario system + reference feasibility solver |
+
+### 8.1 Rule-based adaptive planner — `src/saber/world/red_planner.py`
+Deterministic belief-state planner that reacts to real feedback (login, discovery,
+containment, outage, control denial, budget). It reads only the actor's own
+observation, judges objective completion from its own server-confirmed events, and
+is explicitly documented as **rule-based adaptive, not learned or strategic**. It
+replaces the previous scripted `_red`. Budget is per-scenario via
+`WorldConfig.red_action_budget` (default 60) surfaced to red as `obs["budget"]`.
+
+### 8.2 Verified objective metrics — `src/saber/world/red_metrics.py`
+An independent evaluator that verifies each red actor's objective from
+**server-measured effects** (`exfiltrated_bytes` for access, `disruption` for
+impact), never from the planner's claim or an HTTP status. Progress is recorded
+incrementally inside the effect transaction (durable across archiving,
+deterministic on replay) in evaluator-only key spaces no agent observation exposes.
+The operator `report()` gains a `red_objectives` block separating **intent →
+attempt → artifact_observed → effect_verified** across `NOT_ATTEMPTED /
+IN_PROGRESS / VERIFIED_SUCCESS / VERIFIED_FAILURE / UNKNOWN / INVALID`, with
+completion rate, steps-to-objective, detection/containment timing, rejected
+actions, and failure attributed to blue vs environment vs budget. Attribution uses
+evaluator evidence (a verified containment, or an enforced ACL **the actor was
+actually denied by**), never a red 403; an unattempted objective is never a blue
+win. `mission.py` scoring is unchanged; no composite score was added.
+
+### 8.3 Scenario system — `src/saber/world/scenario.py`, `scenario_cli.py`
+`ScenarioSpec` (Pydantic, `extra=forbid`, frozen, `schema_version="scenario/v1"`):
+id, family, split (dev/heldout), seed, objective, clients, red_roles, blue_mode,
+client_intensity, document_acl, job_acl, initial_outage_ticks, pre_contained_roles,
+red_action_budget, tick_budget, `attack_labels` (tactic/technique/**fidelity**),
+**`expected_feasibility` (private)**, notes.
+
+- **Materialisation + separation.** `materialize()` writes only a `WorldConfig` and
+  ordinary initial state (service policies, documents, pre-existing blocks). The
+  private metadata (expected feasibility, labels, family, objective) is **never**
+  written into world state, so it cannot reach a red or blue observation — enforced
+  by a no-leakage test and a benign-vs-red same-schema test.
+- **Reference feasibility solver.** `feasibility(spec)` forward-simulates the
+  shortest permitted inert path (waits out outages; respects ACL/containment/budget/
+  tick) and classifies `VALID_FEASIBLE / VALID_BLOCKED / INVALID / UNKNOWN`. It
+  **never runs or inspects the tested red agent**, so feasibility is measured
+  independently of red competence. `validate()` checks the solver against the
+  declared label (10/10 families agree).
+- **Ten families** (8 dev, 2 held-out): baseline, blue_containment,
+  environment_blocked, alternative_path, temporary_disruption, benign_lookalikes,
+  multiple_red, budget_constrained, heldout_acl_outage, heldout_blocked_impact.
+- **Three red policies** — `src/saber/world/red_policies.py`: `adaptive` (the
+  planner), `naive_greedy` (motions over public data; verifies nothing for exfil),
+  `random_valid` (seeded valid action). Run via the backward-compatible
+  `Runner(red_policy=...)` hook.
+
+### 8.4 Observed comparison (effect-verified)
+
+| Family | Feasibility | adaptive | naive | random | Note |
+|---|---|---|---|---|---|
+| baseline | FEASIBLE | 1/1 | 0/1 | 0/1 | only the competent policy verifies |
+| budget_constrained | FEASIBLE | 1/1 | 0/1 | 0/1 | feasible within a tight budget of 5 |
+| multiple_red | FEASIBLE | 2/2 | 0/2 | 0/2 | per-principal attribution |
+| temporary_disruption | FEASIBLE | 1/1 | 0/1 | 0/1 | adaptive waits out the outage |
+| alternative_path | FEASIBLE | 1/1 | 1/1 | 1/1 | disrupt reaches impact despite job ACL |
+| blue_containment | FEASIBLE | 0/1 | 0/1 | 0/1 | blocked_by_blue (contained before exfil) |
+| benign_lookalikes | FEASIBLE | 0/1 | 0/1 | 0/1 | blue contains red, no client false-containment |
+| environment_blocked | **BLOCKED** | 0/1 | 0/1 | 0/1 | unreachable by design (ACL) |
+| heldout_acl_outage | FEASIBLE | 0/1 | 0/1 | 0/1 | outage + reactive blue |
+| heldout_blocked_impact | **BLOCKED** | 0/1 | 0/1 | 0/1 | pre-contained |
+
+### 8.5 Commands and tests
+```
+saber world scenario list | show --family F | validate | run --family F --policy adaptive | compare --family F
+```
+Tests: `tests/world/test_red_planner.py` (13), `test_red_metrics.py` (13),
+`test_scenario.py` (13). Regression at this snapshot: **205 passed** across
+`tests/world tests/population tests/range`; ruff and mypy (linux + win32) clean.
+
+### 8.6 Unresolved validity issues
+- **A. Feasibility oracle.** The solver reasons from `ScenarioSpec`; agreement with
+  the declared label is a **consistency check, not execution-level validation**. A
+  future **witness execution** against actual server-side state transitions is
+  needed to prove a declared-feasible path is really walkable end to end.
+- **B. Feasibility semantics.** The solver measures **structural feasibility without
+  blue intervention**. Observed reachability under an active blue policy is a
+  separate, runtime outcome (e.g. blue_containment is FEASIBLE yet contained at run
+  time). These two notions are distinct and must not be conflated.
+- **C. Generalization.** Ten families (two held-out) do **not** establish
+  generalization. Current evidence supports performance only on the tested
+  configurations.
+- **D. Scenario difficulty.** `alternative_path` remains easy (a one-step disrupt
+  all policies reach). `benign_lookalikes` has **not** demonstrated a blue
+  false-positive failure (blue correctly contains red without false-containing
+  clients). Harder lookalike workloads are still needed.
+
+### 8.7 Still-unimplemented (unchanged from §5)
+Mid-chain ATT&CK (Execution / PrivEsc / Defense Evasion / Lateral Movement / C2)
+has **no runnable inert action** and needs the multi-machine lab + snapshots that
+remain infrastructure-blocked (CR-1 Docker daemon down, CR-3 no authorized lab
+network). No fabricated effects were added for them. The LLM red policy is
+menu-based and range-only; it was not run in this work.
 
 ---
 

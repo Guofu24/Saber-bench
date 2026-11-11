@@ -1,9 +1,17 @@
 # SABER — current AI / engineer handoff
 
-**Snapshot:** 2026-11-05. **Implementation baseline:**
-`e9b0c46b77ac11c96143ce70727dbd790d42239f`.
-**Branch:** `feat/environment-profiles`.
+**Snapshot:** 2026-11-10. **Implementation baseline:** `86c08a1` (red-team
+upgrade), branched from `e9b0c46` (previous handoff baseline).
+**Branch:** `feat/mission-outcome-metrics` (not merged to `main`).
 **Repository:** <https://github.com/Guofu24/Saber-bench>.
+
+**This branch adds a red-team upgrade** on top of the environment-profiles work:
+a continuous always-on client, a mission-outcome score, an inert exfiltration
+stage, a rule-based adaptive red planner, independently verified red-objective
+metrics, and a stateful scenario system with an independent feasibility solver.
+See **§5a** for the current architecture, phase status and validity limits; the
+rest of this handoff still describes the shared baseline. Full red-team reference:
+[docs/REDTEAM_SYNTHESIS.md](REDTEAM_SYNTHESIS.md) §8.
 
 This handoff is committed after that implementation; compare `git log` before
 assuming it describes a newer checkout. It records goals, implemented behavior,
@@ -232,6 +240,98 @@ shared-guide namespacing, and includes practice assets in SOC exports. When
 adding tracks, use `Track.guidance_for(role)`; do not assume a single topic name
 works for every role. See `tests/unit/test_training.py` and
 `scripts/smoke_training.py` for the executable workflow.
+
+## 5a. Red-team upgrade (branch `feat/mission-outcome-metrics`)
+
+This branch extends the persistent world's **red** side. All of it is inert,
+single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
+
+### Architecture and key files
+- [`src/saber/population/active_client.py`](../src/saber/population/active_client.py):
+  always-on benign client daemon (scripted by default; hybrid LLM profile opt-in).
+- [`src/saber/world/mission.py`](../src/saber/world/mission.py): private
+  mission-outcome score = protected client work × detection quality; justified
+  containment of an offender is not charged. Provisional weights, evaluator-only.
+- [`src/saber/world/red_planner.py`](../src/saber/world/red_planner.py):
+  deterministic **rule-based adaptive** red planner (belief state from own
+  observations; reacts to containment/ACL denial/outage/budget). Not learned, not
+  strategic.
+- [`src/saber/world/red_policies.py`](../src/saber/world/red_policies.py): three
+  evaluation policies — `adaptive`, `naive_greedy`, `random_valid`.
+- [`src/saber/world/red_metrics.py`](../src/saber/world/red_metrics.py):
+  independent red-objective verification from server effects; the `report()`
+  `red_objectives` block (intent/attempt/artifact/effect; completion, timing,
+  attribution). Evaluator-only key spaces; never in any observation.
+- [`src/saber/world/scenario.py`](../src/saber/world/scenario.py) +
+  [`scenario_cli.py`](../src/saber/world/scenario_cli.py): `ScenarioSpec`
+  (versioned, validated), ten family templates, `materialize()`, and the
+  independent `feasibility()` reference solver.
+- Inert `exfiltrate` tool (TA0010/T1041) in
+  [`environment.py`](../src/saber/world/environment.py); `WorldConfig.red_action_budget`
+  in [`models.py`](../src/saber/world/models.py); `Runner(red_policy=...)` hook in
+  [`runtime.py`](../src/saber/world/runtime.py).
+
+### What actually runs vs only designed
+- **Runs:** scripted/adaptive red over the inert world tools; exfiltration chain
+  with server-measured bytes; verified objective metrics; all ten scenarios
+  materialise and run under three policies; the feasibility solver and
+  `saber world scenario` CLI; the mission score.
+- **Designed/not run here:** the LLM red policy (menu-based, range-only — not
+  exercised); any mid-chain ATT&CK (Execution / PrivEsc / Defense Evasion / Lateral
+  Movement / C2) — **no runnable inert action**, infrastructure-blocked.
+
+### Phase status
+| Phase | Status |
+|---|---|
+| 1 — synthesis/gap analysis | COMPLETE (`docs/REDTEAM_SYNTHESIS.md`) |
+| 2 — red skills | PARTIAL — existing skills need a capability-based review |
+| 3 — adaptive red agent | CORE COMPLETE — deterministic rule-based adaptive planner |
+| 4 — scenario spec & generation | COMPLETE for the initial single-app scope |
+| 5 — verified objective metrics | COMPLETE for the current verified objectives |
+| 6 — integration tests | PARTIAL — tests exist; broader validity/fidelity checks remain |
+| 7 — docs & handoff | this update |
+
+### Validity issues to carry forward
+- **A. Feasibility oracle.** `feasibility()` reasons from `ScenarioSpec`; matching
+  the declared label is a **consistency check, not execution-level validation**.
+  Needs a future **witness execution** against real server-side state transitions.
+- **B. Feasibility semantics.** The solver gives **structural feasibility without
+  blue**; observed reachability under an active blue policy is a separate runtime
+  outcome. Do not conflate them.
+- **C. Generalization.** Ten families (two held-out) do **not** establish
+  generalization; evidence covers only the tested configurations.
+- **D. Scenario difficulty.** `alternative_path` is easy (one-step disrupt);
+  `benign_lookalikes` has not yet produced a blue false-positive failure.
+
+### Known limitations / blockers
+- Mid-chain ATT&CK needs a multi-machine lab + snapshots (CR-1 Docker daemon down,
+  CR-3 no authorized lab network). No fabricated effects were added.
+- `red_metrics` detection/containment timing is principal-specific for containment
+  but coarse for a global ACL; `blocked_by_environment` is approximate.
+- `recon` has no server-verifiable objective and is excluded from scored objectives.
+
+### Suggested next research increments
+1. Witness-execution validation of declared feasibility (issue A).
+2. A capability-based red **skill** review (Phase 2).
+3. Harder benign lookalikes that actually stress blue false positives (issue D).
+4. Diverse alternative paths for exfiltration (custom assets/relationships).
+5. Only after the above: a separate evaluation of the existing menu LLM red policy.
+
+### Commits on this branch
+| Commit | Milestone |
+|---|---|
+| `b883cc7` | Hybrid always-on active client |
+| `efa951b` | Inert exfiltration stage |
+| `0961d95`,`a68ac11` | Mission outcome score (gated on protected client work) |
+| `f34eb5b` | Red-team synthesis (Phase 1) |
+| `06e7cce` | Adaptive red planner (Phase 3) |
+| `5f3d00a`,`1203682` | Verified red-objective metrics + attribution fix (Phase 5) |
+| `86c08a1` | Stateful scenario system + feasibility solver (Phase 4) |
+
+### Last verified checks (this snapshot)
+`ruff check src tests`, `mypy --platform linux`, `mypy --platform win32` clean;
+`pytest tests/world tests/population tests/range` → **205 passed**. New tests:
+`tests/world/test_red_planner.py`, `test_red_metrics.py`, `test_scenario.py`.
 
 ## 6. Validation evidence and its limits
 
