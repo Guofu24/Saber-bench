@@ -15,6 +15,7 @@ from saber.agents.skill_library import guidance_prompt, load_reference_library
 from saber.agents.skills import load_playbook
 from saber.agents.specialties import BLUE_SKILLS
 from saber.baselines.prompt import extract_answer_json
+from saber.world import red_planner
 from saber.world.models import Action, Actor, specialties_for, tools_for
 
 PLAYBOOKS = {
@@ -64,44 +65,8 @@ def _client(actor: Actor, obs: dict[str, Any], turn: int) -> Action:
 
 
 def _red(actor: Actor, obs: dict[str, Any], turn: int) -> Action:
-    last = obs.get("last_result", {})
-    if not obs.get("logged_in"):
-        return action("login")
-    if actor.role == "recon":
-        if last.get("links"):
-            return action(
-                "share",
-                text=json.dumps({"document_links": [x["id"] for x in last["links"]]})[:1000],
-            )
-        return action("browse")
-    if actor.role == "impact":
-        if turn % 4 == 0:
-            return action("disrupt")
-        if turn % 4 == 2:
-            return action("register_job", name=f"sync-{obs['principal']}")
-        return action("share", text=f"Service response: {last.get('status', 'unknown')}")
-    if last.get("tool") == "read_document" and last.get("status") == 200:
-        events = obs.get("events", [])
-        reads = [e for e in events if e["tool"] == "read_document"]
-        if reads:
-            return action("collect", document=reads[-1]["target"])
-    if last.get("tool") == "collect" and last.get("status") == 201:
-        staged = [e for e in obs.get("events", []) if e["tool"] == "collect"]
-        if staged:
-            return action("exfiltrate", document=staged[-1]["target"])
-    links = last.get("links", [])
-    for m in reversed(obs.get("team_messages", [])):
-        try:
-            parsed = json.loads(m["text"])
-            if isinstance(parsed, dict) and isinstance(parsed.get("document_links"), list):
-                links = [{"id": x} for x in parsed["document_links"] if isinstance(x, str)]
-                break
-        except (ValueError, TypeError):
-            continue
-    candidates = [x["id"] for x in links if str(x.get("id", "")).startswith("work-")]
-    if candidates:
-        return action("read_document", document=candidates[turn % len(candidates)])
-    return action("browse")
+    # Belief-state, feedback-driven campaign over the inert red tool surface.
+    return red_planner.plan_action(actor, obs, turn)
 
 
 def _suspicious(e: dict[str, Any]) -> bool:
