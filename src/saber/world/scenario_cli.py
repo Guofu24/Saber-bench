@@ -197,3 +197,67 @@ def multipath_all_cmd(out: Path) -> None:
             f"recovery={rec['status']} via={rec['verified_path']}"
         )
     click.echo("DEV_SIMULATION_ONLY: feasibility is measured independently of red competence.")
+
+
+@scenario_cli.command(
+    "evaluate", help="Compare all red policies on a family over several seeds (Phase 4.1B-2)."
+)
+@click.option("--family", required=True)
+@click.option("--seeds", type=int, default=8, show_default=True, help="Seeds 1..N (permutations).")
+@click.option(
+    "--out",
+    type=click.Path(path_type=Path),
+    default=Path("runs/scenario-evaluate"),
+    show_default=True,
+)
+def evaluate_cmd(family: str, seeds: int, out: Path) -> None:
+    from saber.world import red_eval
+
+    try:
+        res = red_eval.compare_policies(
+            scenario.make(family), out, seeds=tuple(range(1, seeds + 1))
+        )
+    except (ValueError, OSError, RuntimeError) as exc:
+        raise click.ClickException(str(exc)) from None
+    click.echo(
+        f"family={family} budget={res['budget']} optimal_witness={res['optimal_witness_length']}"
+    )
+    for policy, a in res["policies"].items():
+        click.echo(
+            f"  {policy:9} verified={a['verified']}/{a['n']} rate={a['verified_rate']} "
+            f"ci95={a['verified_rate_ci95']} steps={a['mean_steps_when_verified']} "
+            f"diag={a['diagnoses']}"
+        )
+    click.echo("DEV_SIMULATION_ONLY: the offline witness length is a clairvoyant upper bound.")
+
+
+@scenario_cli.command(
+    "budget-sweep", help="Sweep one family's config across action budgets; online vs adaptive."
+)
+@click.option("--family", default="gated_longer_alternative", show_default=True)
+@click.option("--budgets", default="6,8,10,12,15", show_default=True)
+@click.option("--seeds", type=int, default=8, show_default=True)
+@click.option(
+    "--out",
+    type=click.Path(path_type=Path),
+    default=Path("runs/scenario-budget-sweep"),
+    show_default=True,
+)
+def budget_sweep_cmd(family: str, budgets: str, seeds: int, out: Path) -> None:
+    from saber.world import red_eval
+
+    try:
+        parsed = tuple(int(b) for b in budgets.split(","))
+        rows = red_eval.budget_sweep(
+            scenario.make(family), out, budgets=parsed, seeds=tuple(range(1, seeds + 1))
+        )
+    except (ValueError, OSError, RuntimeError) as exc:
+        raise click.ClickException(str(exc)) from None
+    for r in rows:
+        a, o = r["policies"]["adaptive"], r["policies"]["online"]
+        click.echo(
+            f"budget={r['budget']:>2} feas={r['feasibility']:14} W={r['optimal_witness_length']} "
+            f"adaptive={a['verified']}/{a['n']} online={o['verified']}/{o['n']} "
+            f"ci95={o['verified_rate_ci95']} diag={o['diagnoses']}"
+        )
+    click.echo("DEV_SIMULATION_ONLY: the scenario config is identical across budgets.")

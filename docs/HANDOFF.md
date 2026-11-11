@@ -1,8 +1,8 @@
 # SABER — current AI / engineer handoff
 
-**Snapshot:** 2026-11-11. **Implementation baseline:** Phase 4.1B-1 (genuine
-multi-path scenarios) on top of `5e81c93` (Phase 4.1A executable feasibility
-witness), branched from `e9b0c46` (previous handoff baseline).
+**Snapshot:** 2026-11-11. **Implementation baseline:** Phase 4.1B-2 (online-search
+red policy + controlled evaluation) on top of `1aaf5a5` (Phase 4.1B-1 multi-path
+scenarios) and `5e81c93` (Phase 4.1A witness), branched from `e9b0c46`.
 **Branch:** `feat/mission-outcome-metrics` (not merged to `main`).
 **Repository:** <https://github.com/Guofu24/Saber-bench>.
 
@@ -10,8 +10,9 @@ witness), branched from `e9b0c46` (previous handoff baseline).
 a continuous always-on client, a mission-outcome score, an inert exfiltration
 stage, a rule-based adaptive red planner, independently verified red-objective
 metrics, a stateful scenario system with an independent feasibility solver, an executable
-feasibility witness that validates that solver at the execution level, and genuine
-multi-path scenarios (two distinct executable paths to one objective).
+feasibility witness that validates that solver at the execution level, genuine
+multi-path scenarios (two distinct executable paths to one objective), and an
+online-search red policy with a controlled four-policy evaluation.
 See **§5a** for the current architecture, phase status and validity limits; the
 rest of this handoff still describes the shared baseline. Full red-team reference:
 [docs/REDTEAM_SYNTHESIS.md](REDTEAM_SYNTHESIS.md) §8.
@@ -290,6 +291,14 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
   take the 403, verify the alternative). CLI `scenario witness` / `witness-all` /
   `multipath` / `multipath-all`. Structural feasibility only, kept separate from the
   blue-active runtime outcome.
+- [`src/saber/world/online_planner.py`](../src/saber/world/online_planner.py) +
+  [`red_eval.py`](../src/saber/world/red_eval.py) (Phase 4.1B-2): a bounded
+  **online-search** red policy (`POLICIES["online"]`) that discovers an epistemically
+  unidentifiable prerequisite by exploration, and a controlled evaluation harness (4
+  policies × seeds, Wilson CI, an 8-label failure diagnosis, budget sweep, the offline
+  optimal-witness length as a clairvoyant upper bound). CLI `scenario evaluate` /
+  `budget-sweep`. The policy reads only its own observation; the solver/witness are used
+  only offline as a diagnostic reference.
 - Inert `exfiltrate` tool (TA0010/T1041) in
   [`environment.py`](../src/saber/world/environment.py); `WorldConfig.red_action_budget`
   in [`models.py`](../src/saber/world/models.py); `Runner(red_policy=...)` hook in
@@ -303,7 +312,9 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
   (`witness-all`: 10/10 static-vs-witness agreement, 8 verified / 2 no-witness); six
   multi-path families with the multi-path witness (one scenario has two distinct
   executable paths and the witness verifies the alternative after the first is blocked);
-  the adaptive planner recovering from a blocked path via re-enumeration; the mission score.
+  the adaptive planner recovering from a blocked path via re-enumeration; the mission score;
+  the online-search policy discovering a hidden prerequisite that the rule-based planner
+  cannot (4-policy evaluation with Wilson intervals, failure diagnosis and a budget sweep).
 - **Designed/not run here:** the LLM red policy (menu-based, range-only — not
   exercised); any mid-chain ATT&CK (Execution / PrivEsc / Defense Evasion / Lateral
   Movement / C2) — **no runnable inert action**, infrastructure-blocked.
@@ -317,6 +328,7 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
 | 4 — scenario spec & generation | COMPLETE for the initial single-app scope |
 | 4.1A — executable feasibility witness | COMPLETE — solver validated at execution level for the tested scenarios (positive feasibility only; see issue A) |
 | 4.1B-1 — genuine multi-path scenarios | COMPLETE — two distinct executable paths to one objective; witness verifies the alternative after the first is blocked (6 families) |
+| 4.1B-2 — online planning & controlled evaluation | COMPLETE — online-search policy discovers a hidden prerequisite the rule-based planner cannot; 4-policy evaluation with Wilson CI, failure diagnosis, budget sweep |
 | 5 — verified objective metrics | COMPLETE for the current verified objectives |
 | 6 — integration tests | PARTIAL — tests exist (incl. 11 witness + 17 multi-path tests); broader validity/fidelity checks remain |
 | 7 — docs & handoff | this update |
@@ -336,10 +348,11 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
   blue**; observed reachability under an active blue policy is a separate runtime
   outcome (e.g. `blue_containment` is WITNESS_VERIFIED with no blue, yet contained at
   run time). Do not conflate them. The witness measures the structural notion only.
-- **C. Generalization.** Still not established. Phase 4.1B-1 adds genuine multi-path
-  families (two distinct executable paths to one objective, witness-validated), which
-  narrows the "single configuration" concern for the multi-path dimension, but the
-  evidence still covers only the tested configurations.
+- **C. Generalization.** Still not established, but broader than before. Phase 4.1B-1
+  adds witness-validated multi-path families; Phase 4.1B-2 evaluates four policies over
+  seed permutations (document-identity permutations) with Wilson intervals and two
+  held-out structures, and the online policy generalizes to them (8/8). Evidence still
+  covers only the tested configurations; no claim beyond them.
 - **D. Scenario difficulty.** `alternative_path` is easy (one-step disrupt);
   `benign_lookalikes` has not yet produced a blue false-positive failure. Multi-path
   families now exercise harder path-selection (block-and-recover, budget-vs-length),
@@ -355,16 +368,25 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
   unaffected (the witness reads effects directly).
 - The rule-based planner cannot satisfy a prerequisite-gated path (it does not discover
   the index read), so `gated_longer_alternative` fails for the planner though the witness
-  verifies it. Not hardcoded; reported as a limitation.
+  verifies it. The online-search policy (Phase 4.1B-2) does solve it, by exploration.
+- A gated prerequisite is **epistemically unidentifiable** from observations (the gated
+  read returns the same opaque `403` as any other denial). The online policy discovers it
+  by *empirical search*, not identification, and needs ≈2× the clairvoyant budget. A
+  future environment-design increment could add an **observable** prerequisite signal
+  (e.g. a distinct `423 Locked` carrying a prerequisite id).
+- Red's observation window is the last 10 own events; larger scenarios could exceed it and
+  the online policy then re-browses (extra cost). Evaluation is without an active blue team.
 - `recon` has no server-verifiable objective and is excluded from scored objectives.
 
 ### Suggested next research increments
-1. **Phase 4.1B-2** (not started here): multi-path under an active blue team, and/or an
-   independent path generator so the witness no longer shares the solver's generator.
-2. Attribute per-document controls in `red_metrics` (so a blocked single-path run reads
+1. An **observable** prerequisite signal (e.g. `423 Locked` + prerequisite id) so online
+   planning reflects reasoning over an identifiable dependency rather than blind search.
+2. Online planning and the 4-policy evaluation **under an active blue team** (this phase
+   is structural, no blue); and an independent path generator so the witness no longer
+   shares the solver's generator.
+3. Attribute per-document controls in `red_metrics` (so a blocked single-path run reads
    `VERIFIED_FAILURE` with `blocked_by_environment`).
-3. A capability-based red **skill** review (Phase 2).
-4. Harder benign lookalikes that actually stress blue false positives (issue D).
+4. A capability-based red **skill** review (Phase 2); harder benign lookalikes (issue D).
 5. Only after the above: a separate evaluation of the existing menu LLM red policy.
 
 ### Commits on this branch
@@ -378,13 +400,14 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
 | `5f3d00a`,`1203682` | Verified red-objective metrics + attribution fix (Phase 5) |
 | `86c08a1` | Stateful scenario system + feasibility solver (Phase 4) |
 | `5e81c93` | Executable feasibility witness (Phase 4.1A) |
-| _this_ | Genuine multi-path scenarios + multi-path witness (Phase 4.1B-1) |
+| `1aaf5a5` | Genuine multi-path scenarios + multi-path witness (Phase 4.1B-1) |
+| _this_ | Online-search red policy + controlled evaluation (Phase 4.1B-2) |
 
-### Last verified checks (this snapshot, Phase 4.1B-1)
+### Last verified checks (this snapshot, Phase 4.1B-2)
 `ruff check src tests`, `mypy --platform linux`, `mypy --platform win32` clean;
-`pytest tests/world tests/population tests/range` → **233 passed**. New tests:
+`pytest tests/world tests/population tests/range` → **251 passed**. New tests:
 `tests/world/test_red_planner.py`, `test_red_metrics.py`, `test_scenario.py`,
-`test_witness.py` (11), `test_multipath.py` (17).
+`test_witness.py` (11), `test_multipath.py` (17), `test_online_planner.py` (18).
 
 ## 6. Validation evidence and its limits
 

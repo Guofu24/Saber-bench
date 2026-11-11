@@ -636,6 +636,47 @@ def both_paths_blocked(seed: int = 1) -> ScenarioSpec:
     )
 
 
+def heldout_multi_restricted_gated(seed: int = 1) -> ScenarioSpec:
+    # Held-out: three documents, two restricted decoys, only the gated one is viable.
+    # Tests prerequisite discovery among more targets and candidates (unseen structure).
+    return _spec(
+        "heldout_multi_restricted_gated",
+        "heldout",
+        seed,
+        objective="data_exfiltration",
+        clients=3,
+        red_roles=("access",),
+        blue_mode="absent",
+        restricted_clients=(1, 2),
+        gated_clients=(3,),
+        red_action_budget=18,
+        tick_budget=60,
+        attack_labels=_EXFIL_LABELS,
+        expected_feasibility="VALID_FEASIBLE",
+        notes="Only a gated document is viable among restricted decoys; needs discovery.",
+    )
+
+
+def heldout_outage_then_alternative(seed: int = 1) -> ScenarioSpec:
+    # Held-out: a restricted short path and an open alternative behind a temporary outage.
+    return _spec(
+        "heldout_outage_then_alternative",
+        "heldout",
+        seed,
+        objective="data_exfiltration",
+        clients=2,
+        red_roles=("access",),
+        blue_mode="absent",
+        restricted_clients=(1,),
+        initial_outage_ticks=5,
+        red_action_budget=15,
+        tick_budget=40,
+        attack_labels=_EXFIL_LABELS,
+        expected_feasibility="VALID_FEASIBLE",
+        notes="One path is access-controlled; the open alternative is behind an outage.",
+    )
+
+
 FAMILIES = {
     f.__name__: f
     for f in (
@@ -662,8 +703,12 @@ MULTIPATH_FAMILIES = {
         gated_longer_alternative,
         gated_over_budget,
         both_paths_blocked,
+        heldout_multi_restricted_gated,
+        heldout_outage_then_alternative,
     )
 }
+MULTIPATH_DEV = tuple(n for n, f in MULTIPATH_FAMILIES.items() if f().split == "dev")
+MULTIPATH_HELDOUT = tuple(n for n, f in MULTIPATH_FAMILIES.items() if f().split == "heldout")
 ALL_FAMILIES = {**FAMILIES, **MULTIPATH_FAMILIES}
 DEV_FAMILIES = tuple(n for n, f in FAMILIES.items() if f().split == "dev")
 HELDOUT_FAMILIES = tuple(n for n, f in FAMILIES.items() if f().split == "heldout")

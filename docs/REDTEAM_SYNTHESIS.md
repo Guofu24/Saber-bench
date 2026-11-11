@@ -411,7 +411,8 @@ inert and `DEV_SIMULATION_ONLY`. Commits:
 | `1203682` | Phase 5 attribution corrections |
 | `86c08a1` | Phase 4 stateful scenario system + reference feasibility solver |
 | `5e81c93` | Phase 4.1A executable feasibility witness (`witness.py` + CLI) |
-| _this_ | Phase 4.1B-1 genuine multi-path scenarios + multi-path witness |
+| `1aaf5a5` | Phase 4.1B-1 genuine multi-path scenarios + multi-path witness |
+| _this_ | Phase 4.1B-2 online-search red policy + controlled evaluation |
 
 ### 8.1 Rule-based adaptive planner — `src/saber/world/red_planner.py`
 Deterministic belief-state planner that reacts to real feedback (login, discovery,
@@ -558,9 +559,9 @@ saber world scenario list | show --family F | validate | run --family F --policy
 saber world scenario compare --family F | witness --family F | witness-all
 ```
 Tests: `tests/world/test_red_planner.py` (13), `test_red_metrics.py` (13),
-`test_scenario.py` (13), `test_witness.py` (11), `test_multipath.py` (17). Regression
-after Phase 4.1B-1: **233 passed** across `tests/world tests/population tests/range`;
-ruff and mypy (linux + win32) clean.
+`test_scenario.py` (13), `test_witness.py` (11), `test_multipath.py` (17),
+`test_online_planner.py` (18). Regression after Phase 4.1B-2: **251 passed** across
+`tests/world tests/population tests/range`; ruff and mypy (linux + win32) clean.
 
 ### 8.7 Unresolved validity issues
 - **A. Feasibility oracle — PARTIALLY RESOLVED (`5e81c93`).** Positive feasibility is
@@ -660,6 +661,76 @@ one candidate-path generator; general solver completeness and broad generalizati
 unproven; `red_metrics` does not yet *attribute* a per-document restriction to the
 environment (a blocked single-path run reads `IN_PROGRESS`, not `VERIFIED_FAILURE`), since
 it models only the global ACL and containment — verification itself is unaffected.
+
+### 8.10 Online-search red policy + controlled evaluation (Phase 4.1B-2)
+This phase asks whether an **online planning** policy beats the rule-based adaptive
+planner through systematic exploration, and separates *feasibility* from *planning* from
+*information* limits.
+
+- **Observation/action contract (all policies identical).** A policy is
+  `(actor, obs, turn) -> Action`. It sees only the actor's **own** observation: own
+  principal, `logged_in`, `last_result` (a `browse`'s document links appear here only on
+  the turn after the browse), the last ≤10 **own** events (`tool/target/status/tick/owner`),
+  team messages, and `budget` (= `red_action_budget`); `turn` is the actor's own action
+  count. It may emit only inert allowlisted world tools. It never reads `ScenarioSpec`
+  private fields, hidden world state, the reference solver, the witness's paths, blue
+  decisions or evaluator metrics, and never clones the hidden World as an oracle.
+- **The epistemic finding (step 0).** A gated document returns the **same opaque**
+  `403 Access denied.` as a restricted document and the global ACL, and nothing links the
+  prerequisite (index) document to the gated one. So a required prerequisite is
+  **epistemically unidentifiable from any observation** — it can only be discovered
+  *empirically*, by speculatively reading a non-target (public) document and retrying.
+- **Online-search policy** (`src/saber/world/online_planner.py`, `POLICIES["online"]`):
+  rebuilds a belief state each turn (known targets, denials with ticks, public reads,
+  staged chain), advances a staged chain first, reads an open target if one is known,
+  retries a denied target once a public read may have unlocked it, and — when every known
+  target is denied — speculatively reads an un-read public document **only if enough budget
+  remains to follow through**. Deterministic; the impact objective reuses the rule-based
+  routine (one-step effect).
+- **Controlled evaluation** (`src/saber/world/red_eval.py`, CLI `scenario evaluate` /
+  `budget-sweep`): four policies (`random`, `naive`, `adaptive`, `online`) under identical
+  configs and budgets, aggregated over seeds (each seed permutes document identities) with
+  **Wilson 95% intervals**; a per-episode **diagnosis** in `{OBJECTIVE_VERIFIED,
+  PLANNING_FAILURE, EXPLORATION_FAILURE, INFORMATION_LIMITATION, BUDGET_EXHAUSTED,
+  ENVIRONMENT_BLOCKED, BLUE_BLOCKED, UNKNOWN}`; and the **offline optimal witness length**
+  `W` (clairvoyant, labelled an upper bound, never a competitor).
+
+**Policy comparison (8 seeds each; verified / n):**
+
+| Scenario (budget) | W | random | naive | adaptive | online | note |
+|---|---|---|---|---|---|---|
+| first_path_blocked (40) | 5 | 0/8 | 0/8 | 8/8 | 8/8 | open alternative; both planners recover |
+| gated_longer_alternative (12) | 6 | 0/8 | 0/8 | **0/8** | **8/8** | only online discovers the prerequisite |
+| heldout_multi_restricted_gated (18) | 6 | 0/8 | 0/8 | **0/8** | **8/8** | held-out: gated path among 2 restricted decoys |
+| heldout_outage_then_alternative (15) | 6 | 0/8 | 0/8 | 8/8 | 8/8 | held-out: open path behind an outage |
+
+The non-exploring policies' gated failures are diagnosed `INFORMATION_LIMITATION`, **not**
+incompetence (the prerequisite is unidentifiable to them); `both_paths_blocked` is
+`ENVIRONMENT_BLOCKED`.
+
+**Budget sweep — the *same* `gated_longer_alternative` config (8 seeds):**
+
+| budget | W | adaptive | online | online diagnosis |
+|---|---|---|---|---|
+| 6 | 6 | 0/8 | 0/8 | INFORMATION_LIMITATION |
+| 8 | 6 | 0/8 | 0/8 | INFORMATION_LIMITATION |
+| 10 | 6 | 0/8 | 3/8 | mixed (retry-order overhead) |
+| 12 | 6 | 0/8 | **8/8** | OBJECTIVE_VERIFIED |
+| 15 | 6 | 0/8 | **8/8** | OBJECTIVE_VERIFIED |
+
+Feasibility is constant (`W=6`), yet an online agent needs ≈ **2× the clairvoyant budget**
+to overcome the hidden prerequisite by search; adaptive never does. Online's gated trace
+(budget 10): `login → browse → read c2 403 → browse → read c1 403 → browse → read index 200
+→ read c2 200 → collect → exfiltrate (verified)`. The clairvoyant witness length (6) is
+strictly below any online episode on a gated path — it is a reference, not a fair competitor.
+
+**Limitations (honest).** (i) The prerequisite is epistemically unidentifiable; solving it
+is *empirical search*, not identification — a future environment-design increment could add
+an **observable** prerequisite hint (e.g. a `423 Locked` with a prerequisite id) so the cost
+reflects reasoning rather than blind probing. (ii) The red observation window is the last 10
+own events; larger scenarios could exceed it, and the policy then re-browses (extra cost).
+(iii) The impact objective reuses the rule-based routine. (iv) All of this is without an
+active blue team (structural). `DEV_SIMULATION_ONLY`; `READY_BENCHMARK = 0`.
 
 ---
 

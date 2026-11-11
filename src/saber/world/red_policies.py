@@ -12,7 +12,7 @@ from __future__ import annotations
 import hashlib
 from typing import Any
 
-from saber.world import red_planner
+from saber.world import online_planner, red_planner
 from saber.world.models import Action, Actor
 
 _RANDOM_TOOLS = (
@@ -30,6 +30,18 @@ _RANDOM_TOOLS = (
 
 def adaptive(actor: Actor, obs: dict[str, Any], turn: int) -> Action:
     """The deterministic rule-based adaptive planner (belief state + feedback)."""
+    return red_planner.plan_action(actor, obs, turn)
+
+
+def online_search(actor: Actor, obs: dict[str, Any], turn: int) -> Action:
+    """Bounded online-search planner with prerequisite discovery (impact falls back).
+
+    For the access objective it plans by bounded search over its own belief state,
+    discovering a hidden prerequisite by exploration. The impact objective has a
+    single one-step effect, so it reuses the rule-based impact routine.
+    """
+    if actor.role == "access":
+        return online_planner.plan_online(actor, obs, turn)
     return red_planner.plan_action(actor, obs, turn)
 
 
@@ -75,4 +87,9 @@ def random_valid(actor: Actor, obs: dict[str, Any], turn: int) -> Action:
     return Action(tool=tool, args=_random_args(tool, obs))
 
 
-POLICIES = {"adaptive": adaptive, "naive": naive_greedy, "random": random_valid}
+POLICIES = {
+    "adaptive": adaptive,
+    "naive": naive_greedy,
+    "random": random_valid,
+    "online": online_search,
+}
