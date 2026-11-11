@@ -103,3 +103,50 @@ def compare_cmd(family: str, seed: int, out: Path) -> None:
             f"util={r['client_mission_utility']}"
         )
     click.echo("DEV_SIMULATION_ONLY: feasibility is measured independently of red competence.")
+
+
+@scenario_cli.command(
+    "witness", help="Execute the candidate path and verify it (structural, no blue)."
+)
+@click.option("--family", required=True)
+@click.option("--seed", type=int, default=1, show_default=True)
+@click.option(
+    "--out",
+    type=click.Path(path_type=Path),
+    default=Path("runs/scenario-witness"),
+    show_default=True,
+)
+@click.option("--trace/--no-trace", default=True, help="Include the full executed action trace.")
+def witness_cmd(family: str, seed: int, out: Path, trace: bool) -> None:
+    from saber.world import witness
+
+    try:
+        res = witness.run_witness(scenario.make(family, seed), out)
+    except (ValueError, OSError, RuntimeError) as exc:
+        raise click.ClickException(str(exc)) from None
+    view = res if trace else {k: v for k, v in res.items() if k != "trace"}
+    click.echo(json.dumps(view, indent=2, ensure_ascii=False))
+    click.echo("DEV_SIMULATION_ONLY: structural feasibility only; no READY_BENCHMARK promotion.")
+
+
+@scenario_cli.command(
+    "witness-all", help="Run the executable witness over all families; report agreement."
+)
+@click.option(
+    "--out",
+    type=click.Path(path_type=Path),
+    default=Path("runs/scenario-witness-all"),
+    show_default=True,
+)
+def witness_all_cmd(out: Path) -> None:
+    from saber.world import witness
+
+    rows = witness.witness_all(out)
+    for r in rows:
+        click.echo(
+            f"{r['family']:24} static={r['static_feasibility']:14} "
+            f"witness={r['status']:16} verified={r['verified']} agree={r['agree']}"
+        )
+    disagree = [r["family"] for r in rows if not r["agree"]]
+    tail = f"; disagree={disagree}" if disagree else ""
+    click.echo(f"agreement: {len(rows) - len(disagree)}/{len(rows)}{tail}")

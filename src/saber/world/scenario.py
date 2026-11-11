@@ -160,17 +160,19 @@ def feasibility(spec: ScenarioSpec) -> dict[str, Any]:
     if objective == "data_exfiltration" and spec.document_acl:
         return _f("VALID_BLOCKED", "an enforced document ACL denies every foreign read")
 
-    # Forward-simulate the shortest permitted path; wait out an initial outage.
-    tick, actions, done = 1, 0, 0
-    while done < len(plan):
-        if tick > spec.tick_budget:
-            return _f("VALID_BLOCKED", "the objective is not reachable within the tick budget")
-        if actions >= spec.red_action_budget:
-            return _f("VALID_BLOCKED", "the action budget is below the shortest path length")
-        if tick < spec.initial_outage_ticks:  # service down: the only option is to wait
-            tick, actions = tick + 1, actions + 1
-            continue
-        tick, actions, done = tick + 1, actions + 1, done + 1
+    # Shortest permitted path: one `wait` action covers an initial outage (a single
+    # wait(ticks=N) call, as the real planner issues), then the plan runs one action
+    # per tick. Counting the outage as one action matches the executable witness; an
+    # earlier per-tick count over-charged the budget for waiting.
+    outage = spec.initial_outage_ticks
+    wait_actions = 1 if outage > 1 else 0
+    start_tick = max(1, outage)  # service is up from this tick
+    actions = wait_actions + len(plan)
+    last_tick = start_tick + len(plan) - 1
+    if actions > spec.red_action_budget:
+        return _f("VALID_BLOCKED", "the action budget is below the shortest path length")
+    if last_tick > spec.tick_budget:
+        return _f("VALID_BLOCKED", "the objective is not reachable within the tick budget")
     return _f("VALID_FEASIBLE", f"shortest permitted path uses {actions} actions", actions)
 
 
