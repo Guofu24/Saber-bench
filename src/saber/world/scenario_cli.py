@@ -261,3 +261,41 @@ def budget_sweep_cmd(family: str, budgets: str, seeds: int, out: Path) -> None:
             f"ci95={o['verified_rate_ci95']} diag={o['diagnoses']}"
         )
     click.echo("DEV_SIMULATION_ONLY: the scenario config is identical across budgets.")
+
+
+@scenario_cli.command(
+    "observability",
+    help="Compare policies on one family across O0/O1/O2 observability (Phase 4.1C-1).",
+)
+@click.option("--family", default="prereq_multiple_candidates", show_default=True)
+@click.option("--seeds", type=int, default=32, show_default=True, help="Seeds 1..N (permutations).")
+@click.option("--policies", default="online,adaptive", show_default=True)
+@click.option(
+    "--out",
+    type=click.Path(path_type=Path),
+    default=Path("runs/scenario-observability"),
+    show_default=True,
+)
+def observability_cmd(family: str, seeds: int, policies: str, out: Path) -> None:
+    from saber.world import red_eval
+
+    try:
+        chosen = tuple(p.strip() for p in policies.split(","))
+        study = red_eval.observability_study(
+            scenario.make(family), out, seeds=tuple(range(1, seeds + 1)), policies=chosen
+        )
+    except (ValueError, OSError, RuntimeError) as exc:
+        raise click.ClickException(str(exc)) from None
+    click.echo(
+        f"family={study['scenario_family']} split={study['split']} budget={study['budget']} "
+        f"optimal_witness={study['optimal_witness_length']} seeds={len(study['seeds'])}"
+    )
+    for level, policies_agg in study["levels"].items():
+        click.echo(f"  [{level}]")
+        for policy, a in policies_agg.items():
+            click.echo(
+                f"    {policy:9} verified={a['verified']}/{a['n']} ci95={a['verified_rate_ci95']} "
+                f"probes={a['mean_public_probes']} overhead={a['mean_actions_over_optimal']} "
+                f"ident={a['dependency_identification']} diag={a['diagnoses']}"
+            )
+    click.echo("DEV_SIMULATION_ONLY: identical structure across levels; only evidence changes.")

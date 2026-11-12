@@ -1,14 +1,14 @@
 # SABER red-team synthesis
 
-**Snapshot:** 2026-11-11. **Branch:** `feat/mission-outcome-metrics`.
+**Snapshot:** 2026-11-12. **Branch:** `feat/mission-outcome-metrics`.
 **Audience:** engineers/AI continuing SABER's red (adversary-emulation) component.
 **Status:** research synthesis, not a readiness claim. Nothing here promotes any
 subtask to `READY_BENCHMARK`.
 
 Sections 1–7 are the original read-only inventory (repo + external literature) as
 of the Phase 1 synthesis. **Section 8 records the red-team upgrades actually
-implemented on this branch** (Phases 3/4/4.1A/5) and their validity limits; read it for
-the current state. This document collects, in one place, what the repository and
+implemented on this branch** (Phases 3/4/4.1A/4.1B/4.1C/5) and their validity limits; read
+it for the current state. This document collects, in one place, what the repository and
 the external literature say about SABER's **red team**: the skills, the code/tools,
 the governing docs and rules, the outside papers/tools worth learning from, and now
 the implemented adaptive planner, verified objective metrics, scenario system and
@@ -412,7 +412,8 @@ inert and `DEV_SIMULATION_ONLY`. Commits:
 | `86c08a1` | Phase 4 stateful scenario system + reference feasibility solver |
 | `5e81c93` | Phase 4.1A executable feasibility witness (`witness.py` + CLI) |
 | `1aaf5a5` | Phase 4.1B-1 genuine multi-path scenarios + multi-path witness |
-| _this_ | Phase 4.1B-2 online-search red policy + controlled evaluation |
+| `28a8250` | Phase 4.1B-2 online-search red policy + controlled evaluation |
+| _this_ | Phase 4.1C-1 observable prerequisites + planning validity |
 
 ### 8.1 Rule-based adaptive planner — `src/saber/world/red_planner.py`
 Deterministic belief-state planner that reacts to real feedback (login, discovery,
@@ -560,8 +561,9 @@ saber world scenario compare --family F | witness --family F | witness-all
 ```
 Tests: `tests/world/test_red_planner.py` (13), `test_red_metrics.py` (13),
 `test_scenario.py` (13), `test_witness.py` (11), `test_multipath.py` (17),
-`test_online_planner.py` (18). Regression after Phase 4.1B-2: **251 passed** across
-`tests/world tests/population tests/range`; ruff and mypy (linux + win32) clean.
+`test_online_planner.py` (18), `test_observability.py` (19). Regression after Phase
+4.1C-1: **270 passed** across `tests/world tests/population tests/range`; ruff and mypy
+(linux + win32) clean. (Phase 4.1C-1 adds `scenario observability`; see §8.11.)
 
 ### 8.7 Unresolved validity issues
 - **A. Feasibility oracle — PARTIALLY RESOLVED (`5e81c93`).** Positive feasibility is
@@ -731,6 +733,120 @@ reflects reasoning rather than blind probing. (ii) The red observation window is
 own events; larger scenarios could exceed it, and the policy then re-browses (extra cost).
 (iii) The impact objective reuses the rule-based routine. (iv) All of this is without an
 active blue team (structural). `DEV_SIMULATION_ONLY`; `READY_BENCHMARK = 0`.
+
+### 8.11 Observable prerequisites & planning validity (Phase 4.1C-1)
+Phase 4.1B-2 left the prerequisite **epistemically unidentifiable** (an opaque `403`), so a
+prerequisite could only be solved by blind search. This phase asks the next question: **if
+the dependency is made observable, does the online planner reason about it — and generalise
+across prerequisite structures — rather than relying on empirical retries?** The access
+policy and the independent verifier are **identical** across three observability levels over
+the SAME prerequisite structure; only the evidence a Red agent can observe changes.
+
+**Step 0 audit (before implementation).** The online planner (i) keys on no family-specific
+sequence, but takes the lexicographically-smallest candidate id (the 4.1B-2 "retry-order
+overhead"); (ii) has **no model of multiple/chained prerequisites, decoys or any dependency
+statement**; (iii) has **no persistence** beyond the last-10-event window + `last_result`
+(the Runner calls it as a pure `(actor,obs,turn)->Action` and `store.get` returns copies;
+document *text* reaches it only in `last_result`, for one turn); (iv) `diagnose()` assigned
+`INFORMATION_LIMITATION` from scenario *structure* + budget, not from whether evidence was
+actually observable — correct while every gate is opaque, wrong the moment one is not. These
+findings shaped the design (eager evidence consumption; seed-derived ids; evidence-based
+attribution).
+
+**Observation/action contract per level (same structure, same verifier, O0 is 4.1B behaviour):**
+
+| Level | Evidence a Red agent can observe | How it is delivered (existing Red actions only) |
+|---|---|---|
+| **O0** opaque | none — a prerequisite `403` is identical to a restriction and the global ACL | discovery only by empirical probe + retry |
+| **O1** partial | ordinary metadata: the denial says *a preparatory step is incomplete* for THIS asset (not which document) | the `read_document` 403 message; survives in the event window |
+| **O2** explicit | an authorized workflow guide names the exact preparatory documents (`open A before B` edges) | a public document read like any other; parsed from `last_result` |
+
+No privileged hint API; `prereq_layout` ids are **seed-derived** (`doc-<hash>`, never
+`index-1`), so names/order permute per seed. The guide/denial carry only document ids and a
+workflow verb — never a scenario label, feasibility, control type or private field (a
+leakage test asserts this). The planner consumes the guide **eagerly** from `last_result`
+and **re-reads** it to recover edges for a chain (it has no durable memory).
+
+**Prerequisite structures (`prereq_gates`: chain length, decoys, `observable`; plus
+`distractor_docs`).** `PREREQ_FAMILIES` (5 dev + 2 held-out): one prerequisite
+(`prereq_single`); a two-step chain (`prereq_two_chained`); one real prerequisite among
+decoys + distractors (`prereq_multiple_candidates`); a dependency that **remains
+unobservable** even at O2 (`prereq_unobservable`); a feasible path that blind search makes
+infeasible by consuming the budget (`prereq_budget_cliff`); and two **held-out** structures —
+a two-step chain among restricted + reference decoys and distractors
+(`heldout_prereq_chain_decoys`), and two independently gated targets
+(`heldout_prereq_multi_targets`). The chain-aware executable witness verifies the clairvoyant
+path for every family from server effects (independent of observability).
+
+**Online planner across O0/O1/O2 (8 seeds; verified / 8, Wilson 95% CI 8/8 → [0.68, 1.0],
+0/8 → [0.0, 0.32]). The rule-based `adaptive` planner is 0/8 at every level and family.**
+
+| Family (budget, W) | O0 | O1 | O2 | adaptive (any level) |
+|---|---|---|---|---|
+| prereq_single (14, 6) | 8/8 | 8/8 | 8/8 | 0/8 |
+| prereq_two_chained (18, 7) | 5/8 | 5/8 | **8/8** | 0/8 |
+| prereq_multiple_candidates (16, 6) | 2/8 | 2/8 | **8/8** | 0/8 |
+| prereq_budget_cliff (14, 6) | 4/8 | 4/8 | **8/8** | 0/8 |
+| prereq_unobservable (9, 6) | 0/8 | 0/8 | 0/8 | 0/8 |
+| heldout_prereq_chain_decoys (24, 7) | 1/8 | 1/8 | **8/8** | 0/8 |
+| heldout_prereq_multi_targets (18, 6) | 7/8 | 7/8 | 8/8 | 0/8 |
+
+**Reading the result (success criterion).** Explicit evidence (**O2**) lifts the online
+planner to **8/8 on every solvable family** — including both **held-out** structures and the
+decoy/chain/budget-cliff configurations that opaque search cannot reliably solve at the same
+budget (2/8, 1/8, 4/8) — while the one deliberately **unobservable** family stays 0/8 at every
+level, correctly. At O2 the planner **identifies the exact prerequisite** on single-target
+families (dependency-identification 8/8; on `heldout_prereq_multi_targets` it reads 3/8 of the
+*first* target's chain only because it legitimately opens the *other* gated target, which also
+verifies). **O1 matches O0 on completion here** — the hint says a prerequisite exists but not
+which document, so the planner still probes — but it is not inert: O1 **identifies** the
+prerequisite where observable and, crucially, changes **attribution** (below). So the honest
+answer to "does observable dependency information improve planning over opaque trial-and-error,
+including on held-out scenarios?" is **yes for explicit (O2) evidence; partial (O1) evidence
+improves identification and diagnosis but not raw completion in these families.**
+
+**Failure diagnosis is now evidence-based (step 5).** The gated-path branch of `diagnose()`
+no longer keys on the 403: it checks whether identifying evidence was *available* (offline,
+from `observability` + the gate's `observable` flag) and whether it *reached the policy*
+(the episode's own events — a guide read or a hint denial). So a failure is
+`INFORMATION_LIMITATION` only when the dependency was genuinely unobservable (O0, or an
+`observable=False` gate — true even at O2), `OBSERVABLE_EVIDENCE_IGNORED` when evidence
+reached the policy and went unused (e.g. the rule-based planner *receives the O2 hint* yet
+cannot act on it), and `EXPLORATION_FAILURE` when observable evidence existed but the policy
+never gathered it. `BUDGET_EXHAUSTED` still precedes all three (a clairvoyant cannot fit).
+
+The **adaptive** planner's 0/8 shows the diagnosis working end to end: at **O0** its failure
+is `INFORMATION_LIMITATION` (no evidence existed), at **O1/O2** it is
+`OBSERVABLE_EVIDENCE_IGNORED` (it *receives* the hint denial but its fixed procedure cannot
+act on it). The online planner's own O0/O1 failures on `prereq_multiple_candidates` /
+`heldout_prereq_chain_decoys` are `INFORMATION_LIMITATION` at O0 and
+`OBSERVABLE_EVIDENCE_IGNORED` at O1 — the same failing episode is attributed differently
+because the evidence that was available differs, not because a read returned 403.
+
+**Two actual traces (effects).**
+- **Dependency inference (online, O2, `prereq_multiple_candidates`):** `login → browse →
+  read TARGET 403` *(preparatory-step hint)* `→ browse → read decoy 403` *(plain "Access
+  denied.", a hard-restricted wrong hypothesis)* `→ browse → read GUIDE 200 → read PREREQ 200
+  → read TARGET 200` (`unauthorized_access`) `→ collect` (`collected_bytes`) `→ exfiltrate`
+  (`exfiltrated_bytes`, **verified**). The planner takes the hint, re-enumerates, reads and
+  parses the guide (`open <prereq> before <target>`), then walks the named chain — and
+  recovers after probing a hard decoy.
+- **Chain recovery past the observation window (online, O2, `heldout_prereq_chain_decoys`):**
+  it solves a two-step chain among decoys in ≈ 21 actions. The guide read falls **outside the
+  last-10-event window** before exfiltration, so the planner **re-reads the guide** to recover
+  the next edge — paying overhead but still reaching the verified objective, which is why the
+  held-out structure is 8/8 at O2.
+
+
+**Limitations (honest).** (i) The online planner still has no durable belief: it re-reads the
+guide to recover a chain's edges after the window scrolls, paying extra actions (a future
+increment could add a bounded belief memory). (ii) O2's advantage is clearest with
+decoys/chains; with a single prerequisite and few candidates, blind O0 already succeeds, so
+observability mainly cuts overhead there. (iii) The guide is found by reading public
+documents (a generic "guide" title only *orders* exploration; correctness never depends on
+it). (iv) Evidence counts/identification use private layout **offline only**; no policy ever
+receives it. (v) Still no active blue team (structural). `DEV_SIMULATION_ONLY`;
+`READY_BENCHMARK = 0`.
 
 ---
 

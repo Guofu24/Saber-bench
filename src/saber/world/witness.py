@@ -195,6 +195,14 @@ def _exfil_target(world: Any, client_index: int) -> str:
     return f"work-{world.principals[f'client-{client_index}']}"
 
 
+def _prereq_chain(spec: scenario.ScenarioSpec, client_index: int) -> list[str]:
+    """The prerequisite reference documents a clairvoyant reads, in order, for this client."""
+    layout = scenario.prereq_layout(spec)
+    target = scenario.client_document(spec.seed, client_index)
+    chain: list[str] = layout["gates"].get(target, {}).get("chain", [])
+    return chain
+
+
 def _wait_out_outage(
     world: Any, actor: Any, spec: Any, store: Store, trace: list[dict[str, Any]]
 ) -> int:
@@ -226,6 +234,8 @@ def run_exfil_path(
         steps: list[tuple[str, dict[str, Any]]] = [("browse", {}), ("login", {})]
         if client_index in spec.gated_clients:
             steps.append(("read_document", {"document": scenario.INDEX_DOC}))
+        for cid in _prereq_chain(spec, client_index):
+            steps.append(("read_document", {"document": cid}))
         steps += [
             ("read_document", {"document": target}),
             ("collect", {"document": target}),
@@ -263,6 +273,7 @@ def run_exfil_path(
             "preconditions": {
                 "restricted": bool(blocked_by),
                 "gated": client_index in spec.gated_clients,
+                "prereq_chain": len(_prereq_chain(spec, client_index)),
                 "outage_ticks": spec.initial_outage_ticks,
                 "staged_control_applied": apply_staged,
             },
@@ -336,6 +347,9 @@ def _recovery_episode(spec: scenario.ScenarioSpec, root: Any) -> dict[str, Any]:
                     {"document": scenario.INDEX_DOC},
                     "satisfy the prerequisite index",
                 )
+            for cid in _prereq_chain(spec, i):
+                if used < budget:
+                    do("read_document", {"document": cid}, "satisfy the prerequisite chain")
             if used >= budget:
                 break
             result = do("read_document", {"document": target}, f"attempt the client-{i} path")
@@ -403,3 +417,13 @@ def witness_multipath_all(root: Any) -> list[dict[str, Any]]:
     return [
         witness_multipath(scenario.make(fam), base / fam) for fam in scenario.MULTIPATH_FAMILIES
     ]
+
+
+def witness_prereq_all(root: Any) -> list[dict[str, Any]]:
+    """Execute the clairvoyant prerequisite path for every Phase 4.1C-1 family and verify it.
+
+    The witness reads the required chain in order (from the private layout) and verifies from
+    server effects -- independent of observability, which only changes what an AGENT can see.
+    """
+    base = Path(root)
+    return [witness_multipath(scenario.make(fam), base / fam) for fam in scenario.PREREQ_FAMILIES]

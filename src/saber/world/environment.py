@@ -419,9 +419,19 @@ class World:
             # global ACL and an unmet prerequisite apart -- only that this read is blocked.
             reads = self.store.get("reads", p, [])
             requires = doc.get("requires")
-            if (not authorized and (state["document_acl"] or doc.get("restricted"))) or (
-                requires is not None and requires not in reads
-            ):
+            hard_denied = (not authorized) and (state["document_acl"] or doc.get("restricted"))
+            prereq_unmet = requires is not None and requires not in reads
+            if hard_denied or prereq_unmet:
+                # O1/O2: a prerequisite-only denial on a hinted asset carries ordinary
+                # metadata that a preparatory step is incomplete -- never which document
+                # satisfies it, nor any private scenario state. O0 keeps the opaque message,
+                # so a prerequisite, a per-asset restriction and the global ACL are identical.
+                if prereq_unmet and not hard_denied and doc.get("gate_hint"):
+                    return (
+                        403,
+                        {"error": "Access denied: a required preparatory step is incomplete."},
+                        name,
+                    )
                 return 403, {"error": "Access denied."}, name
             if name not in reads:
                 self.store.put("reads", p, [*reads, name][-50:])
