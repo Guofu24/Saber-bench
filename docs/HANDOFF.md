@@ -1,9 +1,9 @@
 # SABER — current AI / engineer handoff
 
-**Snapshot:** 2026-11-12. **Implementation baseline:** Phase 4.1C-1 (observable
-prerequisites + planning validity) on top of `28a8250` (Phase 4.1B-2 online-search
-policy), `1aaf5a5` (Phase 4.1B-1 multi-path scenarios) and `5e81c93` (Phase 4.1A
-witness), branched from `e9b0c46`.
+**Snapshot:** 2026-11-12. **Implementation baseline:** Phase 4.1D-1 (closed-loop
+active-Blue & benign-workload evaluation) on top of `d9d1f42` (Phase 4.1C-1 observable
+prerequisites), `28a8250` (Phase 4.1B-2 online-search policy), `1aaf5a5` (Phase 4.1B-1
+multi-path scenarios) and `5e81c93` (Phase 4.1A witness), branched from `e9b0c46`.
 **Branch:** `feat/mission-outcome-metrics` (not merged to `main`).
 **Repository:** <https://github.com/Guofu24/Saber-bench>.
 
@@ -13,8 +13,9 @@ stage, a rule-based adaptive red planner, independently verified red-objective
 metrics, a stateful scenario system with an independent feasibility solver, an executable
 feasibility witness that validates that solver at the execution level, genuine
 multi-path scenarios (two distinct executable paths to one objective), an
-online-search red policy with a controlled four-policy evaluation, and observable-
-prerequisite conditions (O0/O1/O2) measuring reasoning-from-evidence vs blind search.
+online-search red policy with a controlled four-policy evaluation, observable-
+prerequisite conditions (O0/O1/O2) measuring reasoning-from-evidence vs blind search,
+and closed-loop active-Blue evaluation of those planners with a benign client workload.
 See **§5a** for the current architecture, phase status and validity limits; the
 rest of this handoff still describes the shared baseline. Full red-team reference:
 [docs/REDTEAM_SYNTHESIS.md](REDTEAM_SYNTHESIS.md) §8.
@@ -312,6 +313,15 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
   a wrong hypothesis; the environment's O1 hint and the guide text never leak private
   scenario state (`prereq_layout` ids are seed-derived, read-only, and reference-only).
   CLI `scenario observability`. `PREREQ_FAMILIES` (5 dev + 2 held-out).
+- [`src/saber/world/blue_eval.py`](../src/saber/world/blue_eval.py) (Phase 4.1D-1):
+  **closed-loop** paired evaluation of the EXISTING Red planners against the EXISTING reactive
+  Blue while clients work. `with_blue` / `run_episode` / `paired_study` run the real Runner
+  (client+red+blue) and extract Red / Blue / Client / validity metric blocks from `report()`,
+  `red_metrics` and `mission`, plus an **intervention-attribution timeline** (Blue principal,
+  affected Red principal/asset, event/observation/control ticks, Red actions before/after,
+  objective-verified-before-control, `SUPPORTED`/`FALSE_CONTAINMENT`/`UNKNOWN`). No new
+  simulator, defender or planner change; the loop was already closed in `runtime.py`. CLI
+  `scenario blue-eval`.
 - Inert `exfiltrate` tool (TA0010/T1041) in
   [`environment.py`](../src/saber/world/environment.py); `WorldConfig.red_action_budget`
   in [`models.py`](../src/saber/world/models.py); `Runner(red_policy=...)` hook in
@@ -331,7 +341,11 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
   the seven observable-prerequisite families (`prereq_*`, `PREREQ_FAMILIES`) at O0/O1/O2
   with the chain-aware witness, and the `observability_study` showing explicit evidence
   (O2) measurably improves online planning over opaque trial-and-error (O0) — including on
-  two held-out dependency structures — while an unobservable gate stays unsolved by design.
+  two held-out dependency structures — while an unobservable gate stays unsolved by design;
+  the **closed-loop** `blue_eval.paired_study` running the existing Red planners against the
+  existing reactive Blue with a benign client workload — Blue's verified containment flips a
+  structurally feasible Red objective to `BLUE_BLOCKED` and its control is attributed from
+  evidence, while client mission utility and false containments are measured independently.
 - **Designed/not run here:** the LLM red policy (menu-based, range-only — not
   exercised); any mid-chain ATT&CK (Execution / PrivEsc / Defense Evasion / Lateral
   Movement / C2) — **no runnable inert action**, infrastructure-blocked.
@@ -347,6 +361,7 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
 | 4.1B-1 — genuine multi-path scenarios | COMPLETE — two distinct executable paths to one objective; witness verifies the alternative after the first is blocked (6 families) |
 | 4.1B-2 — online planning & controlled evaluation | COMPLETE — online-search policy discovers a hidden prerequisite the rule-based planner cannot; 4-policy evaluation with Wilson CI, failure diagnosis, budget sweep |
 | 4.1C-1 — observable prerequisites & planning validity | COMPLETE — O0/O1/O2 observability over the same prerequisite structure; explicit evidence measurably improves online planning (incl. held-out); evidence-based failure diagnosis |
+| 4.1D-1 — closed-loop active-Blue & benign-workload evaluation | COMPLETE — paired no-Blue vs reactive-Blue over the existing loop; Blue's verified controls change Red's next observation; Red/Blue/Client/validity metrics + intervention attribution |
 | 5 — verified objective metrics | COMPLETE for the current verified objectives |
 | 6 — integration tests | PARTIAL — tests exist (incl. 11 witness + 17 multi-path + observability tests); broader validity/fidelity checks remain |
 | 7 — docs & handoff | this update |
@@ -362,10 +377,12 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
   validates that generator's output, not the solver in general; (iii) general solver
   completeness remains unproven; (iv) multi-path feasibility and generalization are
   not established (a single shortest path is validated, not the full walkable space).
-- **B. Feasibility semantics.** The solver gives **structural feasibility without
-  blue**; observed reachability under an active blue policy is a separate runtime
-  outcome (e.g. `blue_containment` is WITNESS_VERIFIED with no blue, yet contained at
-  run time). Do not conflate them. The witness measures the structural notion only.
+- **B. Feasibility semantics — now measured on both sides.** The solver/witness give
+  **structural feasibility without blue**; observed reachability under an active blue policy is
+  a separate runtime outcome (e.g. `blue_containment` is WITNESS_VERIFIED with no blue, yet
+  contained at run time). Phase 4.1D-1's `blue_eval.paired_study` reports both in one table
+  (structural feasibility + no-Blue completion vs reactive-Blue completion with Wilson CIs), so
+  the distinction is quantified rather than only asserted. Still do not conflate them.
 - **C. Generalization.** Still not established, but broader than before. Phase 4.1B-1
   adds witness-validated multi-path families; Phase 4.1B-2 evaluates four policies over
   seed permutations (document-identity permutations) with Wilson intervals and two
@@ -375,10 +392,12 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
   it cannot at O0 — generalization across dependency *structures*, not just reseeds. Ids
   are seed-permuted so the planner keys on no fixed name. Evidence still covers only the
   tested configurations; no claim beyond them.
-- **D. Scenario difficulty.** `alternative_path` is easy (one-step disrupt);
-  `benign_lookalikes` has not yet produced a blue false-positive failure. Multi-path
-  families now exercise harder path-selection (block-and-recover, budget-vs-length),
-  but only without an active blue team.
+- **D. Scenario difficulty.** `alternative_path` is easy (one-step disrupt). Phase 4.1D-1
+  **measures** the benign false-positive question: the scripted Blue's detection is
+  owner-filtered and incident-effect-based, so the available benign client workload (authorized
+  reads, mistyped logins, admin ops) is not flaggable and produces **zero** false containments.
+  Reported honestly as a precision strength and a Blue-stress-test gap; harder lookalike
+  workloads (and an LLM Blue that can misjudge) are still needed to exercise false positives.
 
 ### Known limitations / blockers
 - Mid-chain ATT&CK needs a multi-machine lab + snapshots (CR-1 Docker daemon down,
@@ -404,12 +423,14 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
 - `recon` has no server-verifiable objective and is excluded from scored objectives.
 
 ### Suggested next research increments
-1. Online planning and the 4-policy evaluation **under an active blue team** (every phase
-   so far is structural, no blue); and an independent path generator so the witness no
-   longer shares the solver's generator.
+1. A **harder / LLM Blue** and tougher benign-lookalike workloads that can actually produce
+   false positives (Phase 4.1D-1 runs adaptive + online under the existing reactive Blue, but
+   that Blue's effect-based detection never false-contains the available benign workload); and
+   an independent path generator so the witness no longer shares the solver's generator.
 2. Attribute per-document / prerequisite controls in `red_metrics` (so a blocked or
    information-limited single-path run reads `VERIFIED_FAILURE` with the right cause,
-   matching the evaluator's episode diagnosis).
+   matching the evaluator's episode diagnosis); currently `blue_eval` reconstructs that
+   attribution from the case/event store rather than from `red_metrics` directly.
 3. Partial-observability learning: a planner that carries a durable belief across the
    10-event window (the current online policy re-reads the guide instead of remembering).
 4. A capability-based red **skill** review (Phase 2); harder benign lookalikes (issue D).
@@ -428,14 +449,15 @@ single-app, `DEV_SIMULATION_ONLY`, and promotes nothing to `READY_BENCHMARK`.
 | `5e81c93` | Executable feasibility witness (Phase 4.1A) |
 | `1aaf5a5` | Genuine multi-path scenarios + multi-path witness (Phase 4.1B-1) |
 | `28a8250` | Online-search red policy + controlled evaluation (Phase 4.1B-2) |
-| _this_ | Observable prerequisites + planning validity (Phase 4.1C-1) |
+| `d9d1f42` | Observable prerequisites + planning validity (Phase 4.1C-1) |
+| _this_ | Closed-loop active-Blue & benign-workload evaluation (Phase 4.1D-1) |
 
-### Last verified checks (this snapshot, Phase 4.1C-1)
+### Last verified checks (this snapshot, Phase 4.1D-1)
 `ruff check`, `ruff format`, `mypy --platform linux`, `mypy --platform win32` clean;
-`pytest tests/world tests/population tests/range` → **270 passed**. New test this phase:
-`tests/world/test_observability.py` (19). Earlier red tests:
-`test_red_planner.py`, `test_red_metrics.py`, `test_scenario.py`,
-`test_witness.py` (11), `test_multipath.py` (17), `test_online_planner.py` (18).
+`pytest tests/world tests/population tests/range` → **282 passed**. New test this phase:
+`tests/world/test_blue_eval.py` (12). Earlier red tests:
+`test_red_planner.py`, `test_red_metrics.py`, `test_scenario.py`, `test_witness.py` (11),
+`test_multipath.py` (17), `test_online_planner.py` (18), `test_observability.py` (19).
 
 ## 6. Validation evidence and its limits
 

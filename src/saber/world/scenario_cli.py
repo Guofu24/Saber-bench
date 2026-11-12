@@ -299,3 +299,43 @@ def observability_cmd(family: str, seeds: int, policies: str, out: Path) -> None
                 f"ident={a['dependency_identification']} diag={a['diagnoses']}"
             )
     click.echo("DEV_SIMULATION_ONLY: identical structure across levels; only evidence changes.")
+
+
+@scenario_cli.command(
+    "blue-eval",
+    help="Paired no-Blue vs reactive-Blue closed-loop evaluation of a family (Phase 4.1D-1).",
+)
+@click.option("--family", default="blue_containment", show_default=True)
+@click.option(
+    "--policy", type=click.Choice(["adaptive", "online", "naive", "random"]), default="adaptive"
+)
+@click.option("--seeds", type=int, default=32, show_default=True, help="Paired seeds 1..N.")
+@click.option(
+    "--out",
+    type=click.Path(path_type=Path),
+    default=Path("runs/scenario-blue-eval"),
+    show_default=True,
+)
+def blue_eval_cmd(family: str, policy: str, seeds: int, out: Path) -> None:
+    from saber.world import blue_eval
+
+    try:
+        study = blue_eval.paired_study(
+            scenario.make(family), out, red_policy=policy, seeds=tuple(range(1, seeds + 1))
+        )
+    except (ValueError, OSError, RuntimeError) as exc:
+        raise click.ClickException(str(exc)) from None
+    click.echo(
+        f"family={study['scenario_family']} policy={study['red_policy']} "
+        f"structural={study['structural_feasibility']} seeds={len(study['seeds'])}"
+    )
+    for mode, a in study["conditions"].items():
+        rv, det = a["red_verified"], a["blue_detection_rate"]
+        click.echo(
+            f"  [{mode:8}] red_verified={rv['k']}/{rv['n']} ci95={rv['ci95']} "
+            f"blocked_by_blue={a['red_blocked_by_blue']} detect={det['k']}/{det['n']} "
+            f"contain={a['blue_verified_containments']} false_contain={a['blue_false_containments']} "
+            f"client_tasks={a['client_mean_tasks_completed']} mission={a['client_mean_mission_score']} "
+            f"attrib_cov={a['mean_attribution_coverage']} diag={a['red_diagnoses']}"
+        )
+    click.echo("DEV_SIMULATION_ONLY: existing reactive Blue; structural feasibility is separate.")

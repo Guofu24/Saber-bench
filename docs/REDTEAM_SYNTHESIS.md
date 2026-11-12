@@ -413,7 +413,8 @@ inert and `DEV_SIMULATION_ONLY`. Commits:
 | `5e81c93` | Phase 4.1A executable feasibility witness (`witness.py` + CLI) |
 | `1aaf5a5` | Phase 4.1B-1 genuine multi-path scenarios + multi-path witness |
 | `28a8250` | Phase 4.1B-2 online-search red policy + controlled evaluation |
-| _this_ | Phase 4.1C-1 observable prerequisites + planning validity |
+| `d9d1f42` | Phase 4.1C-1 observable prerequisites + planning validity |
+| _this_ | Phase 4.1D-1 closed-loop active-Blue & benign-workload evaluation |
 
 ### 8.1 Rule-based adaptive planner — `src/saber/world/red_planner.py`
 Deterministic belief-state planner that reacts to real feedback (login, discovery,
@@ -561,9 +562,10 @@ saber world scenario compare --family F | witness --family F | witness-all
 ```
 Tests: `tests/world/test_red_planner.py` (13), `test_red_metrics.py` (13),
 `test_scenario.py` (13), `test_witness.py` (11), `test_multipath.py` (17),
-`test_online_planner.py` (18), `test_observability.py` (19). Regression after Phase
-4.1C-1: **270 passed** across `tests/world tests/population tests/range`; ruff and mypy
-(linux + win32) clean. (Phase 4.1C-1 adds `scenario observability`; see §8.11.)
+`test_online_planner.py` (18), `test_observability.py` (19), `test_blue_eval.py` (12).
+Regression after Phase 4.1D-1: **282 passed** across `tests/world tests/population
+tests/range`; ruff and mypy (linux + win32) clean. (Phase 4.1C-1 adds `scenario
+observability`, 4.1D-1 adds `scenario blue-eval`; see §8.11–8.12.)
 
 ### 8.7 Unresolved validity issues
 - **A. Feasibility oracle — PARTIALLY RESOLVED (`5e81c93`).** Positive feasibility is
@@ -845,8 +847,95 @@ decoys/chains; with a single prerequisite and few candidates, blind O0 already s
 observability mainly cuts overhead there. (iii) The guide is found by reading public
 documents (a generic "guide" title only *orders* exploration; correctness never depends on
 it). (iv) Evidence counts/identification use private layout **offline only**; no policy ever
-receives it. (v) Still no active blue team (structural). `DEV_SIMULATION_ONLY`;
-`READY_BENCHMARK = 0`.
+receives it. (v) Still no active blue team (structural) — **addressed in §8.12**.
+`DEV_SIMULATION_ONLY`; `READY_BENCHMARK = 0`.
+
+### 8.12 Closed-loop active-Blue & benign-workload evaluation (Phase 4.1D-1)
+Every phase through 4.1C was **structural** (no active defender). This phase evaluates the
+**existing** Red planners against the **existing** reactive Blue while legitimate clients work,
+in the single-app world — no new simulator, attack, ATT&CK capability or LLM.
+
+**Step 0 audit — the loop is already closed.** `Runner.step()` advances one tick, then every
+active actor (client, red, blue) observes and acts through the real `World.act()` path. Blue's
+observation carries `events = store.events(through_tick=self.tick, …)` — the same server
+telemetry Red writes (`_suspicious` flags register_job/disrupt successes and a read whose
+returned `owner` is foreign; public telemetry, never hidden truth). The scripted Blue opens
+cases, `patch`es ACLs, `quarantine`s jobs, `restore`s and **`contain`s** a principal; a verified
+containment writes a `blocks` entry, and on Red's next turn `_execute` returns
+`403 "Session restricted by the security service."`, which both planners read as `contained`
+and stop. **So Blue's verified control demonstrably changes the state Red observes next.** No
+actor sees the future (`through_tick=self.tick`); detection/containment/false-containment
+counters and `red_metrics` blocked-by-blue attribution already exist, and an objective is
+**verified once** (a later containment never un-verifies it). The `OBSERVABLE_EVIDENCE_IGNORED`
+audit confirms the diagnosis separates *available in the world* (`evidence_available`) from
+*delivered to the agent* (`evidence_surfaced`); *used* is inferred from the outcome.
+
+**What was added:** `blue_eval.py` — a paired **no-Blue vs reactive-Blue** harness
+(`with_blue`, `run_episode`, `paired_study`) that runs the existing components and extracts
+four metric blocks (Red / Blue / Client / validity) plus an **intervention-attribution
+timeline** reconstructed from the sealed case/event store: for each verified Blue control it
+records the Blue principal, the affected Red principal/asset, the **event tick**, the
+**observation/control tick**, Red actions **before/after**, and whether the objective was
+verified **before** the control — attributing `SUPPORTED` / `FALSE_CONTAINMENT` / `UNKNOWN` on
+evidence, never on a Red 403. CLI `scenario blue-eval`. No planner was changed to move results.
+
+**Intervention timeline (sample, `blue_containment`, reactive).** `blue-ir` contains the Red
+access principal at **tick 4** on a case whose triggering evidence is the Red foreign read at
+**tick 3** (a one-tick response latency through the loop); 3 Red actions precede the control, 2
+follow (a denied "restricted" read, then `finish`); `objective_verified_tick = null`
+(never verified) → `blocked_by_blue`, diagnosis `BLUE_BLOCKED`, `attribution = SUPPORTED`,
+coverage 1.0.
+
+**Paired no-Blue vs reactive-Blue (32 seeds; Red verified / 32, Wilson 95%: 32/32 → [0.89,
+1.0], 0/32 → [0.0, 0.11]). Every family is structurally VALID_FEASIBLE — Red is 32/32 with no
+Blue.**
+
+| Family (Red policy) | no-Blue Red | reactive Red | Blue detect | contain | false-contain | detect ticks | mission no→Blue |
+|---|---|---|---|---|---|---|---|
+| baseline (adaptive) | 32/32 | **0/32** | 32/32 | 32 | 0 | 0.25 | 0.50 → 0.98 |
+| blue_containment (adaptive) | 32/32 | **0/32** | 32/32 | 32 | 0 | 0.25 | 0.50 → 0.98 |
+| benign_lookalikes (adaptive) | 32/32 | **0/32** | 32/32 | 32 | 0 | 0.13 | 0.50 → 0.99 |
+| first_path_blocked (online) | 32/32 | **0/32** | 32/32 | 32 | 0 | 0.22 | 0.50 → 0.99 |
+| prereq_multiple_candidates·O2 (online) | 32/32 | **0/32** | 32/32 | 32 | 0 | 0.28 | 0.50 → 0.98 |
+| heldout_acl_outage (adaptive) | 32/32 | **0/32** | 32/32 | 32 | 0 | 0.19 | 0.41 → 0.81 |
+
+**Reading the result (success criterion).** The loop is genuinely closed: the reactive Blue
+**detects the first unauthorized foreign read within ~0.1–0.3 ticks and contains the Red
+principal before it can finish the collect→exfiltrate chain**, flipping every structurally
+feasible objective from `OBJECTIVE_VERIFIED` to `BLUE_BLOCKED` (attribution coverage 1.0, zero
+`UNKNOWN`). Blue's mission score **rises** (0.50→~0.98; 0.41→0.81 on the outage family) because
+it detects and contains while keeping client work running — **zero collateral, zero false
+containments** across all 192 reactive episodes, including the high-volume `benign_lookalikes`
+(≈229 client tasks/episode). So Blue's verified controls demonstrably change Red's subsequent
+decisions, and Red completion and client impact are measured independently.
+
+**Honest caveat.** This scripted Blue is **strong and uniform** in the single-app world — it
+contains Red in all 32 seeds of every family — so Red-policy differences are **masked under
+Blue**: they appear only in the no-Blue column (e.g. online recovers from the restricted path
+17/32 on `first_path_blocked` and solves the O2 gate 32/32 with no Blue — the 4.1C result).
+Differentiating Red policies *under* Blue needs a weaker/slower or LLM Blue (a next increment),
+not a planner change; per the task, no family was forced to any outcome.
+
+**Benign workload (step 3) — honest limitation.** The existing clients do authorized work
+(own-document reads, public reads, writes, `call_app`, admin `maintain`, and occasional
+mistyped logins → 401). `_suspicious` is **owner-filtered and incident-effect-based**, so none
+of this benign activity is flaggable: the scripted Blue **cannot be induced to false-contain a
+client** with the available workload (false containments = 0 across the study). This is reported,
+not worked around — a strength of effect-based detection and a gap for stress-testing Blue
+precision (issue D). The false-containment *attribution path* is still exercised by a mechanism
+test (a contrived case that contains a benign client is recorded and attributed to that client).
+
+**Validity.** Attribution coverage is 1.0 on the contained families (every verified containment
+is case-bound); no `UNKNOWN` interventions arose. No actor observes future telemetry; red/blue/
+scenario private state does not cross teams (tested); paired replay is deterministic; the
+structural witness is unchanged by the new runner.
+
+**Limitations (honest).** (i) The reactive Blue contains a whole principal, so a single-principal
+Red cannot "recover another path" after containment (recovery-after-intervention is for the
+local per-document denial case, not containment). (ii) Blue precision is high by construction, so
+no benign false positive is produced (above). (iii) Still a single-app world; mid-chain ATT&CK
+remains infrastructure-blocked. (iv) The mission weights are provisional DEV values, not a
+benchmark score. `DEV_SIMULATION_ONLY`; `READY_BENCHMARK = 0`.
 
 ---
 

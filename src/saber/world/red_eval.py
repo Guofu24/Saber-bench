@@ -102,6 +102,17 @@ def with_budget(spec: scenario.ScenarioSpec, budget: int, seed: int | None = Non
 def evaluate_episode(spec: scenario.ScenarioSpec, policy_name: str, root: Any) -> dict[str, Any]:
     """Run one policy on one scenario and classify the outcome by cause."""
     res = scenario.run_scenario(spec, policy_name, root)
+    return episode_metrics(spec, policy_name, root, res)
+
+
+def episode_metrics(
+    spec: scenario.ScenarioSpec, policy_name: str, root: Any, res: dict[str, Any]
+) -> dict[str, Any]:
+    """Classify an ALREADY-run episode from its store (reused by the closed-loop harness).
+
+    `res` is the `run_scenario`-shaped summary (verified/steps/blocked_by_*/rejected/…); the
+    store at `root` holds this run's events. No episode is re-run here.
+    """
     principal = _access_principal(spec)
     store = Store(Path(root))
     try:
